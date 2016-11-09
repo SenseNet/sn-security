@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security", "SenseNet.Security\SenseNet.Security.csproj", "{169E4D25-A0E7-4E71-AEC0-558B0FF52537}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.EF6SecurityStore", "SenseNet.Security.EF6SecurityStore\SenseNet.Security.EF6SecurityStore.csproj", "{6ECE5B58-B148-4C51-B50E-2BC26D9A01BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Tests", "SenseNet.Security.Tests\SenseNet.Security.Tests.csproj", "{DFB9B64A-566E-40D1-A5F2-B945274937EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Messaging.Msmq", "SenseNet.Security.Messaging.Msmq\SenseNet.Security.Messaging.Msmq.csproj", "{67D1C02B-0336-4E35-8EC9-573DA304BBEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.TestConsole", "SenseNet.Security.TestConsole\SenseNet.Security.TestConsole.csproj", "{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Tests.Concurrency", "SenseNet.Security.Tests.Concurrency\SenseNet.Security.Tests.Concurrency.csproj", "{EB816791-BE56-45F5-B18A-37DA918ADAB4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{169E4D25-A0E7-4E71-AEC0-558B0FF52537}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{169E4D25-A0E7-4E71-AEC0-558B0FF52537}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{169E4D25-A0E7-4E71-AEC0-558B0FF52537}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{169E4D25-A0E7-4E71-AEC0-558B0FF52537}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ECE5B58-B148-4C51-B50E-2BC26D9A01BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ECE5B58-B148-4C51-B50E-2BC26D9A01BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ECE5B58-B148-4C51-B50E-2BC26D9A01BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ECE5B58-B148-4C51-B50E-2BC26D9A01BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFB9B64A-566E-40D1-A5F2-B945274937EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFB9B64A-566E-40D1-A5F2-B945274937EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFB9B64A-566E-40D1-A5F2-B945274937EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFB9B64A-566E-40D1-A5F2-B945274937EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67D1C02B-0336-4E35-8EC9-573DA304BBEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67D1C02B-0336-4E35-8EC9-573DA304BBEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67D1C02B-0336-4E35-8EC9-573DA304BBEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67D1C02B-0336-4E35-8EC9-573DA304BBEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB816791-BE56-45F5-B18A-37DA918ADAB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB816791-BE56-45F5-B18A-37DA918ADAB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB816791-BE56-45F5-B18A-37DA918ADAB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB816791-BE56-45F5-B18A-37DA918ADAB4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

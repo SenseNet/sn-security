@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{169E4D25-A0E7-4E71-AEC0-558B0FF52537}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SenseNet.Security</RootNamespace>
+    <AssemblyName>SenseNet.Security</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\SenseNet.Security.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\SenseNet.Security.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SenseNet.Tools">
+      <HintPath>..\References\SenseNet.Tools.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AccessControlEntry.cs" />
+    <Compile Include="AccessControlList.cs" />
+    <Compile Include="AccessDeniedException.cs" />
+    <Compile Include="AceInfo.cs" />
+    <Compile Include="AclEditor.cs" />
+    <Compile Include="AclInfo.cs" />
+    <Compile Include="Configuration.cs" />
+    <Compile Include="DataHandler.cs" />
+    <Compile Include="EntityNotFoundException.cs" />
+    <Compile Include="EntityTreeWalker.cs" />
+    <Compile Include="EventMessage.cs" />
+    <Compile Include="ISecurityIdentity.cs" />
+    <Compile Include="ISecurityDataProvider.cs" />
+    <Compile Include="ISecurityUser.cs" />
+    <Compile Include="Messaging\CommunicationMonitor.cs" />
+    <Compile Include="Messaging\SecurityActivityHistory.cs" />
+    <Compile Include="Messaging\SecurityActivityLoader.cs" />
+    <Compile Include="Messaging\SecurityMessages\AddUserToSecurityGroupsActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\DeleteIdentitiesActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\AddMembersToGroupActivity.cs" />
+    <Compile Include="Messaging\DebugMessage.cs" />
+    <Compile Include="Messaging\DefaultMessageProvider.cs" />
+    <Compile Include="Messaging\DistributedMessage.cs" />
+    <Compile Include="Messaging\IDistributedMessage.cs" />
+    <Compile Include="Messaging\IMessageProvider.cs" />
+    <Compile Include="Messaging\IMessageSender.cs" />
+    <Compile Include="Messaging\MessageSender.cs" />
+    <Compile Include="Messaging\BigActivityMessage.cs" />
+    <Compile Include="Messaging\SecurityActivityExecutionLock.cs" />
+    <Compile Include="Messaging\SecurityActivityQueue.cs" />
+    <Compile Include="Messaging\SecurityMessages\CreateSecurityEntityActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\DeleteGroupActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\DeleteSecurityEntityActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\DeleteUserActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\MembershipActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\ModifySecurityEntityOwnerActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\MoveSecurityEntityActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\RemoveMembersFromGroupActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\RemoveUserFromSecurityGroupsActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\SecurityActivity.cs" />
+    <Compile Include="Messaging\SecurityMessages\SetAclActivity.cs" />
+    <Compile Include="Permission.cs" />
+    <Compile Include="PermissionBitMask.cs" />
+    <Compile Include="PermissionEvaluator.cs" />
+    <Compile Include="PermissionLevel.cs" />
+    <Compile Include="PermissionQuery.cs" />
+    <Compile Include="PermissionTypeBase.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SecurityActivityTimeoutException.cs" />
+    <Compile Include="SecurityCache.cs" />
+    <Compile Include="SecurityConfiguration.cs" />
+    <Compile Include="SecurityContext.cs" />
+    <Compile Include="SecurityContextMembership.cs" />
+    <Compile Include="SecurityEntity.cs" />
+    <Compile Include="SecurityGroup.cs" />
+    <Compile Include="SecurityStructureException.cs" />
+    <Compile Include="StoredAce.cs" />
+    <Compile Include="StoredSecurityEntity.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
