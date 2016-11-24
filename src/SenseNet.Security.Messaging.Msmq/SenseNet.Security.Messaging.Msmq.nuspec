@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+    <metadata>
+        <id>SenseNet.Security.Messaging.Msmq</id>
+        <version>2.3.0.0</version>
+        <title>Sense/Net Security MSMQ message provider</title>
+        <authors>Sense/Net</authors>
+        <owners>Sense/Net</owners>
+        <licenseUrl>https://github.com/SenseNet/sn-security/blob/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/SenseNet/sn-security</projectUrl>
+        <iconUrl>https://avatars2.githubusercontent.com/u/4069121?v=3&amp;s=200</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>MSMQ message provider implementation for the SenseNet.Security project.</description>
+        <releaseNotes>Initial release.</releaseNotes>
+        <copyright>Copyright © Sense/Net Inc.</copyright>
+        <language>en-US</language>
+        <tags>sensenet security permissions</tags>
+        <dependencies>
+            <group targetFramework=".NETFramework4.5">
+                <dependency id="SenseNet.Tools" version="2.1" />
+                <dependency id="SenseNet.Security" version="2.3" />
+            </group>
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="bin\Release\SenseNet.Security.Messaging.Msmq.dll" target="lib\net45\SenseNet.Security.Messaging.Msmq.dll" />
+        <file src="bin\Release\SenseNet.Security.Messaging.Msmq.pdb" target="lib\net45\SenseNet.Security.Messaging.Msmq.pdb" />
+        <file src="bin\Release\SenseNet.Security.Messaging.Msmq.XML" target="lib\net45\SenseNet.Security.Messaging.Msmq.XML" />
+    </files>
+</package>
