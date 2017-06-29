@@ -1,4 +1,4 @@
-# Sense/Net Security
+# sensenet ECM Security
 
 [![Join the chat at https://gitter.im/SenseNet/sn-security](https://badges.gitter.im/SenseNet/sn-security.svg)](https://gitter.im/SenseNet/sn-security?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Security core](https://img.shields.io/nuget/v/SenseNet.Security.svg)](https://www.nuget.org/packages/SenseNet.Security)
@@ -7,7 +7,7 @@
 
 A powerful and fast .Net component for managing **permission entries** in structured content repositories.
 
-The permission layer of [SenseNet](https://github.com/SenseNet/sensenet) is built on top of this library, so it is a well-tested, robust and scalable option for providing permission features in large projects.
+The permission layer of [sensenet ECM](https://github.com/SenseNet/sensenet) is built on top of this library, so it is a well-tested, robust and scalable option for providing permission features in large projects.
 
 Permission entries and user-group relationships are stored in a database that can be replaced with a **custom db provider**. The built-in db provider is for *Entity Framework*.
 
