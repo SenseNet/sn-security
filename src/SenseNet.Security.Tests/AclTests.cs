@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using SenseNet.Security;
+using SenseNet.Security.Data;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Tests.TestPortal;
 

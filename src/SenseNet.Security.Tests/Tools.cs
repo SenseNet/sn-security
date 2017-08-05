@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using SenseNet.Security;
+using SenseNet.Security.Data;
 using SenseNet.Security.EF6SecurityStore;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Tests.TestPortal;
@@ -108,7 +109,7 @@ namespace SenseNet.Security.Tests
         internal static Context GetEmptyContext(TestUser currentUser)
         {
             SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
-            MemoryDataProvider._lastActivityId = 0;
+            MemoryDataProvider.LastActivityId = 0;
             return GetEmptyContext(currentUser, new MemoryDataProvider(DatabaseStorage.CreateEmpty()));
         }
         internal static Context GetEmptyContext(TestUser currentUser, ISecurityDataProvider dbProvider)
@@ -348,13 +349,13 @@ namespace SenseNet.Security.Tests
 
         //============================================================================================================
 
-        internal static void InitializeInMemoryMembershipStorage(string src)
+        public static void InitializeInMemoryMembershipStorage(string src)
         {
             // "G1:U1,G2,G3|G2:U2,G4,G5|G3:U3|G4:U4|G5:U5"
             var table = MemoryDataProvider.Storage.Memberships;
             InitializeInMemoryMembershipTable(src, table);
         }
-        internal static List<Membership> CreateInMemoryMembershipTable(string src)
+        public static List<Membership> CreateInMemoryMembershipTable(string src)
         {
             // example: "G1:U1,U2|G2:U3,U4|G3:U1,U3|G4:U4|G5:U5"
             var table = new List<Membership>();

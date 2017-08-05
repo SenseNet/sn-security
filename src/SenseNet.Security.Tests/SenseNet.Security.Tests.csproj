@@ -73,7 +73,6 @@
   <ItemGroup>
     <Compile Include="Accessors.cs" />
     <Compile Include="AclTests.cs" />
-    <Compile Include="DatabaseStorage.cs" />
     <Compile Include="EFAclTests.cs" />
     <Compile Include="EFMembershipTests.cs" />
     <Compile Include="EFLoadActivitiesTests.cs" />
@@ -81,7 +80,6 @@
     <Compile Include="Initializer.cs" />
     <Compile Include="MembershipTests2.cs" />
     <Compile Include="MembershipTests.cs" />
-    <Compile Include="MemoryDataProvider.cs" />
     <Compile Include="MessagingTests.cs" />
     <Compile Include="PermissionQueryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
