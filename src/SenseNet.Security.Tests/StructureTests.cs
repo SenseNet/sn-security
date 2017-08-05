@@ -7,6 +7,7 @@ using SenseNet.Security;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Tests.TestPortal;
 using System.Diagnostics;
+using SenseNet.Security.Data;
 
 namespace SenseNet.Security.Tests
 {
@@ -890,7 +891,7 @@ namespace SenseNet.Security.Tests
         private void StartTheSystem()
         {
             SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
-            MemoryDataProvider._lastActivityId = 0;
+            MemoryDataProvider.LastActivityId = 0;
             Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), new DefaultMessageProvider());
         }
 

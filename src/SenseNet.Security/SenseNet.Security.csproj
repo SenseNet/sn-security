@@ -66,6 +66,8 @@
     <Compile Include="AclInfo.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="DataHandler.cs" />
+    <Compile Include="Data\DatabaseStorage.cs" />
+    <Compile Include="Data\MemoryDataProvider.cs" />
     <Compile Include="EntityNotFoundException.cs" />
     <Compile Include="EntityTreeWalker.cs" />
     <Compile Include="EventMessage.cs" />

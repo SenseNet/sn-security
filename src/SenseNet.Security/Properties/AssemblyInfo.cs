@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SenseNet.Security")]
-[assembly: AssemblyDescription("Security component for Sense/Net ECMS")]
+[assembly: AssemblyDescription("Security component for sensenet ECM")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Sense/Net Inc.")]
 [assembly: AssemblyProduct("SenseNet.Security")]
@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.3.0.0")]
-[assembly: AssemblyFileVersion("2.3.0.0")]
+[assembly: AssemblyVersion("2.3.1.0")]
+[assembly: AssemblyFileVersion("2.3.1.0")]
 [assembly: InternalsVisibleTo("SenseNet.Security.Tests")]
 [assembly: InternalsVisibleTo("SenseNet.Security.Tests.Concurrency")]
