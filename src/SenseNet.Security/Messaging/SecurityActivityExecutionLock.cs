@@ -29,7 +29,7 @@ namespace SenseNet.Security.Messaging
             _activity = activity;
             FullExecutionEnabled = fullExecutionEnabled;
 
-            var interval = Configuration.SecurityActivityExecutionLockRefreshPeriodInSeconds * 1000.0;
+            var interval = Configuration.Messaging.SecurityActivityExecutionLockRefreshPeriodInSeconds * 1000.0;
 
             _timer = new Timer(interval) {Enabled = true};
             _timer.Elapsed += Refresh;

@@ -43,49 +43,7 @@ namespace SenseNet.Security.Messaging.Msmq
                 return _messageRetentionTime.Value;
             }
         }
-
-        private static readonly string MessageProcessorThreadCountKey = "MessageProcessorThreadCount";
-        private static int? _messageProcessorThreadCount;
-        /// <summary>
-        /// Number of message processor threads. Default is 3.
-        /// </summary>
-        public static int MessageProcessorThreadCount
-        {
-            get
-            {
-                if (!_messageProcessorThreadCount.HasValue)
-                {
-                    int value;
-                    var setting = ConfigurationManager.AppSettings[MessageProcessorThreadCountKey];
-                    if (String.IsNullOrEmpty(setting) || !Int32.TryParse(setting, out value))
-                        value = 3;
-                    _messageProcessorThreadCount = value;
-                }
-                return _messageProcessorThreadCount.Value;
-            }
-        }
-
-        private static readonly string MessageProcessorThreadMaxMessagesKey = "MessageProcessorThreadMaxMessages";
-        private static int? _messageProcessorThreadMaxMessages;
-        /// <summary>
-        /// Max number of messages processed by a single message processor thread. Default is 100.
-        /// </summary>
-        public static int MessageProcessorThreadMaxMessages
-        {
-            get
-            {
-                if (!_messageProcessorThreadMaxMessages.HasValue)
-                {
-                    int value;
-                    var setting = ConfigurationManager.AppSettings[MessageProcessorThreadMaxMessagesKey];
-                    if (String.IsNullOrEmpty(setting) || !Int32.TryParse(setting, out value))
-                        value = 100;
-                    _messageProcessorThreadMaxMessages = value;
-                }
-                return _messageProcessorThreadMaxMessages.Value;
-            }
-        }
-
+        
         private static readonly string MsmqReconnectDelayKey = "MsmqReconnectDelay";
         private static int? _msmqReconnectDelay;
         /// <summary>
@@ -106,6 +64,5 @@ namespace SenseNet.Security.Messaging.Msmq
                 return _msmqReconnectDelay.Value;
             }
         }
-
     }
 }
