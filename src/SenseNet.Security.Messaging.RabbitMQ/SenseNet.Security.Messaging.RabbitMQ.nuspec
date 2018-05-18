@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>SenseNet.Security.Messaging.RabbitMQ</id>
+    <version>1.0.0.0</version>
+    <title>sensenet Security RabbitMQ message provider</title>
+    <authors>kavics,tusmester</authors>
+    <owners>Sense/Net</owners>
+    <licenseUrl>https://github.com/SenseNet/sn-security/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/SenseNet/sn-security</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/SenseNet/sn-resources/master/images/sn-icon/sensenet-icon-64.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>RabbitMQ message provider implementation for the SenseNet.Security project.</description>
+    <copyright>Copyright © Sense/Net Inc.</copyright>
+    <language>en-US</language>
+    <tags>sensenet security permissions messaging rabbitmq</tags>
+    <dependencies>
+      <dependency id="SenseNet.Tools" version="2.1" />
+      <dependency id="SenseNet.Security" version="2.3" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\SenseNet.Security.Messaging.RabbitMQ.*" target="lib\net461" />
+  </files>
+</package>

@@ -96,7 +96,7 @@ namespace SenseNet.Security.Messaging
 
             if (message.MessageSent < _startingTheSystem)
             {
-                SnTrace.Messaging.Write($"{message.GetType().Name} was sent before system startup, skipped.");
+                SnTrace.Messaging.Write($"{message.GetType().Name} was sent before system startup ({message.MessageSent}), it is SKIPPED.");
                 return;
             }
 
