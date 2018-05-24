@@ -14,14 +14,34 @@ namespace SenseNet.Security.Messaging.RabbitMQ
     /// </summary>
     public class RabbitMQMessageProvider : MessageProviderBase
     {
-        protected string ServiceUrl { get; set; } = Configuration.RabbitMQ.ServiceUrl;
-        protected string MessageExchange { get; set; } = Configuration.RabbitMQ.MessageExchange;
+        /// <summary>
+        /// RabbitMQ service url.
+        /// </summary>
+        protected string ServiceUrl { get; } = "amqp://localhost:5672";
+        /// <summary>
+        /// Optional exchange name. Mandatory in case the same service is used 
+        /// by multiple different environments (e.g. test and live environment).
+        /// </summary>
+        protected string MessageExchange { get; } = "snsecurity";
 
         //=================================================================================== Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the RabbitMQMessageProvider class with default parameters.
+        /// </summary>
         public RabbitMQMessageProvider() { }
+        /// <summary>
+        /// Initializes a new instance of the RabbitMQMessageProvider class.
+        /// </summary>
+        /// <param name="serviceUrl">RabbitMQ service url, including user credentials.</param>
+        /// <param name="exchange">Optional exchange name. Mandatory in case the same service is used 
+        /// by multiple different environments (e.g. test and live environment).</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public RabbitMQMessageProvider(string serviceUrl, string exchange = null)
         {
+            if (string.IsNullOrEmpty(serviceUrl))
+                throw new ArgumentNullException(nameof(serviceUrl));
+
             ServiceUrl = serviceUrl;
 
             if (!string.IsNullOrEmpty(exchange))
@@ -35,8 +55,16 @@ namespace SenseNet.Security.Messaging.RabbitMQ
 
         //=================================================================================== Overrides
 
+        /// <summary>
+        /// Returns the 'RabbitMQ' constant.
+        /// </summary>
         public override string ReceiverName => "RabbitMQ";
 
+        /// <summary>
+        /// Initializes a RabbitMQ service connection based on the provided service url.
+        /// Declares the exchange and binds a consumer queue.
+        /// Opens a receiver channel and creates a consumer for receiving messages.
+        /// </summary>
         public override void Initialize()
         {
             base.Initialize();
@@ -92,6 +120,9 @@ namespace SenseNet.Security.Messaging.RabbitMQ
                 });
         }
 
+        /// <summary>
+        /// Serializes a message, opens a channel and publishes the message asynchronously.
+        /// </summary>
         public override void SendMessage(IDistributedMessage message)
         {
             if (message == null)
@@ -149,9 +180,12 @@ namespace SenseNet.Security.Messaging.RabbitMQ
 
                     OnSendException(message, ex);
                 }
-            });
+            }).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Shuts down the message provider and releases resources.
+        /// </summary>
         public override void ShutDown()
         {
             ReceiverChannel?.Close();
