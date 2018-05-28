@@ -17,12 +17,12 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         /// <summary>
         /// RabbitMQ service url.
         /// </summary>
-        protected string ServiceUrl { get; } = "amqp://localhost:5672";
+        protected string ServiceUrl { get; } = Configuration.RabbitMQ.ServiceUrl;
         /// <summary>
         /// Optional exchange name. Mandatory in case the same service is used 
         /// by multiple different environments (e.g. test and live environment).
         /// </summary>
-        protected string MessageExchange { get; } = "snsecurity";
+        protected string MessageExchange { get; } = Configuration.RabbitMQ.MessageExchange;
 
         //=================================================================================== Constructors
 
