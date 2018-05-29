@@ -22,32 +22,40 @@ To get started, install the following NuGet package:
 [![NuGet](https://img.shields.io/nuget/v/SenseNet.Security.Messaging.RabbitMQ.svg)](https://www.nuget.org/packages/SenseNet.Security.Messaging.RabbitMQ)
 
 ## Usage
-To use this provider you have to instantiate it in your application and provide one or more parameters as shown in the sections below.
+To use this provider in **sensenet** you can set it in configuration. 
+
+```xml
+<sensenet>
+   <providers>
+      <add key="SecurityMessageProvider" value="SenseNet.Security.Messaging.RabbitMQ.RabbitMQMessageProvider" />
+   </providers>
+<sensenet>
+```
+
+In other applications you can instantiate it in your code and provide one or more parameters as shown in the sections below.
 
 ### Service url
 The **service url** mandatory parameter contains the [RabbitMQ URI](http://rabbitmq.github.io/rabbitmq-dotnet-client/api/RabbitMQ.Client.ConnectionFactory.html) to connect to.
 
-```csharp
-var smp = new RabbitMQMessageProvider("amqp://abcd:example.com/defg");
-smp.Initialize();
-```
+> Please note that this is the same service url configuration that you can use with the main **messaging provider for RabbitMQ** in sensenet.
 
-> Please note that you have to call the `Initialize` method before using the provider.
+```xml
+<sensenet>
+   <rabbitmq>
+      <add key="ServiceUrl" value="amqp://abcd:example.com/defg" />
+    </rabbitmq>
+</sensenet>
+```
 
 ### Exchange name
 In case you want to use the same RabbitMQ service for **multiple different application instances** (e.g. both in test and staging environments), you need to provide a **unique exchange name** for each instance. Please make sure you use the same exchange name in every app domain (e.g. web server) that uses the same Content Repository and need to communicate with each other.
 
-```csharp
-var smp = new RabbitMQMessageProvider("amqp://abcd:example.com/defg",
-   "sn-securitymessage-test.example.com");
-smp.Initialize();
+> Please note that this is **not** the same exchange name that you set if you use the main **messaging provider for RabbitMQ** in sensenet (that is named _MessageExchange_). These two providers need different exchange names so that their messages can be separated from each other.
+
+```xml
+<sensenet>
+   <rabbitmq>
+      <add key="SecurityExchange" value="snsecurity-staging-example.com" />
+    </rabbitmq>
+</sensenet>
 ```
-
-### Setting the provider in sensenet
-In case you are using this provider with sensenet you have to set it as the security message provider the following way during [application or repository start](https://community.sensenet.com/docs/configure-repository).
-
-```csharp
-repositoryBuilder.UseSecurityMessageProvider(smp);
-```
-
-> Please note that you have to call the `Initialize` method before using the provider.
