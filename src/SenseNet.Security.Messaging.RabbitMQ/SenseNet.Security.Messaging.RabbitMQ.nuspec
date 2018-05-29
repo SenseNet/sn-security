@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>SenseNet.Security.Messaging.RabbitMQ</id>
-    <version>1.0.0.0</version>
+    <version>1.0.1.0</version>
     <title>sensenet Security RabbitMQ message provider</title>
     <authors>kavics,tusmester</authors>
     <owners>Sense/Net</owners>
@@ -17,6 +17,7 @@
     <dependencies>
       <dependency id="SenseNet.Tools" version="2.1" />
       <dependency id="SenseNet.Security" version="2.4" />
+      <dependency id="RabbitMQ.Client" version="5.0.1" />
     </dependencies>
   </metadata>
   <files>
