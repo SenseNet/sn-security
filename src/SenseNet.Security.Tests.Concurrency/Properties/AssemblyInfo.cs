@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SenseNet.Security.Tests.Concurrency")]
-[assembly: AssemblyDescription("Security component for sensenet ECM")]
+[assembly: AssemblyDescription("Security component for sensenet")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Sense/Net Inc.")]
 [assembly: AssemblyProduct("SenseNet.Security.Tests.Concurrency")]

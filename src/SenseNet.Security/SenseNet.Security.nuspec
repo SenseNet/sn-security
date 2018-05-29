@@ -2,8 +2,8 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>SenseNet.Security</id>
-    <version>2.3.1.0</version>
-    <title>sensenet ECM Security</title>
+    <version>2.4.0.0</version>
+    <title>sensenet Security</title>
     <authors>kavics,tusmester</authors>
     <owners>Sense/Net</owners>
     <licenseUrl>https://github.com/SenseNet/sn-security/blob/master/LICENSE</licenseUrl>
@@ -11,6 +11,7 @@
     <iconUrl>https://raw.githubusercontent.com/SenseNet/sn-resources/master/images/sn-icon/sensenet-icon-64.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A powerful .Net component for managing permission entries in content repositories.</description>
+    <releaseNotes>See release notes on GitHub.</releaseNotes>
     <copyright>Copyright © Sense/Net Inc.</copyright>
     <language>en-US</language>
     <tags>sensenet ecm security permissions</tags>
@@ -22,8 +23,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\SenseNet.Security.dll" target="lib\net45\SenseNet.Security.dll" />
-    <file src="bin\Release\SenseNet.Security.pdb" target="lib\net45\SenseNet.Security.pdb" />
-    <file src="bin\Release\SenseNet.Security.XML" target="lib\net45\SenseNet.Security.XML" />
+    <file src="bin\Release\SenseNet.Security.dll" target="lib\net451\SenseNet.Security.dll" />
+    <file src="bin\Release\SenseNet.Security.pdb" target="lib\net451\SenseNet.Security.pdb" />
+    <file src="bin\Release\SenseNet.Security.XML" target="lib\net451\SenseNet.Security.XML" />
   </files>
 </package>

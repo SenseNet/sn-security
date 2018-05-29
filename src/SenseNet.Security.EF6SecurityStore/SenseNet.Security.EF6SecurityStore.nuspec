@@ -3,7 +3,7 @@
   <metadata>
     <id>SenseNet.Security.EF6SecurityStore</id>
     <version>2.3.0.0</version>
-    <title>sensenet ECM Security Entity Framework data provider</title>
+    <title>sensenet Security Entity Framework data provider</title>
     <authors>kavics,tusmester</authors>
     <owners>Sense/Net</owners>
     <licenseUrl>https://github.com/SenseNet/sn-security/blob/master/LICENSE</licenseUrl>
@@ -22,8 +22,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\SenseNet.Security.EF6SecurityStore.dll" target="lib\net45\SenseNet.Security.EF6SecurityStore.dll" />
-    <file src="bin\Release\SenseNet.Security.EF6SecurityStore.pdb" target="lib\net45\SenseNet.Security.EF6SecurityStore.pdb" />
-    <file src="bin\Release\SenseNet.Security.EF6SecurityStore.XML" target="lib\net45\SenseNet.Security.EF6SecurityStore.XML" />
+    <file src="bin\Release\SenseNet.Security.EF6SecurityStore.dll" target="lib\net451\SenseNet.Security.EF6SecurityStore.dll" />
+    <file src="bin\Release\SenseNet.Security.EF6SecurityStore.pdb" target="lib\net451\SenseNet.Security.EF6SecurityStore.pdb" />
+    <file src="bin\Release\SenseNet.Security.EF6SecurityStore.XML" target="lib\net451\SenseNet.Security.EF6SecurityStore.XML" />
   </files>
 </package>
