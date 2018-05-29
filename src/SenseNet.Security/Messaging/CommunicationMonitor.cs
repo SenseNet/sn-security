@@ -57,5 +57,10 @@ namespace SenseNet.Security.Messaging
         {
             _timer.Enabled = false;
         }
+
+        public static void Shutdown()
+        {
+            _timer?.Dispose();
+        }
     }
 }

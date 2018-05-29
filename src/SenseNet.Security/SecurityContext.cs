@@ -175,6 +175,21 @@ namespace SenseNet.Security
             return false;
         }
 
+        private static bool _killed;
+        /// <summary>
+        /// Stops the security subsystem.
+        /// </summary>
+        public static void Shutdown()
+        {
+            if (_killed)
+                return;
+            _killed = true;
+            _messageProvider.ShutDown();
+            _messageProvider.MessageReceived -= MessageProvider_MessageReceived;
+            CommunicationMonitor.Shutdown();
+            SecurityActivityQueue.Shutdown();
+        }
+
         /*********************** ACL API **********************/
         /// <summary>
         /// Creates a new instance of the AclEditor class for modifying access control data. 

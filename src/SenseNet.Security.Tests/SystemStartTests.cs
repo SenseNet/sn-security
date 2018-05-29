@@ -236,5 +236,35 @@ namespace SenseNet.Security.Tests
             return Tools.GetId(name);
         }
 
+
+        [TestMethod]
+        public void SystemStartAndShutdown()
+        {
+            //---- Ensure test data
+            var entities = CreateTestEntities();
+            var groups = CreateTestGroups();
+            var memberships = Tools.CreateInMemoryMembershipTable(groups);
+            var aces = CreateTestAces();
+            var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
+
+            //---- Start the system
+            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider());
+            var ctxAcc = new PrivateType(typeof(SecurityContext));
+            var killed = (bool)ctxAcc.GetStaticField("_killed");
+            Assert.IsFalse(killed);
+
+            //---- Start the request
+            context = new Context(TestUser.User1);
+
+            //---- operation
+            context.Security.HasPermission(entities.First().Value.Id, PermissionType.Open);
+
+            //---- kill the system
+            SecurityContext.Shutdown();
+
+            //---- check killed state
+            killed = (bool)ctxAcc.GetStaticField("_killed");
+            Assert.IsTrue(killed);
+        }
     }
 }
