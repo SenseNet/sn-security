@@ -14,6 +14,8 @@ namespace SenseNet.Security.Messaging.RabbitMQ
     /// </summary>
     public class RabbitMQMessageProvider : MessageProviderBase
     {
+        private bool _initialized;
+
         /// <summary>
         /// RabbitMQ service url.
         /// </summary>
@@ -67,8 +69,11 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         /// </summary>
         public override void Initialize()
         {
-            base.Initialize();
+            if (_initialized)
+                return;
 
+            base.Initialize();
+            
             Connection = OpenConnection(ServiceUrl);
 
             string queueName;
@@ -118,6 +123,8 @@ namespace SenseNet.Security.Messaging.RabbitMQ
                     { "Exchange", MessageExchange },
                     { "QueueName", queueName }
                 });
+
+            _initialized = true;
         }
 
         /// <summary>
@@ -192,6 +199,8 @@ namespace SenseNet.Security.Messaging.RabbitMQ
             Connection?.Close();
 
             base.ShutDown();
+
+            _initialized = false;
         }
 
         //=================================================================================== Helper methods
