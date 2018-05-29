@@ -112,6 +112,8 @@ namespace SenseNet.Security
 
             _generalContext = new SecurityContext(SystemUser);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
+
+            _killed = false;
         }
 
         private static void MessageProvider_MessageReceived(object sender, MessageReceivedEventArgs args)
@@ -173,6 +175,21 @@ namespace SenseNet.Security
         {
             parentId = ownerId = 0;
             return false;
+        }
+
+        private static bool _killed;
+        /// <summary>
+        /// Stops the security subsystem.
+        /// </summary>
+        public static void Shutdown()
+        {
+            if (_killed)
+                return;
+            _killed = true;
+            _messageProvider.ShutDown();
+            _messageProvider.MessageReceived -= MessageProvider_MessageReceived;
+            CommunicationMonitor.Shutdown();
+            SecurityActivityQueue.Shutdown();
         }
 
         /*********************** ACL API **********************/

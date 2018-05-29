@@ -66,6 +66,13 @@ namespace SenseNet.Security.Messaging
             CommunicationMonitor.Start();
         }
 
+        internal static void Shutdown()
+        {
+            Serializer.Reset();
+            DependencyManager.Reset();
+            TerminationHistory.Reset(0);
+        }
+
         public static CompletionState GetCurrentCompletionState()
         {
             return TerminationHistory.GetCurrentState();
