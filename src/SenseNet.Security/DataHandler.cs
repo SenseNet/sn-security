@@ -287,7 +287,7 @@ namespace SenseNet.Security
 
         internal static void CleanupSecurityActivities()
         {
-            SecurityContext.General.DataProvider.CleanupSecurityActivities(Configuration.SecuritActivityLifetimeInMinutes);
+            SecurityContext.General.DataProvider.CleanupSecurityActivities(Configuration.Messaging.SecuritActivityLifetimeInMinutes);
         }
 
 
@@ -295,7 +295,7 @@ namespace SenseNet.Security
         {
             var timeout = Debugger.IsAttached
                 ? int.MaxValue
-                : Configuration.SecurityActivityExecutionLockTimeoutInSeconds;
+                : Configuration.Messaging.SecurityActivityExecutionLockTimeoutInSeconds;
 
             return securityActivity.Context.DataProvider
                 .AcquireSecurityActivityExecutionLock(securityActivity, timeout);

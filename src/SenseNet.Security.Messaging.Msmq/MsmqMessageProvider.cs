@@ -4,8 +4,6 @@ using System.Linq;
 using System.Messaging;
 using System.Threading;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization;
 using SenseNet.Diagnostics;
 
 namespace SenseNet.Security.Messaging.Msmq
@@ -13,37 +11,20 @@ namespace SenseNet.Security.Messaging.Msmq
     /// <summary>
     /// IMessageProvider implementation on top of MSMQ.
     /// </summary>
-    internal sealed class MsmqMessageProvider : IMessageProvider
+    internal sealed class MsmqMessageProvider : MessageProviderBase
     {
         private MessageQueue _receiveQueue;
         private List<MessageQueue> _sendQueues;
         private List<bool> _sendQueuesAvailable;
         private readonly ReaderWriterLockSlim _senderLock = new ReaderWriterLockSlim();
         private readonly BinaryMessageFormatter _formatter = new BinaryMessageFormatter();
-        private bool _allowMessageProcessing;
-        private static bool _shutdown;
-
-        public string ReceiverName => _receiveQueue.Path;
-
-
-        /* ============================================================================== Events */
-        public event MessageReceivedEventHandler MessageReceived;
-        public event ReceiveExceptionEventHandler ReceiveException;
-        public event SendExceptionEventHandler SendException;
-
+        
+        public override string ReceiverName => _receiveQueue.Path;
 
         /* ============================================================================== Initialization */
-        public void Initialize()
+        public override void Initialize()
         {
-            _incomingMessages = new List<IDistributedMessage>();
-
-            // initiate processing threads
-            for (var i = 0; i < Configuration.MessageProcessorThreadCount; i++)
-            {
-                var thstart = new ParameterizedThreadStart(CheckProcessableMessages);
-                var thread = new Thread(thstart) {Name = i.ToString()};
-                thread.Start();
-            }
+            base.Initialize();
 
             BuildQueues();
         }
@@ -82,39 +63,19 @@ namespace SenseNet.Security.Messaging.Msmq
             // reconnect
             return CreateQueue(queue.Path);
         }
-
-
+        
         /* ============================================================================== Controlling */
-        private DateTime _startingTheSystem = DateTime.MaxValue;
-        public void Start(DateTime startingTheSystem)
-        {
-            _startingTheSystem = startingTheSystem;
-            Start();
-        }
-        public void Start()
-        {
-            _allowMessageProcessing = true;
-        }
-        public void Stop()
-        {
-            _allowMessageProcessing = false;
-        }
-        public void Purge()
+        
+        public override void Purge()
         {
             var iterator = _receiveQueue.GetMessageEnumerator2();
             while (iterator.MoveNext()) { }
 
             _receiveQueue.Purge();
         }
-        public void ShutDown()
-        {
-            Stop();
-            _shutdown = true;
-        }
-
-
+        
         /* ============================================================================== Send */
-        public void SendMessage(IDistributedMessage message)
+        public override void SendMessage(IDistributedMessage message)
         {
             try
             {
@@ -215,19 +176,9 @@ namespace SenseNet.Security.Messaging.Msmq
                 SnLog.WriteInformation("Send queues have been repaired.", EventId.Messaging);
             }
         }
-
-
+        
         /* ============================================================================== Receive */
-        private int _incomingMessageCount;
-        /// <summary>
-        /// Returns the count of unprocessed incoming messages. Slowing down the producing of messages maybe necessary if it exceeds a certain amount.
-        /// </summary>
-        public int IncomingMessageCount => _incomingMessageCount;
-
-        private static volatile int _messagesCount;
-        private static readonly object _messageListSwitchSync = new object();
-        private static List<IDistributedMessage> _incomingMessages;
-
+        
         private void ReceiveMessages()
         {
             while (true)
@@ -238,7 +189,7 @@ namespace SenseNet.Security.Messaging.Msmq
                     if(message==null)
                         return;
 
-                    if (_shutdown)
+                    if (Shutdown)
                         return;
 
                     OnMessageReceived(message.Body as Stream);
@@ -246,7 +197,7 @@ namespace SenseNet.Security.Messaging.Msmq
                 catch (ThreadAbortException tex)
                 {
                     // suppress threadabortexception on shutdown
-                    if (_shutdown)
+                    if (Shutdown)
                         return;
 
                     SnLog.WriteException(tex, $"An error occurred when receiving from the queue ({_receiveQueue.Path}).",
@@ -257,7 +208,7 @@ namespace SenseNet.Security.Messaging.Msmq
                     // check if receive timed out: this is not a problem
                     if (mex.MessageQueueErrorCode == MessageQueueErrorCode.IOTimeout)
                     {
-                        if (_shutdown)
+                        if (Shutdown)
                             return;
                         continue;
                     }
@@ -287,143 +238,5 @@ namespace SenseNet.Security.Messaging.Msmq
                 }
             }
         }
-        private void OnMessageReceived(Stream messageBody)
-        {
-            var message = DeserializeMessage(messageBody);
-            if (message == null)
-                return;
-            if (message.Sender.IsMe)
-                return;
-
-            if (message.MessageSent < _startingTheSystem)
-                return;
-
-            lock (_messageListSwitchSync)
-                _incomingMessages.Add(message);
-        }
-
-        private void CheckProcessableMessages(object parameter)
-        {
-            while (true)
-            {
-                try
-                {
-                    if (_allowMessageProcessing)
-                    {
-                        List<IDistributedMessage> messagesToProcess;
-                        while ((messagesToProcess = GetProcessableMessages()) != null)
-                        {
-                            var count = messagesToProcess.Count;
-#pragma warning disable 0420
-                            Interlocked.Add(ref _messagesCount, count);
-#pragma warning restore 0420
-
-                            // process all messages in the queue
-                            for (var i = 0; i < count; i++)
-                            {
-                                ProcessSingleMessage(messagesToProcess[i]);
-                                messagesToProcess[i] = null;
-                            }
-
-#pragma warning disable 0420
-                            Interlocked.Add(ref _messagesCount, -count);
-#pragma warning restore 0420
-
-                            if (_shutdown)
-                                return;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    SnLog.WriteException(ex, EventMessage.Errors.ProcessingError, EventId.Messaging);
-                }
-
-                // no messages to process, wait some time and continue checking incoming messages
-                Thread.Sleep(100);
-
-                if (_shutdown)
-                    return;
-            }
-        }
-        private List<IDistributedMessage> GetProcessableMessages()
-        {
-            List<IDistributedMessage> messagesToProcess;
-            lock (_messageListSwitchSync)
-            {
-                _incomingMessageCount = _incomingMessages.Count;
-
-                if (_incomingMessageCount == 0)
-                    return null;
-
-                if (_incomingMessageCount <= Configuration.MessageProcessorThreadMaxMessages)
-                {
-                    // if total message count is smaller than the maximum allowed, process all of them and empty incoming queue
-                    messagesToProcess = _incomingMessages;
-                    _incomingMessages = new List<IDistributedMessage>();
-                }
-                else
-                {
-                    // process the maximum allowed number of messages, leave the rest in the incoming queue
-                    messagesToProcess = _incomingMessages.Take(Configuration.MessageProcessorThreadMaxMessages).ToList();
-                    _incomingMessages = _incomingMessages.Skip(Configuration.MessageProcessorThreadMaxMessages).ToList();
-                }
-            }
-
-            return messagesToProcess;
-        }
-        private void ProcessSingleMessage(object parameter)
-        {
-            var message = parameter as IDistributedMessage;
-            MessageReceived?.Invoke(this, new MessageReceivedEventArgs(message));
-        }
-
-
-        /* ============================================================================== Error handling */
-        private void OnSendException(IDistributedMessage message, Exception exception)
-        {
-            SendException?.Invoke(this, new ExceptionEventArgs(exception, message));
-        }
-        private void OnReceiveException(Exception exception)
-        {
-            ReceiveException?.Invoke(this, new ExceptionEventArgs(exception, null));
-        }
-
-
-        /* ============================================================================== Serialization */
-        private IDistributedMessage DeserializeMessage(Stream data)
-        {
-            var bf = new BinaryFormatter();
-            IDistributedMessage message;
-            try
-            {
-                message = (IDistributedMessage)bf.Deserialize(data);
-            }
-            catch (SerializationException e) //logged
-            {
-                SnLog.WriteException(e, EventMessage.Errors.DeserializationError, EventId.Messaging);
-                message = new UnknownMessage { MessageData = data };
-                // don't rethrow because caller handles
-            }
-            return message;
-        }
-        private Stream SerializeMessage(object message)
-        {
-            try
-            {
-                MemoryStream ms = new MemoryStream();
-                BinaryFormatter bf = new BinaryFormatter();
-                bf.Serialize(ms, message);
-                ms.Flush();
-                ms.Position = 0;
-                return ms;
-            }
-            catch (Exception e)
-            {
-                SnLog.WriteException(e, EventMessage.Errors.SerializationError, EventId.Messaging);
-                throw;
-            }
-        }
-
     }
 }

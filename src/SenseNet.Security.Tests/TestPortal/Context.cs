@@ -64,7 +64,7 @@ namespace SenseNet.Security.Tests.TestPortal
         }
         private static Type GetMessageProviderType()
         {
-            string channelProviderTypeName = Configuration.MessageProvider;
+            string channelProviderTypeName = Configuration.Messaging.MessageProvider;
             if (string.IsNullOrEmpty(channelProviderTypeName))
                 return typeof(DefaultMessageProvider);
 

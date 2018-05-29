@@ -10,7 +10,7 @@ namespace SenseNet.Security.Messaging
 
         internal static void Initialize()
         {
-            var interval = Configuration.CommunicationMonitorRunningPeriodInSeconds * 1000.0;
+            var interval = Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds * 1000.0;
 
             _timer = new System.Timers.Timer(interval) {Enabled = false};
             _timer.Elapsed += Timer_Elapsed;

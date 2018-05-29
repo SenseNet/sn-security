@@ -278,8 +278,8 @@ namespace SenseNet.Security
                 return EmptyGroups;
             }
 
-            /// <summary>Id of the user. This value comes from Configuration.SystemUserId</summary>
-            public int Id => Configuration.SystemUserId;
+            /// <summary>Id of the user. This value comes from Configuration.Identities.SystemUserId</summary>
+            public int Id => Configuration.Identities.SystemUserId;
         }
         /// <summary>
         /// Static instance of the SecuritySystemUser

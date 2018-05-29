@@ -90,14 +90,14 @@ namespace SenseNet.Security
             _messageProvider = configuration.MessageProvider;
             _messageProvider.MessageReceived += MessageProvider_MessageReceived;
 
-            Configuration.SystemUserId = configuration.SystemUserId ?? - 1;
-            Configuration.VisitorUserId = configuration.VisitorUserId ?? 6;
-            Configuration.EveryoneGroupId = configuration.EveryoneGroupId ?? 8;
-            Configuration.OwnerGroupId = configuration.OwnerGroupId ?? 9;
+            Configuration.Identities.SystemUserId = configuration.SystemUserId ?? - 1;
+            Configuration.Identities.VisitorUserId = configuration.VisitorUserId ?? 6;
+            Configuration.Identities.EveryoneGroupId = configuration.EveryoneGroupId ?? 8;
+            Configuration.Identities.OwnerGroupId = configuration.OwnerGroupId ?? 9;
 
-            Configuration.CommunicationMonitorRunningPeriodInSeconds = configuration.CommunicationMonitorRunningPeriodInSeconds ?? 30;
-            Configuration.SecuritActivityLifetimeInMinutes = configuration.SecuritActivityLifetimeInMinutes ?? 42;
-            Configuration.SecuritActivityTimeoutInSeconds = configuration.SecuritActivityTimeoutInSeconds ?? 120;
+            Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds = configuration.CommunicationMonitorRunningPeriodInSeconds ?? 30;
+            Configuration.Messaging.SecuritActivityLifetimeInMinutes = configuration.SecuritActivityLifetimeInMinutes ?? 42;
+            Configuration.Messaging.SecuritActivityTimeoutInSeconds = configuration.SecuritActivityTimeoutInSeconds ?? 120;
 
             _securityDataProviderPrototype = configuration.SecurityDataProvider;
             PermissionTypeBase.InferForcedRelations();

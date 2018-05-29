@@ -45,8 +45,8 @@
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="SenseNet.Tools">
-      <HintPath>..\References\SenseNet.Tools.dll</HintPath>
+    <Reference Include="SenseNet.Tools, Version=2.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SenseNet.Tools.2.2.0\lib\net451\SenseNet.Tools.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -64,7 +64,8 @@
     <Compile Include="AceInfo.cs" />
     <Compile Include="AclEditor.cs" />
     <Compile Include="AclInfo.cs" />
-    <Compile Include="Configuration.cs" />
+    <Compile Include="Configuration\Messaging.cs" />
+    <Compile Include="Configuration\Identities.cs" />
     <Compile Include="DataHandler.cs" />
     <Compile Include="Data\DatabaseStorage.cs" />
     <Compile Include="Data\MemoryDataProvider.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="ISecurityDataProvider.cs" />
     <Compile Include="ISecurityUser.cs" />
     <Compile Include="Messaging\CommunicationMonitor.cs" />
+    <Compile Include="Messaging\MessageProviderBase.cs" />
     <Compile Include="Messaging\SecurityActivityHistory.cs" />
     <Compile Include="Messaging\SecurityActivityLoader.cs" />
     <Compile Include="Messaging\SecurityMessages\AddUserToSecurityGroupsActivity.cs" />
