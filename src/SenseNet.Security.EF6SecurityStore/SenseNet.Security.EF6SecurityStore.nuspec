@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>SenseNet.Security.EF6SecurityStore</id>
-    <version>2.3.0.0</version>
+    <version>2.3.1.0</version>
     <title>sensenet Security Entity Framework data provider</title>
     <authors>kavics,tusmester</authors>
     <owners>Sense/Net</owners>
@@ -11,19 +11,18 @@
     <iconUrl>https://avatars2.githubusercontent.com/u/4069121?v=3&amp;s=200</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Entity Framework data provider implementation for the SenseNet.Security project.</description>
+    <releaseNotes>See release notes on GitHub.</releaseNotes>
     <copyright>Copyright © Sense/Net Inc.</copyright>
     <language>en-US</language>
-    <tags>sensenet ecm security permissions</tags>
+    <tags>sensenet ecm security permissions ef6 entityframework</tags>
     <dependencies>
       <group targetFramework=".NETFramework4.5">
-        <dependency id="SenseNet.Security" version="2.3" />
+        <dependency id="SenseNet.Security" version="2.4" />
         <dependency id="EntityFramework" version="6.1.2" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\SenseNet.Security.EF6SecurityStore.dll" target="lib\net451\SenseNet.Security.EF6SecurityStore.dll" />
-    <file src="bin\Release\SenseNet.Security.EF6SecurityStore.pdb" target="lib\net451\SenseNet.Security.EF6SecurityStore.pdb" />
-    <file src="bin\Release\SenseNet.Security.EF6SecurityStore.XML" target="lib\net451\SenseNet.Security.EF6SecurityStore.XML" />
+    <file src="bin\Release\SenseNet.Security.EF6SecurityStore.*" target="lib\net451" />
   </files>
 </package>

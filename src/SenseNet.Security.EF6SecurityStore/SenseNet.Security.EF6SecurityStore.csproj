@@ -73,9 +73,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="packages.config" />
     <None Include="SenseNet.Security.EF6SecurityStore.nuspec" />
   </ItemGroup>
