@@ -16,7 +16,7 @@
     <language>en-US</language>
     <tags>sensenet ecm security permissions</tags>
     <dependencies>
-      <dependency id="SenseNet.Tools" version="2.1" />
+      <dependency id="SenseNet.Tools" version="3.0" />
       <dependency id="SenseNet.Security" version="2.5" />
     </dependencies>
   </metadata>

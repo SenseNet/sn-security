@@ -15,7 +15,7 @@
     <language>en-US</language>
     <tags>sensenet security permissions messaging rabbitmq</tags>
     <dependencies>
-      <dependency id="SenseNet.Tools" version="2.1" />
+      <dependency id="SenseNet.Tools" version="3.0" />
       <dependency id="SenseNet.Security" version="2.5" />
       <dependency id="RabbitMQ.Client" version="5.0.1" />
     </dependencies>
