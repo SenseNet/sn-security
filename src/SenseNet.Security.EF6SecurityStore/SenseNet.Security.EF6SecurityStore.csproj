@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SenseNet.Security.EF6SecurityStore</RootNamespace>
     <AssemblyName>SenseNet.Security.EF6SecurityStore</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SccProjectName>
@@ -68,13 +68,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SenseNet.Security\SenseNet.Security.csproj">
-      <Project>{169e4d25-a0e7-4e71-aec0-558b0ff52537}</Project>
+      <Project>{b2b39975-3d5e-4457-b9ce-0fcec20f2f59}</Project>
       <Name>SenseNet.Security</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="SenseNet.Security.EF6SecurityStore.nuspec" />
+    <None Include="SenseNet.Security.EF6SecurityStore.nuspec">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Scripts\Install_Schema_2.1.sql" />
