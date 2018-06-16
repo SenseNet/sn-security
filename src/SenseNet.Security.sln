@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.TestConso
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Tests.Concurrency", "SenseNet.Security.Tests.Concurrency\SenseNet.Security.Tests.Concurrency.csproj", "{EB816791-BE56-45F5-B18A-37DA918ADAB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Messaging.RabbitMQ", "SenseNet.Security.Messaging.RabbitMQ\SenseNet.Security.Messaging.RabbitMQ.csproj", "{DB2230A3-478E-4BE3-B6CE-D4ACCD833BBA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Messaging.RabbitMQ", "SenseNet.Security.Messaging.RabbitMQ\SenseNet.Security.Messaging.RabbitMQ.csproj", "{84F97FC3-12B9-4D30-95B6-3308EE3CC322}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +47,10 @@ Global
 		{EB816791-BE56-45F5-B18A-37DA918ADAB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB816791-BE56-45F5-B18A-37DA918ADAB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB816791-BE56-45F5-B18A-37DA918ADAB4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DB2230A3-478E-4BE3-B6CE-D4ACCD833BBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DB2230A3-478E-4BE3-B6CE-D4ACCD833BBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DB2230A3-478E-4BE3-B6CE-D4ACCD833BBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DB2230A3-478E-4BE3-B6CE-D4ACCD833BBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84F97FC3-12B9-4D30-95B6-3308EE3CC322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84F97FC3-12B9-4D30-95B6-3308EE3CC322}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84F97FC3-12B9-4D30-95B6-3308EE3CC322}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84F97FC3-12B9-4D30-95B6-3308EE3CC322}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
