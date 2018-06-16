@@ -23,8 +23,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\SenseNet.Security.Messaging.Msmq.dll" target="lib\net451\SenseNet.Security.Messaging.Msmq.dll" />
-    <file src="bin\Release\SenseNet.Security.Messaging.Msmq.pdb" target="lib\net451\SenseNet.Security.Messaging.Msmq.pdb" />
-    <file src="bin\Release\SenseNet.Security.Messaging.Msmq.XML" target="lib\net451\SenseNet.Security.Messaging.Msmq.XML" />
+    <file src="bin\Release\SenseNet.Security.Messaging.Msmq.*" target="lib\net461" />
   </files>
 </package>

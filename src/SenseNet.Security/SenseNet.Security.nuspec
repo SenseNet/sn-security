@@ -23,8 +23,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\SenseNet.Security.dll" target="lib\net451\SenseNet.Security.dll" />
-    <file src="bin\Release\SenseNet.Security.pdb" target="lib\net451\SenseNet.Security.pdb" />
-    <file src="bin\Release\SenseNet.Security.XML" target="lib\net451\SenseNet.Security.XML" />
+    <file src="bin\Release\SenseNet.Security.*" target="lib\net461" />
   </files>
 </package>
