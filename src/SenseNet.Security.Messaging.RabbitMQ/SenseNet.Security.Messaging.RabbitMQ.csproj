@@ -81,10 +81,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SenseNet.Security\SenseNet.Security.csproj">
-      <Project>{169e4d25-a0e7-4e71-aec0-558b0ff52537}</Project>
+      <Project>{b2b39975-3d5e-4457-b9ce-0fcec20f2f59}</Project>
       <Name>SenseNet.Security</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
