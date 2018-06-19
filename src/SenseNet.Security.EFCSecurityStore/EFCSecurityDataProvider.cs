@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity.Infrastructure;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 
@@ -16,18 +17,25 @@ namespace SenseNet.Security.EFCSecurityStore
     /// </summary>
     public class EFCSecurityDataProvider : ISecurityDataProvider
     {
-        /// <summary>Initializes a new instance of the EF6SecurityDataProvider class.</summary>
+        /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
         public EFCSecurityDataProvider(int commandTimeout = 120, string connectionString = null)
         {
+            if (connectionString == null)
+                connectionString = ConfigurationManager.ConnectionStrings["SecurityStorage"].ConnectionString;
             this.CommandTimeout = commandTimeout;
             this.ConnectionString = connectionString;
         }
 
         private SecurityStorage Db()
         {
-            return !string.IsNullOrEmpty(this.ConnectionString)
-                ? new SecurityStorage(this.CommandTimeout, this.ConnectionString)
-                : new SecurityStorage(this.CommandTimeout);
+            return new SecurityStorage(this);
+        }
+
+        public void ConfigureStorage(DbContextOptionsBuilder optionsBuilder)
+        {
+            //UNDONE:!!! SqlServer specific
+            //UNDONE:!!! Disable migration (schema update)
+            optionsBuilder.UseSqlServer(ConnectionString, p => p.CommandTimeout(CommandTimeout));
         }
 
         //===================================================================== interface implementation
@@ -44,7 +52,7 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public ISecurityDataProvider CreateNew()
         {
-            return new EF6SecurityDataProvider(this.CommandTimeout, this.ConnectionString);
+            return new EFCSecurityDataProvider(this.CommandTimeout, this.ConnectionString);
         }
         /// <summary>
         /// Empties the entire database (clears all records from all tables).
@@ -179,7 +187,7 @@ namespace SenseNet.Security.EFCSecurityStore
                         return;
                     }
                 }
-                catch (OptimisticConcurrencyException ex)
+                catch (DbUpdateConcurrencyException ex)
                 {
                     // handling concurrency
                     exceptions.Add(ex);
@@ -216,7 +224,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 {
                     db.SaveChanges();
                 }
-                catch (OptimisticConcurrencyException)
+                catch (DbUpdateConcurrencyException)
                 {
                     // if someone else has already deleted this entity, do not throw an exception
                 }
@@ -466,7 +474,7 @@ namespace SenseNet.Security.EFCSecurityStore
         {
             var body = SecurityActivity.SerializeActivity(activity);
             bodySize = body.Length;
-            EFMessage result;
+            EntityEntry<EFMessage> result;
             using (var db = Db())
             {
                 result = db.EFMessages.Add(new EFMessage
@@ -478,7 +486,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 });
                 db.SaveChanges();
             }
-            return result.Id;
+            return result.Entity.Id;
         }
         /// <summary>
         /// Deletes all the activities that were saved before the given time limit.

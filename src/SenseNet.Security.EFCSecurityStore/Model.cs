@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace SenseNet.Security.EFCSecurityStore
 {
@@ -13,8 +14,11 @@ namespace SenseNet.Security.EFCSecurityStore
         public const string LockedForYou = "LockedForYou";
     }
 
+    /* ======================================== regular entities */
+
     internal class EFEntity
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Key]
         public int Id { get; set; }
         public int? OwnerId { get; set; }
@@ -83,4 +87,30 @@ namespace SenseNet.Security.EFCSecurityStore
         public DateTime? LockedAt { get; set; }
         public byte[] Body { get; set; }
     }
+
+    /* ======================================== query types */
+
+    internal class EfcIntItem
+    {
+        [Key]
+        public int Id { get; set; }
+        public int Value { get; set; }
+    }
+    internal class EfcStringItem
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Value { get; set; }
+    }
+
+    internal class EfcStoredSecurityEntity
+    {
+        [Key]
+        public int Id { get; set; }
+        public int? nullableOwnerId { get; set; }
+        public int? nullableParentId { get; set; }
+        public bool IsInherited { get; set; }
+        public bool HasExplicitEntry { get; set; }
+    }
+
 }

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SenseNet.Security.EFCSecurityStore;
 
 namespace SenseNet.Security.Tests
 {
@@ -37,7 +38,7 @@ namespace SenseNet.Security.Tests
 
         private Context CreateDefaultContext()
         {
-            return Tools.GetEmptyContext(TestUser.User1, new EF6SecurityDataProvider());
+            return Tools.GetEmptyContext(TestUser.User1, new EFCSecurityDataProvider());
         }
 
         //=================================================================== for new API

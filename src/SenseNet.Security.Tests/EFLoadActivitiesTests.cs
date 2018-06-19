@@ -10,6 +10,7 @@ using SenseNet.Security.Tests.TestPortal;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 using System.IO;
+using SenseNet.Security.EFCSecurityStore;
 
 namespace SenseNet.Security.Tests
 {
@@ -39,7 +40,7 @@ namespace SenseNet.Security.Tests
 
         private Context Start(TextWriter traceChannel = null)
         {
-            Context.StartTheSystem(new EF6SecurityDataProvider(), new DefaultMessageProvider(), traceChannel);
+            Context.StartTheSystem(new EFCSecurityDataProvider(), new DefaultMessageProvider(), traceChannel);
             return new Context(TestUser.User1);
         }
 

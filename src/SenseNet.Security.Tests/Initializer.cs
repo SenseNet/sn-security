@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SenseNet.Security.EF6SecurityStore;
+using SenseNet.Security.EFCSecurityStore;
 
 namespace SenseNet.Security.Tests
 {
@@ -15,7 +16,7 @@ namespace SenseNet.Security.Tests
         public static void InitializeAllTests(TestContext context)
         {
             // install db directly
-            var dbProvider = new EF6SecurityDataProvider();
+            var dbProvider = new EFCSecurityDataProvider();
             dbProvider.InstallDatabase();
 
             var x = PermissionType.See; // preloads the type

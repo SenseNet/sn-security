@@ -9,52 +9,64 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace SenseNet.Security.EFCSecurityStore
 {
     internal class SecurityStorage : DbContext
     {
-        public SecurityStorage(int commandTimeout, string connection) : base(connection)
+        private readonly EFCSecurityDataProvider _provider;
+
+        public SecurityStorage(EFCSecurityDataProvider provider)
         {
-            Initialize(commandTimeout);
+            _provider = provider;
         }
 
-        public SecurityStorage(int commandTimeout)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            Initialize(commandTimeout);
+            _provider.ConfigureStorage(optionsBuilder);
+            base.OnConfiguring(optionsBuilder);
         }
 
-        private void Initialize(int commandTimeout)
-        {
-            // necessary for switching OFF automatic database migration
-            Database.SetInitializer<SecurityStorage>(null);
-            this.Database.CommandTimeout = commandTimeout;
-        }
+        // ------------------------------------
 
         public DbSet<EFEntity> EFEntities { get; set; }
         public DbSet<EFEntry> EFEntries { get; set; }
         public DbSet<EFMembership> EFMemberships { get; set; }
         public DbSet<EFMessage> EFMessages { get; set; }
 
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        internal DbSet<EfcIntItem> EfcIntSet { get; set; }
+        internal DbSet<EfcStringItem> EfcStringSet { get; set; }
+        internal DbSet<EfcStoredSecurityEntity> EfcStoredSecurityEntitySet { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<EFEntity>()
-                .Property(e => e.Id)
-                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.None);
-
-            modelBuilder.Entity<EFEntity>()
-                .HasOptional(e => e.Parent)
+                //.HasOptional(e => e.Parent)
+                .HasOne(e => e.Parent)
                 .WithMany(e => e.Children)
-                .HasForeignKey(e => e.ParentId).WillCascadeOnDelete(false);
+                .IsRequired(false)
+                .HasForeignKey(e => e.ParentId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
             modelBuilder.Entity<EFEntry>()
-                .HasRequired(e => e.EFEntity)
+                .HasOne(e => e.EFEntity)
                 .WithMany(f => f.EFEntries)
-                .HasForeignKey(e => e.EFEntityId).WillCascadeOnDelete(false);
+                .IsRequired()
+                .HasForeignKey(e => e.EFEntityId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
             modelBuilder.Entity<EFMembership>().HasKey(a => new { a.GroupId, a.MemberId });
 
             modelBuilder.Entity<EFEntry>().HasKey(a => new { a.EFEntityId, a.IdentityId, a.LocalOnly });
+
+            //// ----------------------------------- query types
+
+            //modelBuilder
+            //    .Query<EfcIntResult>().ToView("")
+            //    .Property(x => x.Value).HasColumnName("Value");
+
+            // -----------------------------------
 
             base.OnModelCreating(modelBuilder);
         }
@@ -80,18 +92,24 @@ DELETE FROM EFMessages
 
         internal int GetEstimatedEntityCount()
         {
-            return this.Database.SqlQuery<int>("SELECT COUNT(1) FROM EFEntities").Single();
+            //return this.Database.SqlQuery<int>("SELECT COUNT(1) FROM EFEntities").Single();
+            //UNDONE:!!!! not tested
+            var result = EfcIntSet
+                .FromSql("SELECT 1 AS Id, COUNT(1) AS Value FROM EFEntities")
+                .Single()
+                .Value;
+            return result;
         }
 
-        internal IEnumerable<T> ExecuteTestScript<T>(string sql)
-        {
-            return this.Database.SqlQuery<T>(sql).ToArray();
-        }
+        //internal IEnumerable<T> ExecuteTestScript<T>(string sql)
+        //{
+        //    return this.Database.SqlQuery<T>(sql).ToArray();
+        //}
 
         /// <summary>
         /// Name of the SQL script resource file that contains all the table and constraint creation commands.
         /// </summary>
-        private const string RESOURCE_INSTALLDB = "SenseNet.Security.EF6SecurityStore.Scripts.Install_Schema_2.1.sql";
+        private const string RESOURCE_INSTALLDB = "SenseNet.Security.EFCSecurityStore.Scripts.Install_Schema_2.1.sql";
 
         internal void InstallDatabase()
         {
@@ -109,34 +127,62 @@ DELETE FROM EFMessages
         }
 
 
-        private const string SelectUnprocessedActivityIds = @"SELECT Id FROM [EFMessages] WHERE ExecutionState != 'Done'
+        private const string SelectUnprocessedActivityIds = @"SELECT Id AS Value FROM [EFMessages] WHERE ExecutionState != 'Done'
 UNION ALL
 SELECT CONVERT(int, IDENT_CURRENT('EFMessages'))
-ORDER BY Id
+--ORDER BY Id
 ";
         internal int[] GetUnprocessedActivityIds()
         {
-            var x = this.Database.SqlQuery<int>(SelectUnprocessedActivityIds).ToArray();
-            return x;
+            //var x = this.Database.SqlQuery<int>(SelectUnprocessedActivityIds).ToArray();
+            //return x;
+            //UNDONE:!!!! not tested
+            var result = EfcIntSet
+                .FromSql(SelectUnprocessedActivityIds)
+                .Select(x => x.Value)
+                .AsEnumerable()
+                .OrderBy(x => x)
+                .ToArray();
+            return result;
         }
 
 
         private const string LoadStoredSecurityEntityById_Script = @"
 SELECT TOP 1 E.Id, E.OwnerId nullableOwnerId, E.ParentId nullableParentId, E.IsInherited, convert(bit, case when E2.EFEntityId is null then 0 else 1 end) as HasExplicitEntry 
 FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.Id = @EntityId";
+
         internal StoredSecurityEntity LoadStoredSecurityEntityById(int entityId)
         {
-            var x = this.Database.SqlQuery<StoredSecurityEntity>(LoadStoredSecurityEntityById_Script
-                , new SqlParameter("@EntityId", entityId)).FirstOrDefault();
-            return x;
+            //var x = this.Database.SqlQuery<StoredSecurityEntity>(LoadStoredSecurityEntityById_Script
+            //    , new SqlParameter("@EntityId", entityId)).FirstOrDefault();
+            //return x;
+            //UNDONE:!!!! not tested
+            var result = EfcStoredSecurityEntitySet
+                // ReSharper disable once FormatStringProblem
+                .FromSql(LoadStoredSecurityEntityById_Script, new SqlParameter("@EntityId", entityId))
+                .Select(x => new StoredSecurityEntity
+                {
+                    Id = x.Id,
+                    IsInherited = x.IsInherited,
+                    HasExplicitEntry = x.HasExplicitEntry,
+                    nullableParentId = x.nullableParentId,
+                    nullableOwnerId = x.nullableOwnerId
+                })
+                .FirstOrDefault();
+            return result;
         }
 
-
-        private const string LOADAFFECTEDENTITYIDSBYENTRIESANDBREAKSSCRIPT = @"SELECT DISTINCT Id FROM (SELECT DISTINCT EFEntityId Id FROM [EFEntries] UNION ALL SELECT Id FROM [EFEntities] WHERE IsInherited = 0) AS x";
+        private const string LoadAffectedEntityIdsByEntriesAndBreaksScript = @"SELECT DISTINCT Id AS Value FROM (SELECT DISTINCT EFEntityId Id FROM [EFEntries] UNION ALL SELECT Id FROM [EFEntities] WHERE IsInherited = 0) AS x";
         internal IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks()
         {
-            var x = this.Database.SqlQuery<int>(LOADAFFECTEDENTITYIDSBYENTRIESANDBREAKSSCRIPT).ToArray();
-            return x;
+            //var x = this.Database.SqlQuery<int>(LOADAFFECTEDENTITYIDSBYENTRIESANDBREAKSSCRIPT).ToArray();
+            //return x;
+            //UNDONE:!!!! not tested
+            var result = EfcIntSet
+                .FromSql(LoadAffectedEntityIdsByEntriesAndBreaksScript)
+                .Select(x => x.Value)
+                .ToArray();
+            return result;
         }
 
 
@@ -237,19 +283,27 @@ DELETE E1 FROM EFEntities E1 INNER JOIN @EntityIdTable E2 ON E2.EntityId = E1.Id
 	SET ExecutionState = '" + ExecutionState.Executing + @"', LockedBy = @LockedBy, LockedAt = GETUTCDATE()
 	WHERE Id = @ActivityId AND ((ExecutionState = '" + ExecutionState.Wait + @"') OR (ExecutionState = '" + ExecutionState.Executing + @"' AND LockedAt < DATEADD(second, -@TimeLimit, GETUTCDATE())))
 IF (@@rowcount > 0)
-	SELECT '" + ExecutionState.LockedForYou + @"'
+	SELECT 1 as Id, '" + ExecutionState.LockedForYou + @"' AS Value
 ELSE
-	SELECT ExecutionState FROM EFMessages WHERE Id = @ActivityId
+	SELECT Id, ExecutionState AS Value FROM EFMessages WHERE Id = @ActivityId
 ";
         public string AcquireSecurityActivityExecutionLock(int securityActivityId, string lockedBy, int timeoutInSeconds)
         {
-            var result = this.Database
-                .SqlQuery<string>(
-                    AcquireSecurityActivityExecutionLock_Script,
-                    new SqlParameter("@ActivityId", securityActivityId),
-                    new SqlParameter("@LockedBy", lockedBy ?? ""),
-                    new SqlParameter("@TimeLimit", timeoutInSeconds)).Single();
-            return result;
+            //var result = this.Database
+            //    .SqlQuery<string>(
+            //        AcquireSecurityActivityExecutionLock_Script,
+            //        new SqlParameter("@ActivityId", securityActivityId),
+            //        new SqlParameter("@LockedBy", lockedBy ?? ""),
+            //        new SqlParameter("@TimeLimit", timeoutInSeconds)).Single();
+            //return result;
+            //UNDONE:!!!! not tested
+            var result = EfcStringSet
+                .FromSql(AcquireSecurityActivityExecutionLock_Script,
+                        new SqlParameter("@ActivityId", securityActivityId),
+                        new SqlParameter("@LockedBy", lockedBy ?? ""),
+                        new SqlParameter("@TimeLimit", timeoutInSeconds))
+                .Single();
+            return result.Value;
         }
 
         private static readonly string RefreshSecurityActivityExecutionLock_Script = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";

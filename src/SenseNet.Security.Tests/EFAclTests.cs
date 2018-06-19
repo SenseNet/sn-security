@@ -6,6 +6,7 @@ using System.Text;
 using System.Diagnostics;
 using SenseNet.Security;
 using SenseNet.Security.EF6SecurityStore;
+using SenseNet.Security.EFCSecurityStore;
 using SenseNet.Security.Tests.TestPortal;
 
 namespace SenseNet.Security.Tests
@@ -29,7 +30,7 @@ namespace SenseNet.Security.Tests
         public void StartTest()
         {
             Db().CleanupDatabase();
-            __context = Tools.GetEmptyContext(TestUser.User1, new EF6SecurityDataProvider());
+            __context = Tools.GetEmptyContext(TestUser.User1, new EFCSecurityDataProvider());
             EnsureRepository();
         }
 

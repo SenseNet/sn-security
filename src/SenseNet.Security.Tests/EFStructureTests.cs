@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security;
 using SenseNet.Security.EF6SecurityStore;
+using SenseNet.Security.EFCSecurityStore;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Tests.TestPortal;
 
@@ -36,7 +37,7 @@ namespace SenseNet.Security.Tests
 
         private Context Start()
         {
-            Context.StartTheSystem(new EF6SecurityDataProvider(), new DefaultMessageProvider());
+            Context.StartTheSystem(new EFCSecurityDataProvider(), new DefaultMessageProvider());
             return new Context(TestUser.User1);
         }
 
