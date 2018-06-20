@@ -92,19 +92,12 @@ DELETE FROM EFMessages
 
         internal int GetEstimatedEntityCount()
         {
-            //return this.Database.SqlQuery<int>("SELECT COUNT(1) FROM EFEntities").Single();
-            //UNDONE:!!!! not tested
             var result = EfcIntSet
                 .FromSql("SELECT 1 AS Id, COUNT(1) AS Value FROM EFEntities")
                 .Single()
                 .Value;
             return result;
         }
-
-        //internal IEnumerable<T> ExecuteTestScript<T>(string sql)
-        //{
-        //    return this.Database.SqlQuery<T>(sql).ToArray();
-        //}
 
         /// <summary>
         /// Name of the SQL script resource file that contains all the table and constraint creation commands.
@@ -134,9 +127,6 @@ SELECT CONVERT(int, IDENT_CURRENT('EFMessages'))
 ";
         internal int[] GetUnprocessedActivityIds()
         {
-            //var x = this.Database.SqlQuery<int>(SelectUnprocessedActivityIds).ToArray();
-            //return x;
-            //UNDONE:!!!! not tested
             var result = EfcIntSet
                 .FromSql(SelectUnprocessedActivityIds)
                 .Select(x => x.Value)
@@ -153,10 +143,6 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
 
         internal StoredSecurityEntity LoadStoredSecurityEntityById(int entityId)
         {
-            //var x = this.Database.SqlQuery<StoredSecurityEntity>(LoadStoredSecurityEntityById_Script
-            //    , new SqlParameter("@EntityId", entityId)).FirstOrDefault();
-            //return x;
-            //UNDONE:!!!! not tested
             var result = EfcStoredSecurityEntitySet
                 // ReSharper disable once FormatStringProblem
                 .FromSql(LoadStoredSecurityEntityById_Script, new SqlParameter("@EntityId", entityId))

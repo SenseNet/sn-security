@@ -176,10 +176,10 @@
   <ItemGroup>
     <Compile Include="Accessors.cs" />
     <Compile Include="AclTests.cs" />
-    <Compile Include="EFAclTests.cs" />
-    <Compile Include="EFMembershipTests.cs" />
-    <Compile Include="EFLoadActivitiesTests.cs" />
-    <Compile Include="EFStructureTests.cs" />
+    <Compile Include="EF6\EF6AclTests.cs" />
+    <Compile Include="EF6\EF6MembershipTests.cs" />
+    <Compile Include="EF6\EF6LoadActivitiesTests.cs" />
+    <Compile Include="EF6\EF6StructureTests.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="MembershipTests2.cs" />
     <Compile Include="MembershipTests.cs" />
@@ -220,6 +220,9 @@
       <Project>{b2b39975-3d5e-4457-b9ce-0fcec20f2f59}</Project>
       <Name>SenseNet.Security</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="EFC\" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
