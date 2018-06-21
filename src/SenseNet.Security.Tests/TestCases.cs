@@ -32,20 +32,20 @@ namespace SenseNet.Security.Tests
         //======================================================================= Test cases
 
         [TestMethod]
-        public void Acl_Get0()
+        public void TC_Acl_Get0()
         {
             var acl = CurrentContext.Security.GetAclInfo(int.MaxValue, false);
             Assert.IsNull(acl);
         }
         [TestMethod]
-        public void Acl_Get1()
+        public void TC_Acl_Get1()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:______________+");
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
             Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void Acl_Get2()
+        public void TC_Acl_Get2()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
@@ -57,7 +57,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:__________________________________________________-____________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void Acl_Get3()
+        public void TC_Acl_Get3()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
@@ -67,7 +67,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:__________________________________________________-____________+,+G3:_________________________________________________+-+-+-+-+-+-+-+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void Acl_Get4()
+        public void TC_Acl_Get4()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
@@ -79,7 +79,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("-E3|-G3:_________________________________________________+-+-+-+-+-+-+-+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void Acl_Get_BreakedEmpty()
+        public void TC_Acl_Get_BreakedEmpty()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
@@ -90,7 +90,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("-E3|", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void Acl_Get_WithMembership()
+        public void TC_Acl_Get_WithMembership()
         {
             Tools.SetMembership(CurrentContext.Security, "U1:G1");
             Assert.IsTrue(CurrentContext.Security.Cache.IsInGroup(Id("U1"), Id("G1")), "G1 not contains U1");

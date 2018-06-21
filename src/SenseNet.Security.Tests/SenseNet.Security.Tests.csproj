@@ -176,11 +176,13 @@
   <ItemGroup>
     <Compile Include="Accessors.cs" />
     <Compile Include="AclTests.cs" />
+    <Compile Include="EF6Tests.cs" />
     <Compile Include="EF6\EF6AclTests.cs" />
     <Compile Include="EF6\EF6MembershipTests.cs" />
     <Compile Include="EF6\EF6LoadActivitiesTests.cs" />
     <Compile Include="EF6\EF6StructureTests.cs" />
     <Compile Include="EF6\EF6TestBase.cs" />
+    <Compile Include="EFCTests.cs" />
     <Compile Include="EFC\EFCAclTests.cs" />
     <Compile Include="EFC\EFCTestBase.cs" />
     <Compile Include="EFC\EFCLoadActivitiesTests.cs" />
