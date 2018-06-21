@@ -8,7 +8,6 @@ namespace SenseNet.Security.Tests
 {
     public abstract partial class TestCases
     {
-        #region Acl test cases
         [TestMethod]
         public void Acl_Get0()
         {
@@ -1083,7 +1082,6 @@ namespace SenseNet.Security.Tests
         }
 
 
-
         [TestMethod]
         public void AclEditor_BreakInheritance_NotHolder_WithCopy()
         {
@@ -1577,7 +1575,6 @@ namespace SenseNet.Security.Tests
         }
 
 
-
         [TestMethod]
         public void AccessControlList_NoExplicitEntry_ParentBreaked()
         {
@@ -1599,7 +1596,5 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(true, acl11.Inherits);
             Assert.AreEqual(true, acl34.Inherits);
         }
-
-        #endregion
     }
 }
