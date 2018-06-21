@@ -176,8 +176,6 @@
   <ItemGroup>
     <Compile Include="Accessors.cs" />
     <Compile Include="EF6Tests.cs" />
-    <Compile Include="EF6\EF6LoadActivitiesTests.cs" />
-    <Compile Include="EF6\EF6TestBase.cs" />
     <Compile Include="EFCTests.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="InMemTests.cs" />
