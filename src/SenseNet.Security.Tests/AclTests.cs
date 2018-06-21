@@ -11,7 +11,7 @@ using SenseNet.Security.Tests.TestPortal;
 
 namespace SenseNet.Security.Tests
 {
-    [TestClass]
+    //[TestClass]
     public class AclTests
     {
         private Context __context;
@@ -288,9 +288,9 @@ namespace SenseNet.Security.Tests
             //E9 is an empty subtree (leaf) and has inherited permissions
             Tools.SetMembership(CurrentContext.Security, "U1:G1");
             CurrentContext.Security.CreateAclEditor()
-                .Allow(Id("E1"), Id("G1"), false, PermissionType.See).Apply();          
+                .Allow(Id("E1"), Id("G1"), false, PermissionType.See).Apply();
             Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E9"), PermissionType.See));
-        }       
+        }
         [TestMethod]
         public void Eval_AssertSubtreePermission()
         {
@@ -446,7 +446,7 @@ namespace SenseNet.Security.Tests
             SetAcl("-E21|+G1:__________+++++,-G2:_________++++++");
 
             // E26 node is a child of E21 and it should not inherit its parent's local only entries
-            Assert.AreEqual("+E26|+G1:___________________________________________________________+++++", 
+            Assert.AreEqual("+E26|+G1:___________________________________________________________+++++",
                 Tools.ReplaceIds(CurrentContext.Security.GetAcl(Id("E26")).ToString()));
         }
 
@@ -1408,7 +1408,7 @@ namespace SenseNet.Security.Tests
             var sec = CurrentContext.Security;
             var db = CurrentContext.Security.DataProvider;
             var dbAcc = new MemoryDataProviderAccessor((MemoryDataProvider)db);
-            
+
             var e2id = Id("E2");
             var e5id = Id("E5");
 
@@ -1498,7 +1498,7 @@ namespace SenseNet.Security.Tests
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(1, aces.Length);
             Assert.AreEqual("E5|+G2:_________________________________________________-__________+___", Tools.ReplaceIds(aces[0].ToString()));
-        }       
+        }
         [TestMethod]
         public void AclEditor_NormalizeExplicitePermissions2()
         {
