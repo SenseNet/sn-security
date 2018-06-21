@@ -501,7 +501,6 @@ namespace SenseNet.Security.Messaging
         }
     }
 
-    //UNDONE: Remove this and use SenseNet.Tools
     internal class Retrier
     {
         public static T Retry<T>(int count, int waitMilliseconds, Func<T> callback, Func<T, int, Exception, bool> expectation)

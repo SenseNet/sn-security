@@ -33,8 +33,6 @@ namespace SenseNet.Security.EFCSecurityStore
 
         public void ConfigureStorage(DbContextOptionsBuilder optionsBuilder)
         {
-            //UNDONE:!!! SqlServer specific
-            //UNDONE:!!! Disable migration (schema update)
             optionsBuilder.UseSqlServer(ConnectionString, p => p.CommandTimeout(CommandTimeout));
         }
 

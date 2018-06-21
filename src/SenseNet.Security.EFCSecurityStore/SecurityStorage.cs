@@ -163,7 +163,6 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
         {
             //var x = this.Database.SqlQuery<int>(LOADAFFECTEDENTITYIDSBYENTRIESANDBREAKSSCRIPT).ToArray();
             //return x;
-            //UNDONE:!!!! not tested
             var result = EfcIntSet
                 .FromSql(LoadAffectedEntityIdsByEntriesAndBreaksScript)
                 .Select(x => x.Value)
@@ -282,7 +281,6 @@ ELSE
             //        new SqlParameter("@LockedBy", lockedBy ?? ""),
             //        new SqlParameter("@TimeLimit", timeoutInSeconds)).Single();
             //return result;
-            //UNDONE:!!!! not tested
             var result = EfcStringSet
                 .FromSql(AcquireSecurityActivityExecutionLock_Script,
                         new SqlParameter("@ActivityId", securityActivityId),
