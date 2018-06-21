@@ -6,7 +6,7 @@ using SenseNet.Security.Tests.TestPortal;
 
 namespace SenseNet.Security.Tests
 {
-    public abstract partial class TestsCases
+    public abstract partial class TestCases
     {
         #region Acl test cases
         [TestMethod]

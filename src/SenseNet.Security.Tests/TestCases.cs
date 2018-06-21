@@ -7,7 +7,7 @@ using SenseNet.Security.Messaging;
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public abstract partial class TestsCases
+    public abstract partial class TestCases
     {
         // ReSharper disable once InconsistentNaming
         private Context __context;
@@ -18,15 +18,13 @@ namespace SenseNet.Security.Tests
         [TestInitialize]
         public void StartTest()
         {
-            __context = CreateContext(TestUser.User1);
-            EnsureRepository();
-        }
-        internal Context CreateContext(TestUser currentUser, TextWriter traceChannel = null)
-        {
             var dataProvider = GetDataProvider();
             dataProvider.DeleteEverything();
             SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
-            return Tools.GetEmptyContext(currentUser, dataProvider, traceChannel);
+            Context.StartTheSystem(dataProvider, new DefaultMessageProvider());
+            __context = new Context(TestUser.User1);
+
+            EnsureRepository();
         }
 
         /* ======================================================================= Tools */
