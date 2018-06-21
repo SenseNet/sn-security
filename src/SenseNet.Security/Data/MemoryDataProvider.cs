@@ -36,7 +36,7 @@ namespace SenseNet.Security.Data
         }
         public void DeleteEverything()
         {
-            _storage = new DatabaseStorage();
+            _storage = DatabaseStorage.CreateEmpty();
         }
         public void InstallDatabase()
         {
