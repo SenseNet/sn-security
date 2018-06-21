@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
+using System.IO;
 using SenseNet.Security;
 using SenseNet.Security.Data;
 using SenseNet.Security.EF6SecurityStore;
@@ -93,7 +94,19 @@ namespace SenseNet.Security.Tests
         {
             return new MemoryDataProviderAccessor(database).Storage.Aces.Where(x => x.EntityId == entityId).ToArray();
         }
-        internal static StoredAce[] PeekEntriesFromTestDatabase(int entityId, SecurityStorage database)
+        internal static StoredAce[] PeekEntriesFromTestDatabase(int entityId, EF6SecurityStore.SecurityStorage database)
+        {
+            var entries = database.EFEntries.Where(x => x.EFEntityId == entityId).ToArray();
+            return entries.Select(a => new StoredAce
+            {
+                EntityId = a.EFEntityId,
+                IdentityId = a.IdentityId,
+                LocalOnly = a.LocalOnly,
+                AllowBits = Convert.ToUInt64(a.AllowBits),
+                DenyBits = Convert.ToUInt64(a.DenyBits),
+            }).ToArray();
+        }
+        internal static StoredAce[] PeekEntriesFromTestDatabase(int entityId, EFCSecurityStore.SecurityStorage database)
         {
             var entries = database.EFEntries.Where(x => x.EFEntityId == entityId).ToArray();
             return entries.Select(a => new StoredAce
@@ -112,9 +125,9 @@ namespace SenseNet.Security.Tests
             MemoryDataProvider.LastActivityId = 0;
             return GetEmptyContext(currentUser, new MemoryDataProvider(DatabaseStorage.CreateEmpty()));
         }
-        internal static Context GetEmptyContext(TestUser currentUser, ISecurityDataProvider dbProvider)
+        internal static Context GetEmptyContext(TestUser currentUser, ISecurityDataProvider dbProvider, TextWriter traceChannel = null)
         {
-            Context.StartTheSystem(dbProvider, new DefaultMessageProvider());
+            Context.StartTheSystem(dbProvider, new DefaultMessageProvider(), traceChannel);
             return new Context(currentUser);
         }
 

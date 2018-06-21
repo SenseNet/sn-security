@@ -26,7 +26,7 @@ namespace SenseNet.Security.EFCSecurityStore
             this.ConnectionString = connectionString;
         }
 
-        private SecurityStorage Db()
+        internal SecurityStorage Db()
         {
             return new SecurityStorage(this);
         }

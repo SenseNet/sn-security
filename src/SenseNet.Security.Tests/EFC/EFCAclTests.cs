@@ -3,7 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
-using SenseNet.Security.EF6SecurityStore;
+using System.IO;
+using SenseNet.Security.EFCSecurityStore;
 using SenseNet.Security.Tests.TestPortal;
 // ReSharper disable AccessToStaticMemberViaDerivedType
 // ReSharper disable InconsistentNaming
@@ -13,39 +14,25 @@ using SenseNet.Security.Tests.TestPortal;
 // ReSharper disable UnusedMember.Local
 // ReSharper disable UnusedMethodReturnValue.Local
 
-namespace SenseNet.Security.Tests.EF6
+namespace SenseNet.Security.Tests.EFC
 {
     [TestClass]
-    public class EF6AclTests : EF6TestBase
+    public class EFCAclTests : EFCTestBase
     {
-        private Context __context;
-        private Context CurrentContext => __context;
-
-        public TestContext TestContext { get; set; }
-
-        private SecurityStorage Db()
+        protected override Context CreateContext(TextWriter traceChannel = null)
         {
-            var preloaded = System.Data.Entity.SqlServer.SqlProviderServices.Instance;
-            return new SecurityStorage(120);
+            return Tools.GetEmptyContext(TestUser.User1, new EFCSecurityDataProvider(), traceChannel);
         }
 
-
-        [TestInitialize]
-        public void StartTest()
+        protected override void Initialize()
         {
-            Db().CleanupDatabase();
-            __context = Tools.GetEmptyContext(TestUser.User1, new EF6SecurityDataProvider());
             EnsureRepository();
+            base.Initialize();
         }
 
-        [TestCleanup]
-        public void Finishtest()
-        {
-            Tools.CheckIntegrity(TestContext.TestName, CurrentContext.Security);
-        }
 
         [TestMethod]
-        public void EF6_BitConversion_int()
+        public void EFC_BitConversion_int()
         {
             var unsignedMask = 0xFFFFFFFFU;
 
@@ -63,7 +50,7 @@ namespace SenseNet.Security.Tests.EF6
             Assert.AreEqual(unsignedMask, (ui & unsignedMask));
         }
         [TestMethod]
-        public void EF6_BitConversion_long()
+        public void EFC_BitConversion_long()
         {
             var unsignedMask = 0xFFFFFFFFFFFFFFFFU;
 
@@ -84,162 +71,162 @@ namespace SenseNet.Security.Tests.EF6
         #region //======================================================================= Acl_Xx
 
         [TestMethod]
-        public void EF6_Acl_Get0()
+        public void EFC_Acl_Get0()
         {
-            var acl = CurrentContext.Security.GetAclInfo(int.MaxValue);
+            var acl = Context.Security.GetAclInfo(int.MaxValue);
             Assert.IsNull(acl);
         }
         [TestMethod]
-        public void EF6_Acl_Get1()
+        public void EFC_Acl_Get1()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:______________+");
-            var acl = CurrentContext.Security.GetAcl(Id("E3"));
+            var acl = Context.Security.GetAcl(Id("E3"));
             Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void EF6_Acl_Get2()
+        public void EFC_Acl_Get2()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
-            var acl = CurrentContext.Security.GetAcl(Id("E2"));
+            var acl = Context.Security.GetAcl(Id("E2"));
             Assert.AreEqual("+E2|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(acl.ToString()));
 
-            acl = CurrentContext.Security.GetAcl(Id("E3"));
+            acl = Context.Security.GetAcl(Id("E3"));
             Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:__________________________________________________-____________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void EF6_Acl_Get3()
+        public void EFC_Acl_Get3()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
             SetAcl("+E3|+G3:+-+-+-+-+-+-+-+");
 
-            var acl = CurrentContext.Security.GetAcl(Id("E3"));
+            var acl = Context.Security.GetAcl(Id("E3"));
             Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:__________________________________________________-____________+,+G3:_________________________________________________+-+-+-+-+-+-+-+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void EF6_Acl_Get4()
+        public void EFC_Acl_Get4()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
-            CurrentContext.Security.BreakInheritance(Id("E3"), false);
+            Context.Security.BreakInheritance(Id("E3"), false);
             SetAcl("-E3|-G3:+-+-+-+-+-+-+-+");
 
-            var acl = CurrentContext.Security.GetAcl(Id("E3"));
+            var acl = Context.Security.GetAcl(Id("E3"));
 
             Assert.AreEqual("-E3|-G3:_________________________________________________+-+-+-+-+-+-+-+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void EF6_Acl_Get_BreakedEmpty()
+        public void EFC_Acl_Get_BreakedEmpty()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
-            CurrentContext.Security.BreakInheritance(Id("E3"), false);
+            Context.Security.BreakInheritance(Id("E3"), false);
 
-            var acl = CurrentContext.Security.GetAcl(Id("E3"));
+            var acl = Context.Security.GetAcl(Id("E3"));
 
             Assert.AreEqual("-E3|", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void EF6_Acl_Get_WithMembership()
+        public void EFC_Acl_Get_WithMembership()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1");
+            Tools.SetMembership(Context.Security, "U1:G1");
 
-            Assert.IsTrue(CurrentContext.Security.Cache.IsInGroup(Id("U1"), Id("G1")), "G1 not contains U1");
-            Assert.IsFalse(CurrentContext.Security.Cache.IsInGroup(int.MaxValue, int.MaxValue - 1), "Any group contains anyone");
+            Assert.IsTrue(Context.Security.Cache.IsInGroup(Id("U1"), Id("G1")), "G1 not contains U1");
+            Assert.IsFalse(Context.Security.Cache.IsInGroup(int.MaxValue, int.MaxValue - 1), "Any group contains anyone");
             SetAcl("+E1|+U1:________---_+++,+G1:---_+++________");
-            var acl = CurrentContext.Security.GetAcl(Id("E1"));
+            var acl = Context.Security.GetAcl(Id("E1"));
             Assert.AreEqual("+E1|+G1:_________________________________________________---_+++________,+U1:_________________________________________________________---_+++", Tools.ReplaceIds(acl.ToString()));
 
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("______________+")));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("_____________+_")));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("____________+__")));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("______________+")));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("_____________+_")));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("____________+__")));
 
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("___________+___")));
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("__________+____")));
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("_________+_____")));
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("________+______")));
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("_______+_______")));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("___________+___")));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("__________+____")));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("_________+_____")));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("________+______")));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("_______+_______")));
 
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("______+________")));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("_____+_________")));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("____+__________")));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("______+________")));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("_____+_________")));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("____+__________")));
 
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("___+___________")));
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("__+____________")));
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("_+_____________")));
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("+______________")));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("___+___________")));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("__+____________")));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("_+_____________")));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("+______________")));
         }
 
         [TestMethod]
-        public void EF6_Eval_HasPermission_Allow()
+        public void EFC_Eval_HasPermission_Allow()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.See));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.Preview));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.See, PermissionType.Preview));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.Preview));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See, PermissionType.Preview));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), PermissionType.See));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), PermissionType.Preview));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), PermissionType.See, PermissionType.Preview));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E2"), PermissionType.See));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E2"), PermissionType.Preview));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E2"), PermissionType.See, PermissionType.Preview));
             foreach (var perm in PermissionType.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
-                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), perm),
+                    Assert.IsFalse(Context.Security.HasPermission(Id("E1"), perm),
                         $"{perm.Name} permission on E1 is true, expected: false.");
-                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E2"), perm),
+                    Assert.IsFalse(Context.Security.HasPermission(Id("E2"), perm),
                         $"{perm.Name} permission on E2 is true, expected: false.");
                 }
             }
         }
         [TestMethod]
-        public void EF6_Eval_HasPermission_Deny()
+        public void EFC_Eval_HasPermission_Deny()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:+++++++++++++++,+G2:-------------++,+G3:+-+-+-+-+-+-+-+,-G4:+-+-+-+-+-+-+-+");
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.See));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.Preview));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.See, PermissionType.Preview));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.Preview));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See, PermissionType.Preview));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), PermissionType.See));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), PermissionType.Preview));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E1"), PermissionType.See, PermissionType.Preview));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E2"), PermissionType.See));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E2"), PermissionType.Preview));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E2"), PermissionType.See, PermissionType.Preview));
             foreach (var perm in PermissionType.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
-                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), perm),
+                    Assert.IsFalse(Context.Security.HasPermission(Id("E1"), perm),
                         $"{perm.Name} permission on E1 is true, expected: false.");
-                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E2"), perm),
+                    Assert.IsFalse(Context.Security.HasPermission(Id("E2"), perm),
                         $"{perm.Name} permission on E2 is true, expected: false.");
                 }
             }
         }
         [TestMethod]
-        public void EF6_Eval_AssertPermission()
+        public void EFC_Eval_AssertPermission()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
-            CurrentContext.Security.AssertPermission(Id("E1"), PermissionType.See);
-            CurrentContext.Security.AssertPermission(Id("E1"), PermissionType.Preview);
-            CurrentContext.Security.AssertPermission(Id("E1"), PermissionType.See, PermissionType.Preview);
-            CurrentContext.Security.AssertPermission(Id("E2"), PermissionType.See);
-            CurrentContext.Security.AssertPermission(Id("E2"), PermissionType.Preview);
-            CurrentContext.Security.AssertPermission(Id("E2"), PermissionType.See, PermissionType.Preview);
+            Context.Security.AssertPermission(Id("E1"), PermissionType.See);
+            Context.Security.AssertPermission(Id("E1"), PermissionType.Preview);
+            Context.Security.AssertPermission(Id("E1"), PermissionType.See, PermissionType.Preview);
+            Context.Security.AssertPermission(Id("E2"), PermissionType.See);
+            Context.Security.AssertPermission(Id("E2"), PermissionType.Preview);
+            Context.Security.AssertPermission(Id("E2"), PermissionType.See, PermissionType.Preview);
             foreach (var perm in PermissionType.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
                     try
                     {
-                        CurrentContext.Security.AssertPermission(Id("E1"), perm);
+                        Context.Security.AssertPermission(Id("E1"), perm);
                         Assert.Fail($"{perm.Name} permission on E1 is true, expected: false.");
                     }
                     catch (AccessDeniedException) { }
                     try
                     {
-                        CurrentContext.Security.AssertPermission(Id("E2"), perm);
+                        Context.Security.AssertPermission(Id("E2"), perm);
                         Assert.Fail($"{perm.Name} permission on E2 is true, expected: false.");
                     }
                     catch (AccessDeniedException) { }
@@ -247,33 +234,33 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_Eval_AssertPermission3()
+        public void EFC_Eval_AssertPermission3()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
 
             var e1 = GetRepositoryEntity(Id("E1"));
             var e2 = GetRepositoryEntity(Id("E2"));
 
-            CurrentContext.Security.AssertPermission(e1, PermissionType.See);
-            CurrentContext.Security.AssertPermission(e1, PermissionType.Preview);
-            CurrentContext.Security.AssertPermission(e1, PermissionType.See, PermissionType.Preview);
-            CurrentContext.Security.AssertPermission(e2, PermissionType.See);
-            CurrentContext.Security.AssertPermission(e2, PermissionType.Preview);
-            CurrentContext.Security.AssertPermission(e2, PermissionType.See, PermissionType.Preview);
+            Context.Security.AssertPermission(e1, PermissionType.See);
+            Context.Security.AssertPermission(e1, PermissionType.Preview);
+            Context.Security.AssertPermission(e1, PermissionType.See, PermissionType.Preview);
+            Context.Security.AssertPermission(e2, PermissionType.See);
+            Context.Security.AssertPermission(e2, PermissionType.Preview);
+            Context.Security.AssertPermission(e2, PermissionType.See, PermissionType.Preview);
             foreach (var perm in PermissionType.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
                     try
                     {
-                        CurrentContext.Security.AssertPermission(e1, perm);
+                        Context.Security.AssertPermission(e1, perm);
                         Assert.Fail($"{perm.Name} permission on E1 is true, expected: false.");
                     }
                     catch (AccessDeniedException) { }
                     try
                     {
-                        CurrentContext.Security.AssertPermission(e2, perm);
+                        Context.Security.AssertPermission(e2, perm);
                         Assert.Fail($"{perm.Name} permission on E2 is true, expected: false.");
                     }
                     catch (AccessDeniedException) { }
@@ -281,36 +268,36 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_Eval_HasPermission_Break()
+        public void EFC_Eval_HasPermission_Break()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+");
             SetAcl("-E2|+G1:_____________+_");
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.Preview));
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See, PermissionType.Preview));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E2"), PermissionType.See));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E2"), PermissionType.Preview));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E2"), PermissionType.See, PermissionType.Preview));
         }
         [TestMethod]
-        public void EF6_Eval_HasPermission_LocalOnly()
+        public void EFC_Eval_HasPermission_LocalOnly()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+");
             SetAcl("+E2|-G1:_____________+_");
             SetAcl("+E5|+G1:____________+__");
 
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.Preview));
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.PreviewWithoutWatermark));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E2"), PermissionType.See));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E2"), PermissionType.Preview));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E2"), PermissionType.PreviewWithoutWatermark));
 
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E5"), PermissionType.See));
-            Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E5"), PermissionType.Preview));
-            Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E5"), PermissionType.PreviewWithoutWatermark));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E5"), PermissionType.See));
+            Assert.IsFalse(Context.Security.HasPermission(Id("E5"), PermissionType.Preview));
+            Assert.IsTrue(Context.Security.HasPermission(Id("E5"), PermissionType.PreviewWithoutWatermark));
         }
 
         [TestMethod]
-        public void EF6_Eval_HasSubtreePermission_Allow()
+        public void EFC_Eval_HasSubtreePermission_Allow()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
             SetAcl("+E3|+G1:_____________+_,+G2:______________+");
             SetAcl("+E9|+G3:___________+__+,+G4:_______+_____+_");
@@ -336,17 +323,17 @@ namespace SenseNet.Security.Tests.EF6
             }
 
 
-            Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.See));
-            Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.Preview));
-            Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview));
+            Assert.IsTrue(Context.Security.HasSubtreePermission(Id("E3"), PermissionType.See));
+            Assert.IsTrue(Context.Security.HasSubtreePermission(Id("E3"), PermissionType.Preview));
+            Assert.IsTrue(Context.Security.HasSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview));
 
             foreach (var perm in PermissionType.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
-                    Assert.IsFalse(CurrentContext.Security.HasSubtreePermission(Id("E1"), perm),
+                    Assert.IsFalse(Context.Security.HasSubtreePermission(Id("E1"), perm),
                         $"{perm.Name} subtree permission on E1 is true, expected: false.");
-                    Assert.IsFalse(CurrentContext.Security.HasSubtreePermission(Id("E3"), perm),
+                    Assert.IsFalse(Context.Security.HasSubtreePermission(Id("E3"), perm),
                         $"{perm.Name} subtree permission on E3 is true, expected: false.");
                 }
             }
@@ -354,23 +341,23 @@ namespace SenseNet.Security.Tests.EF6
 
             SetAcl("+E21|+G2:_____________-_,+G3:_+___________+_,+G4:____+________-+");
 
-            //Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.Open));
-            Assert.IsFalse(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.Preview));
-            Assert.IsFalse(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview));
+            //Assert.IsTrue(Context.Security.HasSubtreePermission(Id("E3"), PermissionType.Open));
+            Assert.IsFalse(Context.Security.HasSubtreePermission(Id("E3"), PermissionType.Preview));
+            Assert.IsFalse(Context.Security.HasSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview));
         }
         [TestMethod]
-        public void EF6_Eval_HasSubtreePermission_EmptySubTree_BugReproduction()
+        public void EFC_Eval_HasSubtreePermission_EmptySubTree_BugReproduction()
         {
             //E9 is an empty subtree (leaf) and has inherited permissions
-            Tools.SetMembership(CurrentContext.Security, ("U1:G1"));
-            CurrentContext.Security.CreateAclEditor()
+            Tools.SetMembership(Context.Security, ("U1:G1"));
+            Context.Security.CreateAclEditor()
                 .Allow(Id("E1"), Id("G1"), false, PermissionType.See).Apply();
-            Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E9"), PermissionType.See));
+            Assert.IsTrue(Context.Security.HasSubtreePermission(Id("E9"), PermissionType.See));
         }
         [TestMethod]
-        public void EF6_Eval_AssertSubtreePermission()
+        public void EFC_Eval_AssertSubtreePermission()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
             SetAcl("+E3|+G1:_____________+_,+G2:______________+");
             SetAcl("+E9|+G3:___________+__+,+G4:_______+_____+_");
@@ -379,16 +366,16 @@ namespace SenseNet.Security.Tests.EF6
             var origOwnerId = Id("U1");
             var differentOwnerId = int.MaxValue;
 
-            CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See);
-            CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.Preview);
-            CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+            Context.Security.AssertSubtreePermission(Id("E3"), PermissionType.See);
+            Context.Security.AssertSubtreePermission(Id("E3"), PermissionType.Preview);
+            Context.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
             try
             {
-                CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
+                Context.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
             }
             finally
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                Context.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
             }
 
             foreach (var perm in PermissionType.GetPermissionTypes())
@@ -397,7 +384,7 @@ namespace SenseNet.Security.Tests.EF6
                 {
                     try
                     {
-                        CurrentContext.Security.AssertSubtreePermission(Id("E1"), perm);
+                        Context.Security.AssertSubtreePermission(Id("E1"), perm);
                         Assert.Fail($"{perm.Name} subtree permission on E1 is true, expected: false.");
                     }
                     catch
@@ -406,8 +393,8 @@ namespace SenseNet.Security.Tests.EF6
                     }
                     try
                     {
-                        CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
-                        CurrentContext.Security.AssertSubtreePermission(Id("E3"), perm);
+                        Context.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+                        Context.Security.AssertSubtreePermission(Id("E3"), perm);
                         Assert.Fail($"{perm.Name} subtree permission on E3 is true, expected: false.");
                     }
                     catch
@@ -416,7 +403,7 @@ namespace SenseNet.Security.Tests.EF6
                     }
                     finally
                     {
-                        CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                        Context.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
                     }
                 }
             }
@@ -426,7 +413,7 @@ namespace SenseNet.Security.Tests.EF6
 
             try
             {
-                CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.Preview);
+                Context.Security.AssertSubtreePermission(Id("E3"), PermissionType.Preview);
                 Assert.Fail("Edit subtree permission on E3 is true, expected: false.");
             }
             catch
@@ -435,8 +422,8 @@ namespace SenseNet.Security.Tests.EF6
             }
             try
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
-                CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
+                Context.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+                Context.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
                 Assert.Fail("Open+Edit subtree permission on E3 is true, expected: false.");
             }
             catch
@@ -445,13 +432,13 @@ namespace SenseNet.Security.Tests.EF6
             }
             finally
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                Context.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
             }
         }
         [TestMethod]
-        public void EF6_Eval_AssertSubtreePermission_Entity()
+        public void EFC_Eval_AssertSubtreePermission_Entity()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
             SetAcl("+E3|+G1:_____________+_,+G2:______________+");
             SetAcl("+E9|+G3:___________+__+,+G4:_______+_____+_");
@@ -463,9 +450,9 @@ namespace SenseNet.Security.Tests.EF6
             var e1 = GetRepositoryEntity(Id("E1"));
             var e3 = GetRepositoryEntity(Id("E3"));
 
-            CurrentContext.Security.AssertSubtreePermission(e3, PermissionType.See);
-            CurrentContext.Security.AssertSubtreePermission(e3, PermissionType.Preview);
-            CurrentContext.Security.AssertSubtreePermission(e3, PermissionType.See, PermissionType.Preview);
+            Context.Security.AssertSubtreePermission(e3, PermissionType.See);
+            Context.Security.AssertSubtreePermission(e3, PermissionType.Preview);
+            Context.Security.AssertSubtreePermission(e3, PermissionType.See, PermissionType.Preview);
 
             foreach (var perm in PermissionType.GetPermissionTypes())
             {
@@ -473,7 +460,7 @@ namespace SenseNet.Security.Tests.EF6
                 {
                     try
                     {
-                        CurrentContext.Security.AssertSubtreePermission(e1, perm);
+                        Context.Security.AssertSubtreePermission(e1, perm);
                         Assert.Fail($"{perm.Name} subtree permission on E1 is true, expected: false.");
                     }
                     catch
@@ -482,7 +469,7 @@ namespace SenseNet.Security.Tests.EF6
                     }
                     try
                     {
-                        CurrentContext.Security.AssertSubtreePermission(e3, perm);
+                        Context.Security.AssertSubtreePermission(e3, perm);
                         Assert.Fail($"{perm.Name} subtree permission on E3 is true, expected: false.");
                     }
                     catch
@@ -497,7 +484,7 @@ namespace SenseNet.Security.Tests.EF6
 
             try
             {
-                CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.Preview);
+                Context.Security.AssertSubtreePermission(Id("E3"), PermissionType.Preview);
                 Assert.Fail("Edit subtree permission on E3 is true, expected: false.");
             }
             catch
@@ -506,8 +493,8 @@ namespace SenseNet.Security.Tests.EF6
             }
             try
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
-                CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
+                Context.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+                Context.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
                 Assert.Fail("Open+Edit subtree permission on E3 is true, expected: false.");
             }
             catch
@@ -516,20 +503,20 @@ namespace SenseNet.Security.Tests.EF6
             }
             finally
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                Context.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
             }
         }
 
         [TestMethod]
-        public void EF6_Eval_EffectivePermissions()
+        public void EFC_Eval_EffectivePermissions()
         {
-            var db = CurrentContext.Security.DataProvider;
+            var db = Context.Security.DataProvider;
 
             var u1 = Id("U1");
             var u2 = Id("U2");
             var g1 = Id("G1");
 
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             ed.Allow(Id("E1"), u1, false, Tools.GetPermissionTypes("_____________pp"));
             ed.Deny(Id("E1"), u1, false, Tools.GetPermissionTypes("____________p__"));
             ed.Allow(Id("E1"), u2, false, Tools.GetPermissionTypes("__________pp_pp"));
@@ -546,7 +533,7 @@ namespace SenseNet.Security.Tests.EF6
             ed.Deny(Id("E5"), g1, false, Tools.GetPermissionTypes("p__p__p________"));
             ed.Apply();
 
-            var entries = CurrentContext.Security.GetAclInfo(Id("E5")).GetEffectiveEntries(true);
+            var entries = Context.Security.GetAclInfo(Id("E5")).GetEffectiveEntries(true);
 
             Assert.AreEqual(3, entries.Count);
             Assert.AreEqual("+G1:_________________________________________________-++-++-++-++-++", Tools.ReplaceIds(entries[0].ToString()));
@@ -555,7 +542,7 @@ namespace SenseNet.Security.Tests.EF6
         }
 
         [TestMethod]
-        public void EF6_AclEditor_PermissionBitMask1()
+        public void EFC_AclEditor_PermissionBitMask1()
         {
             // ReSharper disable once JoinDeclarationAndInitializer
             PermissionBitMask pbm;
@@ -586,20 +573,20 @@ namespace SenseNet.Security.Tests.EF6
         }
 
         [TestMethod]
-        public void EF6_AclEditor_CreationPossibilities()
+        public void EFC_AclEditor_CreationPossibilities()
         {
             // ReSharper disable once JoinDeclarationAndInitializer
             AclEditor ed;
 
-            ed = AclEditor.Create(CurrentContext.Security);
-            ed = new AclEditor(CurrentContext.Security);
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = AclEditor.Create(Context.Security);
+            ed = new AclEditor(Context.Security);
+            ed = Context.Security.CreateAclEditor();
         }
         [TestMethod]
-        public void EF6_AclEditor_AllowDenyClear()
+        public void EFC_AclEditor_AllowDenyClear()
         {
-            var entity = CurrentContext.Security.GetSecurityEntity(Id("E1"));
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var entity = Context.Security.GetSecurityEntity(Id("E1"));
+            var ed = Context.Security.CreateAclEditor();
             var edAcc = new PrivateObject(ed);
             var acls = (Dictionary<int, AclInfo>)edAcc.GetField("_acls");
             var userId = Id("U1");
@@ -630,13 +617,13 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_AllowDenyMoreBits()
+        public void EFC_AclEditor_AllowDenyMoreBits()
         {
-            var entityId = CurrentContext.Security.GetSecurityEntity(Id("E1")).Id;
+            var entityId = Context.Security.GetSecurityEntity(Id("E1")).Id;
             var userId1 = Id("U1");
             var userId2 = Id("U2");
 
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             var edAcc = new PrivateObject(ed);
             var acls = (Dictionary<int, AclInfo>)edAcc.GetField("_acls");
 
@@ -684,22 +671,22 @@ namespace SenseNet.Security.Tests.EF6
             Assert.AreEqual(PermissionType.DeleteOldVersion.Mask | PermissionType.RecallOldVersion.Mask, ace4.DenyBits);
         }
         [TestMethod]
-        public void EF6_AclEditor_AllowDenyAll()
+        public void EFC_AclEditor_AllowDenyAll()
         {
-            CurrentContext.Security.CreateAclEditor().Set(Id("E1"), Id("U1"), false, new PermissionBitMask { AllowBits = ~0ul, DenyBits = 0ul }).Apply();
-            Assert.AreEqual("+E1|+U1:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E1")).ToString()));
+            Context.Security.CreateAclEditor().Set(Id("E1"), Id("U1"), false, new PermissionBitMask { AllowBits = ~0ul, DenyBits = 0ul }).Apply();
+            Assert.AreEqual("+E1|+U1:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(Context.Security.GetAclInfo(Id("E1")).ToString()));
 
-            CurrentContext.Security.CreateAclEditor().Set(Id("E1"), Id("U1"), false, new PermissionBitMask { AllowBits = 0ul, DenyBits = ~0ul }).Apply();
-            Assert.AreEqual("+E1|+U1:----------------------------------------------------------------", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E1")).ToString()));
+            Context.Security.CreateAclEditor().Set(Id("E1"), Id("U1"), false, new PermissionBitMask { AllowBits = 0ul, DenyBits = ~0ul }).Apply();
+            Assert.AreEqual("+E1|+U1:----------------------------------------------------------------", Tools.ReplaceIds(Context.Security.GetAclInfo(Id("E1")).ToString()));
         }
         [TestMethod]
-        public void EF6_AclEditor_SetMoreBits()
+        public void EFC_AclEditor_SetMoreBits()
         {
-            var entityId = CurrentContext.Security.GetSecurityEntity(Id("E1")).Id;
+            var entityId = Context.Security.GetSecurityEntity(Id("E1")).Id;
             var userId1 = Id("U1");
             var userId2 = Id("U2");
 
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             var edAcc = new PrivateObject(ed);
             var acls = (Dictionary<int, AclInfo>)edAcc.GetField("_acls");
 
@@ -744,29 +731,29 @@ namespace SenseNet.Security.Tests.EF6
             Assert.AreEqual(PermissionType.DeleteOldVersion.Mask | PermissionType.RecallOldVersion.Mask, ace4.DenyBits);
         }
         [TestMethod]
-        public void EF6_AclEditor_AllowMoreEntriesInOneEditor()
+        public void EFC_AclEditor_AllowMoreEntriesInOneEditor()
         {
-            var entityId1 = CurrentContext.Security.GetSecurityEntity(Id("E1")).Id;
-            var entityId2 = CurrentContext.Security.GetSecurityEntity(Id("E2")).Id;
+            var entityId1 = Context.Security.GetSecurityEntity(Id("E1")).Id;
+            var entityId2 = Context.Security.GetSecurityEntity(Id("E2")).Id;
             var userId1 = Id("U1");
             var userId2 = Id("U2");
 
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
 
             ed.Allow(entityId1, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark);
             ed.Allow(entityId1, userId2, false, PermissionType.See);
             ed.Allow(entityId2, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark, PermissionType.PreviewWithoutRedaction);
             ed.Apply();
 
-            var acl = CurrentContext.Security.GetAcl(entityId2);
+            var acl = Context.Security.GetAcl(entityId2);
             Assert.AreEqual("+E2|+U1:____________________________________________________________++++,+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void EF6_AclEditor_NearestHolderIdsAfterReload()
+        public void EFC_AclEditor_NearestHolderIdsAfterReload()
         {
             var userId1 = Id("U1");
 
-            var ctx = CurrentContext.Security;
+            var ctx = Context.Security;
             var ed = ctx.CreateAclEditor();
             ed.Allow(Id("E1"), userId1, false, PermissionType.Custom01);
             ed.Allow(Id("E3"), userId1, false, PermissionType.Custom02);
@@ -787,66 +774,66 @@ namespace SenseNet.Security.Tests.EF6
         }
 
         [TestMethod]
-        public void EF6_AclEditor_RemovePermissions()
+        public void EFC_AclEditor_RemovePermissions()
         {
-            var entityId1 = CurrentContext.Security.GetSecurityEntity(Id("E1")).Id;
-            var entityId2 = CurrentContext.Security.GetSecurityEntity(Id("E2")).Id;
+            var entityId1 = Context.Security.GetSecurityEntity(Id("E1")).Id;
+            var entityId2 = Context.Security.GetSecurityEntity(Id("E2")).Id;
             var userId1 = Id("U1");
             var userId2 = Id("U2");
 
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
 
             ed.Allow(entityId1, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark);
             ed.Allow(entityId1, userId2, false, PermissionType.See);
             ed.Allow(entityId2, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark, PermissionType.PreviewWithoutRedaction);
             ed.Apply();
 
-            var acl = CurrentContext.Security.GetAcl(entityId2);
+            var acl = Context.Security.GetAcl(entityId2);
             Assert.AreEqual("+E2|+U1:____________________________________________________________++++,+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
 
             //#
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(entityId2, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark, PermissionType.PreviewWithoutRedaction);
             ed.Apply();
 
-            acl = CurrentContext.Security.GetAcl(entityId2);
+            acl = Context.Security.GetAcl(entityId2);
             Assert.AreEqual("+E2|+U1:_____________________________________________________________+++,+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void EF6_AclEditor_ResetPermissions()
+        public void EFC_AclEditor_ResetPermissions()
         {
-            var entityId1 = CurrentContext.Security.GetSecurityEntity(Id("E1")).Id;
-            var entityId2 = CurrentContext.Security.GetSecurityEntity(Id("E2")).Id;
+            var entityId1 = Context.Security.GetSecurityEntity(Id("E1")).Id;
+            var entityId2 = Context.Security.GetSecurityEntity(Id("E2")).Id;
             var userId1 = Id("U1");
             var userId2 = Id("U2");
 
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
 
             ed.Allow(entityId1, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark);
             ed.Allow(entityId1, userId2, false, PermissionType.See);
             ed.Allow(entityId2, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark, PermissionType.PreviewWithoutRedaction);
             ed.Apply();
 
-            var acl = CurrentContext.Security.GetAcl(entityId2);
+            var acl = Context.Security.GetAcl(entityId2);
             Assert.AreEqual("+E2|+U1:____________________________________________________________++++,+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
 
             //#
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.Reset(entityId2, userId1, false, PermissionType.See | PermissionType.Preview | PermissionType.PreviewWithoutWatermark | PermissionType.PreviewWithoutRedaction);
             ed.Apply();
 
-            acl = CurrentContext.Security.GetAcl(entityId2);
+            acl = Context.Security.GetAcl(entityId2);
             Assert.AreEqual("+E2|+U1:_____________________________________________________________+++,+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void EF6_AclEditor_KeepInheritedPermissions()
+        public void EFC_AclEditor_KeepInheritedPermissions()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1");
+            Tools.SetMembership(Context.Security, "U1:G1");
 
             var uid1 = Id("U1");
             var gid1 = Id("G1");
 
-            var ed0 = CurrentContext.Security.CreateAclEditor();
+            var ed0 = Context.Security.CreateAclEditor();
             ed0.Allow(Id("E1"), Id("U1"), false, Tools.GetPermissionTypes("______________p"));
             ed0.Allow(Id("E2"), Id("U1"), false, Tools.GetPermissionTypes("_____________p_"));
             ed0.Allow(Id("E5"), Id("U1"), false, Tools.GetPermissionTypes("____________p__"));
@@ -860,73 +847,73 @@ namespace SenseNet.Security.Tests.EF6
             ed0.Allow(Id("E50"), Id("G1"), false, Tools.GetPermissionTypes("__p____________"));
             ed0.Allow(Id("E51"), Id("G1"), false, Tools.GetPermissionTypes("_p_____________"));
             ed0.Apply();
-            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("__________________________________________________++++++__++++++", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
 
             //# set some new and more irrelevant permissions
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             ed.Deny(Id("E52"), uid1, false, Tools.GetPermissionTypes("________ppppppp"));
             ed.Deny(Id("E52"), gid1, false, Tools.GetPermissionTypes("ppppppp________"));
             ed.Apply();
-            Assert.AreEqual("_________________________________________________-------_-------", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("_________________________________________________-------_-------", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
 
             //# clear all permissions (inherited won't be cleared)
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E52"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E52"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("__________________________________________________++++++__++++++", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
 
             //# clear all permissions (inherited won't be cleared)
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E51"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E51"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("___________________________________________________+++++___+++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("___________________________________________________+++++___+++++", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
 
             //# clear all permissions (inherited won't be cleared)
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E50"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E50"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("____________________________________________________++++____++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("____________________________________________________++++____++++", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
 
             //# clear all permissions (inherited won't be cleared)
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E1"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E1"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("____________________________________________________+++_____+++_", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("____________________________________________________+++_____+++_", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
 
             //# clear all permissions (inherited won't be cleared)
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E2"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E2"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("____________________________________________________++______++__", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("____________________________________________________++______++__", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
 
             //# clear all permissions (inherited won't be cleared)
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E5"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E5"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("____________________________________________________+_______+___", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("____________________________________________________+_______+___", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
 
             //# clear all permissions (inherited won't be cleared)
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E14"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E14"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("________________________________________________________________", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("________________________________________________________________", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
         }
         [TestMethod]
-        public void EF6_AclEditor_KeepInheritedPermissions_CommonAclEditor()
+        public void EFC_AclEditor_KeepInheritedPermissions_CommonAclEditor()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1");
+            Tools.SetMembership(Context.Security, "U1:G1");
 
             var uid1 = Id("U1");
             var gid1 = Id("G1");
 
-            var ed0 = CurrentContext.Security.CreateAclEditor();
+            var ed0 = Context.Security.CreateAclEditor();
             ed0.Allow(Id("E1"), Id("U1"), false, Tools.GetPermissionTypes("______________p"));
             ed0.Allow(Id("E2"), Id("U1"), false, Tools.GetPermissionTypes("_____________p_"));
             ed0.Allow(Id("E5"), Id("U1"), false, Tools.GetPermissionTypes("____________p__"));
@@ -940,24 +927,24 @@ namespace SenseNet.Security.Tests.EF6
             ed0.Allow(Id("E50"), Id("G1"), false, Tools.GetPermissionTypes("__p____________"));
             ed0.Allow(Id("E51"), Id("G1"), false, Tools.GetPermissionTypes("_p_____________"));
             ed0.Apply();
-            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("__________________________________________________++++++__++++++", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
 
             //# set some new and more irrelevant permissions
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             ed.Deny(Id("E52"), uid1, false, Tools.GetPermissionTypes("________ppppppp"));
             ed.Deny(Id("E52"), gid1, false, Tools.GetPermissionTypes("ppppppp________"));
             ed.Apply();
-            Assert.AreEqual("_________________________________________________-------_-------", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("_________________________________________________-------_-------", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
 
             //# clear all permissions (inherited won't be cleared)
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E52"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E52"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("__________________________________________________++++++__++++++", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
 
             //# clear all permissions (inherited won't be cleared)
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E51"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E51"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E50"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
@@ -969,109 +956,109 @@ namespace SenseNet.Security.Tests.EF6
             ed.ClearPermission(Id("E5"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E5"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("____________________________________________________+_______+___", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
-            Assert.AreEqual(default(int), CurrentContext.Security.Cache.Entities[Id("E5")].GetFirstAclId());
+            Assert.AreEqual("____________________________________________________+_______+___", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual(default(int), Context.Security.Cache.Entities[Id("E5")].GetFirstAclId());
 
             //# clear all permissions (inherited won't be cleared)
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E14"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E14"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("________________________________________________________________", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("________________________________________________________________", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
         }
         [TestMethod]
-        public void EF6_AclEditor_EmptyEntriesRemovedFromDatabase()
+        public void EFC_AclEditor_EmptyEntriesRemovedFromDatabase()
         {
             var u1 = Id("U1");
 
-            var ed0 = CurrentContext.Security.CreateAclEditor();
+            var ed0 = Context.Security.CreateAclEditor();
             ed0.Allow(Id("E1"), u1, false, Tools.GetPermissionTypes("________p_p_p_p"));
             ed0.Deny(Id("E1"), u1, false, Tools.GetPermissionTypes("_______p_p_p_p_"));
             ed0.Allow(Id("E2"), u1, false, Tools.GetPermissionTypes("p_p_p_p________"));
             ed0.Deny(Id("E2"), u1, false, Tools.GetPermissionTypes("_p_p_p_________"));
             ed0.Apply();
 
-            Assert.AreEqual("_________________________________________________+-+-+-+-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default(int)));
+            Assert.AreEqual("_________________________________________________+-+-+-+-+-+-+-+", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default(int)));
             var dbentries1 = Tools.PeekEntriesFromTestDatabase(Id("E1"), Db());
             var dbentries2 = Tools.PeekEntriesFromTestDatabase(Id("E2"), Db());
             Assert.AreEqual(1, dbentries1.Length);
             Assert.AreEqual(1, dbentries2.Length);
 
             //# clear all permissions (inherited won't be cleared)
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E2"), u1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
 
-            Assert.AreEqual("________________________________________________________-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), u1, default(int)));
+            Assert.AreEqual("________________________________________________________-+-+-+-+", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), u1, default(int)));
             dbentries1 = Tools.PeekEntriesFromTestDatabase(Id("E1"), Db());
             dbentries2 = Tools.PeekEntriesFromTestDatabase(Id("E2"), Db());
             Assert.AreEqual(1, dbentries1.Length);
             Assert.AreEqual(0, dbentries2.Length);
         }
         [TestMethod]
-        public void EF6_AclEditor_EmptyEntriesRemovedFromMemory()
+        public void EFC_AclEditor_EmptyEntriesRemovedFromMemory()
         {
             var u1 = Id("U1");
 
-            var ed0 = CurrentContext.Security.CreateAclEditor();
+            var ed0 = Context.Security.CreateAclEditor();
             ed0.Allow(Id("E1"), u1, false, Tools.GetPermissionTypes("________p_p_p_p"));
             ed0.Deny(Id("E1"), u1, false, Tools.GetPermissionTypes("_______p_p_p_p_"));
             ed0.Allow(Id("E2"), u1, false, Tools.GetPermissionTypes("p_p_p_p________"));
             ed0.Deny(Id("E2"), u1, false, Tools.GetPermissionTypes("_p_p_p_________"));
             ed0.Apply();
 
-            var acl1 = CurrentContext.Security.GetAclInfo(Id("E1"));
-            var acl2 = CurrentContext.Security.GetAclInfo(Id("E2"));
+            var acl1 = Context.Security.GetAclInfo(Id("E1"));
+            var acl2 = Context.Security.GetAclInfo(Id("E2"));
             Assert.AreEqual(1, acl1.Entries.Count);
             Assert.AreEqual(1, acl2.Entries.Count);
 
             //# clear all permissions (inherited won't be cleared)
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E2"), u1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
 
-            acl1 = CurrentContext.Security.GetAclInfo(Id("E1"));
-            acl2 = CurrentContext.Security.GetAclInfo(Id("E2"));
+            acl1 = Context.Security.GetAclInfo(Id("E1"));
+            acl2 = Context.Security.GetAclInfo(Id("E2"));
             Assert.AreEqual(1, acl1.Entries.Count);
             Assert.IsNull(acl2);
         }
         [TestMethod]
-        public void EF6_AclEditor_BreakedEmptyAclIsNotDeletedFromMemory()
+        public void EFC_AclEditor_BreakedEmptyAclIsNotDeletedFromMemory()
         {
             var u1 = Id("U1");
 
-            var ed0 = CurrentContext.Security.CreateAclEditor();
+            var ed0 = Context.Security.CreateAclEditor();
             ed0.Allow(Id("E1"), u1, false, Tools.GetPermissionTypes("________p_p_p_p"));
             ed0.Deny(Id("E1"), u1, false, Tools.GetPermissionTypes("_______p_p_p_p_"));
             ed0.Allow(Id("E2"), u1, false, Tools.GetPermissionTypes("p_p_p_p________"));
             ed0.Deny(Id("E2"), u1, false, Tools.GetPermissionTypes("_p_p_p_________"));
             ed0.Apply();
 
-            var acl1 = CurrentContext.Security.GetAclInfo(Id("E1"));
-            var acl2 = CurrentContext.Security.GetAclInfo(Id("E2"));
+            var acl1 = Context.Security.GetAclInfo(Id("E1"));
+            var acl2 = Context.Security.GetAclInfo(Id("E2"));
             Assert.AreEqual(1, acl1.Entries.Count);
             Assert.AreEqual(1, acl2.Entries.Count);
 
             //# clear all permissions (inherited won't be cleared)
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             ed.BreakInheritance(Id("E2"));
 
             ed.ClearPermission(Id("E2"), u1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
 
-            acl1 = CurrentContext.Security.GetAclInfo(Id("E1"));
-            acl2 = CurrentContext.Security.GetAclInfo(Id("E2"));
+            acl1 = Context.Security.GetAclInfo(Id("E1"));
+            acl2 = Context.Security.GetAclInfo(Id("E2"));
             Assert.AreEqual(1, acl1.Entries.Count);
             Assert.AreEqual(0, acl2.Entries.Count);
             Assert.AreEqual(false, acl2.Inherits);
         }
 
         [TestMethod]
-        public void EF6_AclEditor_UseLocalOnlyValues()
+        public void EFC_AclEditor_UseLocalOnlyValues()
         {
             var u1 = Id("U1");
 
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             ed.Allow(Id("E1"), u1, false, Tools.GetPermissionTypes("______________p"));
             ed.Allow(Id("E2"), u1, true, Tools.GetPermissionTypes("_____________p_"));
             ed.Allow(Id("E5"), u1, false, Tools.GetPermissionTypes("____________p__"));
@@ -1082,16 +1069,16 @@ namespace SenseNet.Security.Tests.EF6
             ed.Deny(Id("E14"), u1, false, Tools.GetPermissionTypes("___p___________"));
             ed.Apply();
 
-            Assert.AreEqual("_______________________________________________________-_______+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E1"), u1, default(int)));
-            Assert.AreEqual("______________________________________________________--______++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E2"), u1, default(int)));
-            Assert.AreEqual("_____________________________________________________---_____+_+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default(int)));
-            Assert.AreEqual("____________________________________________________-_--____++_+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E14"), u1, default(int)));
+            Assert.AreEqual("_______________________________________________________-_______+", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E1"), u1, default(int)));
+            Assert.AreEqual("______________________________________________________--______++", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E2"), u1, default(int)));
+            Assert.AreEqual("_____________________________________________________---_____+_+", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default(int)));
+            Assert.AreEqual("____________________________________________________-_--____++_+", Context.Security.Evaluator._traceEffectivePermissionValues(Id("E14"), u1, default(int)));
         }
         [TestMethod]
-        public void EF6_AclEditor_NearestHolderId()
+        public void EFC_AclEditor_NearestHolderId()
         {
-            var sec = CurrentContext.Security;
-            var db = CurrentContext.Security.DataProvider;
+            var sec = Context.Security;
+            var db = Context.Security.DataProvider;
 
             var u1 = Id("U1");
             var eid0 = default(int);
@@ -1104,7 +1091,7 @@ namespace SenseNet.Security.Tests.EF6
             var eid17 = Id("E17");
 
             //--------------------------------------------------------------------------------
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             ed.Allow(Id("E2"), u1, false, Tools.GetPermissionTypes("_____________P_"));
             ed.Apply();
 
@@ -1117,7 +1104,7 @@ namespace SenseNet.Security.Tests.EF6
             Assert.AreEqual(eid2, sec.GetSecurityEntity(eid17).GetFirstAclId());
 
             //--------------------------------------------------------------------------------
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.Allow(Id("E1"), u1, false, Tools.GetPermissionTypes("______________p"));
             ed.Apply();
 
@@ -1130,7 +1117,7 @@ namespace SenseNet.Security.Tests.EF6
             Assert.AreEqual(eid2, sec.GetSecurityEntity(eid17).GetFirstAclId());
 
             //--------------------------------------------------------------------------------
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.Allow(Id("E5"), u1, false, Tools.GetPermissionTypes("____________P__"));
             ed.Apply();
 
@@ -1143,7 +1130,7 @@ namespace SenseNet.Security.Tests.EF6
             Assert.AreEqual(eid2, sec.GetSecurityEntity(eid17).GetFirstAclId());
 
             //--------------------------------------------------------------------------------
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E1"), u1, false, Tools.GetPermissionTypes("______________P"));
             ed.Apply();
 
@@ -1156,7 +1143,7 @@ namespace SenseNet.Security.Tests.EF6
             Assert.AreEqual(eid2, sec.GetSecurityEntity(eid17).GetFirstAclId());
 
             //--------------------------------------------------------------------------------
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E5"), u1, false, Tools.GetPermissionTypes("____________P__"));
             ed.Apply();
 
@@ -1169,7 +1156,7 @@ namespace SenseNet.Security.Tests.EF6
             Assert.AreEqual(eid2, sec.GetSecurityEntity(eid17).GetFirstAclId());
 
             //--------------------------------------------------------------------------------
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             ed.ClearPermission(Id("E2"), u1, false, Tools.GetPermissionTypes("_____________P_"));
             ed.Apply();
 
@@ -1182,44 +1169,44 @@ namespace SenseNet.Security.Tests.EF6
             Assert.AreEqual(eid0, sec.GetSecurityEntity(eid17).GetFirstAclId());
         }
         [TestMethod]
-        public void EF6_AclEditor_EditablePermissions()
+        public void EFC_AclEditor_EditablePermissions()
         {
-            var db = CurrentContext.Security.DataProvider;
+            var db = Context.Security.DataProvider;
 
             var u1 = Id("U1");
 
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             ed.Allow(Id("E1"), u1, false, Tools.GetPermissionTypes("____________ppp"));
             ed.Allow(Id("E2"), u1, false, Tools.GetPermissionTypes("_________ppp___"));
             ed.Allow(Id("E5"), u1, false, Tools.GetPermissionTypes("______ppp______"));
             ed.Apply();
 
-            var acl = CurrentContext.Security.GetAcl(Id("E1"));
+            var acl = Context.Security.GetAcl(Id("E1"));
             Assert.AreEqual(64, acl.Entries.First().Permissions.Count(x => x.AllowFrom == default(int) && x.DenyFrom == default(int)));
 
-            acl = CurrentContext.Security.GetAcl(Id("E2"));
+            acl = Context.Security.GetAcl(Id("E2"));
             Assert.AreEqual(61, acl.Entries.First().Permissions.Count(x => x.AllowFrom == default(int) && x.DenyFrom == default(int)));
 
-            acl = CurrentContext.Security.GetAcl(Id("E5"));
+            acl = Context.Security.GetAcl(Id("E5"));
             Assert.AreEqual(58, acl.Entries.First().Permissions.Count(x => x.AllowFrom == default(int) && x.DenyFrom == default(int)));
 
-            acl = CurrentContext.Security.GetAcl(Id("E14"));
+            acl = Context.Security.GetAcl(Id("E14"));
             Assert.AreEqual(55, acl.Entries.First().Permissions.Count(x => x.AllowFrom == default(int) && x.DenyFrom == default(int)));
         }
 
 
 
         [TestMethod]
-        public void EF6_AclEditor_BreakInheritance_NotHolder_WithCopy()
+        public void EFC_AclEditor_BreakInheritance_NotHolder_WithCopy()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
+            Context.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
 
-            Assert.AreEqual("-E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("-E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(Context.Security.GetAclInfo(Id("E5")).ToString()));
 
-            var sec = CurrentContext.Security;
+            var sec = Context.Security;
             var entity = sec.GetSecurityEntity(Id("E5"));
             Assert.IsFalse(entity.IsInherited);
 
@@ -1233,18 +1220,18 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_BreakInheritance_Holder_WithCopy()
+        public void EFC_AclEditor_BreakInheritance_Holder_WithCopy()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E2")).Apply();
+            Context.Security.CreateAclEditor().BreakInheritance(Id("E2")).Apply();
 
-            var aclInfo = CurrentContext.Security.GetAclInfo(Id("E2"));
+            var aclInfo = Context.Security.GetAclInfo(Id("E2"));
             Assert.IsNotNull(aclInfo);
             Assert.AreEqual("-E2|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(aclInfo.ToString()));
 
-            var sec = CurrentContext.Security;
+            var sec = Context.Security;
             var entity = sec.GetSecurityEntity(Id("E2"));
             Assert.IsFalse(entity.IsInherited);
 
@@ -1258,18 +1245,18 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_BreakInheritance_NotHolder_WithoutCopy()
+        public void EFC_AclEditor_BreakInheritance_NotHolder_WithoutCopy()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), false).Apply();
+            Context.Security.CreateAclEditor().BreakInheritance(Id("E5"), false).Apply();
 
-            var aclInfo = CurrentContext.Security.GetAclInfo(Id("E5"));
+            var aclInfo = Context.Security.GetAclInfo(Id("E5"));
             Assert.IsNotNull(aclInfo);
             Assert.AreEqual("-E5|", Tools.ReplaceIds(aclInfo.ToString()));
 
-            var sec = CurrentContext.Security;
+            var sec = Context.Security;
             var entity = sec.GetSecurityEntity(Id("E5"));
             Assert.IsFalse(entity.IsInherited);
 
@@ -1281,7 +1268,7 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_BreakInheritance_NotHolder_WithoutCopy_ChildrenAcls()
+        public void EFC_AclEditor_BreakInheritance_NotHolder_WithoutCopy_ChildrenAcls()
         {
             //Break on E32
             //Expected:
@@ -1295,11 +1282,11 @@ namespace SenseNet.Security.Tests.EF6
             SetAcl("+E35|+G2:_+++++++++++___");                                                 //     0x23    //     0x20  0x23
             SetAcl("+E36|+G2:_+++++++++++___");                                                 //     0x24    //           0x24
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E32"), false).Apply();  // 0x20
+            Context.Security.CreateAclEditor().BreakInheritance(Id("E32"), false).Apply();  // 0x20
 
-            var aclE32 = CurrentContext.Security.GetAclInfo(Id("E32"));
-            var aclE35 = CurrentContext.Security.GetAclInfo(Id("E35"));
-            var aclE36 = CurrentContext.Security.GetAclInfo(Id("E36"));
+            var aclE32 = Context.Security.GetAclInfo(Id("E32"));
+            var aclE35 = Context.Security.GetAclInfo(Id("E35"));
+            var aclE36 = Context.Security.GetAclInfo(Id("E36"));
             Assert.IsNotNull(aclE32);
             Assert.AreEqual(Id("E12"), aclE32.Parent.EntityId);
             Assert.AreEqual(Id("E32"), aclE35.Parent.EntityId);
@@ -1307,8 +1294,8 @@ namespace SenseNet.Security.Tests.EF6
 
             Assert.AreEqual("-E32|", Tools.ReplaceIds(aclE32.ToString()));
 
-            var db = CurrentContext.Security.DataProvider;
-            var sec = CurrentContext.Security;
+            var db = Context.Security.DataProvider;
+            var sec = Context.Security;
             var entity = sec.GetSecurityEntity(Id("E32"));
             Assert.IsFalse(entity.IsInherited);
 
@@ -1329,7 +1316,7 @@ namespace SenseNet.Security.Tests.EF6
         }
 
         [TestMethod]
-        public void EF6_AclEditor_BreakInheritance_Holder_WithoutCopy()
+        public void EFC_AclEditor_BreakInheritance_Holder_WithoutCopy()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E4|+G2:+___________++_");
@@ -1337,11 +1324,11 @@ namespace SenseNet.Security.Tests.EF6
             SetAcl("+E33|+G2:_+++++_________");
             SetAcl("+E34|+G2:_+++++_________");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), false).Apply();
+            Context.Security.CreateAclEditor().BreakInheritance(Id("E12"), false).Apply();
 
-            var aclE12 = CurrentContext.Security.GetAclInfo(Id("E12"));
-            var aclE33 = CurrentContext.Security.GetAclInfo(Id("E33"));
-            var aclE34 = CurrentContext.Security.GetAclInfo(Id("E34"));
+            var aclE12 = Context.Security.GetAclInfo(Id("E12"));
+            var aclE33 = Context.Security.GetAclInfo(Id("E33"));
+            var aclE34 = Context.Security.GetAclInfo(Id("E34"));
             Assert.IsNotNull(aclE12);
             Assert.AreEqual(Id("E4"), aclE12.Parent.EntityId);
             Assert.AreEqual(Id("E12"), aclE33.Parent.EntityId);
@@ -1349,8 +1336,8 @@ namespace SenseNet.Security.Tests.EF6
 
             Assert.AreEqual("-E12|+G2:_______________________________________________________++++++___", Tools.ReplaceIds(aclE12.ToString()));
 
-            var db = CurrentContext.Security.DataProvider;
-            var sec = CurrentContext.Security;
+            var db = Context.Security.DataProvider;
+            var sec = Context.Security;
             var entity = sec.GetSecurityEntity(Id("E12"));
             Assert.IsFalse(entity.IsInherited);
 
@@ -1370,7 +1357,7 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_BreakInheritance_OnBreaked()
+        public void EFC_AclEditor_BreakInheritance_OnBreaked()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E4|+G2:+___________++_");
@@ -1381,11 +1368,11 @@ namespace SenseNet.Security.Tests.EF6
             // breaks, tests and repeat
             for (int i = 0; i < 3; i++)
             {
-                CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), false).Apply();
+                Context.Security.CreateAclEditor().BreakInheritance(Id("E12"), false).Apply();
 
-                var aclE12 = CurrentContext.Security.GetAclInfo(Id("E12"));
-                var aclE33 = CurrentContext.Security.GetAclInfo(Id("E33"));
-                var aclE34 = CurrentContext.Security.GetAclInfo(Id("E34"));
+                var aclE12 = Context.Security.GetAclInfo(Id("E12"));
+                var aclE33 = Context.Security.GetAclInfo(Id("E33"));
+                var aclE34 = Context.Security.GetAclInfo(Id("E34"));
                 Assert.IsNotNull(aclE12);
                 Assert.AreEqual(Id("E4"), aclE12.Parent.EntityId);
                 Assert.AreEqual(Id("E12"), aclE33.Parent.EntityId);
@@ -1393,8 +1380,8 @@ namespace SenseNet.Security.Tests.EF6
 
                 Assert.AreEqual("-E12|+G2:_______________________________________________________++++++___", Tools.ReplaceIds(aclE12.ToString()));
 
-                var db = CurrentContext.Security.DataProvider;
-                var sec = CurrentContext.Security;
+                var db = Context.Security.DataProvider;
+                var sec = Context.Security;
                 var entity = sec.GetSecurityEntity(Id("E12"));
                 Assert.IsFalse(entity.IsInherited);
 
@@ -1415,29 +1402,29 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_UnbreakInheritance_WithNormalize()
+        public void EFC_AclEditor_UnbreakInheritance_WithNormalize()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
             //#
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
+            Context.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
 
-            Assert.AreEqual("-E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("-E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(Context.Security.GetAclInfo(Id("E5")).ToString()));
 
             //#
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             ed.Allow(Id("E5"), Id("G2"), false, Tools.GetPermissionTypes("+++++++++++++++"))
                 .Deny(Id("E5"), Id("G2"), false, Tools.GetPermissionTypes("_+_____________"))
                 .Apply();
 
-            Assert.AreEqual("-E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-+++++++++++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("-E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-+++++++++++++", Tools.ReplaceIds(Context.Security.GetAclInfo(Id("E5")).ToString()));
 
             //#
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), normalize: true).Apply();
+            Context.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), normalize: true).Apply();
 
 
-            var sec = CurrentContext.Security;
+            var sec = Context.Security;
             var entity = sec.GetSecurityEntity(Id("E5"));
             Assert.IsTrue(entity.IsInherited);
 
@@ -1450,18 +1437,18 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_UnbreakInheritance_WithoutNormalize()
+        public void EFC_AclEditor_UnbreakInheritance_WithoutNormalize()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
+            Context.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
 
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5")).Apply();
+            Context.Security.CreateAclEditor().UnbreakInheritance(Id("E5")).Apply();
 
-            Assert.AreEqual("+E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("+E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(Context.Security.GetAclInfo(Id("E5")).ToString()));
 
-            var sec = CurrentContext.Security;
+            var sec = Context.Security;
             var entity = sec.GetSecurityEntity(Id("E5"));
             Assert.IsTrue(entity.IsInherited);
 
@@ -1475,27 +1462,27 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_UnbreakInheritance_OnUnbreaked()
+        public void EFC_AclEditor_UnbreakInheritance_OnUnbreaked()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
-            var sec = CurrentContext.Security;
+            var sec = Context.Security;
             var id = Id("E2");
             using (var db = Db())
             {
-                Assert.AreEqual("+E2|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E2")).ToString()));
+                Assert.AreEqual("+E2|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(Context.Security.GetAclInfo(Id("E2")).ToString()));
                 var entity = sec.GetSecurityEntity(Id("E2"));
                 Assert.IsTrue(entity.IsInherited);
                 var aces = db.EFEntries.Where(x => x.EFEntityId == id).OrderBy(x => x.IdentityId).ToArray();
                 Assert.AreEqual(1, aces.Length);
                 Assert.AreEqual("E2|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(aces[0].ToString()));
             }
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E2")).Apply();
+            Context.Security.CreateAclEditor().UnbreakInheritance(Id("E2")).Apply();
             using (var db = Db())
             {
 
-                Assert.AreEqual("+E2|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E2")).ToString()));
+                Assert.AreEqual("+E2|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(Context.Security.GetAclInfo(Id("E2")).ToString()));
                 var entity = sec.GetSecurityEntity(Id("E2"));
                 Assert.IsTrue(entity.IsInherited);
                 var aces = db.EFEntries.Where(x => x.EFEntityId == id).OrderBy(x => x.IdentityId).ToArray();
@@ -1504,24 +1491,24 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_UnbreakInheritance_WithNormalize_AcesAndHolderIds()
+        public void EFC_AclEditor_UnbreakInheritance_WithNormalize_AcesAndHolderIds()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
-            var sec = CurrentContext.Security;
-            var db = CurrentContext.Security.DataProvider;
+            var sec = Context.Security;
+            var db = Context.Security.DataProvider;
 
             var e2id = Id("E2");
             var e5id = Id("E5");
 
             Assert.AreEqual(e2id, sec.GetSecurityEntity(e5id).GetFirstAclId());
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
+            Context.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
 
             Assert.AreEqual(e5id, sec.GetSecurityEntity(e5id).GetFirstAclId());
 
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), normalize: true).Apply();
+            Context.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), normalize: true).Apply();
 
             Assert.AreEqual(e2id, sec.GetSecurityEntity(e5id).GetFirstAclId());
 
@@ -1531,16 +1518,16 @@ namespace SenseNet.Security.Tests.EF6
                 var aces = storage.EFEntries.Where(x => x.EFEntityId == id).ToArray();
                 Assert.AreEqual(0, aces.Length);
             }
-            //Assert.IsNull(CurrentContext.Security.Cache.AclCache.Get(e5id));
-            Assert.IsNull(CurrentContext.Security.GetAclInfo(e5id));
+            //Assert.IsNull(Context.Security.Cache.AclCache.Get(e5id));
+            Assert.IsNull(Context.Security.GetAclInfo(e5id));
         }
 
         [TestMethod]
-        public void EF6_AclEditor_NormalizeDoesNothing()
+        public void EFC_AclEditor_NormalizeDoesNothing()
         {
             SetAcl("+E2|+G2:+___________++_");
 
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
 
             ed.NormalizeExplicitePermissions(Id("E1"));
             ed.NormalizeExplicitePermissions(Id("E2"));
@@ -1549,15 +1536,15 @@ namespace SenseNet.Security.Tests.EF6
 
 
         [TestMethod]
-        public void EF6_AclEditor_CopyEffectivePermissions1()
+        public void EFC_AclEditor_CopyEffectivePermissions1()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
             SetAcl("+E5|+G1:+___+++_____++_,+G2:___________++++");
 
-            CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E5")).Apply();
+            Context.Security.CreateAclEditor().CopyEffectivePermissions(Id("E5")).Apply();
 
-            Assert.AreEqual("+E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("+E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(Context.Security.GetAclInfo(Id("E5")).ToString()));
 
             using (var db = Db())
             {
@@ -1569,15 +1556,15 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_CopyEffectivePermissions2()
+        public void EFC_AclEditor_CopyEffectivePermissions2()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
             SetAcl("+E5|+G1:+___+++_____++_,+G2:___________++++");
 
-            CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E14")).Apply();
+            Context.Security.CreateAclEditor().CopyEffectivePermissions(Id("E14")).Apply();
 
-            Assert.AreEqual("+E14|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E14")).ToString()));
+            Assert.AreEqual("+E14|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(Context.Security.GetAclInfo(Id("E14")).ToString()));
 
             using (var db = Db())
             {
@@ -1589,15 +1576,15 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_NormalizeExplicitePermissions1()
+        public void EFC_AclEditor_NormalizeExplicitePermissions1()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+-__________++_");
             SetAcl("+E5|+G1:+___+++_____++_,+G2:-__________++++");
 
-            CurrentContext.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E5")).Apply();
+            Context.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E5")).Apply();
 
-            Assert.AreEqual("+E5|+G2:_________________________________________________-__________+___", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("+E5|+G2:_________________________________________________-__________+___", Tools.ReplaceIds(Context.Security.GetAclInfo(Id("E5")).ToString()));
 
             using (var db = Db())
             {
@@ -1608,16 +1595,16 @@ namespace SenseNet.Security.Tests.EF6
             }
         }
         [TestMethod]
-        public void EF6_AclEditor_NormalizeExplicitePermissions2()
+        public void EFC_AclEditor_NormalizeExplicitePermissions2()
         {
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
             SetAcl("+E5|+G1:+___+++_____++_,+G2:___________++++");
             SetAcl("+E14|+G1:+++++++++++++++,+G2:+-_________++++");
 
-            CurrentContext.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E14")).Apply();
+            Context.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E14")).Apply();
 
-            Assert.IsNull(CurrentContext.Security.GetAclInfo(Id("E14")));
+            Assert.IsNull(Context.Security.GetAclInfo(Id("E14")));
 
             using (var db = Db())
             {
@@ -1630,76 +1617,76 @@ namespace SenseNet.Security.Tests.EF6
 
         [TestMethod]
         [Description("ACL will not be deleted.")]
-        public void EF6_DeletingGroupRemovesTheCorrespondingAces_1()
+        public void EFC_DeletingGroupRemovesTheCorrespondingAces_1()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
 
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+,+U1:+++++++++++++++");
             SetAcl("+E2|+G2:+___________++_,+U2:+++++++++++++++");
-            var acl = CurrentContext.Security.GetAcl(Id("E1"));
+            var acl = Context.Security.GetAcl(Id("E1"));
             Assert.AreEqual("+E1|+G1:_________________________________________________+++++++++++++++,+G2:__________________________________________________-____________+,+U1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(acl.ToString()));
-            acl = CurrentContext.Security.GetAcl(Id("E2"));
+            acl = Context.Security.GetAcl(Id("E2"));
             Assert.AreEqual("+E2|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++,+U1:_________________________________________________+++++++++++++++,+U2:_________________________________________________+++++++++++++++", Tools.ReplaceIds(acl.ToString()));
 
-            CurrentContext.Security.DeleteSecurityGroup(Id("G2"));
+            Context.Security.DeleteSecurityGroup(Id("G2"));
 
-            acl = CurrentContext.Security.GetAcl(Id("E1"));
+            acl = Context.Security.GetAcl(Id("E1"));
             Assert.AreEqual("+E1|+G1:_________________________________________________+++++++++++++++,+U1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(acl.ToString()));
-            acl = CurrentContext.Security.GetAcl(Id("E2"));
+            acl = Context.Security.GetAcl(Id("E2"));
             Assert.AreEqual("+E2|+G1:_________________________________________________+++++++++++++++,+U1:_________________________________________________+++++++++++++++,+U2:_________________________________________________+++++++++++++++", Tools.ReplaceIds(acl.ToString()));
 
-            Assert.AreEqual(Id("E2"), CurrentContext.Security.Cache.Entities[Id("E2")].GetFirstAclId());
-            Assert.AreEqual(Id("E2"), CurrentContext.Security.Cache.Entities[Id("E5")].GetFirstAclId());
+            Assert.AreEqual(Id("E2"), Context.Security.Cache.Entities[Id("E2")].GetFirstAclId());
+            Assert.AreEqual(Id("E2"), Context.Security.Cache.Entities[Id("E5")].GetFirstAclId());
         }
         [TestMethod]
         [Description("Whole ACL will be deleted.")]
-        public void EF6_DeletingGroupRemovesTheCorrespondingAces_2()
+        public void EFC_DeletingGroupRemovesTheCorrespondingAces_2()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
 
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
-            var acl = CurrentContext.Security.GetAcl(Id("E1"));
+            var acl = Context.Security.GetAcl(Id("E1"));
             Assert.AreEqual("+E1|+G1:_________________________________________________+++++++++++++++,+G2:__________________________________________________-____________+", Tools.ReplaceIds(acl.ToString()));
-            acl = CurrentContext.Security.GetAcl(Id("E2"));
+            acl = Context.Security.GetAcl(Id("E2"));
             Assert.AreEqual("+E2|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(acl.ToString()));
 
-            CurrentContext.Security.DeleteSecurityGroup(Id("G2"));
+            Context.Security.DeleteSecurityGroup(Id("G2"));
 
-            acl = CurrentContext.Security.GetAcl(Id("E1"));
+            acl = Context.Security.GetAcl(Id("E1"));
             Assert.AreEqual("+E1|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(acl.ToString()));
-            acl = CurrentContext.Security.GetAcl(Id("E2"));
+            acl = Context.Security.GetAcl(Id("E2"));
             Assert.AreEqual("+E2|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(acl.ToString()));
 
-            Assert.AreEqual(Id("E1"), CurrentContext.Security.Cache.Entities[Id("E2")].GetFirstAclId()); // pre check
-            Assert.AreEqual(Id("E1"), CurrentContext.Security.Cache.Entities[Id("E5")].GetFirstAclId()); // pre check
+            Assert.AreEqual(Id("E1"), Context.Security.Cache.Entities[Id("E2")].GetFirstAclId()); // pre check
+            Assert.AreEqual(Id("E1"), Context.Security.Cache.Entities[Id("E5")].GetFirstAclId()); // pre check
         }
         [TestMethod]
         [Description("Unknown group (it is not in the Membership).")]
-        public void EF6_DeletingGroupRemovesTheCorrespondingAces_3()
+        public void EFC_DeletingGroupRemovesTheCorrespondingAces_3()
         {
-            Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
+            Tools.SetMembership(Context.Security, "U1:G1,G2|U2:G1");
 
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+,+U1:+++++++++++++++");
             SetAcl("+E2|+G2:+___________++_,+U2:+++++++++++++++");
             SetAcl("+E3|+G3:+___________++_");
 
-            CurrentContext.Security.DeleteSecurityGroup(Id("G3"));
+            Context.Security.DeleteSecurityGroup(Id("G3"));
 
-            Assert.AreEqual(Id("E1"), CurrentContext.Security.Cache.Entities[Id("E3")].GetFirstAclId());
-            Assert.AreEqual(Id("E1"), CurrentContext.Security.Cache.Entities[Id("E8")].GetFirstAclId());
+            Assert.AreEqual(Id("E1"), Context.Security.Cache.Entities[Id("E3")].GetFirstAclId());
+            Assert.AreEqual(Id("E1"), Context.Security.Cache.Entities[Id("E8")].GetFirstAclId());
         }
 
         [TestMethod]
-        public void EF6_AclEditor_AllowDenyClear_Persistence()
+        public void EFC_AclEditor_AllowDenyClear_Persistence()
         {
             Debug.WriteLine("SECU> START TEST: EF4_AclEditor_AllowDenyClear_Persistence");
 
-            var entity4Id = CurrentContext.Security.GetSecurityEntity(Id("E4")).Id;
+            var entity4Id = Context.Security.GetSecurityEntity(Id("E4")).Id;
             var user6Id = Id("U6");
 
             //--------------------------------------------------------
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             for (int i = 0; i < PermissionType.PermissionCount; i += 3)
                 ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             for (int i = 1; i < PermissionType.PermissionCount; i += 3)
@@ -1707,11 +1694,11 @@ namespace SenseNet.Security.Tests.EF6
             for (int i = 2; i < PermissionType.PermissionCount; i += 3)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
-            var acl = CurrentContext.Security.GetAcl(entity4Id);
+            var acl = Context.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|+U6:+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+", Tools.ReplaceIds(acl.ToString()));
 
             //--------------------------------------------------------
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             for (int i = 1; i < PermissionType.PermissionCount; i += 3)
                 ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             for (int i = 2; i < PermissionType.PermissionCount; i += 3)
@@ -1719,11 +1706,11 @@ namespace SenseNet.Security.Tests.EF6
             for (int i = 0; i < PermissionType.PermissionCount; i += 3)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
-            acl = CurrentContext.Security.GetAcl(entity4Id);
+            acl = Context.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|+U6:_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_", Tools.ReplaceIds(acl.ToString()));
 
             //--------------------------------------------------------
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             for (int i = 2; i < PermissionType.PermissionCount; i += 3)
                 ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             for (int i = 0; i < PermissionType.PermissionCount; i += 3)
@@ -1731,69 +1718,69 @@ namespace SenseNet.Security.Tests.EF6
             for (int i = 1; i < PermissionType.PermissionCount; i += 3)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
-            acl = CurrentContext.Security.GetAcl(entity4Id);
+            acl = Context.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|+U6:-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-", Tools.ReplaceIds(acl.ToString()));
 
             //========================================================
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             for (var i = 0; i < PermissionType.PermissionCount; i++)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
-            acl = CurrentContext.Security.GetAcl(entity4Id);
+            acl = Context.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|", Tools.ReplaceIds(acl.ToString()));
 
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             for (var i = 0; i < PermissionType.PermissionCount; i++)
                 ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
-            acl = CurrentContext.Security.GetAcl(entity4Id);
+            acl = Context.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|+U6:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(acl.ToString()));
 
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             for (var i = 0; i < PermissionType.PermissionCount; i++)
                 ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
-            acl = CurrentContext.Security.GetAcl(entity4Id);
+            acl = Context.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|+U6:----------------------------------------------------------------", Tools.ReplaceIds(acl.ToString()));
 
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             for (var i = 0; i < PermissionType.PermissionCount; i++)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
-            acl = CurrentContext.Security.GetAcl(entity4Id);
+            acl = Context.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|", Tools.ReplaceIds(acl.ToString()));
 
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             for (var i = 0; i < PermissionType.PermissionCount; i++)
                 ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
-            acl = CurrentContext.Security.GetAcl(entity4Id);
+            acl = Context.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|+U6:----------------------------------------------------------------", Tools.ReplaceIds(acl.ToString()));
 
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             for (var i = 0; i < PermissionType.PermissionCount; i++)
                 ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
-            acl = CurrentContext.Security.GetAcl(entity4Id);
+            acl = Context.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|+U6:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(acl.ToString()));
 
-            ed = CurrentContext.Security.CreateAclEditor();
+            ed = Context.Security.CreateAclEditor();
             for (var i = 0; i < PermissionType.PermissionCount; i++)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
-            acl = CurrentContext.Security.GetAcl(entity4Id);
+            acl = Context.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|", Tools.ReplaceIds(acl.ToString()));
 
             Debug.WriteLine("SECU> END   TEST: EF4_AclEditor_AllowDenyClear_Persistence");
         }
 
         [TestMethod]
-        public void EF6_AclEditor_Apply64NewEntry()
+        public void EFC_AclEditor_Apply64NewEntry()
         {
             var userId1 = Id("U1");
             var userId2 = Id("U2");
 
-            var ed = CurrentContext.Security.CreateAclEditor();
+            var ed = Context.Security.CreateAclEditor();
             for (int i = 0; i < 32; i++)
             {
                 var entityId = Id("E" + (i + 1));
@@ -1919,12 +1906,12 @@ namespace SenseNet.Security.Tests.EF6
 
         private void SetAcl(string src)
         {
-            Tools.SetAcl(CurrentContext.Security, src);
+            Tools.SetAcl(Context.Security, src);
         }
 
         private void SetAclForEverything()
         {
-            for (int i = 0; i < CurrentContext.Security.Cache.Entities.Count; i++)
+            for (int i = 0; i < Context.Security.Cache.Entities.Count; i++)
                 SetAcl($"+E{i + 1}|+U1:+++++++++++++++");
         }
 
@@ -1953,7 +1940,7 @@ namespace SenseNet.Security.Tests.EF6
                 Parent = parentName == null ? null : _repository[Id(parentName)],
             };
             _repository.Add(entity.Id, entity);
-            CurrentContext.Security.CreateSecurityEntity(entity);
+            Context.Security.CreateSecurityEntity(entity);
             return entity;
         }
         private TestEntity GetRepositoryEntity(int id)

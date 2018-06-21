@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SenseNet.Security.EF6SecurityStore;
+using SenseNet.Security.EFCSecurityStore;
 using SenseNet.Security.Tests.TestPortal;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
@@ -11,43 +11,22 @@ using System.IO;
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedVariable
 
-namespace SenseNet.Security.Tests.EF6
+namespace SenseNet.Security.Tests.EFC
 {
     [TestClass]
-    public class EF6LoadActivitiesTests : EF6TestBase
+    public class EFCLoadActivitiesTests : EFCTestBase
     {
-        private Context _context;
-        public TestContext TestContext { get; set; }
-
-        private SecurityStorage Db()
+        protected override Context CreateContext(TextWriter traceChannel = null)
         {
-            var preloaded = System.Data.Entity.SqlServer.SqlProviderServices.Instance;
-            return new SecurityStorage(120);
-        }
-
-        [TestInitialize]
-        public void InitializeTest()
-        {
-            Db().CleanupDatabase();
-        }
-
-        [TestCleanup]
-        public void FinishTest()
-        {
-            Tools.CheckIntegrity(TestContext.TestName, _context.Security);
-        }
-
-        private Context Start(TextWriter traceChannel = null)
-        {
-            Context.StartTheSystem(new EF6SecurityDataProvider(), new DefaultMessageProvider(), traceChannel);
+            Context.StartTheSystem(new EFCSecurityDataProvider(), new DefaultMessageProvider(), traceChannel);
             return new Context(TestUser.User1);
         }
 
+
         [TestMethod]
-        public void EF6_LoadActivities_AtStart_DataHandlerLevel()
+        public void EFC_LoadActivities_AtStart_DataHandlerLevel()
         {
-            _context = Start();
-            var sctx = _context.Security;
+            var sctx = Context.Security;
             var user1Id = TestUser.User1.Id;
             var rootEntityId = Id("E01");
 
@@ -56,8 +35,7 @@ namespace SenseNet.Security.Tests.EF6
             for (int entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
                 sctx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
 
-            var lastId = Db().ExecuteTestScript<int>("select top 1 Id from [EFMessages] order by Id desc").First();
-
+            var lastId = Db().EFMessages.OrderByDescending(e => e.Id).First().Id;
 
             // test0: initial
             var expectedCs0 = new CompletionState { LastActivityId = lastId };
@@ -104,10 +82,9 @@ namespace SenseNet.Security.Tests.EF6
         }
 
         [TestMethod]
-        public void EF6_LoadActivities_AtStart_ActivityQueueLevel()
+        public void EFC_LoadActivities_AtStart_ActivityQueueLevel()
         {
-            _context = Start();
-            var sctx = _context.Security;
+            var sctx = Context.Security;
             var user1Id = TestUser.User1.Id;
             var rootEntityId = Id("E01");
 
@@ -116,7 +93,7 @@ namespace SenseNet.Security.Tests.EF6
             for (int entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
                 sctx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
 
-            var lastId = Db().ExecuteTestScript<int>("select top 1 Id from [EFMessages] order by Id desc").First();
+            var lastId = Db().EFMessages.OrderByDescending(e => e.Id).First().Id;
 
 
             // test0: initial state
@@ -165,10 +142,9 @@ namespace SenseNet.Security.Tests.EF6
         }
 
         [TestMethod]
-        public void EF6_LoadActivities_RightDependencies()
+        public void EFC_LoadActivities_RightDependencies()
         {
-            _context = Start();
-            var sctx = _context.Security;
+            var sctx = Context.Security;
             var user1Id = TestUser.User1.Id;
 
             // register some dependent activities
@@ -211,7 +187,7 @@ namespace SenseNet.Security.Tests.EF6
                 SecurityActivityQueue.__enableExecution();
             }
 
-            var lastId = Db().ExecuteTestScript<int>("select top 1 Id from [EFMessages] order by Id desc").First();
+            var lastId = Db().EFMessages.OrderByDescending(e => e.Id).First().Id;
             var create1 = lastId - 10;
             var create2 = lastId - 9;
             var create3 = lastId - 8;
@@ -243,12 +219,11 @@ namespace SenseNet.Security.Tests.EF6
         }
 
         [TestMethod]
-        public void EF6_LoadActivities_SmartGapResolution()
+        public void EFC_LoadActivities_SmartGapResolution()
         {
             var sb = new StringBuilder();
-            _context = Start();
             CommunicationMonitor.Stop();
-            var sctx = _context.Security;
+            var sctx = Context.Security;
             var user1Id = TestUser.User1.Id;
             var rootEntityId = Id("E01");
 
