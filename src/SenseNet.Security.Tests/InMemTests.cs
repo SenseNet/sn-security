@@ -16,12 +16,5 @@ namespace SenseNet.Security.Tests
         {
             MemoryDataProvider.Storage.Memberships.Clear();
         }
-
-
-        [TestMethod]
-        public void Xxx()
-        {
-            Assert.Inconclusive();
-        }
     }
 }

@@ -22,12 +22,5 @@ namespace SenseNet.Security.Tests
             db.Database.ExecuteSqlCommand("DELETE FROM [EFMemberships]");
         }
 
-
-        [TestMethod]
-        public void Xxz()
-        {
-            Assert.Inconclusive();
-        }
-
     }
 }
