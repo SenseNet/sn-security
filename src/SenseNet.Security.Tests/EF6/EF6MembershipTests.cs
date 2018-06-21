@@ -13,7 +13,7 @@ using System.Text;
 
 namespace SenseNet.Security.Tests.EF6
 {
-    [TestClass]
+    //[TestClass]
     public class EF6MembershipTests : EF6TestBase
     {
         private Context _context;

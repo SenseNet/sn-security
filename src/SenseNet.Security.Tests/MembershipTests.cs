@@ -9,7 +9,7 @@ using SenseNet.Security.Data;
 
 namespace SenseNet.Security.Tests
 {
-    [TestClass]
+    //[TestClass]
     public class MembershipTests
     {
         Context context;

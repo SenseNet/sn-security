@@ -11,9 +11,10 @@ namespace SenseNet.Security.Tests
     {
         // ReSharper disable once InconsistentNaming
         private Context __context;
-        private Context CurrentContext => __context;
+        protected Context CurrentContext => __context;
 
         protected abstract ISecurityDataProvider GetDataProvider();
+        protected abstract void CleanupMemberships();
 
         [TestInitialize]
         public void StartTest()

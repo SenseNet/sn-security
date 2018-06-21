@@ -11,5 +11,17 @@ namespace SenseNet.Security.Tests
             MemoryDataProvider.LastActivityId = 0;
             return new MemoryDataProvider(DatabaseStorage.CreateEmpty());
         }
+
+        protected override void CleanupMemberships()
+        {
+            MemoryDataProvider.Storage.Memberships.Clear();
+        }
+
+
+        [TestMethod]
+        public void Xxx()
+        {
+            Assert.Inconclusive();
+        }
     }
 }

@@ -14,7 +14,7 @@ using System.Text;
 
 namespace SenseNet.Security.Tests.EFC
 {
-    [TestClass]
+    //[TestClass]
     public class EFCMembershipTests : EFCTestBase
     {
         protected override Context CreateContext(TextWriter traceChannel = null)
