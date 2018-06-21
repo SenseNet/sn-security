@@ -175,23 +175,13 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Accessors.cs" />
-    <Compile Include="AclTests.cs" />
     <Compile Include="EF6Tests.cs" />
-    <Compile Include="EF6\EF6AclTests.cs" />
-    <Compile Include="EF6\EF6MembershipTests.cs" />
     <Compile Include="EF6\EF6LoadActivitiesTests.cs" />
-    <Compile Include="EF6\EF6StructureTests.cs" />
     <Compile Include="EF6\EF6TestBase.cs" />
     <Compile Include="EFCTests.cs" />
-    <Compile Include="EFC\EFCAclTests.cs" />
-    <Compile Include="EFC\EFCTestBase.cs" />
-    <Compile Include="EFC\EFCLoadActivitiesTests.cs" />
-    <Compile Include="EFC\EFCMembershipTests.cs" />
-    <Compile Include="EFC\EFCStructureTests.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="InMemTests.cs" />
     <Compile Include="MembershipTests2.cs" />
-    <Compile Include="MembershipTests.cs" />
     <Compile Include="MessagingTests.cs" />
     <Compile Include="PermissionQueryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -205,7 +195,6 @@
     <Compile Include="TestPortal\TestGroup.cs" />
     <Compile Include="TestPortal\TestSecurityContext.cs" />
     <Compile Include="TestPortal\TestUser.cs" />
-    <Compile Include="StructureTests.cs" />
     <Compile Include="SystemStartTests.cs" />
     <Compile Include="TestsCasesStructureTests.cs" />
     <Compile Include="Tools.cs" />
