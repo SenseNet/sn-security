@@ -11,7 +11,7 @@ using SenseNet.Security.Data;
 
 namespace SenseNet.Security.Tests
 {
-    [TestClass]
+    //[TestClass]
     public class StructureTests
     {
         Context context;

@@ -23,8 +23,6 @@ namespace SenseNet.Security.Tests
             SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             Context.StartTheSystem(dataProvider, new DefaultMessageProvider());
             __context = new Context(TestUser.User1);
-
-            EnsureRepository();
         }
 
         /* ======================================================================= Tools */

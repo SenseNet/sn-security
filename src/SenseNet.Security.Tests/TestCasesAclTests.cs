@@ -11,12 +11,16 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Acl_Get0()
         {
+            EnsureRepository();
+
             var acl = CurrentContext.Security.GetAclInfo(int.MaxValue, false);
             Assert.IsNull(acl);
         }
         [TestMethod]
         public void Acl_Get1()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:______________+");
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
             Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
@@ -24,6 +28,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Acl_Get2()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
@@ -36,6 +42,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Acl_Get3()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
             SetAcl("+E3|+G3:+-+-+-+-+-+-+-+");
@@ -46,6 +54,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Acl_Get4()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
             CurrentContext.Security.BreakInheritance(Id("E3"), false);
@@ -58,6 +68,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Acl_Get_BreakedEmpty()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
             CurrentContext.Security.BreakInheritance(Id("E3"), false);
@@ -69,6 +81,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Acl_Get_WithMembership()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1");
             Assert.IsTrue(CurrentContext.Security.Cache.IsInGroup(Id("U1"), Id("G1")), "G1 not contains U1");
             Assert.IsFalse(CurrentContext.Security.Cache.IsInGroup(int.MaxValue, int.MaxValue - 1), "Any group contains anyone");
@@ -99,6 +113,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_HasPermission_Allow()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.See));
@@ -119,6 +135,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_HasPermission_Deny()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:+++++++++++++++,+G2:-------------++,+G3:+-+-+-+-+-+-+-+,-G4:+-+-+-+-+-+-+-+");
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.See));
@@ -139,6 +157,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_AssertPermission()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
             CurrentContext.Security.AssertPermission(Id("E1"), PermissionType.See);
@@ -169,6 +189,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_AssertPermission3()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
 
@@ -203,6 +225,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_HasPermission_Break()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+");
             SetAcl("-E2|+G1:_____________+_");
@@ -213,6 +237,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_HasPermission_LocalOnly()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+");
             SetAcl("+E2|-G1:_____________+_");
@@ -230,6 +256,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_HasSubtreePermission_Allow()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
             SetAcl("+E3|+G1:_____________+_,+G2:______________+");
@@ -259,6 +287,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_HasSubtreePermission_EmptySubTree_BugReproduction()
         {
+            EnsureRepository();
+
             //E9 is an empty subtree (leaf) and has inherited permissions
             Tools.SetMembership(CurrentContext.Security, "U1:G1");
             CurrentContext.Security.CreateAclEditor()
@@ -268,6 +298,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_AssertSubtreePermission()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
             SetAcl("+E3|+G1:_____________+_,+G2:______________+");
@@ -337,6 +369,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_AssertSubtreePermission_Entity()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
             SetAcl("+E3|+G1:_____________+_,+G2:______________+");
@@ -396,6 +430,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_GetSubtreePermission_BreakAllowLocalonly()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
             SetAcl("+E1|+G1:______________+,+G2:_____________+_");
             SetAcl("+E3|+G1:_____________+_,+G2:______________+");
@@ -417,6 +453,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_AssertChildPermission_ParentHasLocalOnlyEntry()
         {
+            EnsureRepository();
+
             SetAcl("-E21|+G1:__________+++++,-G2:_________++++++");
 
             // E26 node is a child of E21 and it should not inherit its parent's local only entries
@@ -427,6 +465,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Eval_EffectivePermissions()
         {
+            EnsureRepository();
+
             AclEditor ed;
             var db = CurrentContext.Security.DataProvider;
 
@@ -462,6 +502,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_PermissionBitMask1()
         {
+            EnsureRepository();
+
             PermissionBitMask pbm;
 
             pbm = PermissionType.See;
@@ -492,6 +534,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_CreationPossibilities()
         {
+            EnsureRepository();
+
             AclEditor ed;
 
             ed = AclEditor.Create(CurrentContext.Security);
@@ -501,6 +545,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_AllowDenyClear()
         {
+            EnsureRepository();
+
             var entity = CurrentContext.Security.GetSecurityEntity(Id("E1"));
             var ed = CurrentContext.Security.CreateAclEditor();
             var edAcc = new PrivateObject(ed);
@@ -535,6 +581,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_AllowDenyMoreBits()
         {
+            EnsureRepository();
+
             var entityId = CurrentContext.Security.GetSecurityEntity(Id("E1")).Id;
             var userId1 = Id("U1");
             var userId2 = Id("U2");
@@ -585,6 +633,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_AllowDenyAll()
         {
+            EnsureRepository();
+
             CurrentContext.Security.CreateAclEditor().Set(Id("E1"), Id("U1"), false, new PermissionBitMask { AllowBits = ~0ul, DenyBits = 0ul }).Apply();
             Assert.AreEqual("+E1|+U1:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E1")).ToString()));
 
@@ -594,6 +644,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_SetMoreBits()
         {
+            EnsureRepository();
+
             var entityId = CurrentContext.Security.GetSecurityEntity(Id("E1")).Id;
             var userId1 = Id("U1");
             var userId2 = Id("U2");
@@ -641,6 +693,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_AllowMoreEntriesInOneEditor()
         {
+            EnsureRepository();
+
             var entityId1 = CurrentContext.Security.GetSecurityEntity(Id("E1")).Id;
             var entityId2 = CurrentContext.Security.GetSecurityEntity(Id("E2")).Id;
             var userId1 = Id("U1");
@@ -659,6 +713,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_RemovePermissions()
         {
+            EnsureRepository();
+
             var entityId1 = CurrentContext.Security.GetSecurityEntity(Id("E1")).Id;
             var entityId2 = CurrentContext.Security.GetSecurityEntity(Id("E2")).Id;
             var userId1 = Id("U1");
@@ -685,6 +741,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_ResetPermissions()
         {
+            EnsureRepository();
+
             var entityId1 = CurrentContext.Security.GetSecurityEntity(Id("E1")).Id;
             var entityId2 = CurrentContext.Security.GetSecurityEntity(Id("E2")).Id;
             var userId1 = Id("U1");
@@ -711,6 +769,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_KeepInheritedPermissions()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1");
 
             var uid1 = Id("U1");
@@ -791,6 +851,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_KeepInheritedPermissions_CommonAclEditor()
         {
+            EnsureRepository();
+
             Tools.SetMembership(CurrentContext.Security, "U1:G1");
 
             var uid1 = Id("U1");
@@ -852,6 +914,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_EmptyEntriesRemovedFromDatabase()
         {
+            EnsureRepository();
+
             var u1 = Id("U1");
 
             var ed0 = CurrentContext.Security.CreateAclEditor();
@@ -883,6 +947,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_EmptyEntriesRemovedFromMemory()
         {
+            EnsureRepository();
+
             var u1 = Id("U1");
 
             var ed0 = CurrentContext.Security.CreateAclEditor();
@@ -910,6 +976,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_BreakedEmptyAclIsNotDeletedFromMemory()
         {
+            EnsureRepository();
+
             var u1 = Id("U1");
 
             var ed0 = CurrentContext.Security.CreateAclEditor();
@@ -941,6 +1009,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_UseLocalOnlyValues()
         {
+            EnsureRepository();
+
             var u1 = Id("U1");
 
             var ed = CurrentContext.Security.CreateAclEditor();
@@ -962,6 +1032,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_NearestHolderId()
         {
+            EnsureRepository();
+
             AclEditor ed;
             var sec = CurrentContext.Security;
             var db = CurrentContext.Security.DataProvider;
@@ -1057,6 +1129,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_EditablePermissions()
         {
+            EnsureRepository();
+
             AclEditor ed;
             var db = CurrentContext.Security.DataProvider;
 
@@ -1085,6 +1159,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_BreakInheritance_NotHolder_WithCopy()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
@@ -1106,6 +1182,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_BreakInheritance_Holder_WithCopy()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
@@ -1129,6 +1207,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_BreakInheritance_NotHolder_WithoutCopy()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
@@ -1150,6 +1230,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_BreakInheritance_NotHolder_WithoutCopy_ChildrenAcls()
         {
+            EnsureRepository();
+
             //Break on E32
             //Expected:
             //  children acls: E35, E36
@@ -1199,6 +1281,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_BreakInheritance_Holder_WithoutCopy()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E4|+G2:+___________++_");
             SetAcl("+E12|+G2:______++++++___");
@@ -1240,6 +1324,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_BreakInheritance_OnBreaked()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E4|+G2:+___________++_");
             SetAcl("+E12|+G2:______++++++___");
@@ -1283,6 +1369,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_UnbreakInheritance_WithNormalize()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
@@ -1316,6 +1404,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_UnbreakInheritance_WithoutNormalize()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
@@ -1339,6 +1429,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_UnbreakInheritance_OnUnbreaked()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
@@ -1367,6 +1459,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_UnbreakInheritance_WithNormalize_AcesAndHolderIds()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
 
@@ -1397,6 +1491,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_NormalizeDoesNothing()
         {
+            EnsureRepository();
+
             SetAcl("+E2|+G2:+___________++_");
 
             var ed = CurrentContext.Security.CreateAclEditor();
@@ -1410,6 +1506,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_CopyEffectivePermissions1()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
             SetAcl("+E5|+G1:+___+++_____++_,+G2:___________++++");
@@ -1428,6 +1526,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_CopyEffectivePermissions2()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
             SetAcl("+E5|+G1:+___+++_____++_,+G2:___________++++");
@@ -1446,6 +1546,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_NormalizeExplicitePermissions1()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+-__________++_");
             SetAcl("+E5|+G1:+___+++_____++_,+G2:-__________++++");
@@ -1463,6 +1565,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_NormalizeExplicitePermissions2()
         {
+            EnsureRepository();
+
             SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
             SetAcl("+E2|+G2:+___________++_");
             SetAcl("+E5|+G1:+___+++_____++_,+G2:___________++++");
@@ -1482,6 +1586,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AclEditor_AllowDenyClear_Persistence()
         {
+            EnsureRepository();
+
             var entity4Id = CurrentContext.Security.GetSecurityEntity(Id("E4")).Id;
             var user6Id = Id("U6");
             AclEditor ed;
@@ -1578,6 +1684,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void AccessControlList_NoExplicitEntry_ParentBreaked()
         {
+            EnsureRepository();
+
             var ctx = CurrentContext.Security;
 
             ctx.CreateAclEditor().BreakInheritance(Id("E3"), false).Apply(); // with entry
