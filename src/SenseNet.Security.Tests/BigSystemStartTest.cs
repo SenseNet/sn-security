@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SenseNet.Security.Data;
+using SenseNet.Security.EFCSecurityStore;
 
 namespace SenseNet.Security.Tests
 {
@@ -160,7 +161,7 @@ namespace SenseNet.Security.Tests
         public void EF_Performance_SystemStart_BigDatabase()
         {
             var timer = Stopwatch.StartNew();
-            Context.StartTheSystem(new EF6SecurityDataProvider(connectionString: ConnectionString), new DefaultMessageProvider());
+            Context.StartTheSystem(new EFCSecurityDataProvider(connectionString: ConnectionString), new DefaultMessageProvider());
             timer.Stop();
             var ctx = new Context(TestUser.User1);
             Assert.Inconclusive("Loading time: {0}", timer.Elapsed);
@@ -172,7 +173,7 @@ namespace SenseNet.Security.Tests
             Stopwatch timer;
             IDictionary<int, SecurityEntity> entities;
 
-            var dataProvider = new EF6SecurityDataProvider(connectionString: ConnectionString);
+            var dataProvider = new EFCSecurityDataProvider(connectionString: ConnectionString);
             timer = Stopwatch.StartNew();
             var data = dataProvider.LoadSecurityEntities();
             timer.Stop();

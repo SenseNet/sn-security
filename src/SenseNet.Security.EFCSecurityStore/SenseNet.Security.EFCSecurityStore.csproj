@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <DebugType>Full</DebugType>
+    <Authors>kavics,tusmester</Authors>
+    <Company>Sense/Net Inc.</Company>
+    <Product>sensenet Security EF Core dataprovider</Product>
+    <Copyright>Copyright © Sense/Net Inc.</Copyright>
+    <PackageLicenseUrl>https://github.com/SenseNet/sn-security/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/SenseNet/sn-security</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/SenseNet/sn-resources/master/images/sn-icon/sensenet-icon-64.png</PackageIconUrl>
+    <PackageTags>sensenet security permissions</PackageTags>
+    <NeutralLanguage>English</NeutralLanguage>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>Entity Framework Core data provider implementation for the SenseNet.Security project.</Description>
+    <PackageReleaseNotes>See release notes on GitHub.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Scripts\Install_Schema_2.1.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\Install_Schema_2.1.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SenseNet.Security\SenseNet.Security.csproj" />
+  </ItemGroup>
+
+</Project>

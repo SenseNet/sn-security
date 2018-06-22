@@ -17,6 +17,7 @@
     <Product>sensenet Security</Product>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>English</NeutralLanguage>
+    <DebugType>Full</DebugType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -24,7 +24,6 @@ namespace SenseNet.Security.Messaging
             this.executingUnprocessedActivities = executingUnprocessedActivities;
             this.pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
         }
-        //UNDONE: use the executingUnprocessedActivities if needed or remove
         // ReSharper disable once UnusedParameter.Local
         public SecurityActivityLoader(int[] gaps, bool executingUnprocessedActivities)
         {

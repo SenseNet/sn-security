@@ -419,8 +419,6 @@ namespace SenseNet.Security
                 RemoveUserFromGroup(userId, allParents, usersTable, groupsTable);
             }
 
-            //UNDONE: What does do this method?
-            //UNDONE: use the deletedGroup if needed or remove
             // ReSharper disable once UnusedParameter.Local
             internal static void DeleteGroup(SecurityGroup deletedGroup, List<int> allUsers, List<int> allParents, IDictionary<int, SecurityGroup> groupsTable, Dictionary<int, List<int>> usersTable)
             {

@@ -55,7 +55,7 @@ namespace SenseNet.Security.Tests
                 G6:U6|G7:|G8:U7,U8,U9|G9:G16,G17,G18,G19|G10:U11|G11:U12,U13|G12:U14,U15,U16,U17,U18,U19,U20|G13:U21|G14:U22,U23|
                 G15:U24|G16:U25|G17:U26|G18:U27,U28|G19:U29|G20:U30,U31,U32,U33,G21,G22,G23|G21:U34,U35|G22:U36|G23:U37,U38");
             context.Security.Cache.Reset(context.Security.DataProvider);
-            Assert.AreEqual(InitialMembership, MembershipTests.DumpMembership(context.Security));
+            Assert.AreEqual(InitialMembership, DumpMembership(context.Security));
         }
         [TestCleanup]
         public void Finishtest()
@@ -81,7 +81,7 @@ namespace SenseNet.Security.Tests
                 .AddGroupsToUser(U28, G18, G30)
                 .AddGroupsToUser(U29, G18, G30)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -102,7 +102,7 @@ namespace SenseNet.Security.Tests
                 .AddGroupsToUser(U29, G18, G30)
                 .AddGroupsToUser(U40, G1, G3, G9, G18, G30)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -117,7 +117,7 @@ namespace SenseNet.Security.Tests
             var expected = new MembershipEditor(InitialMembership)
                 .AddGroupsToUser(U1, G3, G4, G7, G10, G20, G22)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -132,7 +132,7 @@ namespace SenseNet.Security.Tests
             var expected = new MembershipEditor(InitialMembership)
                 .AddGroupsToUser(U40, G1, G3, G4, G7, G10, G20, G22)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -143,13 +143,13 @@ namespace SenseNet.Security.Tests
             var expected = new MembershipEditor(InitialMembership)
                 .AddGroupsToUser(U1, G3, G4, G7, G10, G20, G22)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
 
             // operation
             ctx.RemoveUserFromSecurityGroups(U1, new[] { G4, G7, G10, G20, G22 });
 
             // test
-            Assert.AreEqual(InitialMembership, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(InitialMembership, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -164,7 +164,7 @@ namespace SenseNet.Security.Tests
             var expected = new MembershipEditor(InitialMembership)
                 .AddGroupsToUser(U40, G1, G3, G7)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -178,13 +178,13 @@ namespace SenseNet.Security.Tests
                 "U11:G1,G3,G10|U12:G1,G3,G11|U13:G1,G3,G11|U14:G1,G5,G12|U15:G1,G5,G12|U16:G1,G5,G12|U17:G1,G5,G12|U18:G1,G5,G12|" +
                 "U19:G1,G5,G12|U20:G1,G5,G12|U21:G1,G5,G13|U22:G1,G5,G14|U23:G1,G5,G14|U24:G1,G5,G15|U25:G1,G3,G9,G16,G18,G30|U26:G1,G3,G9,G17,G18,G30|" +
                 "U27:G1,G3,G9,G18,G30|U28:G1,G3,G9,G18,G30|U29:G1,G3,G9,G18,G19,G30|U30:G20|U31:G20|U32:G20|U33:G20|U34:G20,G21|U35:G20,G21|U36:G20,G22|" +
-                "U37:G20,G23|U38:G20,G23|U40:G1,G3,G9,G18,G30", MembershipTests.DumpMembership(ctx));
+                "U37:G20,G23|U38:G20,G23|U40:G1,G3,G9,G18,G30", DumpMembership(ctx));
 
             // operation
             ctx.DeleteSecurityGroup(G30);
 
             // test
-            Assert.AreEqual(InitialMembership, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(InitialMembership, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -204,7 +204,7 @@ namespace SenseNet.Security.Tests
                 .RemoveGroupsFromUser(U37, G20)
                 .RemoveGroupsFromUser(U38, G20)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -230,7 +230,7 @@ namespace SenseNet.Security.Tests
                 .RemoveGroupsFromUser(U28, G1, G3)
                 .RemoveGroupsFromUser(U29, G1, G3)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -245,7 +245,7 @@ namespace SenseNet.Security.Tests
             var expected = new MembershipEditor(InitialMembership)
                 .DeleteUsers(U7, U8, U9)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -262,7 +262,7 @@ namespace SenseNet.Security.Tests
             .RemoveGroupsFromUser(U34, G20)
             .RemoveGroupsFromUser(U35, G20)
             .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -279,7 +279,7 @@ namespace SenseNet.Security.Tests
                 .RemoveGroupFromUsers(G1, U7, U8, U9, U11, U12, U13, U25, U26, U27, U28, U29)
                 .RemoveGroupFromUsers(G3, U25, U26, U27, U28, U29)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -294,7 +294,7 @@ namespace SenseNet.Security.Tests
             var expected = new MembershipEditor(InitialMembership)
                 .DeleteUsers(U1)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -305,7 +305,7 @@ namespace SenseNet.Security.Tests
             var expected = new MembershipEditor(InitialMembership)
                 .AddGroupsToUser(U1, G3, G4, G7, G10, G20, G22)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
 
             // operation
             ctx.DeleteUser(U1);
@@ -314,7 +314,7 @@ namespace SenseNet.Security.Tests
             expected = new MembershipEditor(InitialMembership)
                 .DeleteUsers(U1)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
 
@@ -331,7 +331,7 @@ namespace SenseNet.Security.Tests
                 .DeleteUsers(U1, U11, U26, U30, U31, U32, U33)
                 .RemoveGroupFromUsers(G20, U34, U35, U36, U37, U38)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
 
@@ -344,7 +344,7 @@ namespace SenseNet.Security.Tests
             ctx.AddUserToSecurityGroups(U1, new[] { G5, G18, G20, G23 });
             ctx.AddUserToSecurityGroups(U40, new[] { G20 });
             ctx.AddMembersToSecurityGroup(G20, null, null, new[] { G10, G12 });
-            var membershipBefore = MembershipTests.DumpMembership(ctx);
+            var membershipBefore = DumpMembership(ctx);
 
             // operation
             ctx.DeleteSecurityGroup(G20);
@@ -359,7 +359,7 @@ namespace SenseNet.Security.Tests
                 .RemoveGroupsFromUser(U38, G1, G3, G5, G10, G12, G20)
                 .DeleteUsers(U30, U31, U32, U33, U40)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -371,7 +371,7 @@ namespace SenseNet.Security.Tests
             ctx.AddUserToSecurityGroups(U1, new[] { G5, G18, G20, G23 });
             ctx.AddUserToSecurityGroups(U40, new[] { G20 });
             ctx.AddMembersToSecurityGroup(G20, null, null, new[] { G10, G12 });
-            var membershipBefore = MembershipTests.DumpMembership(ctx);
+            var membershipBefore = DumpMembership(ctx);
 
             // operation
             ctx.RemoveMembersFromSecurityGroup(G20, null, null, new[] { G10, G12 });
@@ -390,7 +390,7 @@ namespace SenseNet.Security.Tests
                 .RemoveGroupsFromUser(U38, G1, G3, G5, G10, G12)
                 .RemoveGroupsFromUser(U40, G1, G3, G5, G10, G12)
                 .ToString();
-            Assert.AreEqual(expected, MembershipTests.DumpMembership(ctx));
+            Assert.AreEqual(expected, DumpMembership(ctx));
         }
 
         [TestMethod]
@@ -433,6 +433,35 @@ namespace SenseNet.Security.Tests
 
         /*==================================================================================*/
 
+        internal static string DumpMembership(SecurityContext context)
+        {
+            return DumpMembership(context.Cache.Membership);
+        }
+        public static string DumpMembership(Dictionary<int, List<int>> membership)
+        {
+            if (membership.Count == 0)
+                return String.Empty;
+
+            var sb = new StringBuilder();
+            foreach (var userId in membership.Keys.OrderBy(s => s))
+            {
+                sb.Append(GetUserName(userId)).Append(":");
+                sb.Append(String.Join(",", membership[userId].OrderBy(s => s).Select(g => GetGroupName(g))));
+                sb.Append("|");
+            }
+            sb.Length--;
+            return sb.ToString();
+        }
+
+        private static string GetUserName(int userId)
+        {
+            return "U" + (userId % 100);
+        }
+        private static string GetGroupName(int groupId)
+        {
+            return "G" + (groupId % 100);
+        }
+
         private static int Id(string name)
         {
             return Tools.GetId(name);
@@ -454,7 +483,7 @@ namespace SenseNet.Security.Tests
 
             public override string ToString()
             {
-                return MembershipTests.DumpMembership(this.Membership);
+                return DumpMembership(this.Membership);
             }
 
             //-------------------------------------------------------------------------------------

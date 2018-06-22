@@ -36,7 +36,7 @@ namespace SenseNet.Security.Data
         }
         public void DeleteEverything()
         {
-            _storage = new DatabaseStorage();
+            _storage = DatabaseStorage.CreateEmpty();
         }
         public void InstallDatabase()
         {
@@ -258,7 +258,6 @@ namespace SenseNet.Security.Data
         {
             lock (_acesLock)
             {
-                //UNDONE:! check based on EF6 solution
                 var result = new List<int>();
                 var relatedEntityIds = _storage.Aces.Where(x => x.IdentityId == groupId).Select(x => x.EntityId).Distinct();
                 return result;

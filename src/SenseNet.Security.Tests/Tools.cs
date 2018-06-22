@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
+using System.IO;
 using SenseNet.Security;
 using SenseNet.Security.Data;
 using SenseNet.Security.EF6SecurityStore;
@@ -89,32 +90,15 @@ namespace SenseNet.Security.Tests
             return result.ToArray();
         }
 
-        internal static StoredAce[] PeekEntriesFromTestDatabase(int entityId, MemoryDataProvider database)
-        {
-            return new MemoryDataProviderAccessor(database).Storage.Aces.Where(x => x.EntityId == entityId).ToArray();
-        }
-        internal static StoredAce[] PeekEntriesFromTestDatabase(int entityId, SecurityStorage database)
-        {
-            var entries = database.EFEntries.Where(x => x.EFEntityId == entityId).ToArray();
-            return entries.Select(a => new StoredAce
-            {
-                EntityId = a.EFEntityId,
-                IdentityId = a.IdentityId,
-                LocalOnly = a.LocalOnly,
-                AllowBits = Convert.ToUInt64(a.AllowBits),
-                DenyBits = Convert.ToUInt64(a.DenyBits),
-            }).ToArray();
-        }
-
         internal static Context GetEmptyContext(TestUser currentUser)
         {
             SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             MemoryDataProvider.LastActivityId = 0;
             return GetEmptyContext(currentUser, new MemoryDataProvider(DatabaseStorage.CreateEmpty()));
         }
-        internal static Context GetEmptyContext(TestUser currentUser, ISecurityDataProvider dbProvider)
+        internal static Context GetEmptyContext(TestUser currentUser, ISecurityDataProvider dbProvider, TextWriter traceChannel = null)
         {
-            Context.StartTheSystem(dbProvider, new DefaultMessageProvider());
+            Context.StartTheSystem(dbProvider, new DefaultMessageProvider(), traceChannel);
             return new Context(currentUser);
         }
 
@@ -286,11 +270,6 @@ namespace SenseNet.Security.Tests
             var entityId = GetId(b);
             SetAcl(context, entityId, inherits, a[1]);
         }
-        private static void SetAcl(SecurityContext context, TestEntity entity, string src)
-        {
-            var secEntity = context.GetSecurityEntity(entity.Id);
-            SetAcl(context, entity.Id, secEntity.IsInherited, src);
-        }
         private static void SetAcl(SecurityContext context, int entityId, bool isInherited, string src)
         {
             // "+U1:____++++,+G1:____++++"
@@ -354,13 +333,6 @@ namespace SenseNet.Security.Tests
             // "G1:U1,G2,G3|G2:U2,G4,G5|G3:U3|G4:U4|G5:U5"
             var table = MemoryDataProvider.Storage.Memberships;
             InitializeInMemoryMembershipTable(src, table);
-        }
-        public static List<Membership> CreateInMemoryMembershipTable(string src)
-        {
-            // example: "G1:U1,U2|G2:U3,U4|G3:U1,U3|G4:U4|G5:U5"
-            var table = new List<Membership>();
-            InitializeInMemoryMembershipTable(src, table);
-            return table;
         }
         public static List<Membership> CreateInMemoryMembershipTable(Dictionary<int, SecurityGroup> groups)
         {
