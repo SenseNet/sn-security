@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>SenseNet.Security.EF6SecurityStore</id>
-    <version>2.4.0</version>
+    <version>3.0.0</version>
     <title>sensenet Security Entity Framework data provider</title>
     <authors>kavics,tusmester</authors>
     <owners>Sense/Net</owners>
@@ -16,7 +16,7 @@
     <language>en-US</language>
     <tags>sensenet ecm security permissions ef6 entityframework</tags>
     <dependencies>
-      <dependency id="SenseNet.Security" version="2.5" />
+      <dependency id="SenseNet.Security" version="3.0" />
       <dependency id="EntityFramework" version="6.1.2" />
     </dependencies>
   </metadata>

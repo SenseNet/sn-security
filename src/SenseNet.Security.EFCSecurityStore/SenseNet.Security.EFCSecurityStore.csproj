@@ -10,7 +10,7 @@
     <PackageLicenseUrl>https://github.com/SenseNet/sn-security/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/SenseNet/sn-security</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/SenseNet/sn-resources/master/images/sn-icon/sensenet-icon-64.png</PackageIconUrl>
-    <PackageTags>sensenet security permissions</PackageTags>
+    <PackageTags>sensenet security permissions ef core entityframework</PackageTags>
     <NeutralLanguage>English</NeutralLanguage>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Entity Framework Core data provider implementation for the SenseNet.Security project.</Description>
