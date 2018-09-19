@@ -18,10 +18,17 @@ namespace SenseNet.Security.EFCSecurityStore
     public class EFCSecurityDataProvider : ISecurityDataProvider
     {
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
+        public EFCSecurityDataProvider() : this(120)
+        {
+        }
+        /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
         public EFCSecurityDataProvider(int commandTimeout = 120, string connectionString = null)
         {
+            // fallback to well-known connection strings if the caller did not provide one
             if (connectionString == null)
-                connectionString = ConfigurationManager.ConnectionStrings["SecurityStorage"].ConnectionString;
+                connectionString = ConfigurationManager.ConnectionStrings["SecurityStorage"]?.ConnectionString ??
+                                   ConfigurationManager.ConnectionStrings["SnCrMsSql"]?.ConnectionString;
+
             this.CommandTimeout = commandTimeout;
             this.ConnectionString = connectionString;
         }
