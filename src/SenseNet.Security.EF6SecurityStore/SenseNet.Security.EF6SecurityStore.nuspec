@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>SenseNet.Security.EF6SecurityStore</id>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <title>sensenet Security Entity Framework data provider</title>
     <authors>kavics,tusmester</authors>
     <owners>Sense/Net</owners>
