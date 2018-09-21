@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
@@ -17,8 +18,21 @@ namespace SenseNet.Security.EF6SecurityStore
     public class EF6SecurityDataProvider : ISecurityDataProvider
     {
         /// <summary>Initializes a new instance of the EF6SecurityDataProvider class.</summary>
+        public EF6SecurityDataProvider() : this(0)
+        {
+        }
+        /// <summary>Initializes a new instance of the EF6SecurityDataProvider class.</summary>
         public EF6SecurityDataProvider(int commandTimeout = 120, string connectionString = null)
         {
+            // fallback to configuration
+            if (commandTimeout == 0)
+                commandTimeout = Configuration.Data.SecurityDatabaseCommandTimeoutInSeconds;
+
+            // fallback to well-known connection strings if the caller did not provide one
+            if (connectionString == null)
+                connectionString = ConfigurationManager.ConnectionStrings["SecurityStorage"]?.ConnectionString ??
+                                   ConfigurationManager.ConnectionStrings["SnCrMsSql"]?.ConnectionString;
+
             this.CommandTimeout = commandTimeout;
             this.ConnectionString = connectionString;
         }
