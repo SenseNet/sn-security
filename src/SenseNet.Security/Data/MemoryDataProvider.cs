@@ -100,6 +100,7 @@ namespace SenseNet.Security.Data
                     yield return new StoredAce
                     {
                         EntityId = dbItem.EntityId,
+                        EntryType = dbItem.EntryType,
                         IdentityId = dbItem.IdentityId,
                         LocalOnly = dbItem.LocalOnly,
                         AllowBits = dbItem.AllowBits,

@@ -24,7 +24,7 @@ namespace SenseNet.Security
 
         /// <summary>Converts the value of this instance to a System.String.</summary>
         [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-        public override string ToString()
+        public override string ToString() //UNDONE: ToString
         {
             // "+E1|+U1:____++++,+G1:____++++"
 

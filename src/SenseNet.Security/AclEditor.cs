@@ -266,6 +266,7 @@ namespace SenseNet.Security
             var aceInfo = aclInfo.Entries.FirstOrDefault(x => x.IdentityId == identityId && x.LocalOnly == localOnly);
             if (aceInfo == null)
             {
+                //UNDONE: EntryType initialization?
                 aclInfo.Entries.Add(aceInfo = new AceInfo { IdentityId = identityId, LocalOnly = localOnly });
             }
             return aceInfo;

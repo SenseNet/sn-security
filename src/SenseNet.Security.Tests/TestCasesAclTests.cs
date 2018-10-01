@@ -494,9 +494,9 @@ namespace SenseNet.Security.Tests
             var entries = CurrentContext.Security.GetAclInfo(Id("E5")).GetEffectiveEntries(true);
 
             Assert.AreEqual(3, entries.Count);
-            Assert.AreEqual("+G1:_________________________________________________-++-++-++-++-++", Tools.ReplaceIds(entries[0].ToString()));
-            Assert.AreEqual("+U1:_______________________________________________________-++-++-++", Tools.ReplaceIds(entries[1].ToString()));
-            Assert.AreEqual("+U2:____________________________________________________-++-++-++-++", Tools.ReplaceIds(entries[2].ToString()));
+            Assert.AreEqual("Normal|+G1:_________________________________________________-++-++-++-++-++", Tools.ReplaceIds(entries[0].ToString()));
+            Assert.AreEqual("Normal|+U1:_______________________________________________________-++-++-++", Tools.ReplaceIds(entries[1].ToString()));
+            Assert.AreEqual("Normal|+U2:____________________________________________________-++-++-++-++", Tools.ReplaceIds(entries[2].ToString()));
         }
 
         [TestMethod]
@@ -636,10 +636,10 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             CurrentContext.Security.CreateAclEditor().Set(Id("E1"), Id("U1"), false, new PermissionBitMask { AllowBits = ~0ul, DenyBits = 0ul }).Apply();
-            Assert.AreEqual("+E1|+U1:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E1")).ToString()));
+            Assert.AreEqual("+E1|Normal|+U1:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E1")).ToString()));
 
             CurrentContext.Security.CreateAclEditor().Set(Id("E1"), Id("U1"), false, new PermissionBitMask { AllowBits = 0ul, DenyBits = ~0ul }).Apply();
-            Assert.AreEqual("+E1|+U1:----------------------------------------------------------------", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E1")).ToString()));
+            Assert.AreEqual("+E1|Normal|+U1:----------------------------------------------------------------", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E1")).ToString()));
         }
         [TestMethod]
         public void AclEditor_SetMoreBits()
@@ -1157,7 +1157,7 @@ namespace SenseNet.Security.Tests
 
 
         [TestMethod]
-        public void AclEditor_BreakInheritance_NotHolder_WithCopy()
+        public void AclEditor_Break_NotHolder_WithCopy()
         {
             EnsureRepository();
 
@@ -1166,7 +1166,7 @@ namespace SenseNet.Security.Tests
 
             CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
 
-            Assert.AreEqual("-E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("-E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
             var sec = CurrentContext.Security;
             var entity = sec.GetSecurityEntity(Id("E5"));
@@ -1176,22 +1176,22 @@ namespace SenseNet.Security.Tests
             var aceTable = db.LoadAllAces(); // dbAcc.Storage.Aces;
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(2, aces.Length);
-            Assert.AreEqual("E5|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(aces[0].ToString()));
-            Assert.AreEqual("E5|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(aces[1].ToString()));
+            Assert.AreEqual("E5|Normal|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(aces[0].ToString()));
+            Assert.AreEqual("E5|Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(aces[1].ToString()));
         }
         [TestMethod]
-        public void AclEditor_BreakInheritance_Holder_WithCopy()
+        public void AclEditor_Break_Holder_WithCopy()
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
 
             CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E2")).Apply();
 
             var aclInfo = CurrentContext.Security.GetAclInfo(Id("E2"));
             Assert.IsNotNull(aclInfo);
-            Assert.AreEqual("-E2|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(aclInfo.ToString()));
+            Assert.AreEqual("-E2|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(aclInfo.ToString()));
 
             var sec = CurrentContext.Security;
             var entity = sec.GetSecurityEntity(Id("E2"));
@@ -1201,11 +1201,11 @@ namespace SenseNet.Security.Tests
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E2")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(2, aces.Length);
-            Assert.AreEqual("E2|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(aces[0].ToString()));
-            Assert.AreEqual("E2|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(aces[1].ToString()));
+            Assert.AreEqual("E2|Normal|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(aces[0].ToString()));
+            Assert.AreEqual("E2|Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(aces[1].ToString()));
         }
         [TestMethod]
-        public void AclEditor_BreakInheritance_NotHolder_WithoutCopy()
+        public void AclEditor_Break_NotHolder_WithoutCopy()
         {
             EnsureRepository();
 
@@ -1228,7 +1228,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(0, aces.Length);
         }
         [TestMethod]
-        public void AclEditor_BreakInheritance_NotHolder_WithoutCopy_ChildrenAcls()
+        public void AclEditor_Break_NotHolder_WithoutCopy_ChildrenAcls()
         {
             EnsureRepository();
 
@@ -1279,7 +1279,7 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void AclEditor_BreakInheritance_Holder_WithoutCopy()
+        public void AclEditor_Break_Holder_WithoutCopy()
         {
             EnsureRepository();
 
@@ -1301,7 +1301,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(Id("E12"), aclE33.Parent.EntityId);
             Assert.AreEqual(Id("E12"), aclE34.Parent.EntityId);
 
-            Assert.AreEqual("-E12|+G2:_______________________________________________________++++++___", Tools.ReplaceIds(aclE12.ToString()));
+            Assert.AreEqual("-E12|Normal|+G2:_______________________________________________________++++++___", Tools.ReplaceIds(aclE12.ToString()));
 
             var db = CurrentContext.Security.DataProvider;
             var sec = CurrentContext.Security;
@@ -1322,7 +1322,7 @@ namespace SenseNet.Security.Tests
 
         }
         [TestMethod]
-        public void AclEditor_BreakInheritance_OnBreaked()
+        public void AclEditor_Break_OnBreaked()
         {
             EnsureRepository();
 
@@ -1346,7 +1346,7 @@ namespace SenseNet.Security.Tests
                 Assert.AreEqual(Id("E12"), aclE33.Parent.EntityId);
                 Assert.AreEqual(Id("E12"), aclE34.Parent.EntityId);
 
-                Assert.AreEqual("-E12|+G2:_______________________________________________________++++++___", Tools.ReplaceIds(aclE12.ToString()));
+                Assert.AreEqual("-E12|Normal|+G2:_______________________________________________________++++++___", Tools.ReplaceIds(aclE12.ToString()));
 
                 var db = CurrentContext.Security.DataProvider;
                 var sec = CurrentContext.Security;
@@ -1367,7 +1367,7 @@ namespace SenseNet.Security.Tests
             }
         }
         [TestMethod]
-        public void AclEditor_UnbreakInheritance_WithNormalize()
+        public void AclEditor_Unbreak_WithNormalize()
         {
             EnsureRepository();
 
@@ -1377,7 +1377,7 @@ namespace SenseNet.Security.Tests
             //#
             CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
 
-            Assert.AreEqual("-E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("-E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
             //#
             var ed = CurrentContext.Security.CreateAclEditor();
@@ -1385,7 +1385,7 @@ namespace SenseNet.Security.Tests
                 .Deny(Id("E5"), Id("G2"), false, Tools.GetPermissionTypes("_+_____________"))
                 .Apply();
 
-            Assert.AreEqual("-E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-+++++++++++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("-E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-+++++++++++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
             //#
             CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), normalize: true).Apply();
@@ -1399,10 +1399,10 @@ namespace SenseNet.Security.Tests
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(1, aces.Length);
-            Assert.AreEqual("E5|+G2:___________________________________________________++++++++++___", Tools.ReplaceIds(aces[0].ToString()));
+            Assert.AreEqual("E5|Normal|+G2:___________________________________________________++++++++++___", Tools.ReplaceIds(aces[0].ToString()));
         }
         [TestMethod]
-        public void AclEditor_UnbreakInheritance_WithoutNormalize()
+        public void AclEditor_Unbreak_WithoutNormalize()
         {
             EnsureRepository();
 
@@ -1413,7 +1413,7 @@ namespace SenseNet.Security.Tests
 
             CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5")).Apply();
 
-            Assert.AreEqual("+E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("+E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
             var sec = CurrentContext.Security;
             var entity = sec.GetSecurityEntity(Id("E5"));
@@ -1423,11 +1423,11 @@ namespace SenseNet.Security.Tests
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(2, aces.Length);
-            Assert.AreEqual("E5|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(aces[0].ToString()));
-            Assert.AreEqual("E5|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(aces[1].ToString()));
+            Assert.AreEqual("E5|Normal|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(aces[0].ToString()));
+            Assert.AreEqual("E5|Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(aces[1].ToString()));
         }
         [TestMethod]
-        public void AclEditor_UnbreakInheritance_OnUnbreaked()
+        public void AclEditor_Unbreak_OnUnbreaked()
         {
             EnsureRepository();
 
@@ -1438,26 +1438,26 @@ namespace SenseNet.Security.Tests
             var db = CurrentContext.Security.DataProvider;
             var aceTable = db.LoadAllAces();
 
-            Assert.AreEqual("+E2|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E2")).ToString()));
+            Assert.AreEqual("+E2|Normal|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E2")).ToString()));
             var entity = sec.GetSecurityEntity(Id("E2"));
             Assert.IsTrue(entity.IsInherited);
             var aces = aceTable.Where(x => x.EntityId == Id("E2")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(1, aces.Length);
-            Assert.AreEqual("E2|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(aces[0].ToString()));
+            Assert.AreEqual("E2|Normal|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(aces[0].ToString()));
 
 
             CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E2")).Apply();
 
 
-            Assert.AreEqual("+E2|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E2")).ToString()));
+            Assert.AreEqual("+E2|Normal|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E2")).ToString()));
             entity = sec.GetSecurityEntity(Id("E2"));
             Assert.IsTrue(entity.IsInherited);
             aces = aceTable.Where(x => x.EntityId == Id("E2")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(1, aces.Length);
-            Assert.AreEqual("E2|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(aces[0].ToString()));
+            Assert.AreEqual("E2|Normal|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(aces[0].ToString()));
         }
         [TestMethod]
-        public void AclEditor_UnbreakInheritance_WithNormalize_AcesAndHolderIds()
+        public void AclEditor_Unbreak_WithNormalize_AcesAndHolderIds()
         {
             EnsureRepository();
 
@@ -1514,14 +1514,14 @@ namespace SenseNet.Security.Tests
 
             CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E5")).Apply();
 
-            Assert.AreEqual("+E5|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("+E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
             var db = CurrentContext.Security.DataProvider;
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(2, aces.Length);
-            Assert.AreEqual("E5|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(aces[0].ToString()));
-            Assert.AreEqual("E5|+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(aces[1].ToString()));
+            Assert.AreEqual("E5|Normal|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(aces[0].ToString()));
+            Assert.AreEqual("E5|Normal|+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(aces[1].ToString()));
         }
         [TestMethod]
         public void AclEditor_CopyEffectivePermissions2()
@@ -1534,14 +1534,14 @@ namespace SenseNet.Security.Tests
 
             CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E14")).Apply();
 
-            Assert.AreEqual("+E14|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E14")).ToString()));
+            Assert.AreEqual("+E14|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E14")).ToString()));
 
             var db = CurrentContext.Security.DataProvider;
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E14")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(2, aces.Length);
-            Assert.AreEqual("E14|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(aces[0].ToString()));
-            Assert.AreEqual("E14|+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(aces[1].ToString()));
+            Assert.AreEqual("E14|Normal|+G1:_________________________________________________+++++++++++++++", Tools.ReplaceIds(aces[0].ToString()));
+            Assert.AreEqual("E14|Normal|+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(aces[1].ToString()));
         }
         [TestMethod]
         public void AclEditor_NormalizeExplicitePermissions1()
@@ -1554,13 +1554,13 @@ namespace SenseNet.Security.Tests
 
             CurrentContext.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E5")).Apply();
 
-            Assert.AreEqual("+E5|+G2:_________________________________________________-__________+___", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
+            Assert.AreEqual("+E5|Normal|+G2:_________________________________________________-__________+___", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
             var db = CurrentContext.Security.DataProvider;
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(1, aces.Length);
-            Assert.AreEqual("E5|+G2:_________________________________________________-__________+___", Tools.ReplaceIds(aces[0].ToString()));
+            Assert.AreEqual("E5|Normal|+G2:_________________________________________________-__________+___", Tools.ReplaceIds(aces[0].ToString()));
         }
         [TestMethod]
         public void AclEditor_NormalizeExplicitePermissions2()

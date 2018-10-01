@@ -33,6 +33,7 @@ namespace SenseNet.Security.EFCSecurityStore
     internal class EFEntry
     {
         public int EFEntityId { get; set; } // Key member
+        public int EntryType { get; set; } // Key member
         public int IdentityId { get; set; } // Key member
         public bool LocalOnly { get; set; } // Key member
         public long AllowBits { get; set; }
@@ -42,7 +43,7 @@ namespace SenseNet.Security.EFCSecurityStore
 
         /// <summary>Tests use this method. DO NOT REMOVE.</summary>
         [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-        public override string ToString()
+        public override string ToString() //UNDONE: ToString
         {
             var chars = new char[PermissionTypeBase.PermissionCount];
             for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
@@ -55,7 +56,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 else
                     chars[PermissionTypeBase.PermissionCount - i - 1] = '_';
             }
-            return $"({EFEntityId})|{(LocalOnly ? "-" : "+")}({IdentityId}):{new string(chars)}";
+            return $"({EFEntityId})|{EntryType}|{(LocalOnly ? "-" : "+")}({IdentityId}):{new string(chars)}";
         }
 
         public StoredAce ToStoredAce()
@@ -63,6 +64,7 @@ namespace SenseNet.Security.EFCSecurityStore
             return new StoredAce
             {
                 EntityId = this.EFEntityId,
+                EntryType = (EntryType)this.EntryType,
                 IdentityId = this.IdentityId,
                 LocalOnly = this.LocalOnly,
                 AllowBits = this.AllowBits.ToUInt64(),

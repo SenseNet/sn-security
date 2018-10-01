@@ -26,7 +26,7 @@ namespace SenseNet.Security
         /// Converts the value of this instance to a System.String.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-        public override string ToString()
+        public override string ToString() //UNDONE: ToString
         {
             var sb = new StringBuilder();
             ToString(sb);

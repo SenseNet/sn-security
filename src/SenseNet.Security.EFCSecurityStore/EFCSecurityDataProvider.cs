@@ -275,6 +275,7 @@ namespace SenseNet.Security.EFCSecurityStore
                     .Select(a => new StoredAce
                     {
                         EntityId = a.EFEntityId,
+                        EntryType = (EntryType)a.EntryType,
                         IdentityId = a.IdentityId,
                         LocalOnly = a.LocalOnly,
                         AllowBits = a.AllowBits.ToUInt64(),
@@ -298,6 +299,7 @@ namespace SenseNet.Security.EFCSecurityStore
                     .Select(a => new StoredAce
                     {
                         EntityId = a.EFEntityId,
+                        EntryType = (EntryType)a.EntryType,
                         IdentityId = a.IdentityId,
                         LocalOnly = a.LocalOnly,
                         AllowBits = a.AllowBits.ToUInt64(),
@@ -590,6 +592,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 _aces.AddRange(entity.EFEntries.Select(a => new StoredAce
                 {
                     EntityId = a.EFEntityId,
+                    EntryType = (EntryType)a.EntryType,
                     IdentityId = a.IdentityId,
                     LocalOnly = a.LocalOnly,
                     AllowBits = a.AllowBits.ToUInt64(),

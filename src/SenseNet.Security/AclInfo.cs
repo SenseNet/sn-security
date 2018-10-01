@@ -225,7 +225,7 @@ namespace SenseNet.Security
             foreach (var refAce in refAces)
                 if (refAce.IdentityId == predicate.IdentityId && refAce.LocalOnly == predicate.LocalOnly)
                     return refAce;
-            var newAce = new AceInfo { IdentityId = predicate.IdentityId, LocalOnly = predicate.LocalOnly };
+            var newAce = new AceInfo { EntryType = predicate.EntryType, IdentityId = predicate.IdentityId, LocalOnly = predicate.LocalOnly };
             refAces.Add(newAce);
             return newAce;
         }
@@ -247,7 +247,7 @@ namespace SenseNet.Security
                         {
                             if (!localOnlyAces.TryGetValue(aceInfo.IdentityId, out ace))
                             {
-                                ace = new AceInfo { IdentityId = aceInfo.IdentityId, LocalOnly = true };
+                                ace = new AceInfo { EntryType=aceInfo.EntryType, IdentityId = aceInfo.IdentityId, LocalOnly = true };
                                 localOnlyAces.Add(ace.IdentityId, ace);
                             }
                             ace.AllowBits |= aceInfo.AllowBits;
@@ -258,7 +258,7 @@ namespace SenseNet.Security
                     {
                         if (!aces.TryGetValue(aceInfo.IdentityId, out ace))
                         {
-                            ace = new AceInfo { IdentityId = aceInfo.IdentityId, LocalOnly = false };
+                            ace = new AceInfo { EntryType = aceInfo.EntryType, IdentityId = aceInfo.IdentityId, LocalOnly = false };
                             aces.Add(ace.IdentityId, ace);
                         }
                         ace.AllowBits |= aceInfo.AllowBits;
@@ -284,7 +284,7 @@ namespace SenseNet.Security
         /// Converts the information of this instance to its equivalent string representation.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-        public override string ToString()
+        public override string ToString() //UNDONE: ToString
         {
             // "+E1|+U1:____++++,+G1:____++++"
 

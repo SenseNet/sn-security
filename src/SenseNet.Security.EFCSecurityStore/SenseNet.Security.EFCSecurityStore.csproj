@@ -22,9 +22,11 @@
 
   <ItemGroup>
     <None Remove="Scripts\Install_Schema_2.1.sql" />
+    <None Remove="Scripts\Install_Schema_3.1.sql" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Scripts\Install_Schema_3.1.sql" />
     <EmbeddedResource Include="Scripts\Install_Schema_2.1.sql" />
   </ItemGroup>
 

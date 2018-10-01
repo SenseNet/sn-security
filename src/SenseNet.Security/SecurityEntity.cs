@@ -212,7 +212,7 @@ namespace SenseNet.Security
                     var acl = new AclInfo(entityId);
                     var entries = ctx.DataProvider.LoadPermissionEntries(new[] { entityId });
                     foreach (var entry in entries)
-                        acl.Entries.Add(new AceInfo { IdentityId = entry.IdentityId, LocalOnly = entry.LocalOnly, AllowBits = entry.AllowBits, DenyBits = entry.DenyBits });
+                        acl.Entries.Add(new AceInfo { EntryType = entry.EntryType, IdentityId = entry.IdentityId, LocalOnly = entry.LocalOnly, AllowBits = entry.AllowBits, DenyBits = entry.DenyBits });
                     if (acl.Entries.Count > 0)
                         entity.SetAclSafe(acl);
                 }

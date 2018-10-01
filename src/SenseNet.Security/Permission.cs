@@ -45,7 +45,7 @@ namespace SenseNet.Security
 
         /// <summary>Converts the value of this instance to a System.String.</summary>
         [ExcludeFromCodeCoverage]
-        public override string ToString()
+        public override string ToString() //UNDONE: ToString
         {
             if (Deny)
                 return $"{Name}: denied, {(DenyFrom == 0 ? "" : "not ")}editable";
