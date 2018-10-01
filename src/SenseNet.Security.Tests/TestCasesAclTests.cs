@@ -21,7 +21,7 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:______________+");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:______________+");
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
             Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
         }
@@ -30,8 +30,8 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
 
             var acl = CurrentContext.Security.GetAcl(Id("E2"));
             Assert.AreEqual("+E2|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(acl.ToString()));
@@ -44,9 +44,9 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
-            SetAcl("+E3|+G3:+-+-+-+-+-+-+-+");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
+            SetAcl("+E3|Normal|+G3:+-+-+-+-+-+-+-+");
 
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
             Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:__________________________________________________-____________+,+G3:_________________________________________________+-+-+-+-+-+-+-+", Tools.ReplaceIds(acl.ToString()));
@@ -56,10 +56,10 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
             CurrentContext.Security.BreakInheritance(Id("E3"), false);
-            SetAcl("-E3|-G3:+-+-+-+-+-+-+-+");
+            SetAcl("-E3|Normal|-G3:+-+-+-+-+-+-+-+");
 
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
 
@@ -70,8 +70,8 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
             CurrentContext.Security.BreakInheritance(Id("E3"), false);
 
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
@@ -86,7 +86,7 @@ namespace SenseNet.Security.Tests
             Tools.SetMembership(CurrentContext.Security, "U1:G1");
             Assert.IsTrue(CurrentContext.Security.Cache.IsInGroup(Id("U1"), Id("G1")), "G1 not contains U1");
             Assert.IsFalse(CurrentContext.Security.Cache.IsInGroup(int.MaxValue, int.MaxValue - 1), "Any group contains anyone");
-            SetAcl("+E1|+U1:________---_+++,+G1:---_+++________");
+            SetAcl("+E1|Normal|+U1:________---_+++,Normal|+G1:---_+++________");
             var acl = CurrentContext.Security.GetAcl(Id("E1"));
             Assert.AreEqual("+E1|+G1:_________________________________________________---_+++________,+U1:_________________________________________________________---_+++", Tools.ReplaceIds(acl.ToString()));
 
@@ -116,7 +116,7 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
-            SetAcl("+E1|+G1:______________+,+G2:_____________+_");
+            SetAcl("+E1|Normal|+G1:______________+,Normal|+G2:_____________+_");
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.See));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.Preview));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.See, PermissionType.Preview));
@@ -138,7 +138,7 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:-------------++,+G3:+-+-+-+-+-+-+-+,-G4:+-+-+-+-+-+-+-+");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:-------------++,Normal|+G3:+-+-+-+-+-+-+-+,Normal|-G4:+-+-+-+-+-+-+-+");
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.See));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.Preview));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), PermissionType.See, PermissionType.Preview));
@@ -160,7 +160,7 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
-            SetAcl("+E1|+G1:______________+,+G2:_____________+_");
+            SetAcl("+E1|Normal|+G1:______________+,Normal|+G2:_____________+_");
             CurrentContext.Security.AssertPermission(Id("E1"), PermissionType.See);
             CurrentContext.Security.AssertPermission(Id("E1"), PermissionType.Preview);
             CurrentContext.Security.AssertPermission(Id("E1"), PermissionType.See, PermissionType.Preview);
@@ -192,7 +192,7 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
-            SetAcl("+E1|+G1:______________+,+G2:_____________+_");
+            SetAcl("+E1|Normal|+G1:______________+,Normal|+G2:_____________+_");
 
             var e1 = GetRepositoryEntity(Id("E1"));
             var e2 = GetRepositoryEntity(Id("E2"));
@@ -228,8 +228,8 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
-            SetAcl("+E1|+G1:______________+");
-            SetAcl("-E2|+G1:_____________+_");
+            SetAcl("+E1|Normal|+G1:______________+");
+            SetAcl("-E2|Normal|+G1:_____________+_");
             Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.Preview));
             Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See, PermissionType.Preview));
@@ -240,9 +240,9 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
-            SetAcl("+E1|+G1:______________+");
-            SetAcl("+E2|-G1:_____________+_");
-            SetAcl("+E5|+G1:____________+__");
+            SetAcl("+E1|Normal|+G1:______________+");
+            SetAcl("+E2|Normal|-G1:_____________+_");
+            SetAcl("+E5|Normal|+G1:____________+__");
 
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.Preview));
@@ -259,10 +259,10 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
-            SetAcl("+E1|+G1:______________+,+G2:_____________+_");
-            SetAcl("+E3|+G1:_____________+_,+G2:______________+");
-            SetAcl("+E9|+G3:___________+__+,+G4:_______+_____+_");
-            SetAcl("+E20|+G3:_+___________+_,+G4:____+_________+");
+            SetAcl("+E1|Normal|+G1:______________+,Normal|+G2:_____________+_");
+            SetAcl("+E3|Normal|+G1:_____________+_,Normal|+G2:______________+");
+            SetAcl("+E9|Normal|+G3:___________+__+,Normal|+G4:_______+_____+_");
+            SetAcl("+E20|Normal|+G3:_+___________+_,Normal|+G4:____+_________+");
 
             Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.See));
             Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.Preview));
@@ -278,7 +278,7 @@ namespace SenseNet.Security.Tests
             }
 
 
-            SetAcl("+E21|+G2:_____________-_,+G3:_+___________+_,+G4:____+________-+");
+            SetAcl("+E21|Normal|+G2:_____________-_,Normal|+G3:_+___________+_,Normal|+G4:____+________-+");
 
             //Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.Open));
             Assert.IsFalse(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.Preview));
@@ -301,10 +301,10 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
-            SetAcl("+E1|+G1:______________+,+G2:_____________+_");
-            SetAcl("+E3|+G1:_____________+_,+G2:______________+");
-            SetAcl("+E9|+G3:___________+__+,+G4:_______+_____+_");
-            SetAcl("+E20|+G3:_+___________+_,+G4:____+_________+");
+            SetAcl("+E1|Normal|+G1:______________+,Normal|+G2:_____________+_");
+            SetAcl("+E3|Normal|+G1:_____________+_,Normal|+G2:______________+");
+            SetAcl("+E9|Normal|+G3:___________+__+,Normal|+G4:_______+_____+_");
+            SetAcl("+E20|Normal|+G3:_+___________+_,Normal|+G4:____+_________+");
 
             var origOwnerId = Id("U1");
             var differentOwnerId = int.MaxValue;
@@ -346,7 +346,7 @@ namespace SenseNet.Security.Tests
             }
 
 
-            SetAcl("+E21|+G2:_____________-_,+G3:_+___________+_,+G4:____+________-+");
+            SetAcl("+E21|Normal|+G2:_____________-_,Normal|+G3:_+___________+_,Normal|+G4:____+________-+");
 
             try
             {
@@ -372,10 +372,10 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
-            SetAcl("+E1|+G1:______________+,+G2:_____________+_");
-            SetAcl("+E3|+G1:_____________+_,+G2:______________+");
-            SetAcl("+E9|+G3:___________+__+,+G4:_______+_____+_");
-            SetAcl("+E20|+G3:_+___________+_,+G4:____+_________+");
+            SetAcl("+E1|Normal|+G1:______________+,Normal|+G2:_____________+_");
+            SetAcl("+E3|Normal|+G1:_____________+_,Normal|+G2:______________+");
+            SetAcl("+E9|Normal|+G3:___________+__+,Normal|+G4:_______+_____+_");
+            SetAcl("+E20|Normal|+G3:_+___________+_,Normal|+G4:____+_________+");
 
             var origOwnerId = Id("U1");
             var differentOwnerId = int.MaxValue;
@@ -407,7 +407,7 @@ namespace SenseNet.Security.Tests
             }
 
 
-            SetAcl("+E21|+G2:_____________-_,+G3:_+___________+_,+G4:____+________-+");
+            SetAcl("+E21|Normal|+G2:_____________-_,Normal|+G3:_+___________+_,Normal|+G4:____+________-+");
 
             try
             {
@@ -433,12 +433,12 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             Tools.SetMembership(CurrentContext.Security, "U1:G1,G2|U2:G1");
-            SetAcl("+E1|+G1:______________+,+G2:_____________+_");
-            SetAcl("+E3|+G1:_____________+_,+G2:______________+");
-            SetAcl("+E8|+G1:__________+++++,+U1:_________++++++");
-            SetAcl("+E20|+G3:_+___________+_,+G4:____+_________+");
-            SetAcl("-E21|+G1:__________+++++,-U1:_________++++++"); // on a node
-            SetAcl("-E29|+G1:__________+++++,-U1:_________++++++"); // on a leaf
+            SetAcl("+E1|Normal|+G1:______________+,Normal|+G2:_____________+_");
+            SetAcl("+E3|Normal|+G1:_____________+_,Normal|+G2:______________+");
+            SetAcl("+E8|Normal|+G1:__________+++++,Normal|+U1:_________++++++");
+            SetAcl("+E20|Normal|+G3:_+___________+_,Normal|+G4:____+_________+");
+            SetAcl("-E21|Normal|+G1:__________+++++,Normal|-U1:_________++++++"); // on a node
+            SetAcl("-E29|Normal|+G1:__________+++++,Normal|-U1:_________++++++"); // on a leaf
 
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E8"), PermissionType.OpenMinor));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E21"), PermissionType.OpenMinor));
@@ -455,7 +455,7 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("-E21|+G1:__________+++++,-G2:_________++++++");
+            SetAcl("-E21|Normal|+G1:__________+++++,Normal|-G2:_________++++++");
 
             // E26 node is a child of E21 and it should not inherit its parent's local only entries
             Assert.AreEqual("+E26|+G1:___________________________________________________________+++++",
@@ -1161,8 +1161,8 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
 
             CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
 
@@ -1209,8 +1209,8 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
 
             CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), false).Apply();
 
@@ -1237,12 +1237,12 @@ namespace SenseNet.Security.Tests
             //  children acls: E35, E36
             //  not children acls: E33, E34
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");                              // 0x01        // 0x01
-            SetAcl("+E12|+G2:+___________++_");                                                 //   0x0C      //   0x0C
-            SetAcl("+E33|+G2:_+++++++++++___");                                                 //     0x21    //     0x21
-            SetAcl("+E34|+G2:_+++++++++++___");                                                 //     0x22    //     0x22
-            SetAcl("+E35|+G2:_+++++++++++___");                                                 //     0x23    //     0x20  0x23
-            SetAcl("+E36|+G2:_+++++++++++___");                                                 //     0x24    //           0x24
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");       // 0x01        // 0x01
+            SetAcl("+E12|Normal|+G2:+___________++_");                                 //   0x0C      //   0x0C
+            SetAcl("+E33|Normal|+G2:_+++++++++++___");                                 //     0x21    //     0x21
+            SetAcl("+E34|Normal|+G2:_+++++++++++___");                                 //     0x22    //     0x22
+            SetAcl("+E35|Normal|+G2:_+++++++++++___");                                 //     0x23    //     0x20  0x23
+            SetAcl("+E36|Normal|+G2:_+++++++++++___");                                 //     0x24    //           0x24
 
             var ctx = CurrentContext.Security;
             ctx.CreateAclEditor().BreakInheritance(Id("E32"), false).Apply();  // 0x20
@@ -1283,11 +1283,11 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E4|+G2:+___________++_");
-            SetAcl("+E12|+G2:______++++++___");
-            SetAcl("+E33|+G2:_+++++_________");
-            SetAcl("+E34|+G2:_+++++_________");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E4|Normal|+G2:+___________++_");
+            SetAcl("+E12|Normal|+G2:______++++++___");
+            SetAcl("+E33|Normal|+G2:_+++++_________");
+            SetAcl("+E34|Normal|+G2:_+++++_________");
 
             CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), false).Apply();
 
@@ -1326,11 +1326,11 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E4|+G2:+___________++_");
-            SetAcl("+E12|+G2:______++++++___");
-            SetAcl("+E33|+G2:_+++++_________");
-            SetAcl("+E34|+G2:_+++++_________");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E4|Normal|+G2:+___________++_");
+            SetAcl("+E12|Normal|+G2:______++++++___");
+            SetAcl("+E33|Normal|+G2:_+++++_________");
+            SetAcl("+E34|Normal|+G2:_+++++_________");
 
             // breaks, tests and repeat
             for (int i = 0; i < 3; i++)
@@ -1371,8 +1371,8 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
 
             //#
             CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
@@ -1406,8 +1406,8 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
 
             CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
 
@@ -1431,8 +1431,8 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
 
             var sec = CurrentContext.Security;
             var db = CurrentContext.Security.DataProvider;
@@ -1461,8 +1461,8 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
 
             var sec = CurrentContext.Security;
             var db = CurrentContext.Security.DataProvider;
@@ -1493,7 +1493,7 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E2|+G2:+___________++_");
+            SetAcl("+E2|Normal|+G2:+___________++_");
 
             var ed = CurrentContext.Security.CreateAclEditor();
 
@@ -1508,9 +1508,9 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
-            SetAcl("+E5|+G1:+___+++_____++_,+G2:___________++++");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
+            SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:___________++++");
 
             CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E5")).Apply();
 
@@ -1528,9 +1528,9 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
-            SetAcl("+E5|+G1:+___+++_____++_,+G2:___________++++");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
+            SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:___________++++");
 
             CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E14")).Apply();
 
@@ -1548,9 +1548,9 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+-__________++_");
-            SetAcl("+E5|+G1:+___+++_____++_,+G2:-__________++++");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+-__________++_");
+            SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:-__________++++");
 
             CurrentContext.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E5")).Apply();
 
@@ -1567,10 +1567,10 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            SetAcl("+E1|+G1:+++++++++++++++,+G2:_-____________+");
-            SetAcl("+E2|+G2:+___________++_");
-            SetAcl("+E5|+G1:+___+++_____++_,+G2:___________++++");
-            SetAcl("+E14|+G1:+++++++++++++++,+G2:+-_________++++");
+            SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
+            SetAcl("+E2|Normal|+G2:+___________++_");
+            SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:___________++++");
+            SetAcl("+E14|Normal|+G1:+++++++++++++++,Normal|+G2:+-_________++++");
 
             CurrentContext.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E14")).Apply();
 
