@@ -47,7 +47,7 @@ namespace SenseNet.Security
         /// Converts the information of this instance to its equivalent string representation.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-        public override string ToString() //UNDONE: ToString Test
+        public override string ToString()
         {
             return $"{EntryType}|{(LocalOnly ? "-" : "+")}({IdentityId}):{BitsToString()}";
         }

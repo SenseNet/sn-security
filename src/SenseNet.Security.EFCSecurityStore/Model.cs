@@ -43,7 +43,7 @@ namespace SenseNet.Security.EFCSecurityStore
 
         /// <summary>Tests use this method. DO NOT REMOVE.</summary>
         [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-        public override string ToString() //UNDONE: ToString
+        public override string ToString()
         {
             var chars = new char[PermissionTypeBase.PermissionCount];
             for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)

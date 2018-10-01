@@ -53,7 +53,7 @@ namespace SenseNet.Security
                 else
                     chars[PermissionTypeBase.PermissionCount - i - 1] = '_';
             }
-            return $"({EntityId})|{EntryType}|{(LocalOnly ? "-" : "+")}({IdentityId}):{new string(chars)}"; //UNDONE: ToString
+            return $"({EntityId})|{EntryType}|{(LocalOnly ? "-" : "+")}({IdentityId}):{new string(chars)}";
         }
 
         internal StoredAce Clone()
