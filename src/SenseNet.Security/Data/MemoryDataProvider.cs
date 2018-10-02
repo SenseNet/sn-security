@@ -195,11 +195,6 @@ namespace SenseNet.Security.Data
                 return _storage.Aces.Where(a => entityIds.Contains(a.EntityId)).ToArray();
         }
 
-        public IEnumerable<StoredAce> LoadDescendantAces(int entityId, IEnumerable<int> identities)
-        {
-            return new StoredAceEnumerable(entityId, identities);
-        }
-
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
         {
             lock (_acesLock)
@@ -396,41 +391,6 @@ namespace SenseNet.Security.Data
         {
             // do nothing
         }
-
-
-        private class StoredAceEnumerable : IEnumerable<StoredAce>
-        {
-            int _entityId;
-            IEnumerable<int> _identities;
-            List<StoredAce> _aces = new List<StoredAce>();
-
-            internal StoredAceEnumerable(int entityId, IEnumerable<int> identities)
-            {
-                _entityId = entityId;
-                _identities = identities;
-            }
-
-            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-            public IEnumerator<StoredAce> GetEnumerator()
-            {
-                var entity = _storage.Entities[_entityId];
-                FindAces(entity);
-                return _aces.GetEnumerator();
-            }
-            private void FindAces(StoredSecurityEntity entity)
-            {
-                lock (_acesLock)
-                {
-                    foreach (var child in _storage.Entities.Values.Where(e => e.ParentId == entity.Id).ToArray())
-                        FindAces(child);
-                    _aces.AddRange(_storage.Aces.Where(a => a.EntityId == entity.Id));
-                }
-            }
-        }
-
 
 
         //TODO: thread safety
