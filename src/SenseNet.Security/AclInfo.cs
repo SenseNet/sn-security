@@ -124,6 +124,7 @@ namespace SenseNet.Security
 
             return new AccessControlEntry
             {
+                EntryType = aceInfo.EntryType,
                 IdentityId = aceInfo.IdentityId,
                 LocalOnly = aceInfo.LocalOnly,
                 Permissions = perms

@@ -23,7 +23,7 @@ namespace SenseNet.Security.Tests
 
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:______________+");
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
-            Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E3|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
         public void Acl_Get2()
@@ -34,10 +34,10 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+___________++_");
 
             var acl = CurrentContext.Security.GetAcl(Id("E2"));
-            Assert.AreEqual("+E2|+G1:_________________________________________________+++++++++++++++,+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E2|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(acl.ToString()));
 
             acl = CurrentContext.Security.GetAcl(Id("E3"));
-            Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:__________________________________________________-____________+", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E3|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:__________________________________________________-____________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
         public void Acl_Get3()
@@ -49,7 +49,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E3|Normal|+G3:+-+-+-+-+-+-+-+");
 
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
-            Assert.AreEqual("+E3|+G1:_________________________________________________+++++++++++++++,+G2:__________________________________________________-____________+,+G3:_________________________________________________+-+-+-+-+-+-+-+", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E3|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:__________________________________________________-____________+,Normal|+G3:_________________________________________________+-+-+-+-+-+-+-+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
         public void Acl_Get4()
@@ -63,7 +63,7 @@ namespace SenseNet.Security.Tests
 
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
 
-            Assert.AreEqual("-E3|-G3:_________________________________________________+-+-+-+-+-+-+-+", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("-E3|Normal|-G3:_________________________________________________+-+-+-+-+-+-+-+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
         public void Acl_Get_BreakedEmpty()
@@ -88,7 +88,7 @@ namespace SenseNet.Security.Tests
             Assert.IsFalse(CurrentContext.Security.Cache.IsInGroup(int.MaxValue, int.MaxValue - 1), "Any group contains anyone");
             SetAcl("+E1|Normal|+U1:________---_+++,Normal|+G1:---_+++________");
             var acl = CurrentContext.Security.GetAcl(Id("E1"));
-            Assert.AreEqual("+E1|+G1:_________________________________________________---_+++________,+U1:_________________________________________________________---_+++", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E1|Normal|+G1:_________________________________________________---_+++________,Normal|+U1:_________________________________________________________---_+++", Tools.ReplaceIds(acl.ToString()));
 
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("______________+")));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E1"), Tools.GetPermissionTypes("_____________+_")));
@@ -458,7 +458,7 @@ namespace SenseNet.Security.Tests
             SetAcl("-E21|Normal|+G1:__________+++++,Normal|-G2:_________++++++");
 
             // E26 node is a child of E21 and it should not inherit its parent's local only entries
-            Assert.AreEqual("+E26|+G1:___________________________________________________________+++++",
+            Assert.AreEqual("+E26|Normal|+G1:___________________________________________________________+++++",
                 Tools.ReplaceIds(CurrentContext.Security.GetAcl(Id("E26")).ToString()));
         }
 
@@ -708,7 +708,7 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             var acl = CurrentContext.Security.GetAcl(entityId2);
-            Assert.AreEqual("+E2|+U1:____________________________________________________________++++,+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E2|Normal|+U1:____________________________________________________________++++,Normal|+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
         public void AclEditor_RemovePermissions()
@@ -728,7 +728,7 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             var acl = CurrentContext.Security.GetAcl(entityId2);
-            Assert.AreEqual("+E2|+U1:____________________________________________________________++++,+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E2|Normal|+U1:____________________________________________________________++++,Normal|+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
 
             //#
             ed = CurrentContext.Security.CreateAclEditor();
@@ -736,7 +736,7 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             acl = CurrentContext.Security.GetAcl(entityId2);
-            Assert.AreEqual("+E2|+U1:_____________________________________________________________+++,+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E2|Normal|+U1:_____________________________________________________________+++,Normal|+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
         public void AclEditor_ResetPermissions()
@@ -756,7 +756,7 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             var acl = CurrentContext.Security.GetAcl(entityId2);
-            Assert.AreEqual("+E2|+U1:____________________________________________________________++++,+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E2|Normal|+U1:____________________________________________________________++++,Normal|+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
 
             //#
             ed = CurrentContext.Security.CreateAclEditor();
@@ -764,7 +764,7 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             acl = CurrentContext.Security.GetAcl(entityId2);
-            Assert.AreEqual("+E2|+U1:_____________________________________________________________+++,+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E2|Normal|+U1:_____________________________________________________________+++,Normal|+U2:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
         public void AclEditor_KeepInheritedPermissions()
@@ -1603,7 +1603,7 @@ namespace SenseNet.Security.Tests
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
-            Assert.AreEqual("+E4|+U6:+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E4|Normal|+U6:+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+", Tools.ReplaceIds(acl.ToString()));
 
             //--------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
@@ -1615,7 +1615,7 @@ namespace SenseNet.Security.Tests
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
-            Assert.AreEqual("+E4|+U6:_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E4|Normal|+U6:_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_", Tools.ReplaceIds(acl.ToString()));
 
             //--------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
@@ -1627,7 +1627,7 @@ namespace SenseNet.Security.Tests
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
-            Assert.AreEqual("+E4|+U6:-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E4|Normal|+U6:-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-", Tools.ReplaceIds(acl.ToString()));
 
             //========================================================
             ed = CurrentContext.Security.CreateAclEditor();
@@ -1642,14 +1642,14 @@ namespace SenseNet.Security.Tests
                 ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
-            Assert.AreEqual("+E4|+U6:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E4|Normal|+U6:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
             for (var i = 0; i < PermissionType.PermissionCount; i++)
                 ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
-            Assert.AreEqual("+E4|+U6:----------------------------------------------------------------", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E4|Normal|+U6:----------------------------------------------------------------", Tools.ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
             for (var i = 0; i < PermissionType.PermissionCount; i++)
@@ -1663,14 +1663,14 @@ namespace SenseNet.Security.Tests
                 ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
-            Assert.AreEqual("+E4|+U6:----------------------------------------------------------------", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E4|Normal|+U6:----------------------------------------------------------------", Tools.ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
             for (var i = 0; i < PermissionType.PermissionCount; i++)
                 ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
-            Assert.AreEqual("+E4|+U6:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(acl.ToString()));
+            Assert.AreEqual("+E4|Normal|+U6:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
             for (var i = 0; i < PermissionType.PermissionCount; i++)

@@ -10,6 +10,10 @@ namespace SenseNet.Security
     public class AccessControlEntry
     {
         /// <summary>
+        /// Category of the entry.
+        /// </summary>
+        public EntryType EntryType { get; set; }
+        /// <summary>
         /// Id of the related user or group.
         /// </summary>
         public int IdentityId { get; set; }
@@ -26,7 +30,7 @@ namespace SenseNet.Security
         /// Converts the value of this instance to a System.String.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-        public override string ToString() //UNDONE: ToString
+        public override string ToString()
         {
             var chars = new char[PermissionTypeBase.PermissionCount];
             for (var i = 0; i < chars.Length; i++)
@@ -41,7 +45,7 @@ namespace SenseNet.Security
                     chars[index] = '+';
             }
 
-            return $"{(LocalOnly ? '-' : '+')}({IdentityId}):{new string(chars)}";
+            return $"{EntryType}|{(LocalOnly ? '-' : '+')}({IdentityId}):{new string(chars)}";
         }
     }
 }
