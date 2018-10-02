@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
+using System.Linq;
 
 namespace SenseNet.Security
 {
@@ -24,22 +24,10 @@ namespace SenseNet.Security
 
         /// <summary>Converts the value of this instance to a System.String.</summary>
         [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-        public override string ToString() //UNDONE: ToString
+        public override string ToString()
         {
-            // "+E1|+U1:____++++,+G1:____++++"
-
-            var sb = new StringBuilder();
-            sb.Append(Inherits ? '+' : '-');
-            sb.Append("(" + EntityId + ")");
-            sb.Append('|');
-            var count = 0;
-            foreach (var entry in Entries)
-            {
-                if (count++ > 0)
-                    sb.Append(',');
-                entry.ToString(sb);
-            }
-            return sb.ToString();
+            // "+E1|Normal|+U1:____++++,+G1:____++++"
+            return $"{(Inherits ? '+' : '-')}({EntityId})|{string.Join(",", Entries.Select(e => e.ToString()).ToArray())}";
         }
     }
 }
