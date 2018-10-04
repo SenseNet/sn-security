@@ -218,7 +218,7 @@ namespace SenseNet.Security.Data
             {
                 foreach (var ace in aces)
                 {
-                    var old = _storage.Aces.FirstOrDefault(x => x.EntityId == ace.EntityId && x.IdentityId == ace.IdentityId && x.LocalOnly == ace.LocalOnly);
+                    var old = _storage.Aces.FirstOrDefault(x => x.EntityId == ace.EntityId && x.EntryType == ace.EntryType && x.IdentityId == ace.IdentityId && x.LocalOnly == ace.LocalOnly);
                     if (old != null)
                         _storage.Aces.Remove(old);
                     _storage.Aces.Add(ace);

@@ -602,7 +602,7 @@ namespace SenseNet.Security
                 // merge acls
                 foreach (var newAce in aclInfo.Entries)
                 {
-                    var origAce = origAcl.Entries.FirstOrDefault(x => x.IdentityId == newAce.IdentityId && x.LocalOnly == newAce.LocalOnly);
+                    var origAce = origAcl.Entries.FirstOrDefault(x => x.EntryType == newAce.EntryType && x.IdentityId == newAce.IdentityId && x.LocalOnly == newAce.LocalOnly);
                     if (origAce != null)
                     {
                         origAce.AllowBits = newAce.AllowBits;
