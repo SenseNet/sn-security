@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SenseNet.Security.Data;
 using SenseNet.Security.Tests.TestPortal;
 
 namespace SenseNet.Security.Tests
@@ -201,7 +201,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(EntryType.Sharing, entries[1].EntryType);
         }
         [TestMethod]
-        public void Sharing_Acl_EffectiveEntries_MergedWell()
+        public void Sharing_Acl_EffectiveEntries_Merged()
         {
             EnsureRepository();
             var ctx = CurrentContext.Security;
@@ -222,21 +222,19 @@ namespace SenseNet.Security.Tests
             SetAcl("+E1|Sharing|+G1:____________+__");
 
             // ASSERT 2
-            Assert.AreEqual(2, entries.Count);
-            Assert.AreEqual(0x3ul, entries[0].AllowBits);
+            entries = ctx.GetEffectiveEntries(Id("E2"));
+            Assert.AreEqual(1, entries.Count);
+            Assert.AreEqual(0x7ul, entries[0].AllowBits);
             Assert.AreEqual(EntryType.Normal, entries[0].EntryType);
-            Assert.AreEqual(0x8ul, entries[1].AllowBits);
-            Assert.AreEqual(EntryType.Sharing, entries[0].EntryType);
 
             // ACTION 3
             SetAcl("+E2|Sharing|+G1:___________+___");
 
             // ASSERT 3
-            Assert.AreEqual(2, entries.Count);
-            Assert.AreEqual(0x3ul, entries[0].AllowBits);
+            entries = ctx.GetEffectiveEntries(Id("E2"));
+            Assert.AreEqual(1, entries.Count);
+            Assert.AreEqual(0xFul, entries[0].AllowBits);
             Assert.AreEqual(EntryType.Normal, entries[0].EntryType);
-            Assert.AreEqual(0xCul, entries[1].AllowBits);
-            Assert.AreEqual(EntryType.Sharing, entries[0].EntryType);
         }
 
         [TestMethod]
@@ -248,21 +246,65 @@ namespace SenseNet.Security.Tests
             Tools.SetMembership(ctx, "U1:G1");
 
             SetAcl("+E1| Normal|+G1:______________+");
-            SetAcl("+E2| Normal|+G1:_____________+_");
-            SetAcl("+E2|Sharing|+G1:___________+___");
+            SetAcl("+E2|Sharing|+G1:____________+__");
 
-            // ACTION
+            // ACTION 1
             var ed = ctx.CreateAclEditor();
-            ed.Allow("E2", "G1", "____________+__");
+            ed.Allow("E2", "G1", "_____________+_");
+
+            // ASSERT 1 (edited entry is brand new so not merged with the existing sharing entry)
+            var edAcls = new AclEditorAccessor(ed).Acls;
+            Assert.AreEqual(Id("E2"), edAcls.Count == 0 ? 0 : edAcls.First().Key);
+            var entry = edAcls[Id("E2")].Entries.FirstOrDefault();
+            Assert.IsNotNull(entry);
+            Assert.AreEqual(EntryType.Normal, entry.EntryType);
+            Assert.AreEqual(0x2ul, entry.AllowBits);
+
+            // ACTION 2
             ed.Apply();
 
-            // ASSERT
-            Assert.Inconclusive();
+            // ASSERT 2
+            var eff = ctx.GetEffectiveEntries(Id("E2"));
+            Assert.AreEqual(1, eff.Count);
+            Assert.AreEqual(0x7ul, eff[0].AllowBits);
 
-            var acl = ctx.GetAcl(Id("E2"));
-            Assert.AreEqual("+E2|Normal|+G1:_____________________________________________________________+_+", Tools.ReplaceIds(acl.ToString()));
+            var exp = ctx.GetExplicitEntries(Id("E2"));
+            Assert.AreEqual(2, exp.Count);
+            Assert.AreEqual(0x2ul, exp.First(x => x.EntryType == EntryType.Normal).AllowBits);
+            Assert.AreEqual(0x4ul, exp.First(x => x.EntryType == EntryType.Sharing).AllowBits);
+        }
 
-            PermissionTypeBase.InferForcedRelations();
+        [TestMethod]
+        public void Sharing_AclEd_SettingInconsistentEntryIsInvalidOperation()
+        {
+            EnsureRepository();
+            var ctx = CurrentContext.Security;
+            var normalEditor = ctx.CreateAclEditor();
+            var sharingEditor = ctx.CreateAclEditor(EntryType.Sharing);
+            var normalEntry = new AceInfo { EntryType = EntryType.Normal, IdentityId = Id("U1"), AllowBits = 0x1ul };
+            var sharingEntry = new AceInfo { EntryType = EntryType.Sharing, IdentityId = Id("U2"), AllowBits = 0x2ul };
+
+            // ACTION 1
+            normalEditor.SetEntry(Id("E1"), normalEntry, false);
+            try
+            {
+                normalEditor.SetEntry(Id("E1"), sharingEntry, false);
+                Assert.Fail();
+            }
+            catch (InvalidOperationException)
+            {
+            }
+
+            // ACTION 2
+            sharingEditor.SetEntry(Id("E1"), sharingEntry, false);
+            try
+            {
+                sharingEditor.SetEntry(Id("E1"), normalEntry, false);
+                Assert.Fail();
+            }
+            catch (InvalidOperationException)
+            {
+            }
         }
     }
 }

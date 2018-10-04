@@ -17,9 +17,9 @@ namespace SenseNet.Security.Tests.TestPortal
         }
 
         /*********************** ACL API **********************/
-        public new AclEditor CreateAclEditor()
+        public new AclEditor CreateAclEditor(EntryType entryType = EntryType.Normal)
         {
-            return base.CreateAclEditor();
+            return base.CreateAclEditor(entryType);
         }
         public new AccessControlList GetAcl(int entityId)
         {

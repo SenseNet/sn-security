@@ -11,6 +11,8 @@ namespace SenseNet.Security
     /// </summary>
     public class AclEditor
     {
+        public EntryType EntryType { get; }
+
         private enum AggregationType { Allow, Deny }
 
         /// <summary>
@@ -35,14 +37,17 @@ namespace SenseNet.Security
         /// Shortcut of the constructor.
         /// Returns with a new instance of the AclEditor with a SecurityContext as the current context.
         /// </summary>
-        public static AclEditor Create(SecurityContext context) { return new AclEditor(context); }
+        public static AclEditor Create(SecurityContext context, EntryType entryType = EntryType.Normal)
+        {
+            return new AclEditor(context, entryType);
+        }
 
         /// <summary>
         /// Initializes a new instance of the AclEditor with a SecurityContext as the current context.
         /// </summary>
-        /// <param name="context"></param>
-        protected internal AclEditor(SecurityContext context)
+        protected internal AclEditor(SecurityContext context, EntryType entryType = EntryType.Normal)
         {
+            this.EntryType = entryType;
             this.Context = context;
         }
 
@@ -155,6 +160,10 @@ namespace SenseNet.Security
         /// <returns>A reference to this instance for calling more operations.</returns>
         public AclEditor SetEntry(int entityId, AceInfo entry, bool reset)
         {
+            if(entry.EntryType != this.EntryType)
+                throw new InvalidOperationException(
+                    $"Inconsistent entry type. EntryType.{entry.EntryType} is not allowed. Expected: {this.EntryType}");
+
             var ace = EnsureAce(entityId, entry.IdentityId, entry.LocalOnly);
             if (reset)
             {
@@ -276,7 +285,7 @@ namespace SenseNet.Security
             AclInfo aclInfo;
             if (!_acls.TryGetValue(entityId, out aclInfo))
             {
-                aclInfo = SecurityEntity.GetAclInfoCopy(this.Context, entityId);
+                aclInfo = SecurityEntity.GetAclInfoCopy(this.Context, entityId, this.EntryType);
                 if (aclInfo == null)
                 {
                     // creating an empty acl

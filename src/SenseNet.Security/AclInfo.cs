@@ -276,9 +276,13 @@ namespace SenseNet.Security
             return result;
         }
 
-        internal AclInfo Copy()
+        internal AclInfo Copy(EntryType? entryType = null)
         {
-            return new AclInfo(this.EntityId) { Entries = this.Entries.Select(x => x.Copy()).ToList() };
+            var entries = entryType == null
+                ? this.Entries.Select(x => x.Copy()).ToList()
+                : this.Entries.Where(x => x.EntryType == entryType.Value).Select(x => x.Copy()).ToList();
+
+            return new AclInfo(this.EntityId) { Entries = entries };
         }
 
         /// <summary>

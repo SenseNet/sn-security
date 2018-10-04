@@ -271,13 +271,13 @@ namespace SenseNet.Security
             }
         }
 
-        internal static AclInfo GetAclInfoCopy(SecurityContext ctx, int entityId)
+        internal static AclInfo GetAclInfoCopy(SecurityContext ctx, int entityId, EntryType? entryType = null)
         {
             var entity = GetEntitySafe(ctx, entityId, false);
             var acl = entity?.Acl;
             if (acl == null)
                 return null;
-            return entity.Acl.Copy();
+            return entity.Acl.Copy(entryType);
         }
 
         //---- todo

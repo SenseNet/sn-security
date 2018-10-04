@@ -194,11 +194,12 @@ namespace SenseNet.Security
 
         /*********************** ACL API **********************/
         /// <summary>
-        /// Creates a new instance of the AclEditor class for modifying access control data. 
+        /// Creates a new instance of the AclEditor class for modifying access control data.
+        /// Editor handles only one type of entries. Default EntryType is Normal.
         /// </summary>
-        protected AclEditor CreateAclEditor()
+        protected AclEditor CreateAclEditor(EntryType entryType = EntryType.Normal)
         {
-            return AclEditor.Create(this);
+            return AclEditor.Create(this, entryType);
         }
         /// <summary>
         /// Returns the AccessControlList of the passed entity to help building a rich GUI for modifications.
