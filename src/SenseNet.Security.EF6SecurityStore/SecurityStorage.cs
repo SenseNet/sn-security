@@ -53,7 +53,7 @@ namespace SenseNet.Security.EF6SecurityStore
 
             modelBuilder.Entity<EFMembership>().HasKey(a => new { a.GroupId, a.MemberId });
 
-            modelBuilder.Entity<EFEntry>().HasKey(a => new { a.EFEntityId, a.IdentityId, a.LocalOnly });
+            modelBuilder.Entity<EFEntry>().HasKey(a => new { a.EFEntityId, a.EntryType, a.IdentityId, a.LocalOnly });
 
             base.OnModelCreating(modelBuilder);
         }
