@@ -220,9 +220,10 @@ namespace SenseNet.Security
         /// If it is provided, the output will be filtered for the related identities.
         /// Empty collection means nobody, so in case of passing empty,
         /// the method will return an empty list.</param>
-        protected List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null)
+        /// <param name="entryType">Optional filter parameter.</param>
+        protected List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return Evaluator.GetEffectiveEntries(entityId, relatedIdentities);
+            return Evaluator.GetEffectiveEntries(entityId, relatedIdentities, entryType);
         }
         /// <summary>
         /// Returns the explicit entries of the requested entity.
@@ -234,9 +235,10 @@ namespace SenseNet.Security
         /// If it is provided, the output will be filtered for the related identities.
         /// Empty collection means nobody, so in case of passing empty,
         /// the method will return an empty list.</param>
-        protected List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null)
+        /// <param name="entryType">Optional filter parameter.</param>
+        protected List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return Evaluator.GetExplicitEntries(entityId, relatedIdentities);
+            return Evaluator.GetExplicitEntries(entityId, relatedIdentities, entryType);
         }
 
         // for tests
