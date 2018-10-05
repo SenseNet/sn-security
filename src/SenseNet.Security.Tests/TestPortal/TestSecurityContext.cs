@@ -25,13 +25,13 @@ namespace SenseNet.Security.Tests.TestPortal
         {
             return base.GetAcl(entityId);
         }
-        public new List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null)
+        public new List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return base.GetEffectiveEntries(entityId, relatedIdentities);
+            return base.GetEffectiveEntries(entityId, relatedIdentities, entryType);
         }
-        public new List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null)
+        public new List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return base.GetExplicitEntries(entityId, relatedIdentities);
+            return base.GetExplicitEntries(entityId, relatedIdentities, entryType);
         }
 
         /*********************** Low level evaluator API **********************/
