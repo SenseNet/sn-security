@@ -165,6 +165,7 @@ namespace SenseNet.Security
             };
         }
 
+        /// <summary> Used for getting permission. </summary>
         internal void AggregateLocalOnlyValues(List<int> identities, ref ulong allow, ref ulong deny)
         {
             foreach (var permSet in this.Entries)
@@ -177,6 +178,7 @@ namespace SenseNet.Security
                 deny |= permSet.DenyBits;
             }
         }
+        /// <summary> Used for getting permission. </summary>
         internal void AggregateEffectiveValues(List<int> identities, ref ulong allow, ref ulong deny)
         {
             foreach (var permSet in this.Entries)
@@ -237,6 +239,7 @@ namespace SenseNet.Security
             return newAce;
         }
 
+        //UNDONE: Delete if really not used.
         internal List<AceInfo> GetEffectiveEntries(bool withLocalOnly)
         {
             var aces = new Dictionary<int, AceInfo>(); // IdentityId => aceInfo

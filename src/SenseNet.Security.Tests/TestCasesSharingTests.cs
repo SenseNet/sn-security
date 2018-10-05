@@ -150,9 +150,9 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             // ASSERT
-Assert.Inconclusive();
+//Assert.Inconclusive();
             
-var acl14 = ctx.GetAcl(Id("E14")); // E1/E2/E5/E14
+            var acl14 = ctx.GetAcl(Id("E14")); // E1/E2/E5/E14
             var acl20 = ctx.GetAcl(Id("E20")); // E1/E3/E8/E20
 
             // original:     +E14|Normal|+G1:______________________________________________________________++
