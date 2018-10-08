@@ -254,7 +254,7 @@ namespace SenseNet.Security
             return result;
         }
 
-        internal static AccessControlList GetAccessControlList(SecurityContext ctx, int entityId)
+        internal static AccessControlList GetAccessControlList(SecurityContext ctx, int entityId, EntryType entryType = EntryType.Normal)
         {
             EnterReadLock();
             try
@@ -263,7 +263,7 @@ namespace SenseNet.Security
                 var aclInfo = GetFirstAclSafe(ctx, entityId, false);
                 if (aclInfo == null)
                     return AclInfo.CreateEmptyAccessControlList(entityId, entity.IsInherited); //means breaked and cleared
-                return aclInfo.ToAccessContolList(entityId);
+                return aclInfo.ToAccessContolList(entityId, entryType);
             }
             finally
             {

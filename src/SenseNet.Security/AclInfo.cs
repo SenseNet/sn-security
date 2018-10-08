@@ -70,7 +70,7 @@ namespace SenseNet.Security
             Entries = new List<AceInfo>();
         }
 
-        internal AccessControlList ToAccessContolList(int requestedEntityId)
+        internal AccessControlList ToAccessContolList(int requestedEntityId, EntryType entryType)
         {
             var aces = new Dictionary<int, AccessControlEntry>();
             var localOnlyAces = new Dictionary<int, AccessControlEntry>();
@@ -78,7 +78,7 @@ namespace SenseNet.Security
             var aclInfo = this;
             while (aclInfo != null)
             {
-                foreach (var aceInfo in aclInfo.Entries)
+                foreach (var aceInfo in aclInfo.Entries.Where(x => x.EntryType == entryType))
                 {
                     var isLocalAcl = aclInfo.EntityId == requestedEntityId;
                     AccessControlEntry ace;

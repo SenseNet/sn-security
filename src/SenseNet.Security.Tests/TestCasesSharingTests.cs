@@ -8,52 +8,75 @@ namespace SenseNet.Security.Tests
     public abstract partial class TestCases
     {
         [TestMethod]
-        public void Sharing_GetAcl_Inheritance()
+        public void Sharing_GetAcl()
         {
             EnsureRepository();
+            var ctx = CurrentContext.Security;
 
-            // Root permission for G1.
-            SetAcl("+E1| Normal|+G1:______________+");
-            // One level down: The sharing permits more.
-            SetAcl("+E2|Sharing|+U1:____________+++");
-            // Two level down: The sharing permits even more.
-            SetAcl("+E5|Sharing|+U1:__________+++++");
+            Tools.SetMembership(ctx, "U1:G1");
 
-            // Check under E2 but out from E5
-            var acl = CurrentContext.Security.GetAcl(Id("E6"));
-            Assert.AreEqual("+E6|Normal|+G1:_______________________________________________________________+," +
-                               "Sharing|+U1:_____________________________________________________________+++", Tools.ReplaceIds(acl.ToString()));
+            SetAcl("+E1| Normal|+G1:______________+"); // 0x1
+            SetAcl("+E1|Sharing|+G1:___________+___"); // 0x8
+            SetAcl("+E2| Normal|+G1:_____________+_"); // 0x2
+            SetAcl("+E2|Sharing|+G1:__________+____"); // 0x10
+            SetAcl("+E2| Normal|-G1:____________+__"); // 0x4   local
+            SetAcl("+E2|Sharing|-G1:_________+_____"); // 0x20  local
 
-            // Check under E2 and E5
-            acl = CurrentContext.Security.GetAcl(Id("E14"));
-            Assert.AreEqual("+E14|Normal|+G1:_______________________________________________________________+," +
-                                "Sharing|+U1:___________________________________________________________+++++", Tools.ReplaceIds(acl.ToString()));
+            // ACTION 1 root, default filter (Normal)
+            var entries = ctx.GetAcl(Id("E1")).Entries
+                .OrderBy(x => x.LocalOnly).ThenBy(x => x.EntryType).ToList();
+            Assert.AreEqual("Normal|+G1:_______________________________________________________________+", Tools.ReplaceIds(entries[0].ToString()));
+
+            // ACTION 2 child, default filter (Normal)
+            entries = ctx.GetAcl(Id("E2")).Entries
+                .OrderBy(x => x.LocalOnly).ThenBy(x => x.EntryType).ToList();
+            Assert.AreEqual("Normal|+G1:______________________________________________________________++", Tools.ReplaceIds(entries[0].ToString()));
+            Assert.AreEqual("Normal|-G1:_____________________________________________________________+__", Tools.ReplaceIds(entries[1].ToString()));
+
+            // ACTION 3 root, Normal only
+            entries = ctx.GetAcl(Id("E1"), EntryType.Normal).Entries
+                .OrderBy(x => x.LocalOnly).ThenBy(x => x.EntryType).ToList();
+            Assert.AreEqual("Normal|+G1:_______________________________________________________________+", Tools.ReplaceIds(entries[0].ToString()));
+
+            // ACTION 4 child, Normal only
+            entries = ctx.GetAcl(Id("E2"), EntryType.Normal).Entries
+                .OrderBy(x => x.LocalOnly).ThenBy(x => x.EntryType).ToList();
+            Assert.AreEqual("Normal|+G1:______________________________________________________________++", Tools.ReplaceIds(entries[0].ToString()));
+            Assert.AreEqual("Normal|-G1:_____________________________________________________________+__", Tools.ReplaceIds(entries[1].ToString()));
+
+            // ACTION 3 root, Sharing only
+            entries = ctx.GetAcl(Id("E1"), EntryType.Sharing).Entries
+                .OrderBy(x => x.LocalOnly).ThenBy(x => x.EntryType).ToList();
+            Assert.AreEqual("Sharing|+G1:____________________________________________________________+___", Tools.ReplaceIds(entries[0].ToString()));
+
+            // ACTION 4 child, Sharing only
+            entries = ctx.GetAcl(Id("E2"), EntryType.Sharing).Entries
+                .OrderBy(x => x.LocalOnly).ThenBy(x => x.EntryType).ToList();
+            Assert.AreEqual("Sharing|+G1:___________________________________________________________++___", Tools.ReplaceIds(entries[0].ToString()));
+            Assert.AreEqual("Sharing|-G1:__________________________________________________________+_____", Tools.ReplaceIds(entries[1].ToString()));
         }
         [TestMethod]
-        public void Sharing_GetAcl_Local()
+        public void Sharing_GetAcl_FirstAclIsNotRelevant()
         {
             EnsureRepository();
+            var ctx = CurrentContext.Security;
 
-            // Root permission for G1.
-            SetAcl("+E1| Normal|+G1:______________+");
-            // One level down: The sharing permits many more but only local.
-            SetAcl("+E2|Sharing|-U1:________+++++++");
-            // Two level down: The sharing permits less than on parent.
-            SetAcl("+E5|Sharing|+U1:___________++++");
+            Tools.SetMembership(ctx, "U1:G1");
 
-            // Check on E2
-            var acl = CurrentContext.Security.GetAcl(Id("E2"));
-            Assert.AreEqual("+E2|Normal|+G1:_______________________________________________________________+," +
-                               "Sharing|-U1:_________________________________________________________+++++++", Tools.ReplaceIds(acl.ToString()));
+            SetAcl("+E1| Normal|+G1:___________++++"); // 0x1
+            SetAcl("+E2|Sharing|+G1:_______++++____"); // 0x10
 
-            // Check under E2 but out from E5
-            acl = CurrentContext.Security.GetAcl(Id("E6"));
-            Assert.AreEqual("+E6|Normal|+G1:_______________________________________________________________+", Tools.ReplaceIds(acl.ToString()));
+            // ACTION 1: default filter (Normal)
+            var entry = ctx.GetAcl(Id("E5")).Entries.First();
+            Assert.AreEqual("Normal|+G1:____________________________________________________________++++", Tools.ReplaceIds(entry.ToString()));
 
-            // Check under E2 and E5
-            acl = CurrentContext.Security.GetAcl(Id("E14"));
-            Assert.AreEqual("+E14|Normal|+G1:_______________________________________________________________+," +
-                                "Sharing|+U1:____________________________________________________________++++", Tools.ReplaceIds(acl.ToString()));
+            // ACTION 2: Normal only
+            entry = ctx.GetAcl(Id("E5"), EntryType.Normal).Entries.First();
+            Assert.AreEqual("Normal|+G1:____________________________________________________________++++", Tools.ReplaceIds(entry.ToString()));
+
+            // ACTION 3: Sharing only
+            entry = ctx.GetAcl(Id("E5"), EntryType.Sharing).Entries.First();
+            Assert.AreEqual("Sharing|+G1:________________________________________________________++++____", Tools.ReplaceIds(entry.ToString()));
         }
 
         [TestMethod]
