@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SenseNet.Security.Messaging.SecurityMessages;
+// ReSharper disable ArrangeThisQualifier
 
 namespace SenseNet.Security
 {
@@ -11,6 +12,9 @@ namespace SenseNet.Security
     /// </summary>
     public class AclEditor
     {
+        /// <summary>
+        /// Gets the category of entries. Only entries in this category can be edited in this instance.
+        /// </summary>
         public EntryType EntryType { get; }
 
         private enum AggregationType { Allow, Deny }
@@ -18,14 +22,17 @@ namespace SenseNet.Security
         /// <summary>
         /// Modified AclInfo set indexed by entity id.
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         protected Dictionary<int, AclInfo> _acls = new Dictionary<int, AclInfo>();
         /// <summary>
         /// Id set of the entities where inheritance was cancelled.
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         protected List<int> _breaks = new List<int>();
         /// <summary>
         /// Id set of the entities where inheritance was restored.
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         protected List<int> _unbreaks = new List<int>();
 
         /// <summary>
@@ -306,8 +313,8 @@ namespace SenseNet.Security
             {
                 foreach (var refAce in evaluator.GetEffectiveEntries(parentAcl.EntityId, null, entryType))
                 {
-                    var hasLocalAce = localAces.Any(x => x.EntryType == refAce.EntryType &&
-                        x.IdentityId == refAce.IdentityId && x.LocalOnly == refAce.LocalOnly);
+                    var hasLocalAce = localAces.Any(x =>
+                        x.EntryType == refAce.EntryType && x.IdentityId == refAce.IdentityId && x.LocalOnly == refAce.LocalOnly);
                     if (hasLocalAce)
                     {
                         var editorAce = EnsureAce(entityId, entryType, refAce.IdentityId, refAce.LocalOnly);
@@ -323,9 +330,8 @@ namespace SenseNet.Security
         private AceInfo EnsureAce(int entityId, EntryType entryType, int identityId, bool localOnly)
         {
             var aclInfo = EnsureAcl(entityId);
-            var aceInfo = aclInfo.Entries.FirstOrDefault(x => x.EntryType == entryType &&
-                                                              x.IdentityId == identityId &&
-                                                              x.LocalOnly == localOnly);
+            var aceInfo = aclInfo.Entries.FirstOrDefault(
+                x => x.EntryType == entryType && x.IdentityId == identityId && x.LocalOnly == localOnly);
             if (aceInfo == null)
             {
                 aclInfo.Entries.Add(aceInfo = new AceInfo
@@ -339,8 +345,7 @@ namespace SenseNet.Security
         }
         private AclInfo EnsureAcl(int entityId)
         {
-            AclInfo aclInfo;
-            if (!_acls.TryGetValue(entityId, out aclInfo))
+            if (!_acls.TryGetValue(entityId, out var aclInfo))
             {
                 aclInfo = SecurityEntity.GetAclInfoCopy(this.Context, entityId, this.EntryType);
                 if (aclInfo == null)

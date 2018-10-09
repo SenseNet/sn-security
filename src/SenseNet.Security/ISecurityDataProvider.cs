@@ -139,12 +139,13 @@ namespace SenseNet.Security
         int GetEstimatedEntityCount();
 
         /// <summary>
-        /// Inserts or updates one or more StoredACEs. An ACE is identified by a compound key: EntityId, IdentityId, LocalOnly
+        /// Inserts or updates one or more StoredACEs.
+        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
         void WritePermissionEntries(IEnumerable<StoredAce> aces);
         /// <summary>
         /// Deletes the given ACEs.  If an ACE does not exist before deleting, it must be skipped.
-        /// An ACE is identified by a compound key: EntityId, IdentityId, LocalOnly
+        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
         void RemovePermissionEntries(IEnumerable<StoredAce> aces);
 

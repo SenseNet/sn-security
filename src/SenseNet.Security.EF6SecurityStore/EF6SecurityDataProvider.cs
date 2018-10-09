@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -9,12 +8,14 @@ using System.Linq;
 using System.Threading;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
+// ReSharper disable ArrangeThisQualifier
 
 namespace SenseNet.Security.EF6SecurityStore
 {
     /// <summary>
     /// An ISecurityDataProvider implementation built on top of Entity Framework.
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     public class EF6SecurityDataProvider : ISecurityDataProvider
     {
         /// <summary>Initializes a new instance of the EF6SecurityDataProvider class.</summary>
@@ -306,7 +307,8 @@ namespace SenseNet.Security.EF6SecurityStore
             }
         }
         /// <summary>
-        /// Inserts or updates one or more StoredACEs. An ACE is identified by a compound key: EntityId, IdentityId, LocalOnly
+        /// Inserts or updates one or more StoredACEs.
+        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
         {
@@ -329,7 +331,7 @@ namespace SenseNet.Security.EF6SecurityStore
         }
         /// <summary>
         /// Deletes the given ACEs.  If an ACE does not exist before deleting, it must be skipped.
-        /// An ACE is identified by a compound key: EntityId, IdentityId, LocalOnly
+        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
         public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
@@ -594,8 +596,7 @@ namespace SenseNet.Security.EF6SecurityStore
         }
         private SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
         {
-            SecurityGroup group;
-            if (groups.TryGetValue(groupId, out group))
+            if (groups.TryGetValue(groupId, out var group))
                 return group;
             group = new SecurityGroup(groupId);
             groups.Add(group.Id, group);

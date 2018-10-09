@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using SenseNet.Security.Messaging.SecurityMessages;
+// ReSharper disable InconsistentlySynchronizedField
 
 namespace SenseNet.Security.Data
 {
     /// <summary>
     /// Complete ISecurityDataProvider implementation only for testing purposes.
+    /// Do not use this class in any business solution.
     /// </summary>
     public class MemoryDataProvider : ISecurityDataProvider
     {
