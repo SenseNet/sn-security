@@ -575,7 +575,7 @@ namespace SenseNet.Security
 
                 // get related entry if exists
                 var aclEntries = acl?.Entries;
-                var entryToRemove = aclEntries?.FirstOrDefault(e => e.IdentityId == entry.IdentityId && e.LocalOnly == entry.LocalOnly);
+                var entryToRemove = aclEntries?.FirstOrDefault(e => e.EntryType == entry.EntryType && e.IdentityId == entry.IdentityId && e.LocalOnly == entry.LocalOnly);
                 if(entryToRemove == null)
                     continue;
 

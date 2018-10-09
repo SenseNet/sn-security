@@ -155,7 +155,7 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void Sharing_Acl_BreakOperation_SharingNotCopied()
+        public void Sharing_Acl_BreakOperation_Default_SharingNotCopied()
         {
             EnsureRepository();
             var ctx = CurrentContext.Security;
@@ -163,7 +163,8 @@ namespace SenseNet.Security.Tests
             Tools.SetMembership(ctx, "U1:G1,G2");
 
             SetAcl("+E1|Sharing|+G1:______________+");
-            SetAcl("+E2| Normal|+G1:_____________+_");
+            SetAcl("+E1| Normal|+G1:_____________+_");
+            SetAcl("+E2| Normal|+G1:____________+__");
             SetAcl("+E3| Normal|+G2:_____________+_");
 
             // ACTION
@@ -173,17 +174,85 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             // ASSERT
-//Assert.Inconclusive();
-            
-            var acl14 = ctx.GetAcl(Id("E14")); // E1/E2/E5/E14
-            var acl20 = ctx.GetAcl(Id("E20")); // E1/E3/E8/E20
+            var entries5 = ctx.GetExplicitEntries(Id("E5")) // E1/E2/E5
+                .OrderBy(x => x.EntryType).ThenBy(x => x.IdentityId).ToList();
+            var entries8 = ctx.GetExplicitEntries(Id("E8")) // E1/E3/E8
+                .OrderBy(x => x.EntryType).ThenBy(x => x.IdentityId).ToList();
 
-            // original:     +E14|Normal|+G1:______________________________________________________________++
-            Assert.AreEqual("+E14|Normal|+G1:______________________________________________________________+_", Tools.ReplaceIds(acl14.ToString()));
+            Assert.AreEqual(1, entries5.Count);
+            Assert.AreEqual("Normal|+G1:_____________________________________________________________++_", Tools.ReplaceIds(entries5[0].ToString()));
 
-            // original:    <+E20|Normal|+G1:_______________________________________________________________+,
-            //                    Normal|+G2:______________________________________________________________+_
-            Assert.AreEqual("+E20|Normal|+G2:______________________________________________________________+_", Tools.ReplaceIds(acl20.ToString()));
+            Assert.AreEqual(2, entries8.Count);
+            Assert.AreEqual("Normal|+G1:______________________________________________________________+_", Tools.ReplaceIds(entries8[0].ToString()));
+            Assert.AreEqual("Normal|+G2:______________________________________________________________+_", Tools.ReplaceIds(entries8[1].ToString()));
+        }
+        [TestMethod]
+        public void Sharing_Acl_BreakOperation_EverythingCopied()
+        {
+            EnsureRepository();
+            var ctx = CurrentContext.Security;
+
+            Tools.SetMembership(ctx, "U1:G1,G2");
+
+            SetAcl("+E1|Sharing|+G1:______________+");
+            SetAcl("+E1| Normal|+G1:_____________+_");
+            SetAcl("+E2| Normal|+G1:____________+__");
+            SetAcl("+E3| Normal|+G2:_____________+_");
+
+            // ACTION
+            var ed = ctx.CreateAclEditor();
+            ed.BreakInheritance(Id("E5"), new[] { EntryType.Normal, EntryType.Sharing });
+            ed.BreakInheritance(Id("E8"), new[] { EntryType.Normal, EntryType.Sharing });
+            ed.Apply();
+
+            // ASSERT
+            var entries5 = ctx.GetExplicitEntries(Id("E5")) // E1/E2/E5
+                .OrderBy(x => x.EntryType).ThenBy(x => x.IdentityId).ToList();
+            var entries8 = ctx.GetExplicitEntries(Id("E8")) // E1/E3/E8
+                .OrderBy(x => x.EntryType).ThenBy(x => x.IdentityId).ToList();
+
+            Assert.AreEqual(2, entries5.Count);
+            Assert.AreEqual( "Normal|+G1:_____________________________________________________________++_", Tools.ReplaceIds(entries5[0].ToString()));
+            Assert.AreEqual("Sharing|+G1:_______________________________________________________________+", Tools.ReplaceIds(entries5[1].ToString()));
+
+            Assert.AreEqual(3, entries8.Count);
+            Assert.AreEqual( "Normal|+G1:______________________________________________________________+_", Tools.ReplaceIds(entries8[0].ToString()));
+            Assert.AreEqual( "Normal|+G2:______________________________________________________________+_", Tools.ReplaceIds(entries8[1].ToString()));
+            Assert.AreEqual("Sharing|+G1:_______________________________________________________________+", Tools.ReplaceIds(entries8[2].ToString()));
+        }
+        [TestMethod]
+        public void Sharing_Acl_BreakAll_Unbreak_NormalizeOne()
+        {
+            EnsureRepository();
+            var ctx = CurrentContext.Security;
+
+            Tools.SetMembership(ctx, "U1:G1,G2");
+
+            SetAcl("+E1|Sharing|+G1:______________+");
+            SetAcl("+E1| Normal|+G1:_____________+_");
+            SetAcl("+E2| Normal|+G1:____________+__");
+            SetAcl("+E3| Normal|+G2:_____________+_");
+
+            var ed = ctx.CreateAclEditor();
+            ed.BreakInheritance(Id("E5"), new[] { EntryType.Normal, EntryType.Sharing });
+            ed.BreakInheritance(Id("E8"), new[] { EntryType.Normal, EntryType.Sharing });
+            ed.Apply();
+
+            // ACTION
+            ed = ctx.CreateAclEditor();
+            ed.UnbreakInheritance(Id("E5"), new[] { EntryType.Normal });
+            ed.UnbreakInheritance(Id("E8"), new[] { EntryType.Normal });
+            ed.Apply();
+
+            // ASSERT
+            var entries5 = ctx.GetExplicitEntries(Id("E5")); // E1/E2/E5
+            var entries8 = ctx.GetExplicitEntries(Id("E8")); // E1/E3/E8
+
+            Assert.AreEqual(1, entries5.Count);
+            Assert.AreEqual("Sharing|+G1:_______________________________________________________________+", Tools.ReplaceIds(entries5[0].ToString()));
+
+            Assert.AreEqual(1, entries8.Count);
+            Assert.AreEqual("Sharing|+G1:_______________________________________________________________+", Tools.ReplaceIds(entries8[0].ToString()));
         }
 
         [TestMethod]

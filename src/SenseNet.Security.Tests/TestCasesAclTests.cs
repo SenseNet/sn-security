@@ -1497,9 +1497,9 @@ namespace SenseNet.Security.Tests
 
             var ed = CurrentContext.Security.CreateAclEditor();
 
-            ed.NormalizeExplicitePermissions(Id("E1"));
-            ed.NormalizeExplicitePermissions(Id("E2"));
-            ed.NormalizeExplicitePermissions(Id("E5"));
+            ed.NormalizeExplicitePermissions(Id("E1"), new[] { EntryType.Normal });
+            ed.NormalizeExplicitePermissions(Id("E2"), new[] { EntryType.Normal });
+            ed.NormalizeExplicitePermissions(Id("E5"), new[] { EntryType.Normal });
         }
 
 
@@ -1512,7 +1512,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+___________++_");
             SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:___________++++");
 
-            CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E5")).Apply();
+            CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E5"), new[] { EntryType.Normal }).Apply();
 
             Assert.AreEqual("+E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1532,7 +1532,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+___________++_");
             SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:___________++++");
 
-            CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E14")).Apply();
+            CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E14"), new[] { EntryType.Normal }).Apply();
 
             Assert.AreEqual("+E14|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E14")).ToString()));
 
@@ -1552,7 +1552,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+-__________++_");
             SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:-__________++++");
 
-            CurrentContext.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E5")).Apply();
+            CurrentContext.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E5"), new[] { EntryType.Normal }).Apply();
 
             Assert.AreEqual("+E5|Normal|+G2:_________________________________________________-__________+___", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1572,7 +1572,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:___________++++");
             SetAcl("+E14|Normal|+G1:+++++++++++++++,Normal|+G2:+-_________++++");
 
-            CurrentContext.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E14")).Apply();
+            CurrentContext.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E14"), new[] { EntryType.Normal }).Apply();
 
             Assert.IsNull(CurrentContext.Security.GetAclInfo(Id("E14")));
 

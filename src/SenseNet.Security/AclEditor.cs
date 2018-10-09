@@ -63,7 +63,7 @@ namespace SenseNet.Security
         /// <returns>A reference to this instance for calling more operations.</returns>
         public AclEditor Allow(int entityId, int identityId, bool localOnly, params PermissionTypeBase[] permissions)
         {
-            var ace = EnsureAce(entityId, identityId, localOnly);
+            var ace = EnsureAce(entityId, EntryType, identityId, localOnly);
             var perms = AggregateAffectedPermissions(permissions, AggregationType.Allow);
             foreach (var perm in perms)
             {
@@ -84,7 +84,7 @@ namespace SenseNet.Security
         /// <returns>A reference to this instance for calling more operations.</returns>
         public AclEditor Deny(int entityId, int identityId, bool localOnly, params PermissionTypeBase[] permissions)
         {
-            var ace = EnsureAce(entityId, identityId, localOnly);
+            var ace = EnsureAce(entityId, EntryType, identityId, localOnly);
             var perms = AggregateAffectedPermissions(permissions, AggregationType.Deny);
             foreach (var perm in perms)
             {
@@ -106,7 +106,7 @@ namespace SenseNet.Security
         /// <returns>A reference to this instance for calling more operations.</returns>
         public AclEditor ClearPermission(int entityId, int identityId, bool localOnly, params PermissionTypeBase[] permissions)
         {
-            var ace = EnsureAce(entityId, identityId, localOnly);
+            var ace = EnsureAce(entityId, EntryType, identityId, localOnly);
 
             var perms = AggregateAffectedPermissions(permissions, AggregationType.Allow);
             foreach (var perm in perms)
@@ -129,7 +129,7 @@ namespace SenseNet.Security
         /// <returns>A reference to this instance for calling more operations.</returns>
         public AclEditor Set(int entityId, int identityId, bool localOnly, PermissionBitMask permissionMask)
         {
-            var ace = EnsureAce(entityId, identityId, localOnly);
+            var ace = EnsureAce(entityId, EntryType, identityId, localOnly);
             ace.AllowBits |= permissionMask.AllowBits;
             ace.DenyBits |= permissionMask.DenyBits;
             return this;
@@ -144,7 +144,7 @@ namespace SenseNet.Security
         /// <returns>A reference to this instance for calling more operations.</returns>
         public AclEditor Reset(int entityId, int identityId, bool localOnly, PermissionBitMask permissionMask)
         {
-            var ace = EnsureAce(entityId, identityId, localOnly);
+            var ace = EnsureAce(entityId, EntryType, identityId, localOnly);
             ace.AllowBits &= ~permissionMask.AllowBits;
             ace.DenyBits &= ~permissionMask.DenyBits;
             return this;
@@ -164,7 +164,7 @@ namespace SenseNet.Security
                 throw new InvalidOperationException(
                     $"Inconsistent entry type. EntryType.{entry.EntryType} is not allowed. Expected: {this.EntryType}");
 
-            var ace = EnsureAce(entityId, entry.IdentityId, entry.LocalOnly);
+            var ace = EnsureAce(entityId, EntryType, entry.IdentityId, entry.LocalOnly);
             if (reset)
             {
                 ace.AllowBits = entry.AllowBits;
@@ -182,8 +182,10 @@ namespace SenseNet.Security
         /// Cancels the permission inheritance on the requested entity.
         /// </summary>
         /// <param name="entityId">The requested entity.</param>
-        /// <param name="convertToExplicit">If true (default), after the break operation all previous effective permissions will be copied explicitly.</param>
+        /// <param name="convertToExplicit">If true (default), after the break operation all previous effective
+        /// permissions will be copied explicitly. WARNING: Only the Normal category will be copied.</param>
         /// <returns>A reference to this instance for calling more operations.</returns>
+        [Obsolete("Use the BreakInheritance(int entityId, EntryType[] categoriesToCopy) method instead")]
         public AclEditor BreakInheritance(int entityId, bool convertToExplicit = true)
         {
             _unbreaks.Remove(entityId);
@@ -191,16 +193,33 @@ namespace SenseNet.Security
                 _breaks.Add(entityId);
 
             if (convertToExplicit)
-                CopyEffectivePermissions(entityId);
+                CopyEffectivePermissions(entityId, new[] {EntryType.Normal});
 
+            return this;
+        }
+        /// <summary>
+        /// Cancels the permission inheritance on the requested entity.
+        /// </summary>
+        /// <param name="entityId">The requested entity.</param>
+        /// <param name="categoriesToCopy">After the break operation, all previous effective permissions will be
+        /// copied explicitly that are matched any of the given entry types.</param>
+        /// <returns>A reference to this instance for calling more operations.</returns>
+        public AclEditor BreakInheritance(int entityId, EntryType[] categoriesToCopy)
+        {
+            _unbreaks.Remove(entityId);
+            if (!_breaks.Contains(entityId))
+                _breaks.Add(entityId);
+            CopyEffectivePermissions(entityId, categoriesToCopy);
             return this;
         }
         /// <summary>
         /// Restores the permission inheritance on the requested entity.
         /// </summary>
         /// <param name="entityId">The requested entity.</param>
-        /// <param name="normalize">If true (default is false), the unnecessary explicit entries will be removed.</param>
+        /// <param name="normalize">If true (default is false), the unnecessary explicit entries will be removed.
+        /// WARNING: Only the Normal category will be copied.</param>
         /// <returns>A reference to this instance for calling more operations.</returns>
+        [Obsolete("Use the UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize) method instead")]
         public AclEditor UnbreakInheritance(int entityId, bool normalize = false)
         {
             _breaks.Remove(entityId);
@@ -208,8 +227,23 @@ namespace SenseNet.Security
                 _unbreaks.Add(entityId);
 
             if (normalize)
-                NormalizeExplicitePermissions(entityId);
+                NormalizeExplicitePermissions(entityId, new[] { EntryType.Normal });
 
+            return this;
+        }
+        /// <summary>
+        /// Restores the permission inheritance on the requested entity.
+        /// </summary>
+        /// <param name="entityId">The requested entity.</param>
+        /// <param name="categoriesToNormalize">If true (default is false), unnecessary explicit entries
+        /// that match the categories will be removed.</param>
+        /// <returns>A reference to this instance for calling more operations.</returns>
+        public AclEditor UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize)
+        {
+            _breaks.Remove(entityId);
+            if (!_unbreaks.Contains(entityId))
+                _unbreaks.Add(entityId);
+            NormalizeExplicitePermissions(entityId, categoriesToNormalize);
             return this;
         }
 
@@ -226,21 +260,25 @@ namespace SenseNet.Security
         /// Copies effective permissions to explicite access control entries.
         /// </summary>
         /// <param name="entityId">The requested entity.</param>
-        internal AclEditor CopyEffectivePermissions(int entityId)
+        /// <param name="entryTypes">Array of <see cref="EntryType"/>. Only items of these types will be copied
+        /// Copy is skipped if the array is empty.</param>
+        internal AclEditor CopyEffectivePermissions(int entityId, EntryType[] entryTypes)
         {
-            foreach (var refAce in this.Context.Evaluator.GetEffectiveEntries(entityId))
+            foreach (var entryType in entryTypes)
             {
-                var ace = EnsureAce(entityId, refAce.IdentityId, refAce.LocalOnly);
-                ace.AllowBits |= refAce.AllowBits;
-                ace.DenyBits |= refAce.DenyBits;
+                foreach (var refAce in this.Context.Evaluator.GetEffectiveEntries(entityId, null, entryType))
+                {
+                    var ace = EnsureAce(entityId, refAce.EntryType, refAce.IdentityId, refAce.LocalOnly);
+                    ace.AllowBits |= refAce.AllowBits;
+                    ace.DenyBits |= refAce.DenyBits;
+                }
             }
             return this;
         }
         /// <summary>
         /// Removes inherited effective permissions from the explicite setting collection.
         /// </summary>
-        /// <param name="entityId">The requested entity.</param>
-        internal AclEditor NormalizeExplicitePermissions(int entityId)
+        internal AclEditor NormalizeExplicitePermissions(int entityId, EntryType[] entryTypes)
         {
             var firstAcl = SecurityEntity.GetFirstAcl(this.Context, entityId, false);
             if (firstAcl == null)
@@ -255,28 +293,47 @@ namespace SenseNet.Security
                 return this; // this is the root setting
 
             var localAces = firstAcl.Entries;
-            foreach (var refAce in evaluator.GetEffectiveEntries(parentAcl.EntityId))
+            // Ensure all existing explicit entries on the output
+            // to avoid incorrect empty ACL detection in the SetAclActivity
+            foreach (var ace in localAces)
             {
-                var hasLocalAce = localAces.Any(x => x.IdentityId == refAce.IdentityId && x.LocalOnly == refAce.LocalOnly);
-                if (hasLocalAce)
+                var editorAce = EnsureAce(entityId, ace.EntryType, ace.IdentityId, ace.LocalOnly);
+                editorAce.AllowBits = ace.AllowBits;
+                editorAce.DenyBits = ace.DenyBits;
+            }
+
+            foreach (var entryType in entryTypes)
+            {
+                foreach (var refAce in evaluator.GetEffectiveEntries(parentAcl.EntityId, null, entryType))
                 {
-                    var editorAce = EnsureAce(entityId, refAce.IdentityId, refAce.LocalOnly);
-                    editorAce.AllowBits &= ~refAce.AllowBits; // clears all allow bits of refAce
-                    editorAce.DenyBits &= ~refAce.DenyBits;   // clears all deny bits of refAce
+                    var hasLocalAce = localAces.Any(x => x.EntryType == refAce.EntryType &&
+                        x.IdentityId == refAce.IdentityId && x.LocalOnly == refAce.LocalOnly);
+                    if (hasLocalAce)
+                    {
+                        var editorAce = EnsureAce(entityId, entryType, refAce.IdentityId, refAce.LocalOnly);
+                        editorAce.AllowBits &= ~refAce.AllowBits; // clears all allow bits of refAce
+                        editorAce.DenyBits &= ~refAce.DenyBits; // clears all deny bits of refAce
+                    }
                 }
             }
 
             return this;
         }
 
-        private AceInfo EnsureAce(int entityId, int identityId, bool localOnly)
+        private AceInfo EnsureAce(int entityId, EntryType entryType, int identityId, bool localOnly)
         {
             var aclInfo = EnsureAcl(entityId);
-            var aceInfo = aclInfo.Entries.FirstOrDefault(x => x.IdentityId == identityId && x.LocalOnly == localOnly);
+            var aceInfo = aclInfo.Entries.FirstOrDefault(x => x.EntryType == entryType &&
+                                                              x.IdentityId == identityId &&
+                                                              x.LocalOnly == localOnly);
             if (aceInfo == null)
             {
-                //UNDONE: EntryType initialization?
-                aclInfo.Entries.Add(aceInfo = new AceInfo { IdentityId = identityId, LocalOnly = localOnly });
+                aclInfo.Entries.Add(aceInfo = new AceInfo
+                {
+                    EntryType = entryType,
+                    IdentityId = identityId,
+                    LocalOnly = localOnly
+                });
             }
             return aceInfo;
         }
