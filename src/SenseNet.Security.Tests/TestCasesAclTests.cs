@@ -491,7 +491,8 @@ namespace SenseNet.Security.Tests
             ed.Deny(Id("E5"), g1, false, Tools.GetPermissionTypes("p__p__p________"));
             ed.Apply();
 
-            var entries = CurrentContext.Security.GetAclInfo(Id("E5")).GetEffectiveEntries(true);
+            var entries = CurrentContext.Security.GetEffectiveEntries(Id("E5"))
+                .OrderBy(e => e.IdentityId).ToList();
 
             Assert.AreEqual(3, entries.Count);
             Assert.AreEqual("Normal|+G1:_________________________________________________-++-++-++-++-++", Tools.ReplaceIds(entries[0].ToString()));

@@ -239,52 +239,6 @@ namespace SenseNet.Security
             return newAce;
         }
 
-        //UNDONE: Delete if really not used.
-        internal List<AceInfo> GetEffectiveEntries(bool withLocalOnly)
-        {
-            var aces = new Dictionary<int, AceInfo>(); // IdentityId => aceInfo
-            var localOnlyAces = new Dictionary<int, AceInfo>(); // IdentityId => aceInfo
-
-            var aclInfo = this;
-            while (aclInfo != null)
-            {
-                foreach (var aceInfo in aclInfo.Entries)
-                {
-                    AceInfo ace;
-                    if (aceInfo.LocalOnly)
-                    {
-                        if (this == aclInfo && withLocalOnly)
-                        {
-                            if (!localOnlyAces.TryGetValue(aceInfo.IdentityId, out ace))
-                            {
-                                ace = new AceInfo { EntryType=aceInfo.EntryType, IdentityId = aceInfo.IdentityId, LocalOnly = true };
-                                localOnlyAces.Add(ace.IdentityId, ace);
-                            }
-                            ace.AllowBits |= aceInfo.AllowBits;
-                            ace.DenyBits |= aceInfo.DenyBits;
-                        }
-                    }
-                    else
-                    {
-                        if (!aces.TryGetValue(aceInfo.IdentityId, out ace))
-                        {
-                            ace = new AceInfo { EntryType = aceInfo.EntryType, IdentityId = aceInfo.IdentityId, LocalOnly = false };
-                            aces.Add(ace.IdentityId, ace);
-                        }
-                        ace.AllowBits |= aceInfo.AllowBits;
-                        ace.DenyBits |= aceInfo.DenyBits;
-                    }
-                }
-                if (!aclInfo.Inherits)
-                    break;
-                aclInfo = aclInfo.Parent;
-            }
-
-
-            var result = aces.Values.Concat(localOnlyAces.Values).OrderBy(x => x.IdentityId).ThenBy(x => x.LocalOnly).ToList();
-            return result;
-        }
-
         internal AclInfo Copy(EntryType? entryType = null)
         {
             var entries = entryType == null
