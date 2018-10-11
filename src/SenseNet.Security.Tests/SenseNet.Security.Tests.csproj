@@ -183,7 +183,7 @@
     <Compile Include="MessagingTests.cs" />
     <Compile Include="PermissionQueryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryTests.cs" />
+    <Compile Include="SecurityQueryTests.cs" />
     <Compile Include="TestCases.cs" />
     <Compile Include="TestCasesAclTests.cs" />
     <Compile Include="TestCasesMembershipTests.cs" />

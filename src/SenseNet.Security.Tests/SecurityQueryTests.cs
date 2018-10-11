@@ -6,7 +6,7 @@ using SenseNet.Security.Tests.TestPortal;
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public class QueryTests
+    public class SecurityQueryTests
     {
         #region Infrastructure
         private Context CurrentContext { get; set; }
@@ -27,7 +27,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
 
             // ACTION
-            var result = new Query(ctx).GetEntities(_rootEntityId);
+            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId);
 
             // ASSERT
             var ids = GetSortedIds(result);
@@ -42,7 +42,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             const string expected = "2,4,5,10,11,12,15,16,20,22,25,28,32,34,35,36,37,41";
 
-            var result = new Query(ctx).GetEntities(_rootEntityId).Where(e => e.Acl != null);
+            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId).Where(e => e.Acl != null);
 
             Assert.AreEqual(expected, GetSortedIdString(result));
         }
@@ -52,7 +52,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             const string expected = "22,34,35,36,37,41";
 
-            var result = new Query(ctx).GetEntities(_rootEntityId).Where(e => !e.IsInherited);
+            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId).Where(e => !e.IsInherited);
 
             Assert.AreEqual(expected, GetSortedIdString(result));
         }
@@ -62,7 +62,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             const string expected = "101,102,201,202,203";
 
-            var result = new Query(ctx).GetEntities(_rootEntityId)
+            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId)
                 .Where(e => e.Acl != null)
                 .SelectMany(e => e.Acl.Entries)
                 .Select(e => e.IdentityId)
@@ -78,7 +78,7 @@ namespace SenseNet.Security.Tests
             const string expected = "1,4,12,30,32,35,36,37,38,39,41,42";
 
             // ACTION
-            var result = new Query(ctx).GetEntities(Id("E32"));
+            var result = SecurityQuery.All(ctx).GetEntities(Id("E32"));
 
             // ASSERT
             Assert.AreEqual(expected, GetSortedIdString(result.Select(e => e.Id)));
@@ -91,7 +91,7 @@ namespace SenseNet.Security.Tests
             const string expected = "30,12,4,1";
 
             // ACTION
-            var result = new Query.ParentChain(ctx).GetEntities(Id("E32"));
+            var result = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"));
 
             // ASSERT
             Assert.AreEqual(expected, GetIdString(result.Select(e => e.Id)));
@@ -104,7 +104,7 @@ namespace SenseNet.Security.Tests
             const string expected = "32,35,36,37,38,39,41,42";
 
             // ACTION
-            var result = new Query.Subtree(ctx).GetEntities(Id("E32"), BreakOptions.StopAtParentBreak);
+            var result = SecurityQuery.Subtree(ctx).GetEntities(Id("E32"), BreakOptions.StopAtParentBreak);
 
             // ASSERT
             Assert.AreEqual(expected, GetSortedIdString(result.Select(e => e.Id)));
@@ -119,7 +119,7 @@ namespace SenseNet.Security.Tests
                 .Apply();
             const string expected = "30,12,4";
 
-            var result = new Query.ParentChain(ctx).GetEntities(Id("E32"),
+            var result = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"),
                 BreakOptions.StopAtParentBreak);
 
             Assert.AreEqual(expected, GetIdString(result.Select(e => e.Id)));
@@ -130,7 +130,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             const string expected = "30,31,32,33";
 
-            var result = new Query.Subtree(ctx).GetEntities(Id("E30"),
+            var result = SecurityQuery.Subtree(ctx).GetEntities(Id("E30"),
                 BreakOptions.StopAtSubtreeBreaks);
 
             Assert.AreEqual(expected, GetSortedIdString(result.Select(e => e.Id)));
@@ -144,7 +144,7 @@ namespace SenseNet.Security.Tests
                 .Apply();
             const string expected = "4,12,30,31,32,33";
 
-            var result = new Query(ctx).GetEntities(Id("E30"),
+            var result = SecurityQuery.All(ctx).GetEntities(Id("E30"),
                 BreakOptions.StopAtParentBreak | BreakOptions.StopAtSubtreeBreaks);
 
             Assert.AreEqual(expected, GetSortedIdString(result.Select(e => e.Id)));
@@ -158,7 +158,7 @@ namespace SenseNet.Security.Tests
             AddPermissionsForIdentityTests(ctx);
             const string expected = "101,106,107,201,202,203,204,205";
 
-            var result = new Query(ctx).GetEntities(Id("E32"))
+            var result = SecurityQuery.All(ctx).GetEntities(Id("E32"))
                 .Where(e => e.Acl != null)
                 .SelectMany(e => e.Acl.Entries)
                 .Select(e => e.IdentityId)
@@ -173,7 +173,7 @@ namespace SenseNet.Security.Tests
             AddPermissionsForIdentityTests(ctx);
             const string expected = "101,106,201,203,204";
 
-            var result = new Query.ParentChain(ctx).GetEntities(Id("E32"))
+            var result = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"))
                 .Where(e => e.Acl != null)
                 .SelectMany(e => e.Acl.Entries)
                 .Select(e => e.IdentityId)
@@ -188,7 +188,7 @@ namespace SenseNet.Security.Tests
             AddPermissionsForIdentityTests(ctx);
             const string expected = "101,107,201,202,203,205";
 
-            var result = new Query.Subtree(ctx).GetEntities(Id("E32"))
+            var result = SecurityQuery.Subtree(ctx).GetEntities(Id("E32"))
                 .Where(e => e.Acl != null)
                 .SelectMany(e => e.Acl.Entries)
                 .Select(e => e.IdentityId)
@@ -215,13 +215,13 @@ namespace SenseNet.Security.Tests
             var pqResult = GetSortedIdString(ctx.GetRelatedIdentities(Id("E32"), PermissionLevel.AllowedOrDenied));
             Assert.AreEqual(expected, pqResult);
 
-            var result = new Query.ParentChain(ctx).GetEntities(Id("E32"), BreakOptions.StopAtParentBreak)
+            var result = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"), BreakOptions.StopAtParentBreak)
                 .Where(e => e.Acl != null)
                 .SelectMany(e => e.Acl.Entries)
                 .Where(e => !e.LocalOnly) // local only entry is not affected on the parent chain
                 .Select(e => e.IdentityId)
                 .Distinct()
-                .Union(new Query.Subtree(ctx).GetEntities(Id("E32"))
+                .Union(SecurityQuery.Subtree(ctx).GetEntities(Id("E32"))
                     .Where(e => e.Acl != null)
                     .SelectMany(e => e.Acl.Entries)
                     .Select(e => e.IdentityId))
