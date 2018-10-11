@@ -205,10 +205,10 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             AddPermissionsForIdentityTests(ctx);
             ctx.CreateAclEditor()
-                .BreakInheritance(Id("E4"), false)
+                .BreakInheritance(Id("E4"))
                 .Apply();
             ctx.CreateAclEditor()
-                .ClearPermission(Id("E4"), Id("U4"), true, PermissionType.Custom04)
+                .ClearPermission(Id("E4"), Id("U4"), false, PermissionType.Custom04)
                 .Apply();
             const string expected = "101,107,201,202,203,205";
 
