@@ -9,7 +9,7 @@ namespace SenseNet.Security
     public enum BreakOptions
     {
         Default = 0,
-        StopAtParentBreaks = 1,
+        StopAtParentBreak = 1,
         StopAtSubtreeBreaks = 2
     }
 
@@ -60,7 +60,7 @@ namespace SenseNet.Security
 
             internal static IEnumerable<SecurityEntity> GetEntities(SecurityEntity entity, BreakOptions handleBreaks)
             {
-                if ((handleBreaks & BreakOptions.StopAtParentBreaks) != 0)
+                if ((handleBreaks & BreakOptions.StopAtParentBreak) != 0)
                 {
                     while ((entity = entity?.Parent) != null)
                     {

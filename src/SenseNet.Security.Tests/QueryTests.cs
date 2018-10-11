@@ -104,7 +104,7 @@ namespace SenseNet.Security.Tests
             const string expected = "32,35,36,37,38,39,41,42";
 
             // ACTION
-            var result = new Query.Subtree(ctx).GetEntities(Id("E32"));
+            var result = new Query.Subtree(ctx).GetEntities(Id("E32"), BreakOptions.StopAtParentBreak);
 
             // ASSERT
             Assert.AreEqual(expected, GetSortedIdString(result.Select(e => e.Id)));
@@ -120,7 +120,7 @@ namespace SenseNet.Security.Tests
             const string expected = "30,12,4";
 
             var result = new Query.ParentChain(ctx).GetEntities(Id("E32"),
-                BreakOptions.StopAtParentBreaks);
+                BreakOptions.StopAtParentBreak);
 
             Assert.AreEqual(expected, GetIdString(result.Select(e => e.Id)));
         }
@@ -145,7 +145,7 @@ namespace SenseNet.Security.Tests
             const string expected = "4,12,30,31,32,33";
 
             var result = new Query(ctx).GetEntities(Id("E30"),
-                BreakOptions.StopAtParentBreaks | BreakOptions.StopAtSubtreeBreaks);
+                BreakOptions.StopAtParentBreak | BreakOptions.StopAtSubtreeBreaks);
 
             Assert.AreEqual(expected, GetSortedIdString(result.Select(e => e.Id)));
         }
@@ -215,7 +215,7 @@ namespace SenseNet.Security.Tests
             var pqResult = GetSortedIdString(ctx.GetRelatedIdentities(Id("E32"), PermissionLevel.AllowedOrDenied));
             Assert.AreEqual(expected, pqResult);
 
-            var result = new Query.ParentChain(ctx).GetEntities(Id("E32"), BreakOptions.StopAtParentBreaks)
+            var result = new Query.ParentChain(ctx).GetEntities(Id("E32"), BreakOptions.StopAtParentBreak)
                 .Where(e => e.Acl != null)
                 .SelectMany(e => e.Acl.Entries)
                 .Where(e => !e.LocalOnly) // local only entry is not affected on the parent chain
