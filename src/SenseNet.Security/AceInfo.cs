@@ -11,6 +11,10 @@ namespace SenseNet.Security
     public class AceInfo
     {
         /// <summary>
+        /// Cateory of the entry.
+        /// </summary>
+        public EntryType EntryType { get; set; }
+        /// <summary>
         /// Id of the identity.
         /// </summary>
         public int IdentityId { get; internal set; }
@@ -32,6 +36,7 @@ namespace SenseNet.Security
             return new AceInfo
             {
                 IdentityId = this.IdentityId,
+                EntryType = this.EntryType,
                 LocalOnly = this.LocalOnly,
                 AllowBits = this.AllowBits,
                 DenyBits = this.DenyBits
@@ -44,7 +49,7 @@ namespace SenseNet.Security
         [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            return $"{(LocalOnly ? "-" : "+")}({IdentityId}):{BitsToString()}";
+            return $"{EntryType}|{(LocalOnly ? "-" : "+")}({IdentityId}):{BitsToString()}";
         }
         /// <summary>
         /// Converts the AllowBits and DenyBits of this instance to its equivalent string representation.

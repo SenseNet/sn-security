@@ -201,19 +201,19 @@ namespace SenseNet.Security
             return PermissionValue.Allowed;
         }
 
-        internal List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null)
+        internal List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
             SecurityEntity.EnterReadLock();
             try
             {
-                return GetEffectiveEntriesSafe(entityId, relatedIdentities);
+                return GetEffectiveEntriesSafe(entityId, relatedIdentities, entryType);
             }
             finally
             {
                 SecurityEntity.ExitReadLock();
             }
         }
-        internal List<AceInfo> GetEffectiveEntriesSafe(int entityId, IEnumerable<int> relatedIdentities = null)
+        internal List<AceInfo> GetEffectiveEntriesSafe(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
             var aces = new List<AceInfo>();
 
@@ -223,37 +223,40 @@ namespace SenseNet.Security
             {
                 relatedIdentities = relatedIdentities?.ToArray();
                 if (entityId == firstAcl.EntityId)
-                    firstAcl.AggregateLevelOnlyValues(aces, relatedIdentities);
+                    firstAcl.AggregateLevelOnlyValues(aces, relatedIdentities, entryType);
                 for (var aclInfo = firstAcl; aclInfo != null; aclInfo = aclInfo.Inherits ? aclInfo.Parent : null)
-                    aclInfo.AggregateEffectiveValues(aces, relatedIdentities);
+                    aclInfo.AggregateEffectiveValues(aces, relatedIdentities, entryType);
             }
             //==<
 
             return aces;
         }
 
-        internal List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null)
+        internal List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return GetExplicitEntriesSafe(entityId, SecurityEntity.GetFirstAcl(_securityContext, entityId, true), relatedIdentities);
+            return GetExplicitEntriesSafe(entityId, SecurityEntity.GetFirstAcl(_securityContext, entityId, true), relatedIdentities, entryType);
         }
-        internal List<AceInfo> GetExplicitEntriesSafe(int entityId, IEnumerable<int> relatedIdentities = null)
+        internal List<AceInfo> GetExplicitEntriesSafe(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return GetExplicitEntriesSafe(entityId, SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true), relatedIdentities);
+            return GetExplicitEntriesSafe(entityId, SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true), relatedIdentities, entryType);
         }
-        private List<AceInfo> GetExplicitEntriesSafe(int entityId, AclInfo acl, IEnumerable<int> relatedIdentities)
+        private List<AceInfo> GetExplicitEntriesSafe(int entityId, AclInfo acl, IEnumerable<int> relatedIdentities, EntryType? entryType)
         {
-            var aces = new List<AceInfo>();
+            IEnumerable<AceInfo> aces = null;
 
             //==>
             if (acl != null && entityId == acl.EntityId)
             {
                 aces = relatedIdentities == null
-                ? acl.Entries.Select(x => x.Copy()).ToList()
-                : acl.Entries.Where(x => relatedIdentities.Contains(x.IdentityId)).Select(x => x.Copy()).ToList();
+                    ? acl.Entries.Select(x => x.Copy())
+                    : acl.Entries.Where(x => relatedIdentities.Contains(x.IdentityId)).Select(x => x.Copy());
+
+                if (entryType != null)
+                    aces = aces.Where(x => x.EntryType == entryType).ToList();
             }
             //==<
 
-            return aces;
+            return aces?.ToList() ?? new List<AceInfo>();
         }
 
         /*------------------------------------------------------------------------------------------ Tools */

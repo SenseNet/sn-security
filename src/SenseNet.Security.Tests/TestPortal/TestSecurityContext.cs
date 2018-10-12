@@ -10,28 +10,28 @@ namespace SenseNet.Security.Tests.TestPortal
     {
         public TestSecurityContext(ISecurityUser currentUser) : base(currentUser) { }
 
-        public static new void StartTheSystem(SecurityConfiguration configuration)
+        public new static void StartTheSystem(SecurityConfiguration configuration)
         {
             SecurityContext.StartTheSystem(configuration);
             _generalContext = new TestSecurityContext(SystemUser);
         }
 
         /*********************** ACL API **********************/
-        public new AclEditor CreateAclEditor()
+        public new AclEditor CreateAclEditor(EntryType entryType = EntryType.Normal)
         {
-            return base.CreateAclEditor();
+            return base.CreateAclEditor(entryType);
         }
-        public new AccessControlList GetAcl(int entityId)
+        public new AccessControlList GetAcl(int entityId, EntryType entryType = EntryType.Normal)
         {
-            return base.GetAcl(entityId);
+            return base.GetAcl(entityId, entryType);
         }
-        public new List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null)
+        public new List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return base.GetEffectiveEntries(entityId, relatedIdentities);
+            return base.GetEffectiveEntries(entityId, relatedIdentities, entryType);
         }
-        public new List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null)
+        public new List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return base.GetExplicitEntries(entityId, relatedIdentities);
+            return base.GetExplicitEntries(entityId, relatedIdentities, entryType);
         }
 
         /*********************** Low level evaluator API **********************/

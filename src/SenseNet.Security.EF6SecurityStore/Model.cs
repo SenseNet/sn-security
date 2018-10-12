@@ -29,6 +29,7 @@ namespace SenseNet.Security.EF6SecurityStore
     internal class EFEntry
     {
         public int EFEntityId { get; set; } // Key member
+        public int EntryType { get; set; } // Key member
         public int IdentityId { get; set; } // Key member
         public bool LocalOnly { get; set; } // Key member
         public long AllowBits { get; set; }
@@ -51,7 +52,7 @@ namespace SenseNet.Security.EF6SecurityStore
                 else
                     chars[PermissionTypeBase.PermissionCount - i - 1] = '_';
             }
-            return $"({EFEntityId})|{(LocalOnly ? "-" : "+")}({IdentityId}):{new string(chars)}";
+            return $"({EFEntityId})|{EntryType}|{(LocalOnly ? "-" : "+")}({IdentityId}):{new string(chars)}";
         }
 
         public StoredAce ToStoredAce()
@@ -59,6 +60,7 @@ namespace SenseNet.Security.EF6SecurityStore
             return new StoredAce
             {
                 EntityId = this.EFEntityId,
+                EntryType = (EntryType)this.EntryType,
                 IdentityId = this.IdentityId,
                 LocalOnly = this.LocalOnly,
                 AllowBits = this.AllowBits.ToUInt64(),

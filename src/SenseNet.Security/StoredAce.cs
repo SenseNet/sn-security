@@ -7,7 +7,7 @@ namespace SenseNet.Security
     /// <summary>
     /// Represents persistent information about an access control entry.
     /// </summary>
-    [DebuggerDisplay("Entity: {EntityId}, Identity: {IdentityId}, Local: {LocalOnly}, Allow: {AllowBits}, Deny: {DenyBits}")]
+    [DebuggerDisplay("Entity: {EntityId}, Type: {EntryType}, Identity: {IdentityId}, Local: {LocalOnly}, Allow: {AllowBits}, Deny: {DenyBits}")]
     [Serializable]
     public class StoredAce
     {
@@ -15,6 +15,10 @@ namespace SenseNet.Security
         /// Id of the entity.
         /// </summary>
         public int EntityId { get; set; }
+        /// <summary>
+        /// Category of the entry.
+        /// </summary>
+        public EntryType EntryType { get; set; }
         /// <summary>
         /// Id of the identity.
         /// </summary>
@@ -49,7 +53,7 @@ namespace SenseNet.Security
                 else
                     chars[PermissionTypeBase.PermissionCount - i - 1] = '_';
             }
-            return $"({EntityId})|{(LocalOnly ? "-" : "+")}({IdentityId}):{new string(chars)}";
+            return $"({EntityId})|{EntryType}|{(LocalOnly ? "-" : "+")}({IdentityId}):{new string(chars)}";
         }
 
         internal StoredAce Clone()
@@ -57,6 +61,7 @@ namespace SenseNet.Security
             return new StoredAce
             {
                 EntityId = this.EntityId,
+                EntryType = this.EntryType,
                 IdentityId = this.IdentityId,
                 LocalOnly = this.LocalOnly,
                 AllowBits = this.AllowBits,
