@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
@@ -197,39 +198,85 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expected, GetSortedIdString(result));
         }
 
-
-
+        /* ============================================================================= PermissionQuery substitution */
         [TestMethod]
         public void Linq_PermQuery_GetRelatedIdentities()
         {
             var ctx = CurrentContext.Security;
-            AddPermissionsForIdentityTests(ctx);
+            ctx.CreateAclEditor()
+                .Allow(Id("E1"), Id("U4"), false, PermissionType.Custom04)
+                .Allow(Id("E38"), Id("U5"), false, PermissionType.Custom04)
+                // additions for checking local permissions.
+                .Allow(Id("E1"), Id("G6"), true, PermissionType.Custom04)
+                .Allow(Id("E38"), Id("G7"), true, PermissionType.Custom04)
+                // additions for checking denied permissions.
+                .Deny(Id("E1"), Id("U6"), false, PermissionType.Custom01)
+                .Deny(Id("E1"), Id("U7"), false, PermissionType.Custom02)
+                .Apply();
             ctx.CreateAclEditor()
                 .BreakInheritance(Id("E4"))
                 .Apply();
             ctx.CreateAclEditor()
                 .ClearPermission(Id("E4"), Id("U4"), false, PermissionType.Custom04)
                 .Apply();
-            const string expected = "101,107,201,202,203,205";
 
-            var pqResult = GetSortedIdString(ctx.GetRelatedIdentities(Id("E32"), PermissionLevel.AllowedOrDenied));
-            Assert.AreEqual(expected, pqResult);
+            const string expected1 = "101,107,201,202,205";
 
-            var result = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"), BreakOptions.StopAtParentBreak)
-                .Where(e => e.Acl != null)
-                .SelectMany(e => e.Acl.Entries)
-                .Where(e => !e.LocalOnly) // local only entry is not affected on the parent chain
+            var pqResult1 = ctx.GetRelatedIdentities(Id("E32"), PermissionLevel.Allowed);
+            Assert.AreEqual(expected1, GetSortedIdString(pqResult1));
+
+            var result1 = PermissionQueryWithLinq_GetRelatedIdentities(ctx, Id("E32"), PermissionLevel.Allowed);
+            Assert.AreEqual(expected1, GetSortedIdString(result1));
+
+            const string expected2 = "203,206,207";
+
+            var pqResult2 = ctx.GetRelatedIdentities(Id("E32"), PermissionLevel.Denied);
+            Assert.AreEqual(expected2, GetSortedIdString(pqResult2));
+
+            var result2 = PermissionQueryWithLinq_GetRelatedIdentities(ctx, Id("E32"), PermissionLevel.Denied);
+            Assert.AreEqual(expected2, GetSortedIdString(result2));
+
+            const string expected3 = "101,107,201,202,203,205,206,207";
+
+            var pqResult3 = ctx.GetRelatedIdentities(Id("E32"), PermissionLevel.AllowedOrDenied);
+            Assert.AreEqual(expected3, GetSortedIdString(pqResult3));
+
+            var result3 = PermissionQueryWithLinq_GetRelatedIdentities(ctx, Id("E32"), PermissionLevel.AllowedOrDenied);
+            Assert.AreEqual(expected3, GetSortedIdString(result3));
+        }
+        private IEnumerable<int> PermissionQueryWithLinq_GetRelatedIdentities(SecurityContext ctx, int entityId, PermissionLevel level)
+        {
+            bool IsActive(AceInfo entry)
+            {
+                switch(level)
+                {
+                    case PermissionLevel.Allowed:
+                        return entry.AllowBits != 0ul;
+                    case PermissionLevel.Denied:
+                        return entry.DenyBits != 0ul;
+                    case PermissionLevel.AllowedOrDenied:
+                        return true;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(level), level, null);
+                }
+            }
+
+            return SecurityQuery.ParentChain(ctx).GetEntities(entityId, BreakOptions.StopAtParentBreak)
+                .Where(e => e.Acl != null)       // relevant entities
+                .SelectMany(e => e.Acl.Entries)  // join
+                .Where(e => !e.LocalOnly)        // local only entry is not affected on the parent chain
+                .Where(IsActive)                 // filter by level
                 .Select(e => e.IdentityId)
                 .Distinct()
-                .Union(SecurityQuery.Subtree(ctx).GetEntities(Id("E32"))
-                    .Where(e => e.Acl != null)
-                    .SelectMany(e => e.Acl.Entries)
+                .Union(SecurityQuery.Subtree(ctx).GetEntities(entityId) // do not stop at breaks
+                    .Where(e => e.Acl != null)      // relevant entities
+                    .SelectMany(e => e.Acl.Entries) // join
+                    .Where(IsActive)                // filter by level
                     .Select(e => e.IdentityId))
                 .Distinct();
-
-            Assert.AreEqual(expected, GetSortedIdString(result));
         }
 
+        /* ============================================================================= Tools */
         private void AddPermissionsForIdentityTests(TestSecurityContext ctx)
         {
             ctx.CreateAclEditor()
