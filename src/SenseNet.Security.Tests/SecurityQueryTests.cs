@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Remotion.Linq.Utilities;
 using SenseNet.Security.Tests.TestPortal;
 
 namespace SenseNet.Security.Tests
@@ -199,6 +202,7 @@ namespace SenseNet.Security.Tests
         }
 
         /* ============================================================================= PermissionQuery substitution */
+
         [TestMethod]
         public void Linq_PermQuery_GetRelatedIdentities()
         {
@@ -274,6 +278,71 @@ namespace SenseNet.Security.Tests
                     .Where(IsActive)                // filter by level
                     .Select(e => e.IdentityId))
                 .Distinct();
+        }
+
+        [TestMethod]
+        public void Linq_PermQuery_GetRelatedPermissions()
+        {
+            var ctx = CurrentContext.Security;
+
+            Tools.SetMembership(CurrentContext.Security, "U4:G4");
+            ctx.CreateAclEditor()
+                .Allow(Id("E1"), Id("G4"), false, PermissionType.Custom04)
+                .Allow(Id("E42"), Id("G4"), false, PermissionType.Custom04)
+                .Apply();
+
+            // sample output: "U1:p0:1,p1:2|U2:|U3:p3:2"
+            string ResultToString(Dictionary<string, Dictionary<int, int>> result)
+            {
+                var x = result.Select(item =>
+                {
+                    var sb = new StringBuilder();
+                    sb.Append(item.Key);
+                    foreach (var permCount in item.Value)
+                        sb.Append(":").Append($"p{permCount.Key}:{permCount.Value}");
+                    return sb.ToString();
+                }).ToArray();
+                return string.Join("|", x);
+            }
+
+            var identityNames = new[] { "U1", "U2", "U3", "U4" };
+
+            var expectedAllowedPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3|U4";
+            var allowedPermCountsByIdentities = ResultToString(identityNames
+                .Select(identityName => new
+                {
+                    id = identityName,
+                    permissionCounters = ctx
+                        .GetRelatedPermissions(Id("E32"), PermissionLevel.Allowed, true, Id(identityName), i => true)
+                        .Where(x => x.Value != 0).ToDictionary(x => x.Key.Index, x => x.Value)
+                })
+                .ToDictionary(x => x.id, x => x.permissionCounters));
+            var expectedDeniedPermCounts = "U1|U2|U3:p32:4|U4";
+            var deniedPermCountsByIdentities = ResultToString(identityNames
+                .Select(identityName => new
+                {
+                    id = identityName,
+                    permissionCounters = ctx
+                        .GetRelatedPermissions(Id("E32"), PermissionLevel.Denied, true, Id(identityName), i => true)
+                        .Where(x => x.Value != 0).ToDictionary(x => x.Key.Index, x => x.Value)
+                })
+                .ToDictionary(x => x.id, x => x.permissionCounters));
+            var expectedAllPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3:p32:4|U4";
+            var allPermCountsByIdentities = ResultToString(identityNames
+                .Select(identityName => new
+                {
+                    id = identityName,
+                    permissionCounters = ctx
+                        .GetRelatedPermissions(Id("E32"), PermissionLevel.AllowedOrDenied, true, Id(identityName), i => true)
+                        .Where(x => x.Value != 0).ToDictionary(x => x.Key.Index, x => x.Value)
+                })
+                .ToDictionary(x => x.id, x => x.permissionCounters));
+
+            Assert.AreEqual(expectedAllowedPermCounts, allowedPermCountsByIdentities);
+            Assert.AreEqual(expectedDeniedPermCounts, deniedPermCountsByIdentities);
+            Assert.AreEqual(expectedAllPermCounts, allPermCountsByIdentities);
+
+            Assert.Inconclusive();
         }
 
         /* ============================================================================= Tools */
