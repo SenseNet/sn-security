@@ -249,7 +249,7 @@ namespace SenseNet.Security.Data
                 _storage.Aces.RemoveAll(y => y.EntityId == entityId);
         }
 
-        public void RemovePermissionEntriesByGroup(int groupId) //UNDONE: ?? Internal? Private?
+        internal void RemovePermissionEntriesByGroup(int groupId)
         {
             lock (AcesLock)
                 _storage.Aces.RemoveAll(x => x.IdentityId == groupId);
@@ -271,14 +271,6 @@ namespace SenseNet.Security.Data
 
             // remove the entity itself
             _storage.Entities.Remove(entityId);}
-
-        public IEnumerable<int> GetEntitiesOfGroup(int groupId) //UNDONE: ?? Delete? Internal? Private?
-        {
-            lock (AcesLock)
-            {
-                return _storage.Aces.Where(x => x.IdentityId == groupId).Select(x => x.EntityId).Distinct();
-            }
-        }
 
         /// <inheritdoc />
         public void QueryGroupRelatedEntities(int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds)
