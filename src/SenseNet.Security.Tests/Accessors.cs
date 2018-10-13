@@ -51,6 +51,12 @@ namespace SenseNet.Security.Tests
         }
     }
 
+    internal class AclEditorAccessor : Accessor
+    {
+        public AclEditorAccessor(AclEditor editor) : base(editor) { }
+        internal Dictionary<int, AclInfo> Acls => base.GetFieldOrProperty<Dictionary<int, AclInfo>>("_acls");
+    }
+
     //internal class AclCacheAccessor : Accessor
     //{
     //    public AclCacheAccessor(AclCache aclCache) : base(aclCache) { }

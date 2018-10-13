@@ -51,6 +51,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                             _entriesToRemove.Add(new StoredAce
                             {
                                 EntityId = acl.EntityId,
+                                EntryType = EntryType.Normal,
                                 IdentityId = ace.IdentityId,
                                 LocalOnly = ace.LocalOnly
                             });
@@ -61,6 +62,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                             _entries.Add(new StoredAce
                             {
                                 EntityId = acl.EntityId,
+                                EntryType =  ace.EntryType,
                                 IdentityId = ace.IdentityId,
                                 LocalOnly = ace.LocalOnly,
                                 AllowBits = ace.AllowBits,

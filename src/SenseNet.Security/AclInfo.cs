@@ -70,7 +70,7 @@ namespace SenseNet.Security
             Entries = new List<AceInfo>();
         }
 
-        internal AccessControlList ToAccessContolList(int requestedEntityId)
+        internal AccessControlList ToAccessContolList(int requestedEntityId, EntryType entryType)
         {
             var aces = new Dictionary<int, AccessControlEntry>();
             var localOnlyAces = new Dictionary<int, AccessControlEntry>();
@@ -78,7 +78,7 @@ namespace SenseNet.Security
             var aclInfo = this;
             while (aclInfo != null)
             {
-                foreach (var aceInfo in aclInfo.Entries)
+                foreach (var aceInfo in aclInfo.Entries.Where(x => x.EntryType == entryType))
                 {
                     var isLocalAcl = aclInfo.EntityId == requestedEntityId;
                     AccessControlEntry ace;
@@ -124,6 +124,7 @@ namespace SenseNet.Security
 
             return new AccessControlEntry
             {
+                EntryType = aceInfo.EntryType,
                 IdentityId = aceInfo.IdentityId,
                 LocalOnly = aceInfo.LocalOnly,
                 Permissions = perms
@@ -164,6 +165,7 @@ namespace SenseNet.Security
             };
         }
 
+        /// <summary> Used for getting permission. </summary>
         internal void AggregateLocalOnlyValues(List<int> identities, ref ulong allow, ref ulong deny)
         {
             foreach (var permSet in this.Entries)
@@ -176,6 +178,7 @@ namespace SenseNet.Security
                 deny |= permSet.DenyBits;
             }
         }
+        /// <summary> Used for getting permission. </summary>
         internal void AggregateEffectiveValues(List<int> identities, ref ulong allow, ref ulong deny)
         {
             foreach (var permSet in this.Entries)
@@ -189,27 +192,14 @@ namespace SenseNet.Security
             }
         }
 
-        internal void AggregateLevelOnlyValues(List<AceInfo> aces, IEnumerable<int> relatedIdentities = null)
+        /// <summary> Used for getting effective entries. </summary>
+        internal void AggregateLevelOnlyValues(List<AceInfo> aces, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
             foreach (var ace in this.Entries)
             {
                 if (!ace.LocalOnly)
                     continue;
-                // ReSharper disable once PossibleMultipleEnumeration
-                if (relatedIdentities == null || relatedIdentities.Contains(ace.IdentityId))
-                {
-                    var refAce = EnsureAce(ace, aces);
-                    refAce.AllowBits |= ace.AllowBits;
-                    refAce.DenyBits |= ace.DenyBits;
-                }
-            }
-        }
-
-        internal void AggregateEffectiveValues(List<AceInfo> aces, IEnumerable<int> relatedIdentities = null)
-        {
-            foreach (var ace in this.Entries)
-            {
-                if (ace.LocalOnly)
+                if (entryType != null && ace.EntryType != entryType.Value)
                     continue;
                 // ReSharper disable once PossibleMultipleEnumeration
                 if (relatedIdentities == null || relatedIdentities.Contains(ace.IdentityId))
@@ -220,64 +210,42 @@ namespace SenseNet.Security
                 }
             }
         }
+        /// <summary> Used for getting effective entries. </summary>
+        internal void AggregateEffectiveValues(List<AceInfo> aces, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
+        {
+            foreach (var ace in this.Entries)
+            {
+                if (ace.LocalOnly)
+                    continue;
+                if (entryType != null && ace.EntryType != entryType.Value)
+                    continue;
+                // ReSharper disable once PossibleMultipleEnumeration
+                if (relatedIdentities == null || relatedIdentities.Contains(ace.IdentityId))
+                {
+                    var refAce = EnsureAce(ace, aces);
+                    refAce.AllowBits |= ace.AllowBits;
+                    refAce.DenyBits |= ace.DenyBits;
+                }
+            }
+        }
+        /// <summary> Used for getting effective entries. </summary>
         private AceInfo EnsureAce(AceInfo predicate, List<AceInfo> refAces)
         {
             foreach (var refAce in refAces)
-                if (refAce.IdentityId == predicate.IdentityId && refAce.LocalOnly == predicate.LocalOnly)
+                if (refAce.EntryType == predicate.EntryType && refAce.IdentityId == predicate.IdentityId && refAce.LocalOnly == predicate.LocalOnly)
                     return refAce;
-            var newAce = new AceInfo { IdentityId = predicate.IdentityId, LocalOnly = predicate.LocalOnly };
+            var newAce = new AceInfo { EntryType = predicate.EntryType, IdentityId = predicate.IdentityId, LocalOnly = predicate.LocalOnly };
             refAces.Add(newAce);
             return newAce;
         }
 
-        internal List<AceInfo> GetEffectiveEntries(bool withLocalOnly)
+        internal AclInfo Copy(EntryType? entryType = null)
         {
-            var aces = new Dictionary<int, AceInfo>(); // IdentityId => aceInfo
-            var localOnlyAces = new Dictionary<int, AceInfo>(); // IdentityId => aceInfo
+            var entries = entryType == null
+                ? this.Entries.Select(x => x.Copy()).ToList()
+                : this.Entries.Where(x => x.EntryType == entryType.Value).Select(x => x.Copy()).ToList();
 
-            var aclInfo = this;
-            while (aclInfo != null)
-            {
-                foreach (var aceInfo in aclInfo.Entries)
-                {
-                    AceInfo ace;
-                    if (aceInfo.LocalOnly)
-                    {
-                        if (this == aclInfo && withLocalOnly)
-                        {
-                            if (!localOnlyAces.TryGetValue(aceInfo.IdentityId, out ace))
-                            {
-                                ace = new AceInfo { IdentityId = aceInfo.IdentityId, LocalOnly = true };
-                                localOnlyAces.Add(ace.IdentityId, ace);
-                            }
-                            ace.AllowBits |= aceInfo.AllowBits;
-                            ace.DenyBits |= aceInfo.DenyBits;
-                        }
-                    }
-                    else
-                    {
-                        if (!aces.TryGetValue(aceInfo.IdentityId, out ace))
-                        {
-                            ace = new AceInfo { IdentityId = aceInfo.IdentityId, LocalOnly = false };
-                            aces.Add(ace.IdentityId, ace);
-                        }
-                        ace.AllowBits |= aceInfo.AllowBits;
-                        ace.DenyBits |= aceInfo.DenyBits;
-                    }
-                }
-                if (!aclInfo.Inherits)
-                    break;
-                aclInfo = aclInfo.Parent;
-            }
-
-
-            var result = aces.Values.Concat(localOnlyAces.Values).OrderBy(x => x.IdentityId).ThenBy(x => x.LocalOnly).ToList();
-            return result;
-        }
-
-        internal AclInfo Copy()
-        {
-            return new AclInfo(this.EntityId) { Entries = this.Entries.Select(x => x.Copy()).ToList() };
+            return new AclInfo(this.EntityId) { Entries = entries };
         }
 
         /// <summary>

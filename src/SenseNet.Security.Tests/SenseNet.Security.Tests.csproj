@@ -177,6 +177,7 @@
     <Compile Include="Accessors.cs" />
     <Compile Include="EF6Tests.cs" />
     <Compile Include="EFCTests.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="InMemTests.cs" />
     <Compile Include="MembershipTests2.cs" />
@@ -187,6 +188,7 @@
     <Compile Include="TestCases.cs" />
     <Compile Include="TestCasesAclTests.cs" />
     <Compile Include="TestCasesMembershipTests.cs" />
+    <Compile Include="TestCasesSharingTests.cs" />
     <Compile Include="TestPortal\Context.cs" />
     <Compile Include="TestPortal\EventId.cs" />
     <Compile Include="TestPortal\PermissionType.cs" />

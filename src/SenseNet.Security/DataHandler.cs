@@ -61,7 +61,7 @@ namespace SenseNet.Security
                     acl = new AclInfo(storedAce.EntityId);
                     acls.Add(acl.EntityId, acl);
                 }
-                acl.Entries.Add(new AceInfo { IdentityId = storedAce.IdentityId, LocalOnly = storedAce.LocalOnly, AllowBits = storedAce.AllowBits, DenyBits = storedAce.DenyBits });
+                acl.Entries.Add(new AceInfo { EntryType = storedAce.EntryType, IdentityId = storedAce.IdentityId, LocalOnly = storedAce.LocalOnly, AllowBits = storedAce.AllowBits, DenyBits = storedAce.DenyBits });
             }
 
             return acls;

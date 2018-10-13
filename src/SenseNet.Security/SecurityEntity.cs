@@ -212,7 +212,7 @@ namespace SenseNet.Security
                     var acl = new AclInfo(entityId);
                     var entries = ctx.DataProvider.LoadPermissionEntries(new[] { entityId });
                     foreach (var entry in entries)
-                        acl.Entries.Add(new AceInfo { IdentityId = entry.IdentityId, LocalOnly = entry.LocalOnly, AllowBits = entry.AllowBits, DenyBits = entry.DenyBits });
+                        acl.Entries.Add(new AceInfo { EntryType = entry.EntryType, IdentityId = entry.IdentityId, LocalOnly = entry.LocalOnly, AllowBits = entry.AllowBits, DenyBits = entry.DenyBits });
                     if (acl.Entries.Count > 0)
                         entity.SetAclSafe(acl);
                 }
@@ -254,7 +254,7 @@ namespace SenseNet.Security
             return result;
         }
 
-        internal static AccessControlList GetAccessControlList(SecurityContext ctx, int entityId)
+        internal static AccessControlList GetAccessControlList(SecurityContext ctx, int entityId, EntryType entryType = EntryType.Normal)
         {
             EnterReadLock();
             try
@@ -263,7 +263,7 @@ namespace SenseNet.Security
                 var aclInfo = GetFirstAclSafe(ctx, entityId, false);
                 if (aclInfo == null)
                     return AclInfo.CreateEmptyAccessControlList(entityId, entity.IsInherited); //means breaked and cleared
-                return aclInfo.ToAccessContolList(entityId);
+                return aclInfo.ToAccessContolList(entityId, entryType);
             }
             finally
             {
@@ -271,13 +271,13 @@ namespace SenseNet.Security
             }
         }
 
-        internal static AclInfo GetAclInfoCopy(SecurityContext ctx, int entityId)
+        internal static AclInfo GetAclInfoCopy(SecurityContext ctx, int entityId, EntryType? entryType = null)
         {
             var entity = GetEntitySafe(ctx, entityId, false);
             var acl = entity?.Acl;
             if (acl == null)
                 return null;
-            return entity.Acl.Copy();
+            return entity.Acl.Copy(entryType);
         }
 
         //---- todo
@@ -575,7 +575,7 @@ namespace SenseNet.Security
 
                 // get related entry if exists
                 var aclEntries = acl?.Entries;
-                var entryToRemove = aclEntries?.FirstOrDefault(e => e.IdentityId == entry.IdentityId && e.LocalOnly == entry.LocalOnly);
+                var entryToRemove = aclEntries?.FirstOrDefault(e => e.EntryType == entry.EntryType && e.IdentityId == entry.IdentityId && e.LocalOnly == entry.LocalOnly);
                 if(entryToRemove == null)
                     continue;
 
@@ -602,7 +602,7 @@ namespace SenseNet.Security
                 // merge acls
                 foreach (var newAce in aclInfo.Entries)
                 {
-                    var origAce = origAcl.Entries.FirstOrDefault(x => x.IdentityId == newAce.IdentityId && x.LocalOnly == newAce.LocalOnly);
+                    var origAce = origAcl.Entries.FirstOrDefault(x => x.EntryType == newAce.EntryType && x.IdentityId == newAce.IdentityId && x.LocalOnly == newAce.LocalOnly);
                     if (origAce != null)
                     {
                         origAce.AllowBits = newAce.AllowBits;

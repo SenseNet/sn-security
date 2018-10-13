@@ -261,14 +261,14 @@ namespace SenseNet.Security.Tests
 
         internal static void SetAcl(SecurityContext context, string src)
         {
-            // "+E1|+U1:____++++,+G1:____++++"
+            // "+E1|Normal|+U1:____++++,+G1:____++++"
             var a = src.Split('|');
             var inherits = a[0][0] == '+';
             var b = a[0].Substring(1);
             if (b.Contains(','))
                 throw new NotSupportedException("DO NOT PASS OWNER INFORMATION");
             var entityId = GetId(b);
-            SetAcl(context, entityId, inherits, a[1]);
+            SetAcl(context, entityId, inherits, src.Substring(a[0].Length + 1));
         }
         private static void SetAcl(SecurityContext context, int entityId, bool isInherited, string src)
         {
@@ -293,14 +293,18 @@ namespace SenseNet.Security.Tests
         }
         private static AceInfo CreateAce(string src)
         {
-            // "+U1:____++++
-            var localOnly = src[0] != '+';
-            var a = src.Substring(1).Split(':');
-            ulong allowBits;
-            ulong denyBits;
-            Tools.ParsePermissions(a[1], out allowBits, out denyBits);
+            // "Normal|+U1:____++++
+            var segments = src.Split('|');
+
+            Enum.TryParse<EntryType>(segments[0], true, out var entryType);
+
+            var localOnly = segments[1][0] != '+';
+            var a = segments[1].Substring(1).Split(':');
+
+            Tools.ParsePermissions(a[1], out var allowBits, out var denyBits);
             return new AceInfo
             {
+                EntryType = entryType,
                 LocalOnly = localOnly,
                 IdentityId = GetId(a[0]),
                 AllowBits = allowBits,

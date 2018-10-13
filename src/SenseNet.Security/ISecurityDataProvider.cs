@@ -139,25 +139,13 @@ namespace SenseNet.Security
         int GetEstimatedEntityCount();
 
         /// <summary>
-        /// Loads a list of all of the stored ACEs of a subtree in an ordered way.
-        /// The result must be filtered by the related identities.
-        /// </summary>
-        /// <remarks>
-        /// If the unique path sholud be stored into the StoredAce, the followiwng SQL query can demonstrate the task of this method:
-        /// SELECT * FROM StoredAces WHERE Path LIKE @path + '/%' AND IdentityId IN ( @ident1, ident2, ... ) ORDER BY Path
-        /// </remarks>
-        /// <param name="entityId">Provides the subtree.</param>
-        /// <param name="identities">Relevant identities</param>
-        [Obsolete("Do not use this method anymore.", true)]
-        IEnumerable<StoredAce> LoadDescendantAces(int entityId, IEnumerable<int> identities);
-
-        /// <summary>
-        /// Inserts or updates one or more StoredACEs. An ACE is identified by a compound key: EntityId, IdentityId, LocalOnly
+        /// Inserts or updates one or more StoredACEs.
+        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
         void WritePermissionEntries(IEnumerable<StoredAce> aces);
         /// <summary>
         /// Deletes the given ACEs.  If an ACE does not exist before deleting, it must be skipped.
-        /// An ACE is identified by a compound key: EntityId, IdentityId, LocalOnly
+        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
         void RemovePermissionEntries(IEnumerable<StoredAce> aces);
 

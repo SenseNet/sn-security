@@ -194,19 +194,20 @@ namespace SenseNet.Security
 
         /*********************** ACL API **********************/
         /// <summary>
-        /// Creates a new instance of the AclEditor class for modifying access control data. 
+        /// Creates a new instance of the AclEditor class for modifying access control data.
+        /// Editor handles only one type of entries. Default EntryType is Normal.
         /// </summary>
-        protected AclEditor CreateAclEditor()
+        protected AclEditor CreateAclEditor(EntryType entryType = EntryType.Normal)
         {
-            return AclEditor.Create(this);
+            return AclEditor.Create(this, entryType);
         }
         /// <summary>
         /// Returns the AccessControlList of the passed entity to help building a rich GUI for modifications.
         /// The entity must exist. Entity resolution can compensate the entity integrity error.
         /// </summary>
-        protected AccessControlList GetAcl(int entityId)
+        protected AccessControlList GetAcl(int entityId, EntryType entryType = EntryType.Normal)
         {
-            return SecurityEntity.GetAccessControlList(this, entityId);
+            return SecurityEntity.GetAccessControlList(this, entityId, entryType);
         }
 
         /// <summary>
@@ -219,9 +220,10 @@ namespace SenseNet.Security
         /// If it is provided, the output will be filtered for the related identities.
         /// Empty collection means nobody, so in case of passing empty,
         /// the method will return an empty list.</param>
-        protected List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null)
+        /// <param name="entryType">Optional filter parameter.</param>
+        protected List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return Evaluator.GetEffectiveEntries(entityId, relatedIdentities);
+            return Evaluator.GetEffectiveEntries(entityId, relatedIdentities, entryType);
         }
         /// <summary>
         /// Returns the explicit entries of the requested entity.
@@ -233,9 +235,10 @@ namespace SenseNet.Security
         /// If it is provided, the output will be filtered for the related identities.
         /// Empty collection means nobody, so in case of passing empty,
         /// the method will return an empty list.</param>
-        protected List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null)
+        /// <param name="entryType">Optional filter parameter.</param>
+        protected List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return Evaluator.GetExplicitEntries(entityId, relatedIdentities);
+            return Evaluator.GetExplicitEntries(entityId, relatedIdentities, entryType);
         }
 
         // for tests

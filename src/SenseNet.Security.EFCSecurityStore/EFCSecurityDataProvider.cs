@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
@@ -10,6 +9,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 
+// ReSharper disable InconsistentNaming
 namespace SenseNet.Security.EFCSecurityStore
 {
     /// <summary>
@@ -33,8 +33,8 @@ namespace SenseNet.Security.EFCSecurityStore
                 connectionString = ConfigurationManager.ConnectionStrings["SecurityStorage"]?.ConnectionString ??
                                    ConfigurationManager.ConnectionStrings["SnCrMsSql"]?.ConnectionString;
 
-            this.CommandTimeout = commandTimeout;
-            this.ConnectionString = connectionString;
+            CommandTimeout = commandTimeout;
+            ConnectionString = connectionString;
         }
 
         internal SecurityStorage Db()
@@ -61,7 +61,7 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public ISecurityDataProvider CreateNew()
         {
-            return new EFCSecurityDataProvider(this.CommandTimeout, this.ConnectionString);
+            return new EFCSecurityDataProvider(CommandTimeout, ConnectionString);
         }
         /// <summary>
         /// Empties the entire database (clears all records from all tables).
@@ -172,7 +172,8 @@ namespace SenseNet.Security.EFCSecurityStore
             }
         }
         /// <summary>
-        /// Updates the given entity to the database. If it does not exist before updating, a SecurityStructureException must be thrown.
+        /// Updates the given entity to the database. If it does not exist before updating, 
+        /// a SecurityStructureException must be thrown.
         /// </summary>
         public void UpdateSecurityEntity(StoredSecurityEntity entity)
         {
@@ -214,9 +215,10 @@ namespace SenseNet.Security.EFCSecurityStore
                 }
             }
 
-            // the loop ended after several retries
+            // the loop was finished after several attenpts
             if (exceptions.Count > 0)
-                throw new SecurityStructureException("Cannot update entity because of concurrency: " + entity.Id, new AggregateException(exceptions));
+                throw new SecurityStructureException(
+                    "Cannot update entity because of concurrency: " + entity.Id, new AggregateException(exceptions));
         }
         /// <summary>
         /// Deletes an entity by the given identifier. If the entity does not exist before deleting, this method does nothing.
@@ -244,7 +246,8 @@ namespace SenseNet.Security.EFCSecurityStore
             }
         }
         /// <summary>
-        /// Moves the source entity to the target entity. Only a parent relink is needed. All other operations call other data provider methods.
+        /// Moves the source entity to the target entity. Only a parent relink is needed. All other operations call 
+        /// other data provider methods.
         /// </summary>
         public void MoveSecurityEntity(int sourceId, int targetId) // always called with SetSecurityHolder method
         {
@@ -252,10 +255,12 @@ namespace SenseNet.Security.EFCSecurityStore
             {
                 var source = LoadEFEntity(sourceId, db);
                 if (source == null)
-                    throw new EntityNotFoundException("Cannot execute the move operation because source does not exist: " + sourceId);
+                    throw new EntityNotFoundException(
+                        "Cannot execute the move operation because source does not exist: " + sourceId);
                 var target = LoadEFEntity(targetId, db);
                 if (target == null)
-                    throw new EntityNotFoundException("Cannot execute the move operation because target does not exist: " + targetId);
+                    throw new EntityNotFoundException(
+                        "Cannot execute the move operation because target does not exist: " + targetId);
 
                 source.ParentId = target.Id;
 
@@ -275,6 +280,7 @@ namespace SenseNet.Security.EFCSecurityStore
                     .Select(a => new StoredAce
                     {
                         EntityId = a.EFEntityId,
+                        EntryType = (EntryType)a.EntryType,
                         IdentityId = a.IdentityId,
                         LocalOnly = a.LocalOnly,
                         AllowBits = a.AllowBits.ToUInt64(),
@@ -298,6 +304,7 @@ namespace SenseNet.Security.EFCSecurityStore
                     .Select(a => new StoredAce
                     {
                         EntityId = a.EFEntityId,
+                        EntryType = (EntryType)a.EntryType,
                         IdentityId = a.IdentityId,
                         LocalOnly = a.LocalOnly,
                         AllowBits = a.AllowBits.ToUInt64(),
@@ -307,23 +314,8 @@ namespace SenseNet.Security.EFCSecurityStore
             }
         }
         /// <summary>
-        /// Loads a list of all of the stored ACEs of a subtree in an ordered way.
-        /// The result must be filtered by the related identities.
-        /// </summary>
-        /// <remarks>
-        /// If the unique path sholud be stored into the StoredAce, the followiwng SQL query can demonstrate the task of this method:
-        /// SELECT * FROM StoredAces WHERE Path LIKE @path + '/%' AND IdentityId IN ( @ident1, ident2, ... ) ORDER BY Path
-        /// </remarks>
-        /// <param name="entityId">Provides the subtree.</param>
-        /// <param name="identities">Relevant identities</param>
-        [Obsolete("Do not use this method anymore.", true)]
-        public IEnumerable<StoredAce> LoadDescendantAces(int entityId, IEnumerable<int> identities)
-        {
-            using (var db = Db())
-                return new StoredAceEnumerable(entityId, identities, db);
-        }
-        /// <summary>
-        /// Inserts or updates one or more StoredACEs. An ACE is identified by a compound key: EntityId, IdentityId, LocalOnly
+        /// Inserts or updates one or more StoredACEs.
+        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
         {
@@ -337,8 +329,9 @@ namespace SenseNet.Security.EFCSecurityStore
             {
                 // possible foreign key constraint error
                 var message = ex.Message.StartsWith("The INSERT statement conflicted with the FOREIGN KEY constraint")
-                    // ReSharper disable once PossibleMultipleEnumeration
-                    ? "Cannot write permission entries because one of the entities is missing from the database. " + string.Join(",", aces.Select(a => a.EntityId).Distinct().OrderBy(ei => ei))
+                    ? "Cannot write permission entries because one of the entities is missing from the database. " +
+                        // ReSharper disable once PossibleMultipleEnumeration
+                        string.Join(",", aces.Select(a => a.EntityId).Distinct().OrderBy(ei => ei))
                     : "Cannot write permission entries because of a database error.";
 
                 throw new SecurityStructureException(message, ex);
@@ -346,7 +339,7 @@ namespace SenseNet.Security.EFCSecurityStore
         }
         /// <summary>
         /// Deletes the given ACEs.  If an ACE does not exist before deleting, it must be skipped.
-        /// An ACE is identified by a compound key: EntityId, IdentityId, LocalOnly
+        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
         public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
@@ -362,7 +355,8 @@ namespace SenseNet.Security.EFCSecurityStore
                 db.RemovePermissionEntriesByEntity(entityId);
         }
         /// <summary>
-        /// Deletes all ACEs related to any of the entities in a subtree defined by the provided root id, then deletes all the entities too.
+        /// Deletes all ACEs related to any of the entities in a subtree defined by the provided root id, then 
+        /// deletes all the entities too.
         /// </summary>
         public void DeleteEntitiesAndEntries(int entityId)
         {
@@ -388,8 +382,10 @@ namespace SenseNet.Security.EFCSecurityStore
         /// <summary>
         /// Returns an array of all unprocessed activity ids supplemented with the last stored activity id.
         /// Empty array means that the database does not contain any activities.
-        /// Array with only one element means that the database does not contain any unprocessed element and the last stored activity id is the returned item.
-        /// Two or more element means that the array contains one or more unprocessed activity id and the last element is the last stored activity id.
+        /// Array with only one element means that the database does not contain any unprocessed element 
+        /// and the last stored activity id is the returned item.
+        /// Two or more element means that the array contains one or more unprocessed activity id and the 
+        /// last element is the last stored activity id.
         /// </summary>
         /// <returns>Zero or more id of unprocessed elements supplemented with the last stored activity id.</returns>
         public int[] GetUnprocessedActivityIds()
@@ -410,7 +406,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// <param name="from">Least expected id.</param>
         /// <param name="to">Largest allowed id.</param>
         /// <param name="count">Fragment size.</param>
-        /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
+        /// <param name="executingUnprocessedActivities">
+        /// Value of the IsUnprocessedActivity property of every loaded object.</param>
         public SecurityActivity[] LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities)
         {
             var result = new List<SecurityActivity>();
@@ -436,7 +433,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// vill be the value of the given "executingUnprocessedActivities" parameter.
         /// </summary>
         /// <param name="gaps">Individual id array</param>
-        /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
+        /// <param name="executingUnprocessedActivities">
+        /// Value of the IsUnprocessedActivity property of every loaded object.</param>
         public SecurityActivity[] LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities)
         {
             var result = new List<SecurityActivity>();
@@ -509,14 +507,16 @@ namespace SenseNet.Security.EFCSecurityStore
         /// <summary>
         /// Ensures an exclusive (only one) object for the activity. Returns the new lock object or null.
         /// </summary>
-        public SecurityActivityExecutionLock AcquireSecurityActivityExecutionLock(SecurityActivity securityActivity, int timeoutInSeconds)
+        public SecurityActivityExecutionLock AcquireSecurityActivityExecutionLock(
+            SecurityActivity securityActivity, int timeoutInSeconds)
         {
             var maxTime = timeoutInSeconds == int.MaxValue ? DateTime.MaxValue : DateTime.UtcNow.AddSeconds(timeoutInSeconds);
             while (DateTime.UtcNow < maxTime)
             {
                 string result;
                 using (var db = Db())
-                    result = db.AcquireSecurityActivityExecutionLock(securityActivity.Id, securityActivity.Context.MessageProvider.ReceiverName, timeoutInSeconds);
+                    result = db.AcquireSecurityActivityExecutionLock(
+                        securityActivity.Id, securityActivity.Context.MessageProvider.ReceiverName, timeoutInSeconds);
 
                 // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (result)
@@ -530,7 +530,8 @@ namespace SenseNet.Security.EFCSecurityStore
                         return new SecurityActivityExecutionLock(securityActivity, false);
                 }
             }
-            throw new SecurityActivityTimeoutException($"Waiting for a SecurityActivityExecutionLock timed out: #{securityActivity.Id}/{securityActivity.TypeName}");
+            throw new SecurityActivityTimeoutException(
+                $"Waiting for a SecurityActivityExecutionLock timed out: #{securityActivity.Id}/{securityActivity.TypeName}");
         }
         /// <summary>
         /// Refreshes the lock object to avoid its timeout.
@@ -556,57 +557,18 @@ namespace SenseNet.Security.EFCSecurityStore
             return db.EFEntities.FirstOrDefault(x => x.Id == entityId);
         }
 
-        //===================================================================== 
-
-        private class StoredAceEnumerable : IEnumerable<StoredAce>
-        {
-            private readonly int _entityId;
-            // ReSharper disable once NotAccessedField.Local
-            private IEnumerable<int> _identities; //TODO: usage?
-            private readonly List<StoredAce> _aces = new List<StoredAce>();
-            private readonly SecurityStorage _db;
-
-            internal StoredAceEnumerable(int entityId, IEnumerable<int> identities, SecurityStorage db)
-            {
-                _entityId = entityId;
-                _identities = identities;
-                _db = db;
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-            public IEnumerator<StoredAce> GetEnumerator()
-            {
-                var entity = _db.EFEntities.FirstOrDefault(x => x.Id == _entityId);
-                FindAces(entity);
-                return _aces.GetEnumerator();
-            }
-            private void FindAces(EFEntity entity)
-            {
-                foreach (var child in entity.Children)
-                    FindAces(child);
-                _aces.AddRange(entity.EFEntries.Select(a => new StoredAce
-                {
-                    EntityId = a.EFEntityId,
-                    IdentityId = a.IdentityId,
-                    LocalOnly = a.LocalOnly,
-                    AllowBits = a.AllowBits.ToUInt64(),
-                    DenyBits = a.DenyBits.ToUInt64()
-                }));
-            }
-        }
-
-        /*******************************************  */
+        /* ===================================================================== */
 
         /// <summary>
         /// This method provides a collection of entity ids that have a group-related access control entry.
         /// </summary>
         /// <param name="groupId"></param>
-        /// <param name="entityIds">Entities that have one or more group related ACEs. These ACEs will be removed from the ACLs.</param>
-        /// <param name="exclusiveEntityIds">Entities that have only the given group related ACEs. These ACLs will be removed.</param>
-        public void QueryGroupRelatedEntities(int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds)
+        /// <param name="entityIds">
+        /// Entities that have one or more group related ACEs. These ACEs will be removed from the ACLs. </param>
+        /// <param name="exclusiveEntityIds">
+        /// Entities that have only the given group related ACEs. These ACLs will be removed. </param>
+        public void QueryGroupRelatedEntities(
+            int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds)
         {
             var result = new List<int>();
             using (var db = Db())
@@ -653,8 +615,7 @@ namespace SenseNet.Security.EFCSecurityStore
         }
         private SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
         {
-            SecurityGroup group;
-            if (groups.TryGetValue(groupId, out group))
+            if (groups.TryGetValue(groupId, out var group))
                 return group;
             group = new SecurityGroup(groupId);
             groups.Add(group.Id, group);
@@ -724,7 +685,10 @@ namespace SenseNet.Security.EFCSecurityStore
             var allNewMembers = groupArray.Union(userArray);
             using (var db = Db())
             {
-                var origMemberIds = db.EFMemberships.Where(m => m.GroupId == groupId && allNewMembers.Contains(m.MemberId)).Select(m => m.MemberId).ToArray();
+                var origMemberIds = db.EFMemberships
+                    .Where(m => m.GroupId == groupId && allNewMembers.Contains(m.MemberId))
+                    .Select(m => m.MemberId)
+                    .ToArray();
                 var newGroupIds = groupArray.Except(origMemberIds).ToArray();
                 var newUserIds = userArray.Except(origMemberIds).ToArray();
                 var newGroups = newGroupIds.Select(g => new EFMembership { GroupId = groupId, MemberId = g, IsUser = false });
@@ -741,8 +705,10 @@ namespace SenseNet.Security.EFCSecurityStore
         /// Removes one or more users and groups from the specified group.
         /// </summary>
         /// <param name="groupId">Id of a group.</param>
-        /// <param name="userMembers">Contains the ids of users that will be removed. Can be null or an empty list too.</param>
-        /// <param name="groupMembers">Contains the ids of groups that will be removed. Can be null or an empty list too.</param>
+        /// <param name="userMembers">
+        /// Contains the ids of users that will be removed. Can be null or an empty list too.</param>
+        /// <param name="groupMembers">
+        /// Contains the ids of groups that will be removed. Can be null or an empty list too.</param>
         public void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
             using (var db = Db())

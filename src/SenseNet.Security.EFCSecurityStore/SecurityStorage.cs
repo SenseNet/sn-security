@@ -58,7 +58,7 @@ namespace SenseNet.Security.EFCSecurityStore
 
             modelBuilder.Entity<EFMembership>().HasKey(a => new { a.GroupId, a.MemberId });
 
-            modelBuilder.Entity<EFEntry>().HasKey(a => new { a.EFEntityId, a.IdentityId, a.LocalOnly });
+            modelBuilder.Entity<EFEntry>().HasKey(a => new { a.EFEntityId, a.EntryType, a.IdentityId, a.LocalOnly });
 
             //// ----------------------------------- query types
 
@@ -102,7 +102,7 @@ DELETE FROM EFMessages
         /// <summary>
         /// Name of the SQL script resource file that contains all the table and constraint creation commands.
         /// </summary>
-        private const string RESOURCE_INSTALLDB = "SenseNet.Security.EFCSecurityStore.Scripts.Install_Schema_2.1.sql";
+        private const string RESOURCE_INSTALLDB = "SenseNet.Security.EFCSecurityStore.Scripts.Install_Schema_3.1.sql";
 
         internal void InstallDatabase()
         {
@@ -171,7 +171,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
         }
 
 
-        private const string REMOVEPERMISSIONENTRIESSCRIPT = @"DELETE FROM EFEntries WHERE EFEntityId = {0} AND IdentityId = {1} AND LocalOnly = {2}";
+        private const string REMOVEPERMISSIONENTRIESSCRIPT = @"DELETE FROM EFEntries WHERE EFEntityId = {0} AND EntryType = {1} AND IdentityId = {2} AND LocalOnly = {3}";
         internal void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
             var storedAces = aces as StoredAce[] ?? aces.ToArray();
@@ -189,7 +189,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
             }
 
             foreach (var ace in storedAces)
-                sb.AppendFormat(REMOVEPERMISSIONENTRIESSCRIPT, ace.EntityId, ace.IdentityId, ace.LocalOnly ? 1 : 0).AppendLine();
+                sb.AppendFormat(REMOVEPERMISSIONENTRIESSCRIPT, ace.EntityId, (int)ace.EntryType, ace.IdentityId, ace.LocalOnly ? 1 : 0).AppendLine();
 
             if (count > 1)
             {
@@ -200,7 +200,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
             this.Database.ExecuteSqlCommand(sb.ToString());
         }
 
-        private const string INSERTPERMISSIONENTRIESSCRIPT = @"INSERT INTO EFEntries SELECT {0}, {1}, {2}, {3}, {4}";
+        private const string INSERTPERMISSIONENTRIESSCRIPT = @"INSERT INTO EFEntries SELECT {0}, {1}, {2}, {3}, {4}, {5}";
         internal void WritePermissionEntries(IEnumerable<StoredAce> aces)
         {
             var storedAces = aces as StoredAce[] ?? aces.ToArray();
@@ -215,10 +215,10 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
             sb.AppendLine();
 
             foreach (var ace in storedAces)
-                sb.AppendFormat(REMOVEPERMISSIONENTRIESSCRIPT, ace.EntityId, ace.IdentityId, ace.LocalOnly ? 1 : 0).AppendLine();
+                sb.AppendFormat(REMOVEPERMISSIONENTRIESSCRIPT, ace.EntityId, (int)ace.EntryType, ace.IdentityId, ace.LocalOnly ? 1 : 0).AppendLine();
             sb.AppendLine();
             foreach (var ace in storedAces)
-                sb.AppendFormat(INSERTPERMISSIONENTRIESSCRIPT, ace.EntityId, ace.IdentityId, ace.LocalOnly ? 1 : 0
+                sb.AppendFormat(INSERTPERMISSIONENTRIESSCRIPT, ace.EntityId, (int)ace.EntryType, ace.IdentityId, ace.LocalOnly ? 1 : 0
                     , ace.AllowBits.ToInt64()
                     , ace.DenyBits.ToInt64()).AppendLine();
 
