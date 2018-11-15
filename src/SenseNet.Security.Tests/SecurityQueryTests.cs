@@ -119,7 +119,7 @@ namespace SenseNet.Security.Tests
         {
             var ctx = CurrentContext.Security;
             ctx.CreateAclEditor()
-                .BreakInheritance(Id("E4"))
+                .BreakInheritance(Id("E4"), new[] { EntryType.Normal })
                 .Apply();
             const string expected = "30,12,4";
 
@@ -144,7 +144,7 @@ namespace SenseNet.Security.Tests
         {
             var ctx = CurrentContext.Security;
             ctx.CreateAclEditor()
-                .BreakInheritance(Id("E4"))
+                .BreakInheritance(Id("E4"), new[] { EntryType.Normal })
                 .Apply();
             const string expected = "4,12,30,31,32,33";
 
@@ -201,6 +201,260 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expected, GetSortedIdString(result));
         }
 
+        [TestMethod]
+        public void Linq_All_IdentitiesByCategory()
+        {
+            var ctx = CurrentContext.Security;
+            AddPermissionsForCategorySelectionTests(ctx);
+
+            const string expectedAll = "101,106,107,108,109,201,202,203,204,205,206,207";
+            const string expectedNormal = "101,106,107,201,202,203,204,205";
+            const string expectedSharing = "108,109,206,207";
+
+            var resultAll = SecurityQuery.All(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            var resultNormal = SecurityQuery.All(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => e.EntryType == EntryType.Normal)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            var resultSharing = SecurityQuery.All(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => e.EntryType == EntryType.Sharing)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            Assert.AreEqual(expectedAll, GetSortedIdString(resultAll));
+            Assert.AreEqual(expectedNormal, GetSortedIdString(resultNormal));
+            Assert.AreEqual(expectedSharing, GetSortedIdString(resultSharing));
+        }
+        [TestMethod]
+        public void Linq_Parent_IdentitiesByCategory()
+        {
+            var ctx = CurrentContext.Security;
+            AddPermissionsForCategorySelectionTests(ctx);
+
+            const string expectedAll = "101,106,108,201,203,204,206";
+            const string expectedNormal = "101,106,201,203,204";
+            const string expectedSharing = "108,206";
+
+            var resultAll = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            var resultNormal = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => e.EntryType == EntryType.Normal)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            var resultSharing = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => e.EntryType == EntryType.Sharing)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            Assert.AreEqual(expectedAll, GetSortedIdString(resultAll));
+            Assert.AreEqual(expectedNormal, GetSortedIdString(resultNormal));
+            Assert.AreEqual(expectedSharing, GetSortedIdString(resultSharing));
+        }
+        [TestMethod]
+        public void Linq_Subtree_IdentitiesByCategory()
+        {
+            var ctx = CurrentContext.Security;
+            AddPermissionsForCategorySelectionTests(ctx);
+
+            const string expectedAll = "101,107,109,201,202,203,205,207";
+            const string expectedNormal = "101,107,201,202,203,205";
+            const string expectedSharing = "109,207";
+
+            var resultAll = SecurityQuery.Subtree(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            var resultNormal = SecurityQuery.Subtree(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => e.EntryType == EntryType.Normal)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            var resultSharing = SecurityQuery.Subtree(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => e.EntryType == EntryType.Sharing)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            Assert.AreEqual(expectedAll, GetSortedIdString(resultAll));
+            Assert.AreEqual(expectedNormal, GetSortedIdString(resultNormal));
+            Assert.AreEqual(expectedSharing, GetSortedIdString(resultSharing));
+        }
+
+        [TestMethod]
+        public void Linq_All_Identities_ByPermission()
+        {
+            var ctx = CurrentContext.Security;
+            AddPermissionsForIdentityByPermissionTests(ctx);
+
+            const string expected1 = "101,103,104,106,201,203,204,206";
+            const string expected2 = "102,103,105,106,202,203,205,206";
+            const string expected3 = "103,106,203,206";
+            const string expected4 = "101,102,103,104,105,106,201,202,203,204,205,206";
+
+            var mask1 = PermissionType.Custom11.Mask;
+            var mask2 = PermissionType.Custom12.Mask;
+            var mask3 = mask1 | mask2;
+
+            var result1 = SecurityQuery.All(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask1) == mask1)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            var result2 = SecurityQuery.All(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask2) == mask2)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            // all bits
+            var result3 = SecurityQuery.All(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask3) == mask3)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            // any bit
+            var result4 = SecurityQuery.All(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask3) != 0)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            Assert.AreEqual(expected1, GetSortedIdString(result1));
+            Assert.AreEqual(expected2, GetSortedIdString(result2));
+            Assert.AreEqual(expected3, GetSortedIdString(result3));
+            Assert.AreEqual(expected4, GetSortedIdString(result4));
+        }
+        [TestMethod]
+        public void Linq_Parent_Identities_ByPermission()
+        {
+            var ctx = CurrentContext.Security;
+            AddPermissionsForIdentityByPermissionTests(ctx);
+
+            const string expected1 = "101,103,201,203";
+            const string expected2 = "102,103,202,203";
+            const string expected3 = "103,203";
+            const string expected4 = "101,102,103,201,202,203";
+
+            var mask1 = PermissionType.Custom11.Mask;
+            var mask2 = PermissionType.Custom12.Mask;
+            var mask3 = mask1 | mask2;
+
+            var result1 = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask1) == mask1)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            var result2 = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask2) == mask2)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            // all bits
+            var result3 = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask3) == mask3)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            // any bit
+            var result4 = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask3) != 0)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            Assert.AreEqual(expected1, GetSortedIdString(result1));
+            Assert.AreEqual(expected2, GetSortedIdString(result2));
+            Assert.AreEqual(expected3, GetSortedIdString(result3));
+            Assert.AreEqual(expected4, GetSortedIdString(result4));
+        }
+        [TestMethod]
+        public void Linq_Subtree_Identities_ByPermission()
+        {
+            var ctx = CurrentContext.Security;
+            AddPermissionsForIdentityByPermissionTests(ctx);
+
+            const string expected1 = "104,106,204,206";
+            const string expected2 = "105,106,205,206";
+            const string expected3 = "106,206";
+            const string expected4 = "104,105,106,204,205,206";
+
+            var mask1 = PermissionType.Custom11.Mask;
+            var mask2 = PermissionType.Custom12.Mask;
+            var mask3 = mask1 | mask2;
+
+            var result1 = SecurityQuery.Subtree(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask1) == mask1)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            var result2 = SecurityQuery.Subtree(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask2) == mask2)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            // all bits
+            var result3 = SecurityQuery.Subtree(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask3) == mask3)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            // any bit
+            var result4 = SecurityQuery.Subtree(ctx).GetEntities(Id("E32"))
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries)
+                .Where(e => (e.AllowBits & mask3) != 0)
+                .Select(e => e.IdentityId)
+                .Distinct();
+
+            Assert.AreEqual(expected1, GetSortedIdString(result1));
+            Assert.AreEqual(expected2, GetSortedIdString(result2));
+            Assert.AreEqual(expected3, GetSortedIdString(result3));
+            Assert.AreEqual(expected4, GetSortedIdString(result4));
+        }
+
         /* ============================================================================= PermissionQuery substitution */
 
         [TestMethod]
@@ -218,7 +472,7 @@ namespace SenseNet.Security.Tests
                 .Deny(Id("E1"), Id("U7"), false, PermissionType.Custom02)
                 .Apply();
             ctx.CreateAclEditor()
-                .BreakInheritance(Id("E4"))
+                .BreakInheritance(Id("E4"), new[] { EntryType.Normal })
                 .Apply();
             ctx.CreateAclEditor()
                 .ClearPermission(Id("E4"), Id("U4"), false, PermissionType.Custom04)
@@ -355,6 +609,44 @@ namespace SenseNet.Security.Tests
                 // additions for validating local permissions.
                 .Allow(Id("E1"), Id("G6"), true, PermissionType.Custom04)
                 .Allow(Id("E38"), Id("G7"), true, PermissionType.Custom04)
+                .Apply();
+        }
+        private void AddPermissionsForCategorySelectionTests(TestSecurityContext ctx)
+        {
+            ctx.CreateAclEditor()
+                // additions for easy checking of differences between parent-chain and the subtree
+                .Allow(Id("E1"), Id("U4"), false, PermissionType.Custom04)
+                .Allow(Id("E38"), Id("U5"), false, PermissionType.Custom04)
+                // additions for validating local permissions.
+                .Allow(Id("E1"), Id("G6"), false, PermissionType.Custom04)
+                .Allow(Id("E38"), Id("G7"), false, PermissionType.Custom04)
+                .Apply();
+
+            // add some sharing related entries
+            ctx.CreateAclEditor(EntryType.Sharing)
+                .Allow(Id("E4"), Id("U6"), false, PermissionType.Custom04)
+                .Allow(Id("E39"), Id("U7"), false, PermissionType.Custom04)
+                .Allow(Id("E4"), Id("G8"), false, PermissionType.Custom04)
+                .Allow(Id("E39"), Id("G9"), false, PermissionType.Custom04)
+                .Apply();
+        }
+        private void AddPermissionsForIdentityByPermissionTests(TestSecurityContext ctx)
+        {
+            var p1 = PermissionType.Custom11;
+            var p2 = PermissionType.Custom12;
+            ctx.CreateAclEditor()
+                .Allow(Id("E1"), Id("U1"), false, p1)
+                .Allow(Id("E1"), Id("U2"), false, p2)
+                .Allow(Id("E1"), Id("U3"), false, p1, p2)
+                .Allow(Id("E1"), Id("G1"), false, p1)
+                .Allow(Id("E1"), Id("G2"), false, p2)
+                .Allow(Id("E1"), Id("G3"), false, p1, p2)
+                .Allow(Id("E38"), Id("U4"), false, p1)
+                .Allow(Id("E38"), Id("U5"), false, p2)
+                .Allow(Id("E38"), Id("U6"), false, p1, p2)
+                .Allow(Id("E38"), Id("G4"), false, p1)
+                .Allow(Id("E38"), Id("G5"), false, p2)
+                .Allow(Id("E38"), Id("G6"), false, p1, p2)
                 .Apply();
         }
 
@@ -524,25 +816,25 @@ namespace SenseNet.Security.Tests
                 .Apply();
 
             ctx.CreateAclEditor()
-                .BreakInheritance(Id("E22"))
+                .BreakInheritance(Id("E22"), new[] { EntryType.Normal })
 
-                .BreakInheritance(Id("E34"))
+                .BreakInheritance(Id("E34"), new[] { EntryType.Normal })
                 .Allow(Id("E34"), Id("U2"), false, PermissionType.Custom01)
-                .BreakInheritance(Id("E35"))
+                .BreakInheritance(Id("E35"), new[] { EntryType.Normal })
                 .Allow(Id("E35"), Id("U2"), false, PermissionType.Custom01)
                 .ClearPermission(Id("E35"), Id("U1"), false, PermissionType.Custom01)
 
-                .BreakInheritance(Id("E36"))
+                .BreakInheritance(Id("E36"), new[] { EntryType.Normal })
                 .ClearPermission(Id("E36"), Id("U1"), false, PermissionType.Custom01)
 
 
                 .Apply();
 
             ctx.CreateAclEditor()
-                .BreakInheritance(Id("E37"))
+                .BreakInheritance(Id("E37"), new[] { EntryType.Normal })
 
                 // E41 and her subtree (E41, E42) is disabled for everyone except the system user
-                .BreakInheritance(Id("E41"), false)
+                .BreakInheritance(Id("E41"), new EntryType[0])
 
                 .Apply();
 
