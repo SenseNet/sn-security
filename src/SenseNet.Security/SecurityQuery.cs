@@ -5,30 +5,51 @@ using System.Linq;
 
 namespace SenseNet.Security
 {
+    /// <summary>
+    /// Controls the inheritance handling in the collection enumerators.
+    /// </summary>
     [Flags]
     public enum BreakOptions
     {
+        /// <summary>Indicates that the tree walker does not take into account any inheritance break.</summary>
         Default = 0,
+        /// <summary>Indicates that the parent chain walker stops at any inheritance break.</summary>
         StopAtParentBreak = 1,
+        /// <summary>Indicates that the subtree walker do not enter into the broken inheritance subtrees.</summary>
         StopAtSubtreeBreaks = 2
     }
 
+    /// <summary>
+    /// Contains security-related queryable collections.
+    /// </summary>
     public class SecurityQuery
     {
         private enum Axis { All, ParentChain, Subtree };
 
         /* ============================================================ Static part */
 
+        /// <summary>
+        /// Returns SecurityQuery instance that supports any query on the parent chain
+        /// and the subtree of a later specified entity.
+        /// </summary>
         public static SecurityQuery All(SecurityContext context)
         {
             return new SecurityQuery(context, Axis.All);
         }
 
+        /// <summary>
+        /// Returns SecurityQuery instance that supports any query on the parent chain of a later specified entity.
+        /// Note that the focused entity is not a member of its parent chain.
+        /// </summary>
         public static SecurityQuery ParentChain(SecurityContext context)
         {
             return new SecurityQuery(context, Axis.ParentChain);
         }
 
+        /// <summary>
+        /// Returns SecurityQuery instance that supports any query in the subtree of a later specified entity.
+        /// Note that the focused entity is a member of its subtree.
+        /// </summary>
         public static SecurityQuery Subtree(SecurityContext context)
         {
             return new SecurityQuery(context, Axis.Subtree);
@@ -41,9 +62,18 @@ namespace SenseNet.Security
             _context = context;
             _axis = axis;
         }
-        private SecurityContext _context;
-        private Axis _axis;
+        private readonly SecurityContext _context;
+        private readonly Axis _axis;
 
+        /// <summary>
+        /// Returns all entities in the predefined axis (All, ParentChain, Subtree) of the specified entity.
+        /// The collection is empty if the entity was not found.
+        /// This operation is thread safe. The thread safety uses system resources, so to minimize these,
+        /// it's strongly recommended processing as fast as possible.
+        /// </summary>
+        /// <param name="rootId">The Id of the focused entity.</param>
+        /// <param name="handleBreaks">Controls the permission inheritance handling.</param>
+        /// <returns>The IEnumerable&lt;SecurityEntity&gt; to further filtering.</returns>
         public IEnumerable<SecurityEntity> GetEntities(int rootId, BreakOptions handleBreaks = BreakOptions.Default)
         {
             SecurityEntity.EnterReadLock();
@@ -76,6 +106,17 @@ namespace SenseNet.Security
                 SecurityEntity.ExitReadLock();
             }
         }
+        /// <summary>
+        /// Returns all entries in the predefined axis (All, ParentChain, Subtree) of the specified entity.
+        /// The collection is empty if the entity was not found.
+        /// Note that the output entries do not refers their owher entities and there is no inexpensive way 
+        /// to recover them.
+        /// This operation is thread safe. The thread safety uses system resources, so to minimize these,
+        /// it's strongly recommended processing as fast as possible.
+        /// </summary>
+        /// <param name="rootId">The Id of the focused entity.</param>
+        /// <param name="handleBreaks">Controls the permission inheritance handling.</param>
+        /// <returns>The IEnumerable&lt;SecurityEntity&gt; to further filtering.</returns>
         public IEnumerable<AceInfo> GetEntries(int rootId, BreakOptions handleBreaks = BreakOptions.Default)
         {
             return GetEntities(rootId, handleBreaks)
