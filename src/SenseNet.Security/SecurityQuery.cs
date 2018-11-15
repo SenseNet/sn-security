@@ -76,6 +76,13 @@ namespace SenseNet.Security
                 SecurityEntity.ExitReadLock();
             }
         }
+        public IEnumerable<AceInfo> GetEntries(int rootId, BreakOptions handleBreaks = BreakOptions.Default)
+        {
+            return GetEntities(rootId, handleBreaks)
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries);
+        }
+
 
         private IEnumerable<SecurityEntity> GetEntitiesFromParentChain(SecurityEntity entity, BreakOptions handleBreaks)
         {

@@ -74,6 +74,23 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual(expected, GetSortedIdString(result));
         }
+        [TestMethod]
+        public void Linq_Root_Entries_AllExisting()
+        {
+            var ctx = CurrentContext.Security;
+
+            var resultWithFilter = SecurityQuery.All(ctx).GetEntities(_rootEntityId)
+                .Where(e => e.Acl != null)
+                .SelectMany(e => e.Acl.Entries);
+
+            // ACTION
+            var result = SecurityQuery.All(ctx).GetEntries(_rootEntityId);
+
+            // ASSERT
+            var expected = string.Join(" | ", resultWithFilter.Select(x => x.ToString()).OrderBy(x => x));
+            var actual = string.Join(" | ", result.Select(x => x.ToString()).OrderBy(x => x));
+            Assert.AreEqual(expected, actual);
+        }
 
         [TestMethod]
         public void Linq_All_Entities()
