@@ -566,6 +566,10 @@ namespace SenseNet.Security.Tests
                 .Allow(Id("E1"), Id("G4"), false, PermissionType.Custom04)
                 .Allow(Id("E42"), Id("G4"), false, PermissionType.Custom04)
                 .Apply();
+            ctx.CreateAclEditor(EntryType.Sharing)
+                .Allow(Id("E4"), Id("U8"), false, PermissionType.Open)
+                .Allow(Id("E41"), Id("U8"), false, PermissionType.Open)
+                .Apply();
 
             // sample output: "U1:p0:1,p1:2|U2:|U3:p3:2"
             string ResultToString(Dictionary<string, Dictionary<int, int>> result)
@@ -581,9 +585,10 @@ namespace SenseNet.Security.Tests
                 return string.Join("|", x);
             }
 
-            var identityNames = new[] { "U1", "U2", "U3", "U4" };
+            var identityNames = new[] { "U1", "U2", "U3", "U4", "U8" };
 
-            var expectedAllowedPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3|U4";
+            // ---- ALLOWED
+            var expectedAllowedPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3|U4|U8";
             var allowedPermCountsByIdentities = ResultToString(identityNames
                 .Select(identityName => new
                 {
@@ -593,7 +598,20 @@ namespace SenseNet.Security.Tests
                         .Where(x => x.Value != 0).ToDictionary(x => x.Key.Index, x => x.Value)
                 })
                 .ToDictionary(x => x.id, x => x.permissionCounters));
-            var expectedDeniedPermCounts = "U1|U2|U3:p32:4|U4";
+            var allowedPermCountsByIdentitiesLinq = ResultToString(identityNames
+                .Select(identityName => new
+                {
+                    id = identityName,
+                    permissionCounters =
+                        PermissionQueryWithLinq_GetRelatedPermissions(ctx, Id("E32"), Id(identityName), PermissionLevel.Allowed)
+                        .Where(x => x.Value != 0).ToDictionary(x => x.Key.Index, x => x.Value)
+                })
+                .ToDictionary(x => x.id, x => x.permissionCounters));
+            Assert.AreEqual(allowedPermCountsByIdentities, allowedPermCountsByIdentitiesLinq);
+            Assert.AreEqual(expectedAllowedPermCounts, allowedPermCountsByIdentities);
+
+            // ---- DENIED
+            var expectedDeniedPermCounts = "U1|U2|U3:p32:4|U4|U8";
             var deniedPermCountsByIdentities = ResultToString(identityNames
                 .Select(identityName => new
                 {
@@ -603,7 +621,20 @@ namespace SenseNet.Security.Tests
                         .Where(x => x.Value != 0).ToDictionary(x => x.Key.Index, x => x.Value)
                 })
                 .ToDictionary(x => x.id, x => x.permissionCounters));
-            var expectedAllPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3:p32:4|U4";
+            var deniedPermCountsByIdentitiesLinq = ResultToString(identityNames
+                .Select(identityName => new
+                {
+                    id = identityName,
+                    permissionCounters =
+                    PermissionQueryWithLinq_GetRelatedPermissions(ctx, Id("E32"), Id(identityName), PermissionLevel.Denied)
+                        .Where(x => x.Value != 0).ToDictionary(x => x.Key.Index, x => x.Value)
+                })
+                .ToDictionary(x => x.id, x => x.permissionCounters));
+            Assert.AreEqual(deniedPermCountsByIdentities, deniedPermCountsByIdentitiesLinq);
+            Assert.AreEqual(expectedDeniedPermCounts, deniedPermCountsByIdentities);
+
+            // ALLOWED OR DENIED
+            var expectedAllPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3:p32:4|U4|U8";
             var allPermCountsByIdentities = ResultToString(identityNames
                 .Select(identityName => new
                 {
@@ -613,12 +644,121 @@ namespace SenseNet.Security.Tests
                         .Where(x => x.Value != 0).ToDictionary(x => x.Key.Index, x => x.Value)
                 })
                 .ToDictionary(x => x.id, x => x.permissionCounters));
-
-            Assert.AreEqual(expectedAllowedPermCounts, allowedPermCountsByIdentities);
-            Assert.AreEqual(expectedDeniedPermCounts, deniedPermCountsByIdentities);
+            var allPermCountsByIdentitiesLinq = ResultToString(identityNames
+                .Select(identityName => new
+                {
+                    id = identityName,
+                    permissionCounters =
+                    PermissionQueryWithLinq_GetRelatedPermissions(ctx, Id("E32"), Id(identityName), PermissionLevel.AllowedOrDenied)
+                        .Where(x => x.Value != 0).ToDictionary(x => x.Key.Index, x => x.Value)
+                })
+                .ToDictionary(x => x.id, x => x.permissionCounters));
+            Assert.AreEqual(allPermCountsByIdentities, allPermCountsByIdentitiesLinq);
             Assert.AreEqual(expectedAllPermCounts, allPermCountsByIdentities);
+        }
+        private Dictionary<PermissionTypeBase, int> PermissionQueryWithLinq_GetRelatedPermissions(
+            TestSecurityContext ctx, int entityId, int identityId, PermissionLevel level)
+        {
+            var counters = new int[PermissionTypeBase.PermissionCount];
+            var permissionTypes = PermissionTypeBase.GetPermissionTypes();
+            void CountBits(ulong bits)
+            {
+                var mask = 1uL;
+                var b = bits;
+                foreach (var pt in permissionTypes)
+                {
+                    if ((b & mask) > 0)
+                        counters[pt.Index]++;
+                    mask = mask << 1;
+                }
+            }
 
-            Assert.Inconclusive();
+            var identities = new[] { identityId };
+            foreach (var change in SecurityQuery.Subtree(ctx)
+                .GetPermissionChanges(entityId, identities, BreakOptions.StopAtParentBreak)
+                .Where(x => x.EntryType == EntryType.Normal))
+            {
+                switch (level)
+                {
+                    case PermissionLevel.Allowed:
+                        CountBits(change.ChangedBits.AllowBits);
+                        break;
+                    case PermissionLevel.Denied:
+                        CountBits(change.ChangedBits.DenyBits);
+                        break;
+                    case PermissionLevel.AllowedOrDenied:
+                        CountBits(change.ChangedBits.AllowBits);
+                        CountBits(change.ChangedBits.DenyBits);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(level), level, null);
+                }
+            }
+
+            var result = new Dictionary<PermissionTypeBase, int>();
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
+                result.Add(PermissionTypeBase.GetPermissionTypeByIndex(i), counters[i]);
+
+            return result;
+        }
+        private Dictionary<PermissionTypeBase, int> PermissionQueryWithLinq_GetRelatedPermissions_OLD(
+            TestSecurityContext ctx, int entityId, int identityId, PermissionLevel level)
+        {
+            var counters = new int[PermissionTypeBase.PermissionCount];
+            var permissionTypes = PermissionTypeBase.GetPermissionTypes();
+            void CountBits(ulong bits)
+            {
+                var mask = 1uL;
+                var b = bits;
+                foreach (var pt in permissionTypes)
+                {
+                    if ((b & mask) > 0)
+                        counters[pt.Index]++;
+                    mask = mask << 1;
+                }
+            }
+
+            //var identities = new TestSecurityContext(new TestUser { Id = identityId }).GetGroups();
+            //identities.Add(identityId);
+            var identities = new[] {identityId};
+
+            var aces = SecurityQuery.ParentChain(ctx).GetEntities(entityId, BreakOptions.StopAtParentBreak)
+                .Where(e => e.Acl != null)                              // relevant entities
+                .SelectMany(e => e.Acl.Entries)                         // join
+                .Where(e => identities.Contains(e.IdentityId) &&        // identity filter
+                            !e.LocalOnly &&                             // local only entry is not affected on the parent chain
+                            e.EntryType == EntryType.Normal)            // only the normal entries are relevant
+                .Union(SecurityQuery.Subtree(ctx).GetEntities(entityId) // do not stop at breaks
+                    .Where(e => e.Acl != null)                          // relevant entities
+                    .SelectMany(e => e.Acl.Entries)                     // join
+                    .Where(e => identities.Contains(e.IdentityId) &&    // identity filter
+                                e.EntryType == EntryType.Normal)        // only the normal entries are relevant
+                );
+
+            foreach (var ace in aces)
+            {
+                switch (level)
+                {
+                    case PermissionLevel.Allowed:
+                        CountBits(ace.AllowBits);
+                        break;
+                    case PermissionLevel.Denied:
+                        CountBits(ace.DenyBits);
+                        break;
+                    case PermissionLevel.AllowedOrDenied:
+                        CountBits(ace.AllowBits);
+                        CountBits(ace.DenyBits);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(level), level, null);
+                }
+            }
+
+            var result = new Dictionary<PermissionTypeBase, int>();
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
+                result.Add(PermissionTypeBase.GetPermissionTypeByIndex(i), counters[i]);
+
+            return result;
         }
 
         /* ============================================================================= Tools */

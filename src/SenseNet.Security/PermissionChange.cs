@@ -6,16 +6,41 @@
     public class PermissionChange
     {
         /// <summary>
-        /// Related entity object.
+        /// Gets the related entity object.
         /// </summary>
-        public SecurityEntity Entity { get; set; }
+        public SecurityEntity Entity { get; }
         /// <summary>
-        /// Id of the related identity.
+        /// Gets the Id of the related identity.
         /// </summary>
-        public int IdentityId { get; set; }
+        public int IdentityId { get; }
         /// <summary>
-        /// Every bit indicate a permission modification state: 1 changed, 0 unchanged.
+        /// Gets the type of changed entry.
         /// </summary>
-        public PermissionBitMask ChangedBits { get; set; }
+        public EntryType EntryType { get; }
+        /// <summary>
+        /// Gets the changed bitmask. Every bit indicate a permission modification state: 1 changed, 0 unchanged.
+        /// </summary>
+        public PermissionBitMask ChangedBits { get; }
+
+        internal PermissionChange(SecurityEntity entity, AceInfo entry) : this(entity, entry.IdentityId,
+            entry.EntryType,
+            entry.AllowBits, entry.DenyBits)
+        {
+        }
+
+        internal PermissionChange(SecurityEntity entity, int identityId, EntryType entryType,
+            ulong changedAllowBits, ulong changedDenyBits) : this(entity, identityId, entryType,
+                new PermissionBitMask {AllowBits = changedAllowBits, DenyBits = changedDenyBits })
+        {
+        }
+
+        internal PermissionChange(SecurityEntity entity, int identityId, EntryType entryType,
+            PermissionBitMask changedBits)
+        {
+            Entity = entity;
+            IdentityId = identityId;
+            EntryType = entryType;
+            ChangedBits = changedBits;
+        }
     }
 }

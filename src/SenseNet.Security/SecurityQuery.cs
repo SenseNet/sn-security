@@ -152,19 +152,9 @@ namespace SenseNet.Security
                     {
                         // skip local only if this is not the root
                         if (entity.Id != entityId || !entry.LocalOnly)
-                        {
                             // filter by related identities
                             if (!isIdentityFilterActive || identities.Contains(entry.IdentityId))
-                            {
-                                yield return new PermissionChange
-                                {
-                                    Entity = entity,
-                                    IdentityId = entry.IdentityId,
-                                    ChangedBits =
-                                        new PermissionBitMask {AllowBits = entry.AllowBits, DenyBits = entry.DenyBits}
-                                };
-                            }
-                        }
+                                yield return new PermissionChange(entity, entry);
                     }
                 }
                 else
@@ -180,12 +170,15 @@ namespace SenseNet.Security
                     // Aggregate effective and local bits per identity
                     foreach (var effectiveEntry in effectiveEntries)
                     {
-                        var localEntry = localEntries.FirstOrDefault(e => e.IdentityId == effectiveEntry.IdentityId);
+                        var localEntry = localEntries.FirstOrDefault(e =>
+                            e.IdentityId == effectiveEntry.IdentityId && e.EntryType == effectiveEntry.EntryType);
+
                         var aggregatedBits = new PermissionBitMask
                         {
                             AllowBits = effectiveEntry.AllowBits,
                             DenyBits = effectiveEntry.DenyBits
                         };
+
                         if (localEntry != null)
                         {
                             aggregatedBits.AllowBits |= localEntry.AllowBits;
@@ -195,22 +188,17 @@ namespace SenseNet.Security
                         }
 
                         yield return new PermissionChange
-                        {
-                            Entity = entity,
-                            IdentityId = effectiveEntry.IdentityId,
-                            ChangedBits = aggregatedBits
-                        };
+                        (
+                             entity,
+                             effectiveEntry.IdentityId,
+                             effectiveEntry.EntryType,
+                             aggregatedBits
+                        );
                     }
+
                     // New local entries that are not exist in parent's effective ACEs
                     foreach (var localEntry in localEntries)
-                    {
-                        yield return new PermissionChange
-                        {
-                            Entity = entity,
-                            IdentityId = localEntry.IdentityId,
-                            ChangedBits = new PermissionBitMask {AllowBits = localEntry.AllowBits, DenyBits = localEntry.DenyBits}
-                        };
-                    }
+                        yield return new PermissionChange(entity,localEntry);
                 }
             }
         }
