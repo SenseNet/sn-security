@@ -71,15 +71,15 @@ namespace SenseNet.Security
         /// This operation is thread safe. The thread safety uses system resources, so to minimize these,
         /// it's strongly recommended processing as fast as possible.
         /// </summary>
-        /// <param name="rootId">The Id of the focused entity.</param>
+        /// <param name="entityId">The Id of the focused entity.</param>
         /// <param name="handleBreaks">Controls the permission inheritance handling.</param>
         /// <returns>The IEnumerable&lt;SecurityEntity&gt; to further filtering.</returns>
-        public IEnumerable<SecurityEntity> GetEntities(int rootId, BreakOptions handleBreaks = BreakOptions.Default)
+        public IEnumerable<SecurityEntity> GetEntities(int entityId, BreakOptions handleBreaks = BreakOptions.Default)
         {
             SecurityEntity.EnterReadLock();
             try
             {
-                var root = SecurityEntity.GetEntitySafe(_context, rootId, false);
+                var root = SecurityEntity.GetEntitySafe(_context, entityId, false);
 
                 IEnumerable<SecurityEntity> collection;
                 switch (_axis)
@@ -114,16 +114,106 @@ namespace SenseNet.Security
         /// This operation is thread safe. The thread safety uses system resources, so to minimize these,
         /// it's strongly recommended processing as fast as possible.
         /// </summary>
-        /// <param name="rootId">The Id of the focused entity.</param>
+        /// <param name="entityId">The Id of the focused entity.</param>
         /// <param name="handleBreaks">Controls the permission inheritance handling.</param>
         /// <returns>The IEnumerable&lt;SecurityEntity&gt; to further filtering.</returns>
-        public IEnumerable<AceInfo> GetEntries(int rootId, BreakOptions handleBreaks = BreakOptions.Default)
+        public IEnumerable<AceInfo> GetEntries(int entityId, BreakOptions handleBreaks = BreakOptions.Default)
         {
-            return GetEntities(rootId, handleBreaks)
+            return GetEntities(entityId, handleBreaks)
                 .Where(e => e.Acl != null)
                 .SelectMany(e => e.Acl.Entries);
         }
 
+        /// <summary>
+        /// Returns permission changes in the predefined axis (All, ParentChain, Subtree) of the specified entity.
+        /// A permission is changed when the parent permission and local permission are not equal.
+        /// The collection can be prefiltered with a relatedIdentity parameter.
+        /// This operation is thread safe. The thread safety uses system resources, so to minimize these,
+        /// it's strongly recommended processing as fast as possible.
+        /// </summary>
+        /// <param name="entityId">The Id of the focused entity.</param>
+        /// <param name="relatedIdentities">Identity filter. Null or empty means inactive filter.</param>
+        /// <param name="handleBreaks">Controls the permission inheritance handling.</param>
+        /// <returns>The IEnumerable&lt;PermissionChange&gt; to further filtering.</returns>
+        public IEnumerable<PermissionChange> GetPermissionChanges(int entityId, IEnumerable<int> relatedIdentities,
+            BreakOptions handleBreaks = BreakOptions.Default)
+        {
+            var identities = relatedIdentities?.ToArray();
+            var isIdentityFilterActive = identities != null && identities.Length > 0;
+
+            foreach (var entity in GetEntities(entityId, handleBreaks))
+            {
+                if (entity.Acl == null)
+                    continue;
+
+                if (entity.IsInherited)
+                {
+                    foreach (var entry in entity.Acl.Entries)
+                    {
+                        // skip local only if this is not the root
+                        if (entity.Id != entityId || !entry.LocalOnly)
+                        {
+                            // filter by related identities
+                            if (!isIdentityFilterActive || identities.Contains(entry.IdentityId))
+                            {
+                                yield return new PermissionChange
+                                {
+                                    Entity = entity,
+                                    IdentityId = entry.IdentityId,
+                                    ChangedBits =
+                                        new PermissionBitMask {AllowBits = entry.AllowBits, DenyBits = entry.DenyBits}
+                                };
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    var effectiveEntries = _context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities);
+
+                    var localEntries = entity.Acl.Entries
+                        .Where(e => (entity.Id != entityId || !e.LocalOnly) &&
+                                    // ReSharper disable once AssignNullToNotNullAttribute
+                                    (!isIdentityFilterActive || identities.Contains(e.IdentityId)))
+                        .ToList();
+
+                    // Aggregate effective and local bits per identity
+                    foreach (var effectiveEntry in effectiveEntries)
+                    {
+                        var localEntry = localEntries.FirstOrDefault(e => e.IdentityId == effectiveEntry.IdentityId);
+                        var aggregatedBits = new PermissionBitMask
+                        {
+                            AllowBits = effectiveEntry.AllowBits,
+                            DenyBits = effectiveEntry.DenyBits
+                        };
+                        if (localEntry != null)
+                        {
+                            aggregatedBits.AllowBits |= localEntry.AllowBits;
+                            aggregatedBits.DenyBits |= localEntry.DenyBits;
+                            // Remove processed item from local entries.
+                            localEntries.Remove(localEntry);
+                        }
+
+                        yield return new PermissionChange
+                        {
+                            Entity = entity,
+                            IdentityId = effectiveEntry.IdentityId,
+                            ChangedBits = aggregatedBits
+                        };
+                    }
+                    // New local entries that are not exist in parent's effective ACEs
+                    foreach (var localEntry in localEntries)
+                    {
+                        yield return new PermissionChange
+                        {
+                            Entity = entity,
+                            IdentityId = localEntry.IdentityId,
+                            ChangedBits = new PermissionBitMask {AllowBits = localEntry.AllowBits, DenyBits = localEntry.DenyBits}
+                        };
+                    }
+                }
+            }
+        }
 
         private IEnumerable<SecurityEntity> GetEntitiesFromParentChain(SecurityEntity entity, BreakOptions handleBreaks)
         {
