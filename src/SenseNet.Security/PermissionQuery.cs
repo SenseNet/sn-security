@@ -61,10 +61,10 @@ namespace SenseNet.Security
 
                     // if breaked, adding existing parent-s effective identities because all identities are related.
                     if (!entity.IsInherited && entity.Parent != null)
-                        CollectIdentitiesFromAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id), level, identities);
+                        CollectIdentitiesFromAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, null, EntryType.Normal), level, identities);
 
                     // adding explicite identities
-                    CollectIdentitiesFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id), level, identities);
+                    CollectIdentitiesFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, null, EntryType.Normal), level, identities);
                 }
             }
             finally

@@ -104,7 +104,6 @@ namespace SenseNet.Security.Tests
             // ASSERT
             Assert.AreEqual(expected, GetSortedIdString(result.Select(e => e.Id)));
         }
-
         [TestMethod]
         public void Linq_Parent_Entities()
         {
@@ -117,7 +116,6 @@ namespace SenseNet.Security.Tests
             // ASSERT
             Assert.AreEqual(expected, GetIdString(result.Select(e => e.Id)));
         }
-
         [TestMethod]
         public void Linq_Subtree_Entities()
         {
@@ -495,6 +493,12 @@ namespace SenseNet.Security.Tests
                 .ClearPermission(Id("E4"), Id("U4"), false, PermissionType.Custom04)
                 .Apply();
 
+            ctx.CreateAclEditor(EntryType.Sharing)
+                .Allow(Id("E12"), Id("U8"), false, PermissionType.Open)
+                .Allow(Id("E41"), Id("U8"), false, PermissionType.Open)
+                .Allow(Id("E38"), Id("U8"), false, PermissionType.Open)
+                .Apply();
+
             const string expected1 = "101,107,201,202,205";
 
             var pqResult1 = ctx.GetRelatedIdentities(Id("E32"), PermissionLevel.Allowed);
@@ -537,16 +541,17 @@ namespace SenseNet.Security.Tests
             }
 
             return SecurityQuery.ParentChain(ctx).GetEntities(entityId, BreakOptions.StopAtParentBreak)
-                .Where(e => e.Acl != null)       // relevant entities
-                .SelectMany(e => e.Acl.Entries)  // join
-                .Where(e => !e.LocalOnly)        // local only entry is not affected on the parent chain
-                .Where(IsActive)                 // filter by level
+                .Where(e => e.Acl != null)                              // relevant entities
+                .SelectMany(e => e.Acl.Entries)                         // join
+                .Where(e => !e.LocalOnly &&                             // local only entry is not affected on the parent chain
+                             e.EntryType == EntryType.Normal &&         // only the normal entries are relevant
+                             IsActive(e))                               // filter by level
                 .Select(e => e.IdentityId)
-                .Distinct()
                 .Union(SecurityQuery.Subtree(ctx).GetEntities(entityId) // do not stop at breaks
-                    .Where(e => e.Acl != null)      // relevant entities
-                    .SelectMany(e => e.Acl.Entries) // join
-                    .Where(IsActive)                // filter by level
+                    .Where(e => e.Acl != null)                          // relevant entities
+                    .SelectMany(e => e.Acl.Entries)                     // join
+                    .Where(e => e.EntryType == EntryType.Normal &&      // only the normal entries are relevant
+                                IsActive(e))                            // filter by level
                     .Select(e => e.IdentityId))
                 .Distinct();
         }
