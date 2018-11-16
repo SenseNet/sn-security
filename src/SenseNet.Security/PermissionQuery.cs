@@ -116,10 +116,10 @@ namespace SenseNet.Security
                     // if breaked, adding existing parent-s effective identities because all identities are related.
                     var localBits = new PermissionBitMask();
                     if (!entity.IsInherited && entity.Parent != null)
-                        CollectPermissionsFromLocalAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities), localBits);
+                        CollectPermissionsFromLocalAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities, EntryType.Normal), localBits);
 
                     // adding explicite identities
-                    CollectPermissionsFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities), level, counters, localBits);
+                    CollectPermissionsFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), level, counters, localBits);
                 }
 
                 var result = new Dictionary<PermissionTypeBase, int>();
