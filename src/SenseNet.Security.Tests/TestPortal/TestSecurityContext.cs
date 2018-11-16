@@ -167,9 +167,9 @@ namespace SenseNet.Security.Tests.TestPortal
         {
             return base.GetAllowedUsers(entityId, permissions);
         }
-        public new IEnumerable<int> GetParentGroups(int entityId, bool directOnly)
+        public new IEnumerable<int> GetParentGroups(int identityId, bool directOnly)
         {
-            return base.GetParentGroups(entityId, directOnly);
+            return base.GetParentGroups(identityId, directOnly);
         }
 
         /*********************** Membership API (low level only) **********************/
