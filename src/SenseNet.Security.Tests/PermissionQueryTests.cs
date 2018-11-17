@@ -1,18 +1,18 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+// ReSharper disable JoinDeclarationAndInitializer
+// ReSharper disable UnusedMethodReturnValue.Local
 
 namespace SenseNet.Security.Tests
 {
     [TestClass]
     public class PermissionQueryTests
     {
+        // ReSharper disable once InconsistentNaming
         private Context __context;
-        private Context CurrentContext { get { return __context; } }
+        private Context CurrentContext => __context;
 
         public TestContext TestContext { get; set; }
 
@@ -35,16 +35,16 @@ namespace SenseNet.Security.Tests
         public void PermissionQuery_GetRelatedIdentities()
         {
             var result = CurrentContext.Security.GetRelatedIdentities(Id("E3"), PermissionLevel.AllowedOrDenied);
-            var actual = String.Join(", ", result.OrderBy(x => x));
-            Assert.AreEqual(String.Format("{0}, {1}, {2}, {3}, {4}", Id("G1"), Id("G2"), Id("U1"), Id("U2"), Id("U3")), actual);
+            var actual = string.Join(", ", result.OrderBy(x => x));
+            Assert.AreEqual($"{Id("G1")}, {Id("G2")}, {Id("U1")}, {Id("U2")}, {Id("U3")}", actual);
 
             result = CurrentContext.Security.GetRelatedIdentities(Id("E4"), PermissionLevel.AllowedOrDenied);
-            actual = String.Join(", ", result.OrderBy(x => x));
-            Assert.AreEqual(String.Format("{0}, {1}, {2}, {3}", Id("G1"), Id("G2"), Id("U1"), Id("U3")), actual);
+            actual = string.Join(", ", result.OrderBy(x => x));
+            Assert.AreEqual($"{Id("G1")}, {Id("G2")}, {Id("U1")}, {Id("U3")}", actual);
 
             result = CurrentContext.Security.GetRelatedIdentities(Id("E22"), PermissionLevel.AllowedOrDenied);
-            actual = String.Join(", ", result.OrderBy(x => x));
-            Assert.AreEqual(String.Format("{0}, {1}, {2}, {3}", Id("G1"), Id("U1"), Id("U2"), Id("U3")), actual);
+            actual = string.Join(", ", result.OrderBy(x => x));
+            Assert.AreEqual($"{Id("G1")}, {Id("U1")}, {Id("U2")}, {Id("U3")}", actual);
         }
 
         [TestMethod]
@@ -52,28 +52,28 @@ namespace SenseNet.Security.Tests
         {
             var perms = new[] { PermissionType.Custom01 };
             var result = CurrentContext.Security.GetRelatedEntities(Id("E3"), PermissionLevel.AllowedOrDenied, true, Id("U1"), perms);
-            var actual = String.Join(", ", result.OrderBy(x => x));
-            Assert.AreEqual(String.Format("{0}, {1}", Id("E22"), Id("E28")), actual);
+            var actual = string.Join(", ", result.OrderBy(x => x));
+            Assert.AreEqual($"{Id("E22")}, {Id("E28")}", actual);
 
             perms = new[] { PermissionType.Custom02 };
             result = CurrentContext.Security.GetRelatedEntities(Id("E3"), PermissionLevel.AllowedOrDenied, true, Id("U1"), perms);
-            actual = String.Join(", ", result.OrderBy(x => x));
+            actual = string.Join(", ", result.OrderBy(x => x));
             Assert.AreEqual(Id("E15").ToString(), actual);
 
             perms = new[] { PermissionType.Custom03 };
             result = CurrentContext.Security.GetRelatedEntities(Id("E3"), PermissionLevel.AllowedOrDenied, true, Id("U1"), perms);
-            actual = String.Join(", ", result.OrderBy(x => x));
-            Assert.AreEqual(String.Format("{0}, {1}", Id("E12"), Id("E20")), actual);
+            actual = string.Join(", ", result.OrderBy(x => x));
+            Assert.AreEqual($"{Id("E12")}, {Id("E20")}", actual);
 
             perms = new[] { PermissionType.Custom01, PermissionType.Custom02, PermissionType.Custom03 };
             result = CurrentContext.Security.GetRelatedEntities(Id("E3"), PermissionLevel.AllowedOrDenied, true, Id("U1"), perms);
-            actual = String.Join(", ", result.OrderBy(x => x));
-            Assert.AreEqual(String.Format("{0}, {1}, {2}, {3}, {4}", Id("E12"), Id("E15"), Id("E20"), Id("E22"), Id("E28")), actual);
+            actual = string.Join(", ", result.OrderBy(x => x));
+            Assert.AreEqual($"{Id("E12")}, {Id("E15")}, {Id("E20")}, {Id("E22")}, {Id("E28")}", actual);
 
             perms = new[] { PermissionType.Custom01, PermissionType.Custom02, PermissionType.Custom03 };
             result = CurrentContext.Security.GetRelatedEntities(Id("E3"), PermissionLevel.AllowedOrDenied, true, Id("U3"), perms);
-            actual = String.Join(", ", result.OrderBy(x => x));
-            Assert.AreEqual(String.Format("{0}, {1}, {2}", Id("E4"), Id("E5"), Id("E22")), actual);
+            actual = string.Join(", ", result.OrderBy(x => x));
+            Assert.AreEqual($"{Id("E4")}, {Id("E5")}, {Id("E22")}", actual);
         }
 
         [TestMethod]
@@ -81,8 +81,8 @@ namespace SenseNet.Security.Tests
         {
             var perms = new[] { PermissionType.Custom01 };
             var result = CurrentContext.Security.GetRelatedEntities(Id("E3"), PermissionLevel.Allowed, true, Id("U3"), perms);
-            var actual = String.Join(", ", result.OrderBy(x => x));
-            Assert.AreEqual(String.Format("{0}, {1}", Id("E5"), Id("E22")), actual);
+            var actual = string.Join(", ", result.OrderBy(x => x));
+            Assert.AreEqual($"{Id("E5")}, {Id("E22")}", actual);
         }
 
         [TestMethod]
@@ -90,7 +90,7 @@ namespace SenseNet.Security.Tests
         {
             var perms = new[] { PermissionType.Custom01 };
             var result = CurrentContext.Security.GetRelatedEntities(Id("E3"), PermissionLevel.Denied, true, Id("U3"), perms);
-            var actual = String.Join(", ", result.OrderBy(x => x));
+            var actual = string.Join(", ", result.OrderBy(x => x));
             Assert.AreEqual(Id("E4").ToString(), actual);
         }
 
@@ -99,12 +99,12 @@ namespace SenseNet.Security.Tests
         {
             var perms = new[] { PermissionType.Custom01 };
             var result = CurrentContext.Security.GetRelatedEntities(Id("E33"), PermissionLevel.AllowedOrDenied, true, Id("U1"), perms);
-            var actual = String.Join(", ", result.OrderBy(x => x));
-            Assert.AreEqual(String.Format("{0}, {1}, {2}, {3}", Id("E34"), Id("E35"), Id("E36"), Id("E37")), actual);
+            var actual = string.Join(", ", result.OrderBy(x => x));
+            Assert.AreEqual($"{Id("E34")}, {Id("E35")}, {Id("E36")}, {Id("E37")}", actual);
 
             result = CurrentContext.Security.GetRelatedEntities(Id("E33"), PermissionLevel.AllowedOrDenied, true, Id("U2"), perms);
-            actual = String.Join(", ", result.OrderBy(x => x));
-            Assert.AreEqual(String.Format("{0}, {1}", Id("E34"), Id("E35")), actual);
+            actual = string.Join(", ", result.OrderBy(x => x));
+            Assert.AreEqual($"{Id("E34")}, {Id("E35")}", actual);
         }
         
         [TestMethod]
@@ -116,33 +116,33 @@ namespace SenseNet.Security.Tests
             var permissionTypes = new[] { PermissionType.Custom01, PermissionType.Custom02, PermissionType.Custom03 };
 
             result = CurrentContext.Security.GetRelatedEntitiesOneLevel(Id("E2"), PermissionLevel.AllowedOrDenied, Id("G1"), permissionTypes);
-            actual = String.Join(", ", result.OrderBy(x => x));
+            actual = string.Join(", ", result.OrderBy(x => x));
             Assert.AreEqual(Id("E3").ToString(), actual);
 
             result = CurrentContext.Security.GetRelatedEntitiesOneLevel(Id("E3"), PermissionLevel.AllowedOrDenied, Id("G2"), permissionTypes);
-            actual = String.Join(", ", result.OrderBy(x => x));
+            actual = string.Join(", ", result.OrderBy(x => x));
             Assert.AreEqual(Id("E15").ToString(), actual);
 
             result = CurrentContext.Security.GetRelatedEntitiesOneLevel(Id("E4"), PermissionLevel.AllowedOrDenied, Id("G2"), permissionTypes);
-            actual = String.Join(", ", result.OrderBy(x => x)); 
-            Assert.AreEqual(String.Format("{0}, {1}", Id("E5"), Id("E11")), actual);
+            actual = string.Join(", ", result.OrderBy(x => x)); 
+            Assert.AreEqual($"{Id("E5")}, {Id("E11")}", actual);
 
             result = CurrentContext.Security.GetRelatedEntitiesOneLevel(Id("E3"), PermissionLevel.Denied, Id("U3"), permissionTypes);
-            actual = String.Join(", ", result.OrderBy(x => x)); 
+            actual = string.Join(", ", result.OrderBy(x => x)); 
             Assert.AreEqual(Id("E4").ToString(), actual);
 
             result = CurrentContext.Security.GetRelatedEntitiesOneLevel(Id("E3"), PermissionLevel.Denied, Id("G1"), permissionTypes);
-            actual = String.Join(", ", result.OrderBy(x => x)); 
+            actual = string.Join(", ", result.OrderBy(x => x)); 
             Assert.AreEqual("", actual);
 
             result = CurrentContext.Security.GetRelatedEntitiesOneLevel(Id("E33"), PermissionLevel.Allowed, Id("U2"), permissionTypes);
-            actual = String.Join(", ", result.OrderBy(x => x)); 
-            Assert.AreEqual(String.Format("{0}, {1}", Id("E34"), Id("E35")), actual);
+            actual = string.Join(", ", result.OrderBy(x => x)); 
+            Assert.AreEqual($"{Id("E34")}, {Id("E35")}", actual);
         }
 
         //---------------------------------------------------------------
 
-        private Dictionary<string, PermissionType> _permissions = new Dictionary<string, PermissionType>
+        private readonly Dictionary<string, PermissionType> _permissions = new Dictionary<string, PermissionType>
         {
             {"P1", PermissionType.Custom01},
             {"P2", PermissionType.Custom02},
@@ -209,7 +209,7 @@ namespace SenseNet.Security.Tests
             var entityId = Id(entityName);
             var permTypes = permissions.Select(p => _permissions[p]).ToArray();
             var result = CurrentContext.Security.GetAllowedUsers(entityId, permTypes);
-            return String.Join(", ", result.Select(i => Tools.IdToName(i)).OrderBy(s => s));
+            return string.Join(", ", result.Select(Tools.IdToName).OrderBy(s => s));
         }
 
         [TestMethod]
@@ -242,94 +242,93 @@ namespace SenseNet.Security.Tests
         {
             var identityId = Id(identityName);
             var result = CurrentContext.Security.GetParentGroups(identityId, directOnly);
-            return String.Join(", ", result.Select(i => Tools.IdToName(i)).OrderBy(s => s));
+            return string.Join(", ", result.Select(Tools.IdToName).OrderBy(s => s));
         }
 
         #region Helper methods
-        private Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
+        private readonly Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
 
         private void CreatePlayground()
         {
-            TestEntity e;
             var u1 = TestUser.User1;
 
-            e = CreateEntity("E1", null, u1);
+            CreateEntity("E1", null, u1);
             {
-                e = CreateEntity("E2", "E1", u1);
+                CreateEntity("E2", "E1", u1);
                 {
-                    e = CreateEntity("E3", "E2", u1);
+                    CreateEntity("E3", "E2", u1);
                     {
-                        e = CreateEntity("E4", "E3", u1);
+                        CreateEntity("E4", "E3", u1);
                         {
-                            e = CreateEntity("E5", "E4", u1);
+                            CreateEntity("E5", "E4", u1);
                             {
-                                e = CreateEntity("E6", "E5", u1);
-                                e = CreateEntity("E7", "E5", u1);
-                                e = CreateEntity("E8", "E5", u1);
+                                CreateEntity("E6", "E5", u1);
+                                CreateEntity("E7", "E5", u1);
+                                CreateEntity("E8", "E5", u1);
                             }
-                            e = CreateEntity("E9", "E4", u1);
+                            CreateEntity("E9", "E4", u1);
                             {
-                                e = CreateEntity("E10", "E9", u1);
+                                CreateEntity("E10", "E9", u1);
                             }
-                            e = CreateEntity("E11", "E4", u1);
+                            CreateEntity("E11", "E4", u1);
                             {
-                                e = CreateEntity("E12", "E11", u1);
-                                e = CreateEntity("E13", "E11", u1);
-                                e = CreateEntity("E14", "E11", u1);
+                                CreateEntity("E12", "E11", u1);
+                                CreateEntity("E13", "E11", u1);
+                                CreateEntity("E14", "E11", u1);
                             }
                         }
-                        e = CreateEntity("E15", "E3", u1);
+                        CreateEntity("E15", "E3", u1);
                         {
-                            e = CreateEntity("E16", "E15", u1);
-                            e = CreateEntity("E17", "E15", u1);
+                            CreateEntity("E16", "E15", u1);
+                            CreateEntity("E17", "E15", u1);
                             {
-                                e = CreateEntity("E18", "E17", u1);
-                                e = CreateEntity("E19", "E17", u1);
-                                e = CreateEntity("E20", "E17", u1);
+                                CreateEntity("E18", "E17", u1);
+                                CreateEntity("E19", "E17", u1);
+                                CreateEntity("E20", "E17", u1);
                             }
-                            e = CreateEntity("E21", "E15", u1);
+                            CreateEntity("E21", "E15", u1);
                         }
-                        e = CreateEntity("E22", "E3", u1);
+                        CreateEntity("E22", "E3", u1);
                         {
-                            e = CreateEntity("E23", "E22", u1);
+                            CreateEntity("E23", "E22", u1);
                             {
-                                e = CreateEntity("E24", "E23", u1);
-                                e = CreateEntity("E25", "E23", u1);
-                                e = CreateEntity("E26", "E23", u1);
+                                CreateEntity("E24", "E23", u1);
+                                CreateEntity("E25", "E23", u1);
+                                CreateEntity("E26", "E23", u1);
                             }
-                            e = CreateEntity("E27", "E22", u1);
-                            e = CreateEntity("E28", "E22", u1);
+                            CreateEntity("E27", "E22", u1);
+                            CreateEntity("E28", "E22", u1);
                             {
-                                e = CreateEntity("E29", "E28", u1);
-                                e = CreateEntity("E30", "E28", u1);
-                                e = CreateEntity("E31", "E28", u1);
+                                CreateEntity("E29", "E28", u1);
+                                CreateEntity("E30", "E28", u1);
+                                CreateEntity("E31", "E28", u1);
                             }
                         }
                     }
                 }
-                e = CreateEntity("E32", "E1", u1);
+                CreateEntity("E32", "E1", u1);
                 {
-                    e = CreateEntity("E33", "E32", u1);
+                    CreateEntity("E33", "E32", u1);
                     {
-                        e = CreateEntity("E34", "E33", u1);
-                        e = CreateEntity("E35", "E33", u1);
-                        e = CreateEntity("E36", "E33", u1);
-                        e = CreateEntity("E37", "E33", u1);
+                        CreateEntity("E34", "E33", u1);
+                        CreateEntity("E35", "E33", u1);
+                        CreateEntity("E36", "E33", u1);
+                        CreateEntity("E37", "E33", u1);
                     }
                 }
-                e = CreateEntity("E60", "E1", u1);
+                CreateEntity("E60", "E1", u1);
                 {
-                    e = CreateEntity("E61", "E60", u1);
+                    CreateEntity("E61", "E60", u1);
                     {
-                        e = CreateEntity("E62", "E61", u1);
+                        CreateEntity("E62", "E61", u1);
                         {
-                            e = CreateEntity("E63", "E62", u1);
+                            CreateEntity("E63", "E62", u1);
                             {
-                                e = CreateEntity("E64", "E63", u1);
+                                CreateEntity("E64", "E63", u1);
                                 {
-                                    e = CreateEntity("E65", "E64", u1);
+                                    CreateEntity("E65", "E64", u1);
                                     {
-                                        e = CreateEntity("E66", "E65", u1);
+                                        CreateEntity("E66", "E65", u1);
                                     }
                                 }
                             }
@@ -339,13 +338,13 @@ namespace SenseNet.Security.Tests
             }
             var ctx = CurrentContext.Security;
 
-            ctx.AddUsersToSecurityGroup(Id("G13"), new[] { Id("U13") });
-            ctx.AddUsersToSecurityGroup(Id("G12"), new[] { Id("U12") });
-            ctx.AddUsersToSecurityGroup(Id("G11"), new[] { Id("U11") });
-            ctx.AddUsersToSecurityGroup(Id("G10"), new[] { Id("U10") });
-            ctx.AddGroupToSecurityGroups(Id("G11"), new[] { Id("G10") });
-            ctx.AddGroupToSecurityGroups(Id("G13"), new[] { Id("G11") });
-            ctx.AddGroupToSecurityGroups(Id("G13"), new[] { Id("G12") });
+            ctx.AddUsersToSecurityGroup(Id("G13"), new[] {Id("U13")});
+            ctx.AddUsersToSecurityGroup(Id("G12"), new[] {Id("U12")});
+            ctx.AddUsersToSecurityGroup(Id("G11"), new[] {Id("U11")});
+            ctx.AddUsersToSecurityGroup(Id("G10"), new[] {Id("U10")});
+            ctx.AddGroupToSecurityGroups(Id("G11"), new[] {Id("G10")});
+            ctx.AddGroupToSecurityGroups(Id("G13"), new[] {Id("G11")});
+            ctx.AddGroupToSecurityGroups(Id("G13"), new[] {Id("G12")});
 
             ctx.CreateAclEditor()
                 .Allow(Id("E2"), Id("U1"), false, PermissionType.Custom01)
@@ -368,21 +367,21 @@ namespace SenseNet.Security.Tests
                 .Allow(Id("E16"), Id("U2"), false, PermissionType.Custom02)
                 .Allow(Id("E20"), Id("U1"), false, PermissionType.Custom03)
 
-                .BreakInheritance(Id("E22"))
+                .BreakInheritance(Id("E22"), new[] {EntryType.Normal})
                 .Allow(Id("E25"), Id("U2"), false, PermissionType.Custom01)
                 .Allow(Id("E28"), Id("U1"), false, PermissionType.Custom01)
                 .Allow(Id("E28"), Id("G1"), false, PermissionType.Custom02)
 
                 .Allow(Id("E32"), Id("U1"), false, PermissionType.Custom01)
-                .BreakInheritance(Id("E34"))
+                .BreakInheritance(Id("E34"), new[] {EntryType.Normal})
                 .Allow(Id("E34"), Id("U2"), false, PermissionType.Custom01)
-                .BreakInheritance(Id("E35"))
+                .BreakInheritance(Id("E35"), new[] {EntryType.Normal})
                 .Allow(Id("E35"), Id("U2"), false, PermissionType.Custom01)
                 .ClearPermission(Id("E35"), Id("U1"), false, PermissionType.Custom01)
 
-                .BreakInheritance(Id("E36"))
+                .BreakInheritance(Id("E36"), new[] {EntryType.Normal})
                 .ClearPermission(Id("E36"), Id("U1"), false, PermissionType.Custom01)
-                .BreakInheritance(Id("E37"))
+                .BreakInheritance(Id("E37"), new[] {EntryType.Normal})
 
                 //---------------------------------------
                 .Allow(Id("E61"), Id("G13"), false, PermissionType.Custom01)
@@ -402,7 +401,7 @@ namespace SenseNet.Security.Tests
             {
                 Id = Id(name),
                 Name = name,
-                OwnerId = owner == null ? default(int) : owner.Id,
+                OwnerId = owner?.Id ?? default(int),
                 Parent = parentName == null ? null : _repository[Id(parentName)],
             };
             _repository.Add(entity.Id, entity);
