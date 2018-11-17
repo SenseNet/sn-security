@@ -208,7 +208,7 @@ namespace SenseNet.Security
                     var added = false;
                     if (!entity.IsInherited && entity.Parent != null)
                     {
-                        if (HasBitsByEffectiveAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities), level, mask))
+                        if (HasBitsByEffectiveAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities, EntryType.Normal), level, mask))
                         {
                             entityIds.Add(entity.Id);
                             added = true;
@@ -217,7 +217,7 @@ namespace SenseNet.Security
 
                     // adding explicite identities
                     if (!added)
-                        if (HasBitsByExpliciteAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities), level, mask))
+                        if (HasBitsByExpliciteAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), level, mask))
                             entityIds.Add(entity.Id);
                 }
 
@@ -333,7 +333,7 @@ namespace SenseNet.Security
                 var root = SecurityEntity.GetEntitySafe(context, entityId, true);
                 foreach (var childEntity in root.Children)
                 {
-                    var aces = context.Evaluator.GetEffectiveEntriesSafe(childEntity.Id, identities);
+                    var aces = context.Evaluator.GetEffectiveEntriesSafe(childEntity.Id, identities, EntryType.Normal);
                     if (aces.Any(a => HasBits(a.AllowBits, a.DenyBits, level, mask)))
                         result.Add(childEntity.Id);
                 }
