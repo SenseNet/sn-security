@@ -393,6 +393,42 @@ namespace SenseNet.Security.Tests
 
                 .Apply();
 
+            var users = new[] { "U1", "U2", "U3", "U4", "U10", "U12" };
+            var sharingPerms = PermissionTypeBase.GetPermissionTypes();
+            var aclEd = ctx.CreateAclEditor(EntryType.Sharing);
+            foreach (var user in users)
+            {
+                var userId = Id(user);
+                aclEd
+                    .Allow(Id("E2"), userId, false, sharingPerms)
+                    .Allow(Id("E3"), userId, false, sharingPerms)
+                    .Allow(Id("E4"), userId, false, sharingPerms)
+                    .Allow(Id("E5"), userId, false, sharingPerms)
+                    .Allow(Id("E6"), userId, false, sharingPerms)
+                    .Allow(Id("E7"), userId, false, sharingPerms)
+                    .Allow(Id("E8"), userId, false, sharingPerms)
+                    .Allow(Id("E9"), userId, false, sharingPerms)
+                    .Allow(Id("E10"), userId, false, sharingPerms)
+                    .Allow(Id("E11"), userId, false, sharingPerms)
+                    .Allow(Id("E12"), userId, false, sharingPerms)
+                    .Allow(Id("E15"), userId, false, sharingPerms)
+                    .Allow(Id("E16"), userId, false, sharingPerms)
+                    .Allow(Id("E20"), userId, false, sharingPerms)
+                    .Allow(Id("E22"), userId, false, sharingPerms)
+                    .Allow(Id("E25"), userId, false, sharingPerms)
+                    .Allow(Id("E28"), userId, false, sharingPerms)
+                    .Allow(Id("E32"), userId, false, sharingPerms)
+                    .Allow(Id("E34"), userId, false, sharingPerms)
+                    .Allow(Id("E35"), userId, false, sharingPerms)
+                    .Allow(Id("E36"), userId, false, sharingPerms)
+                    .Allow(Id("E61"), userId, false, sharingPerms)
+                    .Allow(Id("E62"), userId, false, sharingPerms)
+                    .Allow(Id("E63"), userId, false, sharingPerms)
+                    .Allow(Id("E64"), userId, false, sharingPerms)
+                    .Allow(Id("E65"), userId, false, sharingPerms)
+                    .Allow(Id("E66"), userId, false, sharingPerms);
+            }
+            aclEd.Apply();
         }
 
         private TestEntity CreateEntity(string name, string parentName, TestUser owner)
