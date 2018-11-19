@@ -48,13 +48,17 @@ namespace SenseNet.Security
         }
         internal PermissionValue GetPermission(int userId, int entityId, int ownerId, params PermissionTypeBase[] permissions)
         {
+            return GetPermission(userId, entityId, ownerId, null, permissions);
+        }
+        internal PermissionValue GetPermission(int userId, int entityId, int ownerId, EntryType? entryType, params PermissionTypeBase[] permissions)
+        {
             if (userId == Configuration.Identities.SystemUserId)
                 return PermissionValue.Allowed;
 
             SecurityEntity.EnterReadLock();
             try
             {
-                return GetPermissionSafe(userId, entityId, ownerId, permissions);
+                return GetPermissionSafe(userId, entityId, ownerId, entryType, permissions);
             }
             finally
             {
@@ -62,6 +66,10 @@ namespace SenseNet.Security
             }
         }
         internal PermissionValue GetPermissionSafe(int userId, int entityId, int ownerId, params PermissionTypeBase[] permissions)
+        {
+            return GetPermissionSafe(userId, entityId, ownerId, null, permissions);
+        }
+        internal PermissionValue GetPermissionSafe(int userId, int entityId, int ownerId, EntryType? entryType, params PermissionTypeBase[] permissions)
         {
             if (userId == Configuration.Identities.SystemUserId)
                 return PermissionValue.Allowed;
@@ -75,10 +83,21 @@ namespace SenseNet.Security
 
             if (firstAcl == null)
                 return PermissionValue.Undefined;
-            if (entityId == firstAcl.EntityId)
-                firstAcl.AggregateLocalOnlyValues(identities, ref allow, ref deny);
-            for (var aclInfo = firstAcl; aclInfo != null; aclInfo = aclInfo.Inherits ? aclInfo.Parent : null)
-                aclInfo.AggregateEffectiveValues(identities, ref allow, ref deny);
+
+            if (entryType == null)
+            {
+                if (entityId == firstAcl.EntityId)
+                    firstAcl.AggregateLocalOnlyValues(identities, ref allow, ref deny);
+                for (var aclInfo = firstAcl; aclInfo != null; aclInfo = aclInfo.Inherits ? aclInfo.Parent : null)
+                    aclInfo.AggregateEffectiveValues(identities, ref allow, ref deny);
+            }
+            else
+            {
+                if (entityId == firstAcl.EntityId)
+                    firstAcl.AggregateLocalOnlyValues(identities, entryType.Value, ref allow, ref deny);
+                for (var aclInfo = firstAcl; aclInfo != null; aclInfo = aclInfo.Inherits ? aclInfo.Parent : null)
+                    aclInfo.AggregateEffectiveValues(identities, entryType.Value, ref allow, ref deny);
+            }
             //==<
 
             var mask = PermissionTypeBase.GetPermissionMask(permissions);

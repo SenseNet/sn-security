@@ -191,6 +191,32 @@ namespace SenseNet.Security
                 deny |= permSet.DenyBits;
             }
         }
+        /// <summary> Used for getting permission in a permission query. </summary>
+        internal void AggregateLocalOnlyValues(List<int> identities, EntryType entryType, ref ulong allow, ref ulong deny)
+        {
+            foreach (var permSet in this.Entries.Where(e => e.EntryType == entryType))
+            {
+                if (!permSet.LocalOnly)
+                    continue;
+                if (!identities.Contains(permSet.IdentityId))
+                    continue;
+                allow |= permSet.AllowBits;
+                deny |= permSet.DenyBits;
+            }
+        }
+        /// <summary> Used for getting permission in a permission query. </summary>
+        internal void AggregateEffectiveValues(List<int> identities, EntryType entryType, ref ulong allow, ref ulong deny)
+        {
+            foreach (var permSet in this.Entries.Where(e => e.EntryType == entryType))
+            {
+                if (permSet.LocalOnly)
+                    continue;
+                if (!identities.Contains(permSet.IdentityId))
+                    continue;
+                allow |= permSet.AllowBits;
+                deny |= permSet.DenyBits;
+            }
+        }
 
         /// <summary> Used for getting effective entries. </summary>
         internal void AggregateLevelOnlyValues(List<AceInfo> aces, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
