@@ -43,7 +43,11 @@ namespace SenseNet.Security
 
         internal bool HasPermission(int userId, int entityId, int ownerId, params PermissionTypeBase[] permissions)
         {
-            var value = GetPermission(userId, entityId, ownerId, permissions);
+            return HasPermission(userId, entityId, ownerId, null, permissions);
+        }
+        internal bool HasPermission(int userId, int entityId, int ownerId, EntryType? entryType, params PermissionTypeBase[] permissions)
+        {
+            var value = GetPermission(userId, entityId, ownerId, entryType, permissions);
             return value == PermissionValue.Allowed;
         }
         internal PermissionValue GetPermission(int userId, int entityId, int ownerId, params PermissionTypeBase[] permissions)
