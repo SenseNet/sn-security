@@ -159,37 +159,47 @@ namespace SenseNet.Security.Tests
             var u11 = new TestUser() { Id = Id("U11"), Name = "U11" };
             var u12 = new TestUser() { Id = Id("U12"), Name = "U12" };
             var u13 = new TestUser() { Id = Id("U13"), Name = "U13" };
+            var id10 = u10.Id;
+            var id11 = u11.Id;
+            var id12 = u12.Id;
+            var id13 = u13.Id;
 
-            Assert.IsFalse(new TestSecurityContext(u10).HasPermission(Id("E66"), _permissions["P1"]));
-            Assert.IsFalse(new TestSecurityContext(u11).HasPermission(Id("E66"), _permissions["P1"]));
-            Assert.IsFalse(new TestSecurityContext(u12).HasPermission(Id("E66"), _permissions["P1"]));
-            Assert.IsTrue(new TestSecurityContext(u13).HasPermission(Id("E66"), _permissions["P1"]));
+            Assert.IsFalse(HasNormalPermission(id10, Id("E66"), _permissions["P1"]));
+            Assert.IsFalse(HasNormalPermission(id11, Id("E66"), _permissions["P1"]));
+            Assert.IsFalse(HasNormalPermission(id12, Id("E66"), _permissions["P1"]));
+            Assert.IsTrue(HasNormalPermission(id13, Id("E66"), _permissions["P1"]));
 
-            Assert.IsTrue(new TestSecurityContext(u10).HasPermission(Id("E66"), _permissions["P2"]));
-            Assert.IsTrue(new TestSecurityContext(u11).HasPermission(Id("E66"), _permissions["P2"]));
-            Assert.IsFalse(new TestSecurityContext(u12).HasPermission(Id("E66"), _permissions["P2"]));
-            Assert.IsTrue(new TestSecurityContext(u13).HasPermission(Id("E66"), _permissions["P2"]));
+            Assert.IsTrue(HasNormalPermission(id10, Id("E66"), _permissions["P2"]));
+            Assert.IsTrue(HasNormalPermission(id11, Id("E66"), _permissions["P2"]));
+            Assert.IsFalse(HasNormalPermission(id12, Id("E66"), _permissions["P2"]));
+            Assert.IsTrue(HasNormalPermission(id13, Id("E66"), _permissions["P2"]));
 
-            Assert.IsFalse(new TestSecurityContext(u10).HasPermission(Id("E66"), _permissions["P3"]));
-            Assert.IsFalse(new TestSecurityContext(u11).HasPermission(Id("E66"), _permissions["P3"]));
-            Assert.IsTrue(new TestSecurityContext(u12).HasPermission(Id("E66"), _permissions["P3"]));
-            Assert.IsTrue(new TestSecurityContext(u13).HasPermission(Id("E66"), _permissions["P3"]));
+            Assert.IsFalse(HasNormalPermission(id10, Id("E66"), _permissions["P3"]));
+            Assert.IsFalse(HasNormalPermission(id11, Id("E66"), _permissions["P3"]));
+            Assert.IsTrue(HasNormalPermission(id12, Id("E66"), _permissions["P3"]));
+            Assert.IsTrue(HasNormalPermission(id13, Id("E66"), _permissions["P3"]));
 
-            Assert.IsFalse(new TestSecurityContext(u10).HasPermission(Id("E66"), _permissions["P4"]));
-            Assert.IsFalse(new TestSecurityContext(u11).HasPermission(Id("E66"), _permissions["P4"]));
-            Assert.IsFalse(new TestSecurityContext(u12).HasPermission(Id("E66"), _permissions["P4"]));
-            Assert.IsTrue(new TestSecurityContext(u13).HasPermission(Id("E66"), _permissions["P4"]));
+            Assert.IsFalse(HasNormalPermission(id10, Id("E66"), _permissions["P4"]));
+            Assert.IsFalse(HasNormalPermission(id11, Id("E66"), _permissions["P4"]));
+            Assert.IsFalse(HasNormalPermission(id12, Id("E66"), _permissions["P4"]));
+            Assert.IsTrue(HasNormalPermission(id13, Id("E66"), _permissions["P4"]));
 
-            Assert.IsTrue(new TestSecurityContext(u10).HasPermission(Id("E66"), _permissions["P5"]));
-            Assert.IsFalse(new TestSecurityContext(u11).HasPermission(Id("E66"), _permissions["P5"]));
-            Assert.IsFalse(new TestSecurityContext(u12).HasPermission(Id("E66"), _permissions["P5"]));
-            Assert.IsFalse(new TestSecurityContext(u13).HasPermission(Id("E66"), _permissions["P5"]));
+            Assert.IsTrue(HasNormalPermission(id10, Id("E66"), _permissions["P5"]));
+            Assert.IsFalse(HasNormalPermission(id11, Id("E66"), _permissions["P5"]));
+            Assert.IsFalse(HasNormalPermission(id12, Id("E66"), _permissions["P5"]));
+            Assert.IsFalse(HasNormalPermission(id13, Id("E66"), _permissions["P5"]));
 
-            Assert.IsFalse(new TestSecurityContext(u10).HasPermission(Id("E66"), _permissions["P6"]));
-            Assert.IsFalse(new TestSecurityContext(u11).HasPermission(Id("E66"), _permissions["P6"]));
-            Assert.IsTrue(new TestSecurityContext(u12).HasPermission(Id("E66"), _permissions["P6"]));
-            Assert.IsFalse(new TestSecurityContext(u13).HasPermission(Id("E66"), _permissions["P6"]));
+            Assert.IsFalse(HasNormalPermission(id10, Id("E66"), _permissions["P6"]));
+            Assert.IsFalse(HasNormalPermission(id11, Id("E66"), _permissions["P6"]));
+            Assert.IsTrue(HasNormalPermission(id12, Id("E66"), _permissions["P6"]));
+            Assert.IsFalse(HasNormalPermission(id13, Id("E66"), _permissions["P6"]));
         }
+        private bool HasNormalPermission(int userId, int entityId, PermissionType permission)
+        {
+            return new TestSecurityContext(TestUser.User1).Evaluator.GetPermission(userId, entityId, 0, EntryType.Normal,
+                permission) == PermissionValue.Allowed;
+        }
+
         [TestMethod]
         public void PermissionQuery_GetAllowedUsers()
         {
