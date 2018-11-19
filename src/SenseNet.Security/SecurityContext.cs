@@ -281,7 +281,7 @@ namespace SenseNet.Security
         /// an <see cref="AccessDeniedException"/> will be thrown.
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
-        /// <param name="entryType">Permission entry filter. Only these entries are participated in the evaluation.</param>
+        /// <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null.
         /// Empty set means "allowed nothing" so SenseNetSecurityException will be thrown.</param>
         protected void AssertPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
@@ -315,7 +315,7 @@ namespace SenseNet.Security
         /// Returns true if all passed permissions are allowed on the passed entity for the current user.
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
-        /// <param name="entryType">Permission entry filter. Only these entries are participated in the evaluation.</param>
+        /// <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
         protected bool HasPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
         {
@@ -349,7 +349,7 @@ namespace SenseNet.Security
         ///   Allowed if every passed permission is allowed.
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
-        /// <param name="entryType">Permission entry filter. Only these entries are participated in the evaluation.</param>
+        /// <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
         protected PermissionValue GetPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
         {

@@ -355,7 +355,7 @@ namespace SenseNet.Security
             var identities = entries.Select(e => e.IdentityId).ToArray();
             var users = GetFlattenedUsers(context, identities);
             var allowedIdentities = users
-                .Where(u => context.Evaluator.GetPermission(u, entityId, ownerId, EntryType.Normal, permArray) == PermissionValue.Allowed)
+                .Where(u => context.Evaluator.HasPermission(u, entityId, ownerId, EntryType.Normal, permArray))
                 .ToArray();
             return allowedIdentities;
         }
