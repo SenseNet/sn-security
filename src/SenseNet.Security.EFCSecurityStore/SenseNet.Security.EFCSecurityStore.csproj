@@ -15,18 +15,18 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Entity Framework Core data provider implementation for the SenseNet.Security project.</Description>
     <PackageReleaseNotes>See release notes on GitHub.</PackageReleaseNotes>
-    <AssemblyVersion>1.0.1.1</AssemblyVersion>
-    <FileVersion>1.0.1.1</FileVersion>
-    <Version>1.0.1.1</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Version>2.0.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Scripts\Install_Schema_2.1.sql" />
-    <None Remove="Scripts\Install_Schema_3.1.sql" />
+    <None Remove="Scripts\Install_Schema_4.0.sql" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\Install_Schema_3.1.sql" />
+    <EmbeddedResource Include="Scripts\Install_Schema_4.0.sql" />
     <EmbeddedResource Include="Scripts\Install_Schema_2.1.sql" />
   </ItemGroup>
 
