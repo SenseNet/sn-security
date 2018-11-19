@@ -26,10 +26,10 @@ namespace SenseNet.Security
                     // if breaked, adding existing parent-s effective identities because all identities are related.
                     var localBits = new PermissionBitMask();
                     if (!entity.IsInherited && entity.Parent != null && (includeRoot || entity.Parent.Id != entityId))
-                        CollectPermissionsFromLocalAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities), localBits);
+                        CollectPermissionsFromLocalAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities, EntryType.Normal), localBits);
 
                     // adding explicite identities
-                    CollectPermissionsFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities), PermissionLevel.AllowedOrDenied, counters, localBits);
+                    CollectPermissionsFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), PermissionLevel.AllowedOrDenied, counters, localBits);
                 }
 
                 var result = new Dictionary<PermissionTypeBase, int>();
@@ -61,10 +61,10 @@ namespace SenseNet.Security
 
                     // if breaked, adding existing parent-s effective identities because all identities are related.
                     if (!entity.IsInherited && entity.Parent != null)
-                        CollectIdentitiesFromAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id), level, identities);
+                        CollectIdentitiesFromAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, null, EntryType.Normal), level, identities);
 
                     // adding explicite identities
-                    CollectIdentitiesFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id), level, identities);
+                    CollectIdentitiesFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, null, EntryType.Normal), level, identities);
                 }
             }
             finally
@@ -116,10 +116,10 @@ namespace SenseNet.Security
                     // if breaked, adding existing parent-s effective identities because all identities are related.
                     var localBits = new PermissionBitMask();
                     if (!entity.IsInherited && entity.Parent != null)
-                        CollectPermissionsFromLocalAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities), localBits);
+                        CollectPermissionsFromLocalAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities, EntryType.Normal), localBits);
 
                     // adding explicite identities
-                    CollectPermissionsFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities), level, counters, localBits);
+                    CollectPermissionsFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), level, counters, localBits);
                 }
 
                 var result = new Dictionary<PermissionTypeBase, int>();
@@ -208,7 +208,7 @@ namespace SenseNet.Security
                     var added = false;
                     if (!entity.IsInherited && entity.Parent != null)
                     {
-                        if (HasBitsByEffectiveAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities), level, mask))
+                        if (HasBitsByEffectiveAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities, EntryType.Normal), level, mask))
                         {
                             entityIds.Add(entity.Id);
                             added = true;
@@ -217,7 +217,7 @@ namespace SenseNet.Security
 
                     // adding explicite identities
                     if (!added)
-                        if (HasBitsByExpliciteAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities), level, mask))
+                        if (HasBitsByExpliciteAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), level, mask))
                             entityIds.Add(entity.Id);
                 }
 
@@ -285,10 +285,10 @@ namespace SenseNet.Security
 
                     // if breaked, adding existing parent-s effective identities because all identities are related.
                     if (!entity.IsInherited && entity.Parent != null)
-                        CollectIdentitiesFromAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id), level, mask, identities);
+                        CollectIdentitiesFromAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, null, EntryType.Normal), level, mask, identities);
 
                     // adding explicite identities
-                    CollectIdentitiesFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id), level, mask, identities);
+                    CollectIdentitiesFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, null, EntryType.Normal), level, mask, identities);
                 }
                 return identities;
             }
@@ -333,7 +333,7 @@ namespace SenseNet.Security
                 var root = SecurityEntity.GetEntitySafe(context, entityId, true);
                 foreach (var childEntity in root.Children)
                 {
-                    var aces = context.Evaluator.GetEffectiveEntriesSafe(childEntity.Id, identities);
+                    var aces = context.Evaluator.GetEffectiveEntriesSafe(childEntity.Id, identities, EntryType.Normal);
                     if (aces.Any(a => HasBits(a.AllowBits, a.DenyBits, level, mask)))
                         result.Add(childEntity.Id);
                 }
@@ -355,7 +355,7 @@ namespace SenseNet.Security
             var identities = entries.Select(e => e.IdentityId).ToArray();
             var users = GetFlattenedUsers(context, identities);
             var allowedIdentities = users
-                .Where(u => context.Evaluator.HasPermission(u, entityId, ownerId, permArray))
+                .Where(u => context.Evaluator.HasPermission(u, entityId, ownerId, EntryType.Normal, permArray))
                 .ToArray();
             return allowedIdentities;
         }

@@ -494,5 +494,20 @@ namespace SenseNet.Security.Tests
             {
             }
         }
+
+        [TestMethod]
+        public void Sharing_AclEd_SetBitmask()
+        {
+            EnsureRepository();
+            var ctx = CurrentContext.Security;
+
+            var bitMask = new PermissionBitMask { AllowBits = 0x1Ful, DenyBits = 0x00ul };
+            ctx.CreateAclEditor(EntryType.Sharing)
+                .Set(Id("E5"), Id("U1"), false, bitMask)
+                .Apply();
+
+            var entries = ctx.GetExplicitEntries(Id("E5"), null, EntryType.Sharing);
+            Assert.AreEqual(1, entries.Count);
+        }
     }
 }

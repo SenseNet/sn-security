@@ -272,7 +272,21 @@ namespace SenseNet.Security
         /// Empty set means "allowed nothing" so SenseNetSecurityException will be thrown.</param>
         protected void AssertPermission(int entityId, params PermissionTypeBase[] permissions)
         {
-            if(!HasPermission(entityId, permissions))
+            if (!HasPermission(entityId, permissions))
+                throw new AccessDeniedException(null, null, entityId, null, permissions);
+        }
+        /// <summary>
+        /// If one or more passed permissions are not allowed (undefined or denied)
+        /// on the passed entity for the current user,
+        /// an <see cref="AccessDeniedException"/> will be thrown.
+        /// </summary>
+        /// <param name="entityId">Id of the entity. Cannot be 0.</param>
+        /// <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
+        /// <param name="permissions">Set of related permissions. Cannot be null.
+        /// Empty set means "allowed nothing" so SenseNetSecurityException will be thrown.</param>
+        protected void AssertPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
+        {
+            if (!HasPermission(entityId, entryType, permissions))
                 throw new AccessDeniedException(null, null, entityId, null, permissions);
         }
         /// <summary>
@@ -298,6 +312,16 @@ namespace SenseNet.Security
             return Evaluator.HasPermission(CurrentUser.Id, entityId, GetOwnerId(entityId), permissions);
         }
         /// <summary>
+        /// Returns true if all passed permissions are allowed on the passed entity for the current user.
+        /// </summary>
+        /// <param name="entityId">Id of the entity. Cannot be 0.</param>
+        /// <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
+        /// <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
+        protected bool HasPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
+        {
+            return Evaluator.HasPermission(CurrentUser.Id, entityId, GetOwnerId(entityId), null, permissions);
+        }
+        /// <summary>
         /// Returns true if all passed permissions are allowed for the current user on every entity in the whole subtree of the passed entity.
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
@@ -317,6 +341,19 @@ namespace SenseNet.Security
         protected PermissionValue GetPermission(int entityId, params PermissionTypeBase[] permissions)
         {
             return Evaluator.GetPermission(CurrentUser.Id, entityId, GetOwnerId(entityId), permissions);
+        }
+        /// <summary>
+        /// Returns an aggregated permission value by all passed permissions for the current user on the passed entity.
+        /// Value is Denied if there is at least one denied among the passed permissions,
+        ///   Undefined if there is an undefined and there is no denied among the passed permissions,
+        ///   Allowed if every passed permission is allowed.
+        /// </summary>
+        /// <param name="entityId">Id of the entity. Cannot be 0.</param>
+        /// <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
+        /// <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
+        protected PermissionValue GetPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
+        {
+            return Evaluator.GetPermission(CurrentUser.Id, entityId, GetOwnerId(entityId), entryType, permissions);
         }
         /// <summary>
         /// Returns an aggregated permission value by all passed permissions for the current user on every entity in whole subtree of the passed entity.
