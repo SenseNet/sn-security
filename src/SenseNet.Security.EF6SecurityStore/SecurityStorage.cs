@@ -90,7 +90,7 @@ DELETE FROM EFMessages
         /// <summary>
         /// Name of the SQL script resource file that contains all the table and constraint creation commands.
         /// </summary>
-        private const string RESOURCE_INSTALLDB = "SenseNet.Security.EF6SecurityStore.Scripts.Install_Schema_3.1.sql";
+        private const string RESOURCE_INSTALLDB = "SenseNet.Security.EF6SecurityStore.Scripts.Install_Schema_4.0.sql";
 
         internal void InstallDatabase()
         {
