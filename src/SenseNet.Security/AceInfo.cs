@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using SenseNet.Security.Configuration;
 
 namespace SenseNet.Security
 {
@@ -30,6 +32,21 @@ namespace SenseNet.Security
         /// Denied permissions as bitmask.
         /// </summary>
         public ulong DenyBits { get; internal set; }
+
+        internal static List<AceInfo> GetElevatedAces(EntryType? entryType)
+        {
+            return new List<AceInfo>
+            {
+                new AceInfo
+                {
+                    IdentityId = Identities.SystemUserId,
+                    EntryType = entryType ?? EntryType.Normal,
+                    LocalOnly = false,
+                    AllowBits = ulong.MaxValue,
+                    DenyBits = 0ul
+                }
+            };
+        }
 
         internal AceInfo Copy()
         {
