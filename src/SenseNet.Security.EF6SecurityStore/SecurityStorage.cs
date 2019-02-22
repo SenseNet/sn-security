@@ -108,9 +108,13 @@ DELETE FROM EFMessages
         }
 
 
-        private const string SelectUnprocessedActivityIds = @"SELECT Id FROM [EFMessages] WHERE ExecutionState != 'Done'
+        private const string SelectUnprocessedActivityIds = @"DECLARE @lastInserted INT
+DECLARE @ident INT
+SELECT @lastInserted = MAX(Id) FROM EFMessages
+SELECT @ident = CONVERT(int, IDENT_CURRENT('EFMessages'))
+SELECT Id FROM [EFMessages] WHERE ExecutionState != 'Done'
 UNION ALL
-SELECT CONVERT(int, IDENT_CURRENT('EFMessages'))
+SELECT CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN @ident-1 ELSE @ident END Id
 ORDER BY Id
 ";
         internal int[] GetUnprocessedActivityIds()
