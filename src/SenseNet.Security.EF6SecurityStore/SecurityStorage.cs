@@ -114,7 +114,7 @@ SELECT @lastInserted = MAX(Id) FROM EFMessages
 SELECT @ident = CONVERT(int, IDENT_CURRENT('EFMessages'))
 SELECT Id FROM [EFMessages] WHERE ExecutionState != 'Done'
 UNION ALL
-SELECT CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN @ident-1 ELSE @ident END Id
+SELECT CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN 0 ELSE @ident END Id
 ORDER BY Id
 ";
         internal int[] GetUnprocessedActivityIds()
