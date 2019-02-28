@@ -177,6 +177,7 @@
     <Compile Include="Accessors.cs" />
     <Compile Include="EF6Tests.cs" />
     <Compile Include="EFCTests.cs" />
+    <Compile Include="EntityDictionaryTests.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="InMemTests.cs" />

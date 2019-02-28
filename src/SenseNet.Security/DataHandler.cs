@@ -14,7 +14,7 @@ namespace SenseNet.Security
             var count = dataProvider.GetEstimatedEntityCount();
             var capacity = count + count / 10;
 
-            var entities = new Dictionary<int, SecurityEntity>(capacity);
+            var entities = new EntityDictionary(capacity); //new Dictionary<int, SecurityEntity>(capacity);
             var relations = new List<Tuple<SecurityEntity, int>>(capacity); // first is Id, second is ParentId
 
             foreach (var storedEntity in dataProvider.LoadSecurityEntities())
@@ -41,7 +41,7 @@ namespace SenseNet.Security
                 parentEntity.AddChild_Unsafe(rel.Item1);
             }
 
-            return new ConcurrentDictionary<int, SecurityEntity>(entities);
+            return entities;  //new ConcurrentDictionary<int, SecurityEntity>(entities);
         }
 
         public static IDictionary<int, SecurityGroup> LoadAllGroups(ISecurityDataProvider dataProvider)

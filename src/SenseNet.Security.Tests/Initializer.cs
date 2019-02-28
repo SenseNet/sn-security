@@ -17,12 +17,12 @@ namespace SenseNet.Security.Tests
         public static void InitializeAllTests(TestContext context)
         {
             // install db directly
-            new EF6SecurityDataProvider(connectionString:
-                    ConfigurationManager.ConnectionStrings["EF6SecurityStorage"].ConnectionString)
-                .InstallDatabase();
-            new EFCSecurityDataProvider(connectionString:
-                    ConfigurationManager.ConnectionStrings["EFCSecurityStorage"].ConnectionString)
-                .InstallDatabase();
+            //new EF6SecurityDataProvider(connectionString:
+            //        ConfigurationManager.ConnectionStrings["EF6SecurityStorage"].ConnectionString)
+            //    .InstallDatabase();
+            //new EFCSecurityDataProvider(connectionString:
+            //        ConfigurationManager.ConnectionStrings["EFCSecurityStorage"].ConnectionString)
+            //    .InstallDatabase();
 
             var x = PermissionType.See; // preloads the type
         }
