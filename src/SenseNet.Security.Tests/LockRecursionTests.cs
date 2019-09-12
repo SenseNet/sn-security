@@ -31,11 +31,19 @@ namespace SenseNet.Security.Tests
         }
 
         #region Infrastructure 
-        private Context GetContext(LockRecursionUser currentUser)
+        private Context GetContextAndStartTheSystem(LockRecursionUser currentUser)
         {
             SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             MemoryDataProvider.LastActivityId = 0;
             Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), new DefaultMessageProvider(), null);
+            var context = new Context(currentUser);
+            CreatePlayground(context);
+            return context;
+        }
+        private Context GetContext(LockRecursionUser currentUser)
+        {
+            SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
+            MemoryDataProvider.LastActivityId = 0;
             return new Context(currentUser);
         }
 
@@ -237,12 +245,10 @@ namespace SenseNet.Security.Tests
                 return new int[0];
             });
 
-            _context = GetContext(user);
-            CreatePlayground(_context);
-            _context.Security.HasPermission(Id("E1"), PermissionType.Open);
+            var context = GetContextAndStartTheSystem(user);
+            context.Security.HasPermission(Id("E1"), PermissionType.Open);
         }
 
-        private Context _context;
         [TestMethod]
         public void LockRecuirsion_AvoidWithElevation()
         {
@@ -254,9 +260,8 @@ namespace SenseNet.Security.Tests
                 return new int[0];
             });
 
-            _context = GetContext(user);
-            CreatePlayground(_context);
-            _context.Security.HasPermission(Id("E1"), PermissionType.Open);
+            var context = GetContextAndStartTheSystem(user);
+            context.Security.HasPermission(Id("E1"), PermissionType.Open);
         }
     }
 }
