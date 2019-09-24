@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SenseNet.Security.Configuration;
 
 namespace SenseNet.Security
 {
@@ -227,9 +226,6 @@ namespace SenseNet.Security
 
         internal List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            if (_securityContext.CurrentUser.Id == Identities.SystemUserId)
-                return AceInfo.GetElevatedAces(entryType);
-
             SecurityEntity.EnterReadLock();
             try
             {

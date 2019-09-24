@@ -236,8 +236,8 @@ namespace SenseNet.Security.Tests
         }
         #endregion
 
-        [TestMethod]
-        public void LockRecuirsion_NoExtension()
+        //[TestMethod]
+        public void LockRecursion_NoExtension()
         {
             var user = new LockRecursionUser(Id("E1"), entityId =>
             {
@@ -249,8 +249,8 @@ namespace SenseNet.Security.Tests
             context.Security.HasPermission(Id("E1"), PermissionType.Open);
         }
 
-        [TestMethod]
-        public void LockRecuirsion_AvoidWithElevation()
+        //[TestMethod]
+        public void LockRecursion_AvoidWithElevation()
         {
             var user = new LockRecursionUser(Id("E1"), entityId =>
             {
