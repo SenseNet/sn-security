@@ -180,6 +180,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="InMemTests.cs" />
+    <Compile Include="LockRecursionTests.cs" />
     <Compile Include="MembershipTests2.cs" />
     <Compile Include="MessagingTests.cs" />
     <Compile Include="PermissionQueryTests.cs" />

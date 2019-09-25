@@ -102,7 +102,7 @@ DELETE FROM EFMessages
         /// <summary>
         /// Name of the SQL script resource file that contains all the table and constraint creation commands.
         /// </summary>
-        private const string RESOURCE_INSTALLDB = "SenseNet.Security.EFCSecurityStore.Scripts.Install_Schema_3.1.sql";
+        private const string RESOURCE_INSTALLDB = "SenseNet.Security.EFCSecurityStore.Scripts.Install_Schema_4.0.sql";
 
         internal void InstallDatabase()
         {
@@ -120,9 +120,13 @@ DELETE FROM EFMessages
         }
 
 
-        private const string SelectUnprocessedActivityIds = @"SELECT Id AS Value FROM [EFMessages] WHERE ExecutionState != 'Done'
+        private const string SelectUnprocessedActivityIds = @"DECLARE @lastInserted INT
+DECLARE @ident INT
+SELECT @lastInserted = MAX(Id) FROM EFMessages
+SELECT @ident = CONVERT(int, IDENT_CURRENT('EFMessages'))
+SELECT Id, Id AS [Value] FROM [EFMessages] WHERE ExecutionState != 'Done'
 UNION ALL
-SELECT CONVERT(int, IDENT_CURRENT('EFMessages'))
+SELECT 0, CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN 0 ELSE @ident END [Value]
 --ORDER BY Id
 ";
         internal int[] GetUnprocessedActivityIds()
