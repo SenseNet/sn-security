@@ -259,7 +259,7 @@ namespace SenseNet.Security
         /// </summary>
         public virtual void Apply()
         {
-            var activity = new SetAclActivity(_acls.Values, _breaks, _unbreaks);
+            var activity = new SetAclActivity(_acls.Values.ToArray(), _breaks, _unbreaks);
             activity.Execute(this.Context);
         }
 
