@@ -1,7 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>2.1.0</Version>
     <DebugType>Full</DebugType>
     <Authors>kavics,tusmester</Authors>
     <Company>Sense/Net Inc.</Company>
@@ -15,9 +16,6 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Entity Framework Core data provider implementation for the SenseNet.Security project.</Description>
     <PackageReleaseNotes>See release notes on GitHub.</PackageReleaseNotes>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
-    <Version>2.0.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
