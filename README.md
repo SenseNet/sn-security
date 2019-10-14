@@ -13,7 +13,7 @@ Permission entries and user-group relationships are stored in a database that ca
 
 ## Main features
 ### Entities
-The security component has an API for maintaining an entity structure (parent-child relationships), so it is ideal and most effective for providing security functinality in environments where there is a tree structure.
+The security component has an API for maintaining an entity structure (parent-child relationships), so it is ideal and most effective for providing security functionality in environments where there is a tree structure.
 ````csharp
 // register an entity in the security component
 context.CreateSecurityEntity(entityId, parentId, ownerId);
@@ -24,7 +24,7 @@ User-Group relationships are essential, because permissions are evaluated in a t
 context.IsInGroup(memberId, groupId);
 ````
 ### Entries
-Permission entries (*Access Control Entries*) are lists of permisisons defined on an entity for a user or group. The security component handles permissions as simple slots in the db, the permission types (e.g. Open or Save) are defined by the client application.
+Permission entries (*Access Control Entries*) are lists of permissions defined on an entity for a user or group. The security component handles permissions as simple slots in the db, the permission types (e.g. Open or Save) are defined by the client application.
 ````csharp
 // break permission inheritance, fluent API
 context.CreateAclEditor()
