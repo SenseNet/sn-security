@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SenseNet.Security.Data;
-using SenseNet.Security.EFCSecurityStore;
 
 namespace SenseNet.Security.Tests
 {
@@ -158,72 +157,65 @@ namespace SenseNet.Security.Tests
         /*************************************************************************************************/
 
         //[TestMethod Timeout(10 * 60 * 1000)]
-        public void EF_Performance_SystemStart_BigDatabase()
-        {
-            var timer = Stopwatch.StartNew();
-            Context.StartTheSystem(new EFCSecurityDataProvider(connectionString: ConnectionString), new DefaultMessageProvider());
-            timer.Stop();
-            var ctx = new Context(TestUser.User1);
-            Assert.Inconclusive("Loading time: {0}", timer.Elapsed);
-        }
+        //public void EF_Performance_SystemStart_BigDatabase()
+        //{
+        //    var timer = Stopwatch.StartNew();
+        //    Context.StartTheSystem(new EFCSecurityDataProvider(connectionString: ConnectionString), new DefaultMessageProvider());
+        //    timer.Stop();
+        //    var ctx = new Context(TestUser.User1);
+        //    Assert.Inconclusive("Loading time: {0}", timer.Elapsed);
+        //}
 
         //[TestMethod Timeout(10*60*1000)]
-        public void EF_Performance_SystemStart_BigEntityTable()
-        {
-            Stopwatch timer;
-            IDictionary<int, SecurityEntity> entities;
+        //public void EF_Performance_SystemStart_BigEntityTable()
+        //{
+        //    Stopwatch timer;
+        //    IDictionary<int, SecurityEntity> entities;
 
-            var dataProvider = new EFCSecurityDataProvider(connectionString: ConnectionString);
-            timer = Stopwatch.StartNew();
-            var data = dataProvider.LoadSecurityEntities();
-            timer.Stop();
-            var time1 = timer.Elapsed;
-            Debug.WriteLine("warmup: " + time1);
-
-
-            //timer = Stopwatch.StartNew();
-            ////var entities = DataHandler.LoadSecurityEntities(dataProvider);
-            //entities = LoadSecurityEntities_1(dataProvider);
-            //timer.Stop();
-            //var time2 = timer.Elapsed;
-            //Debug.WriteLine("loading time#1: " + time2);
+        //    var dataProvider = new EFCSecurityDataProvider(connectionString: ConnectionString);
+        //    timer = Stopwatch.StartNew();
+        //    var data = dataProvider.LoadSecurityEntities();
+        //    timer.Stop();
+        //    var time1 = timer.Elapsed;
+        //    Debug.WriteLine("warmup: " + time1);
 
 
-            //timer = Stopwatch.StartNew();
-            //entities = LoadSecurityEntities_2(dataProvider);
-            //timer.Stop();
-            //var time3 = timer.Elapsed;
-            //Debug.WriteLine("loading time#2: " + time3);
-
-            _log.Clear();
-            timer = Stopwatch.StartNew();
-            entities = LoadSecurityEntities_3(dataProvider);
-            timer.Stop();
-            var time4 = timer.Elapsed;
-            Debug.WriteLine("loading time#2: " + time4);
+        //    //timer = Stopwatch.StartNew();
+        //    ////var entities = DataHandler.LoadSecurityEntities(dataProvider);
+        //    //entities = LoadSecurityEntities_1(dataProvider);
+        //    //timer.Stop();
+        //    //var time2 = timer.Elapsed;
+        //    //Debug.WriteLine("loading time#1: " + time2);
 
 
-            //Assert.Inconclusive("Loading times: {0}, {1}, {2}, {3}, {4}", time1, time2, time3, time4, _log);
-            Assert.Inconclusive("Loading times: {0}, {1}, {2}", time1, time4, _log);
+        //    //timer = Stopwatch.StartNew();
+        //    //entities = LoadSecurityEntities_2(dataProvider);
+        //    //timer.Stop();
+        //    //var time3 = timer.Elapsed;
+        //    //Debug.WriteLine("loading time#2: " + time3);
+
+        //    _log.Clear();
+        //    timer = Stopwatch.StartNew();
+        //    entities = LoadSecurityEntities_3(dataProvider);
+        //    timer.Stop();
+        //    var time4 = timer.Elapsed;
+        //    Debug.WriteLine("loading time#2: " + time4);
 
 
-            // Loading times: 00:00:10.2905993, 00:02:35.7031781, 00:02:11.6167352 // #1: main lists with explicite capacity
-            // Loading times: 00:00:10.2637016, 00:02:33.3550854, 00:02:07.6887293 // #2: dictionary instead of concurrent dictionary
-            //                                                                            + less dictionary lookups in the building relationships
-            // Loading times: 00:00:10.2887780, 00:02:33.5082941, 00:02:03.8172389
-            // Load: 00:00:12.9822886, Rel: 00:01:46.5209197, Copy: 00:00:04.6075951
-            // Load: 00:00:13.0581931, Rel: 00:01:46.7875856, Copy: 00:00:07.4265863
-            // Load: 00:00:13.2952581, Rel: 00:01:46.8437112, Copy: 00:00:03.3409542
-            // Load: 00:00:12.9505824, Rel: 00:00:02.8798472, Copy: 00:00:03.6220331 // #3: AddChild_Unsafe
-            // Loading times: 00:00:09.5691147, 00:00:19.1797264, Load: 00:00:12.7218657, Rel: 00:00:02.9009923, Copy: 00:00:03.5535364
+        //    //Assert.Inconclusive("Loading times: {0}, {1}, {2}, {3}, {4}", time1, time2, time3, time4, _log);
+        //    Assert.Inconclusive("Loading times: {0}, {1}, {2}", time1, time4, _log);
 
 
-
-
-
-
-
-        }
+        //    // Loading times: 00:00:10.2905993, 00:02:35.7031781, 00:02:11.6167352 // #1: main lists with explicite capacity
+        //    // Loading times: 00:00:10.2637016, 00:02:33.3550854, 00:02:07.6887293 // #2: dictionary instead of concurrent dictionary
+        //    //                                                                            + less dictionary lookups in the building relationships
+        //    // Loading times: 00:00:10.2887780, 00:02:33.5082941, 00:02:03.8172389
+        //    // Load: 00:00:12.9822886, Rel: 00:01:46.5209197, Copy: 00:00:04.6075951
+        //    // Load: 00:00:13.0581931, Rel: 00:01:46.7875856, Copy: 00:00:07.4265863
+        //    // Load: 00:00:13.2952581, Rel: 00:01:46.8437112, Copy: 00:00:03.3409542
+        //    // Load: 00:00:12.9505824, Rel: 00:00:02.8798472, Copy: 00:00:03.6220331 // #3: AddChild_Unsafe
+        //    // Loading times: 00:00:09.5691147, 00:00:19.1797264, Load: 00:00:12.7218657, Rel: 00:00:02.9009923, Copy: 00:00:03.5535364
+        //}
 
         static StringBuilder _log = new StringBuilder();
 

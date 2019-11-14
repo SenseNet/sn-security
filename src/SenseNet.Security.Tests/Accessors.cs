@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security;
@@ -8,33 +9,39 @@ using SenseNet.Security.Data;
 
 namespace SenseNet.Security.Tests
 {
-    internal abstract class Accessor
+    public abstract class Accessor
     {
-        protected PrivateObject _wrapped;
-        private PrivateType _wrappedType;
-        public Accessor(object wrapped)
+        protected object Wrapped;
+        private readonly Type _wrappedType;
+
+        protected Accessor(object wrapped)
         {
-            _wrapped = new PrivateObject(wrapped);
-            _wrappedType = new PrivateType(wrapped.GetType());
+            Wrapped = wrapped;
+            _wrappedType = wrapped.GetType();
         }
         internal T Invoke<T>(string name, params object[] parameters)
         {
-            return (T)_wrapped.Invoke(name, parameters);
+            var method = _wrappedType.GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance);
+
+            return (T)method.Invoke(Wrapped, parameters);
         }
         internal T GetFieldOrProperty<T>(string name)
         {
-            return (T)_wrapped.GetFieldOrProperty(name);
+            var field = _wrappedType.GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
+            return (T) field.GetValue(Wrapped);
         }
         internal T GetStaticField<T>(string name)
         {
-            return (T)_wrappedType.GetStaticField(name);
+            var field = _wrappedType.GetField(name, BindingFlags.NonPublic | BindingFlags.Static);
+            return (T)field.GetValue(Wrapped);
         }
         internal void SetFieldOrProperty(string name, object value)
         {
-            _wrapped.SetFieldOrProperty(name, value);
+            var field = _wrappedType.GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
+            
+            field.SetValue(Wrapped, value);
         }
     }
-
     internal class MemoryDataProviderAccessor : Accessor
     {
         public MemoryDataProviderAccessor(MemoryDataProvider provider) : base(provider) { }
@@ -51,19 +58,9 @@ namespace SenseNet.Security.Tests
         }
     }
 
-    internal class AclEditorAccessor : Accessor
+    public class AclEditorAccessor : Accessor
     {
         public AclEditorAccessor(AclEditor editor) : base(editor) { }
-        internal Dictionary<int, AclInfo> Acls => base.GetFieldOrProperty<Dictionary<int, AclInfo>>("_acls");
+        public Dictionary<int, AclInfo> Acls => base.GetFieldOrProperty<Dictionary<int, AclInfo>>("_acls");
     }
-
-    //internal class AclCacheAccessor : Accessor
-    //{
-    //    public AclCacheAccessor(AclCache aclCache) : base(aclCache) { }
-    //    public int Count { get { return GetFieldOrProperty<Dictionary<int, AclInfo>>("_aclTable").Count; } }
-    //    public void Clear()
-    //    {
-    //        GetFieldOrProperty<Dictionary<int, AclInfo>>("_aclTable").Clear();
-    //    }
-    //}
 }
