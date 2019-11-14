@@ -550,7 +550,7 @@ namespace SenseNet.Security.Tests
 
             var entity = CurrentContext.Security.GetSecurityEntity(Id("E1"));
             var ed = CurrentContext.Security.CreateAclEditor();
-            var acls = new AclEditorAccessor2(ed).Acls;
+            var acls = new AclEditorAccessor(ed).Acls;
             var userId = Id("U1");
             var ace = new AceInfo { IdentityId = userId };
             var level = entity.Level;
@@ -588,7 +588,7 @@ namespace SenseNet.Security.Tests
             var userId2 = Id("U2");
 
             var ed = CurrentContext.Security.CreateAclEditor();
-            var acls = new AclEditorAccessor2(ed).Acls;
+            var acls = new AclEditorAccessor(ed).Acls;
 
             ed.Allow(entityId, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark);
             ed.Allow(entityId, userId2, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark);
@@ -650,7 +650,7 @@ namespace SenseNet.Security.Tests
             var userId2 = Id("U2");
 
             var ed = CurrentContext.Security.CreateAclEditor();
-            var acls = new AclEditorAccessor2(ed).Acls;
+            var acls = new AclEditorAccessor(ed).Acls;
 
             //#
             ed.Set(entityId, userId1, false, PermissionType.See | PermissionType.Preview | PermissionType.PreviewWithoutWatermark | ~PermissionType.Publish | ~PermissionType.Delete);
