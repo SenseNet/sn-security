@@ -81,6 +81,6 @@ namespace SenseNet.Security.Tests.TestPortal
             Security = new TestSecurityContext(currentUser);
         }
 
-        public TestSecurityContext Security { get; private set; }
+        public TestSecurityContext Security { get; set; }
     }
 }

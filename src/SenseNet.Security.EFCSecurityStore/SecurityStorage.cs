@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
-using System.Data.Common;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace SenseNet.Security.EFCSecurityStore
 {
@@ -93,7 +90,7 @@ DELETE FROM EFMessages
         internal int GetEstimatedEntityCount()
         {
             var result = EfcIntSet
-                .FromSql("SELECT 1 AS Id, COUNT(1) AS Value FROM EFEntities")
+                .FromSqlRaw("SELECT 1 AS Id, COUNT(1) AS Value FROM EFEntities")
                 .Single()
                 .Value;
             return result;
@@ -132,7 +129,7 @@ SELECT 0, CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN 0 ELSE @ident END 
         internal int[] GetUnprocessedActivityIds()
         {
             var result = EfcIntSet
-                .FromSql(SelectUnprocessedActivityIds)
+                .FromSqlRaw(SelectUnprocessedActivityIds)
                 .Select(x => x.Value)
                 .AsEnumerable()
                 .OrderBy(x => x)
@@ -149,7 +146,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
         {
             var result = EfcStoredSecurityEntitySet
                 // ReSharper disable once FormatStringProblem
-                .FromSql(LoadStoredSecurityEntityById_Script, new SqlParameter("@EntityId", entityId))
+                .FromSqlRaw(LoadStoredSecurityEntityById_Script, new SqlParameter("@EntityId", entityId))
                 .Select(x => new StoredSecurityEntity
                 {
                     Id = x.Id,
@@ -168,7 +165,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
             //var x = this.Database.SqlQuery<int>(LOADAFFECTEDENTITYIDSBYENTRIESANDBREAKSSCRIPT).ToArray();
             //return x;
             var result = EfcIntSet
-                .FromSql(LoadAffectedEntityIdsByEntriesAndBreaksScript)
+                .FromSqlRaw(LoadAffectedEntityIdsByEntriesAndBreaksScript)
                 .Select(x => x.Value)
                 .ToArray();
             return result;
@@ -278,20 +275,25 @@ ELSE
 ";
         public string AcquireSecurityActivityExecutionLock(int securityActivityId, string lockedBy, int timeoutInSeconds)
         {
-            //var result = this.Database
-            //    .SqlQuery<string>(
-            //        AcquireSecurityActivityExecutionLock_Script,
-            //        new SqlParameter("@ActivityId", securityActivityId),
-            //        new SqlParameter("@LockedBy", lockedBy ?? ""),
-            //        new SqlParameter("@TimeLimit", timeoutInSeconds)).Single();
-            //return result;
-            var result = EfcStringSet
-                .FromSql(AcquireSecurityActivityExecutionLock_Script,
+            var query = EfcStringSet
+                .FromSqlRaw(AcquireSecurityActivityExecutionLock_Script,
                         new SqlParameter("@ActivityId", securityActivityId),
                         new SqlParameter("@LockedBy", lockedBy ?? ""),
-                        new SqlParameter("@TimeLimit", timeoutInSeconds))
-                .Single();
-            return result.Value;
+                        new SqlParameter("@TimeLimit", timeoutInSeconds));
+
+            var result = string.Empty;
+
+            // We use foreach here instead of Single or First, because Entity Framework
+            // generates an outer SELECT for those methods that result in an incorrect
+            // SQL syntax.
+            foreach (var item in query)
+            {
+                // read the first and only item and return immediately
+                result = item.Value;
+                break;
+            }
+
+            return result;
         }
 
         private static readonly string RefreshSecurityActivityExecutionLock_Script = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";

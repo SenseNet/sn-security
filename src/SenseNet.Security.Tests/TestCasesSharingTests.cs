@@ -440,7 +440,7 @@ namespace SenseNet.Security.Tests
             ed.Allow("E2", "G1", "_____________+_");
 
             // ASSERT 1 (edited entry is brand new so not merged with the existing sharing entry)
-            var edAcls = new AclEditorAccessor(ed).Acls;
+            var edAcls = new AclEditorAccessor2(ed).Acls;
             Assert.AreEqual(Id("E2"), edAcls.Count == 0 ? 0 : edAcls.First().Key);
             var entry = edAcls[Id("E2")].Entries.FirstOrDefault();
             Assert.IsNotNull(entry);

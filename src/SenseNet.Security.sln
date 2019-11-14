@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29409.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security", "SenseNet.Security\SenseNet.Security.csproj", "{B2B39975-3D5E-4457-B9CE-0FCEC20F2F59}"
 EndProject
@@ -17,7 +17,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Tests.Con
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security.Messaging.RabbitMQ", "SenseNet.Security.Messaging.RabbitMQ\SenseNet.Security.Messaging.RabbitMQ.csproj", "{84F97FC3-12B9-4D30-95B6-3308EE3CC322}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.EFCSecurityStore", "SenseNet.Security.EFCSecurityStore\SenseNet.Security.EFCSecurityStore.csproj", "{398CF1C1-6721-4DFB-B624-F86EB996E47E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security.EFCSecurityStore", "SenseNet.Security.EFCSecurityStore\SenseNet.Security.EFCSecurityStore.csproj", "{398CF1C1-6721-4DFB-B624-F86EB996E47E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.EFCSecurityStore.Tests", "SenseNet.Security.EFCSecurityStore.Tests\SenseNet.Security.EFCSecurityStore.Tests.csproj", "{3858F7DE-E3E0-4483-A227-38A38650F2BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{398CF1C1-6721-4DFB-B624-F86EB996E47E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{398CF1C1-6721-4DFB-B624-F86EB996E47E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{398CF1C1-6721-4DFB-B624-F86EB996E47E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3858F7DE-E3E0-4483-A227-38A38650F2BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3858F7DE-E3E0-4483-A227-38A38650F2BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3858F7DE-E3E0-4483-A227-38A38650F2BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3858F7DE-E3E0-4483-A227-38A38650F2BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

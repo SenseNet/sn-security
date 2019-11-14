@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security;
@@ -34,7 +35,35 @@ namespace SenseNet.Security.Tests
             _wrapped.SetFieldOrProperty(name, value);
         }
     }
-
+    public abstract class Accessor2
+    {
+        protected object _wrapped;
+        private Type _wrappedType;
+        public Accessor2(object wrapped)
+        {
+            _wrapped = wrapped;
+            _wrappedType = wrapped.GetType();
+        }
+        //internal T Invoke<T>(string name, params object[] parameters)
+        //{
+        //    return (T)_wrapped.Invoke(name, parameters);
+        //}
+        internal T GetFieldOrProperty<T>(string name)
+        {
+            var field = _wrappedType.GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
+            return (T) field.GetValue(_wrapped);
+        }
+        //internal T GetStaticField<T>(string name)
+        //{
+        //    return (T)_wrappedType.GetStaticField(name);
+        //}
+        internal void SetFieldOrProperty(string name, object value)
+        {
+            var field = _wrappedType.GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
+            
+            field.SetValue(_wrapped, value);
+        }
+    }
     internal class MemoryDataProviderAccessor : Accessor
     {
         public MemoryDataProviderAccessor(MemoryDataProvider provider) : base(provider) { }
@@ -55,6 +84,11 @@ namespace SenseNet.Security.Tests
     {
         public AclEditorAccessor(AclEditor editor) : base(editor) { }
         internal Dictionary<int, AclInfo> Acls => base.GetFieldOrProperty<Dictionary<int, AclInfo>>("_acls");
+    }
+    public class AclEditorAccessor2 : Accessor2
+    {
+        public AclEditorAccessor2(AclEditor editor) : base(editor) { }
+        public Dictionary<int, AclInfo> Acls => base.GetFieldOrProperty<Dictionary<int, AclInfo>>("_acls");
     }
 
     //internal class AclCacheAccessor : Accessor

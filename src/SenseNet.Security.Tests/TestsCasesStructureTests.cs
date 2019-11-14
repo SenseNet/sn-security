@@ -105,7 +105,6 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.CreateSecurityEntity(grandChildId, childId, TestUser.User3.Id);
 
             // inspection
-            var db = new PrivateObject(CurrentContext.Security.DataProvider);
             SecurityEntity memEntity;
             StoredSecurityEntity dbEntity;
             memEntity = CurrentContext.Security.GetSecurityEntity(rootId);
@@ -773,8 +772,8 @@ namespace SenseNet.Security.Tests
         public void Structure_ResolveMissingEntity()
         {
             var ctx = new MissingEntityResolverContext(TestUser.User1);
-            var contextAcc = new PrivateObject(CurrentContext);
-            contextAcc.SetFieldOrProperty("Security", ctx);
+
+            CurrentContext.Security = ctx;
 
             //----
 

@@ -16,6 +16,8 @@ namespace SenseNet.Security.Tests.TestPortal
             _generalContext = new TestSecurityContext(SystemUser);
         }
 
+        public ISecurityDataProvider GetDataProvider() => DataProvider;
+
         /*********************** ACL API **********************/
         public new AclEditor CreateAclEditor(EntryType entryType = EntryType.Normal)
         {
