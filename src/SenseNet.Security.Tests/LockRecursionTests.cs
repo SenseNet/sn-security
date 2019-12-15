@@ -51,7 +51,6 @@ namespace SenseNet.Security.Tests
 
         private void CreatePlayground(Context context)
         {
-            TestEntity e;
             var u1 = TestUser.User1;
 
             CreateEntity(context, "E1", null, u1);
