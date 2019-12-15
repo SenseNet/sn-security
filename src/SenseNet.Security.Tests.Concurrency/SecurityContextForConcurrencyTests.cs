@@ -1,4 +1,5 @@
-﻿namespace SenseNet.Security.Tests.TestPortal
+﻿// ReSharper disable once CheckNamespace
+namespace SenseNet.Security.Tests.TestPortal
 {
     public class SecurityContextForConcurrencyTests : SecurityContext
     {
