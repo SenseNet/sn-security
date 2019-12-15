@@ -20,7 +20,7 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual(id, dbEntity.Id);
             Assert.AreEqual(id, memEntity.Id);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.IsNull(memEntity.Parent);
             Assert.AreEqual(TestUser.User1.Id, dbEntity.OwnerId);
             Assert.AreEqual(TestUser.User1.Id, memEntity.OwnerId);
@@ -33,14 +33,14 @@ namespace SenseNet.Security.Tests
             var id = Id("E101");
 
             //# calling the security component for creating one entity
-            CurrentContext.Security.CreateSecurityEntity(id, default(int), TestUser.User1.Id);
+            CurrentContext.Security.CreateSecurityEntity(id, default, TestUser.User1.Id);
 
             var dbEntity = GetStoredSecurityEntity(id);
             var memEntity = CurrentContext.Security.GetSecurityEntity(id);
 
             Assert.AreEqual(id, dbEntity.Id);
             Assert.AreEqual(id, memEntity.Id);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.IsNull(memEntity.Parent);
             Assert.AreEqual(TestUser.User1.Id, dbEntity.OwnerId);
             Assert.AreEqual(TestUser.User1.Id, memEntity.OwnerId);
@@ -71,7 +71,7 @@ namespace SenseNet.Security.Tests
             Assert.IsNull(memEntity.Parent);
             Assert.AreEqual(TestUser.User1.Id, memEntity.OwnerId);
             dbEntity = GetStoredSecurityEntity(rootId);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.AreEqual(TestUser.User1.Id, dbEntity.OwnerId);
 
             memEntity = CurrentContext.Security.GetSecurityEntity(childId);
@@ -100,7 +100,7 @@ namespace SenseNet.Security.Tests
             var grandChildId = Id("E103");
 
             //# calling the security component for creating an entity chain
-            CurrentContext.Security.CreateSecurityEntity(rootId, default(int), TestUser.User1.Id);
+            CurrentContext.Security.CreateSecurityEntity(rootId, default, TestUser.User1.Id);
             CurrentContext.Security.CreateSecurityEntity(childId, rootId, TestUser.User2.Id);
             CurrentContext.Security.CreateSecurityEntity(grandChildId, childId, TestUser.User3.Id);
 
@@ -112,7 +112,7 @@ namespace SenseNet.Security.Tests
             Assert.IsNull(memEntity.Parent);
             Assert.AreEqual(TestUser.User1.Id, memEntity.OwnerId);
             dbEntity = GetStoredSecurityEntity(rootId);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.AreEqual(TestUser.User1.Id, dbEntity.OwnerId);
 
             memEntity = CurrentContext.Security.GetSecurityEntity(childId);
@@ -177,7 +177,7 @@ namespace SenseNet.Security.Tests
         public void Structure_CreateSecurityEntity_invalidId()
         {
             //# calling the security component
-            CurrentContext.Security.CreateSecurityEntity(default(int), default(int), default(int));
+            CurrentContext.Security.CreateSecurityEntity(default, default, default);
         }
         [TestMethod]
         public void Structure_CreateSecurityEntity_existing()
@@ -336,18 +336,18 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(TestUser.User2.Id, memEntity.OwnerId);
             var dbEntity = GetStoredSecurityEntity(id);
             Assert.AreEqual(id, dbEntity.Id);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.AreEqual(TestUser.User2.Id, dbEntity.OwnerId);
 
 
             //# calling the security component for clearing the entity's owner
-            entity.OwnerId = default(int);
+            entity.OwnerId = default;
             CurrentContext.Security.ModifyEntity(entity);
 
             memEntity = CurrentContext.Security.GetSecurityEntity(id);
-            Assert.AreEqual(default(int), memEntity.OwnerId);
+            Assert.AreEqual(default, memEntity.OwnerId);
             dbEntity = GetStoredSecurityEntity(id);
-            Assert.AreEqual(default(int), dbEntity.OwnerId);
+            Assert.AreEqual(default, dbEntity.OwnerId);
 
         }
         [TestMethod]
@@ -355,7 +355,7 @@ namespace SenseNet.Security.Tests
         {
             var id = Id("E101");
 
-            try { CurrentContext.Security.CreateSecurityEntity(id, default(int), TestUser.User1.Id); }
+            try { CurrentContext.Security.CreateSecurityEntity(id, default, TestUser.User1.Id); }
             catch { }
 
             //# calling the security component for modifying the entity's owner
@@ -367,28 +367,28 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(TestUser.User2.Id, memEntity.OwnerId);
             var dbEntity = GetStoredSecurityEntity(id);
             Assert.AreEqual(id, dbEntity.Id);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.AreEqual(TestUser.User2.Id, dbEntity.OwnerId);
 
             //# calling the security component for clearing the entity's owner
-            CurrentContext.Security.ModifyEntityOwner(id, default(int));
+            CurrentContext.Security.ModifyEntityOwner(id, default);
 
             memEntity = CurrentContext.Security.GetSecurityEntity(id);
-            Assert.AreEqual(default(int), memEntity.OwnerId);
+            Assert.AreEqual(default, memEntity.OwnerId);
             dbEntity = GetStoredSecurityEntity(id);
-            Assert.AreEqual(default(int), dbEntity.OwnerId);
+            Assert.AreEqual(default, dbEntity.OwnerId);
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Structure_ModifyEntityOwner_invalidId()
         {
-            CurrentContext.Security.ModifyEntityOwner(default(int), TestUser.User2.Id);
+            CurrentContext.Security.ModifyEntityOwner(default, TestUser.User2.Id);
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Structure_ModifyEntity_invalidId()
         {
-            var entity = new TestEntity { Id = default(int), OwnerId = TestUser.User1.Id, Parent = null };
+            var entity = new TestEntity { Id = default, OwnerId = TestUser.User1.Id, Parent = null };
             CurrentContext.Security.ModifyEntity(entity);
         }
         [TestMethod]
@@ -433,7 +433,7 @@ namespace SenseNet.Security.Tests
         {
             TestEntity root, source, target, child1, child2;
             CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
-            source.Id = default(int);
+            source.Id = default;
             CurrentContext.Security.MoveEntity(source, target);
         }
         [TestMethod]
@@ -442,7 +442,7 @@ namespace SenseNet.Security.Tests
         {
             TestEntity root, source, target, child1, child2;
             CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
-            target.Id = default(int);
+            target.Id = default;
             CurrentContext.Security.MoveEntity(source, target);
         }
         [TestMethod]

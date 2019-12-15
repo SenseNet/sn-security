@@ -148,7 +148,7 @@ namespace SenseNet.Security.Tests
             {
                 Id = Id(name),
                 Name = name,
-                OwnerId = owner?.Id ?? default(int),
+                OwnerId = owner?.Id ?? default,
                 Parent = parentName == null ? null : _repository[Id(parentName)],
             };
             _repository.Add(entity.Id, entity);

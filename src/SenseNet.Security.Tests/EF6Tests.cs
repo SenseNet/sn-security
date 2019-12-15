@@ -41,7 +41,7 @@ namespace SenseNet.Security.Tests
             var rootEntityId = Id("E01");
 
             // create 30 activities
-            sctx.CreateSecurityEntity(rootEntityId, default(int), user1Id);
+            sctx.CreateSecurityEntity(rootEntityId, default, user1Id);
             for (int entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
                 sctx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
 
@@ -100,7 +100,7 @@ namespace SenseNet.Security.Tests
             var rootEntityId = Id("E01");
 
             // create 30 activities
-            sctx.CreateSecurityEntity(rootEntityId, default(int), user1Id);
+            sctx.CreateSecurityEntity(rootEntityId, default, user1Id);
             for (int entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
                 sctx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
 
@@ -166,7 +166,7 @@ namespace SenseNet.Security.Tests
             {
                 SecurityActivityQueue.__disableExecution();
 
-                new CreateSecurityEntityActivity(Id("E01"), default(int), user1Id).Execute(sctx, false);
+                new CreateSecurityEntityActivity(Id("E01"), default, user1Id).Execute(sctx, false);
                 {
                     new CreateSecurityEntityActivity(Id("E02"), Id("E01"), user1Id).Execute(sctx, false);
                     {
@@ -239,7 +239,7 @@ namespace SenseNet.Security.Tests
             var rootEntityId = Id("E01");
 
             // create some activities with gap
-            sctx.CreateSecurityEntity(rootEntityId, default(int), user1Id);
+            sctx.CreateSecurityEntity(rootEntityId, default, user1Id);
             for (int entityId = rootEntityId + 1; entityId < rootEntityId + 11; entityId++)
             {
                 sctx.CreateSecurityEntity(entityId, rootEntityId, user1Id);

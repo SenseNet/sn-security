@@ -244,7 +244,7 @@ namespace SenseNet.Security.Tests
         {
 
             //# deleting an invalid group
-            CurrentContext.Security.DeleteSecurityGroup(default(int));
+            CurrentContext.Security.DeleteSecurityGroup(default);
 
         }
 

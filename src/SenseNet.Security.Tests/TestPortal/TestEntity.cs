@@ -10,7 +10,7 @@
         public TestEntity Parent
         {
             get { return _parent; }
-            set { _parent = value; ParentId = value == null ? default(int) : value.Id; }
+            set { _parent = value; ParentId = value == null ? default : value.Id; }
         }
 
         //========================================================================================

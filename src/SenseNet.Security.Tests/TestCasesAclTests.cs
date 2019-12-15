@@ -787,63 +787,63 @@ namespace SenseNet.Security.Tests
             ed0.Allow(Id("E50"), Id("G1"), false, Tools.GetPermissionTypes("__p____________"));
             ed0.Allow(Id("E51"), Id("G1"), false, Tools.GetPermissionTypes("_p_____________"));
             ed0.Apply();
-            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# set some new and more irrelevant permissions
             var ed = CurrentContext.Security.CreateAclEditor();
             ed.Deny(Id("E52"), uid1, false, Tools.GetPermissionTypes("________ppppppp"));
             ed.Deny(Id("E52"), gid1, false, Tools.GetPermissionTypes("ppppppp________"));
             ed.Apply();
-            Assert.AreEqual("_________________________________________________-------_-------", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("_________________________________________________-------_-------", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E52"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E52"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E51"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E51"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("___________________________________________________+++++___+++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("___________________________________________________+++++___+++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E50"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E50"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("____________________________________________________++++____++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("____________________________________________________++++____++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E1"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E1"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("____________________________________________________+++_____+++_", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("____________________________________________________+++_____+++_", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E2"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E2"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("____________________________________________________++______++__", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("____________________________________________________++______++__", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E5"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E5"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("____________________________________________________+_______+___", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("____________________________________________________+_______+___", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E14"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E14"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("________________________________________________________________", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("________________________________________________________________", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
         }
         [TestMethod]
         public void AclEditor_KeepInheritedPermissions_CommonAclEditor()
@@ -869,21 +869,21 @@ namespace SenseNet.Security.Tests
             ed0.Allow(Id("E50"), Id("G1"), false, Tools.GetPermissionTypes("__p____________"));
             ed0.Allow(Id("E51"), Id("G1"), false, Tools.GetPermissionTypes("_p_____________"));
             ed0.Apply();
-            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# set some new and more irrelevant permissions
             var ed = CurrentContext.Security.CreateAclEditor();
             ed.Deny(Id("E52"), uid1, false, Tools.GetPermissionTypes("________ppppppp"));
             ed.Deny(Id("E52"), gid1, false, Tools.GetPermissionTypes("ppppppp________"));
             ed.Apply();
-            Assert.AreEqual("_________________________________________________-------_-------", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("_________________________________________________-------_-------", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E52"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E52"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
@@ -898,15 +898,15 @@ namespace SenseNet.Security.Tests
             ed.ClearPermission(Id("E5"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E5"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("____________________________________________________+_______+___", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
-            Assert.AreEqual(default(int), CurrentContext.Security.Cache.Entities[Id("E5")].GetFirstAclId());
+            Assert.AreEqual("____________________________________________________+_______+___", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
+            Assert.AreEqual(default, CurrentContext.Security.Cache.Entities[Id("E5")].GetFirstAclId());
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E14"), uid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E14"), gid1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
-            Assert.AreEqual("________________________________________________________________", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default(int)));
+            Assert.AreEqual("________________________________________________________________", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
         }
         [TestMethod]
         public void AclEditor_EmptyEntriesRemovedFromDatabase()
@@ -924,7 +924,7 @@ namespace SenseNet.Security.Tests
 
             var db = CurrentContext.Security.DataProvider;
 
-            Assert.AreEqual("_________________________________________________+-+-+-+-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default(int)));
+            Assert.AreEqual("_________________________________________________+-+-+-+-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default));
             var dbentries1 = db.LoadPermissionEntries(new[] { Id("E1") }).ToArray();
             var dbentries2 = db.LoadPermissionEntries(new[] { Id("E2") }).ToArray();
             Assert.AreEqual(1, dbentries1.Count());
@@ -935,7 +935,7 @@ namespace SenseNet.Security.Tests
             ed.ClearPermission(Id("E2"), u1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
 
-            Assert.AreEqual("________________________________________________________-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), u1, default(int)));
+            Assert.AreEqual("________________________________________________________-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), u1, default));
             dbentries1 = db.LoadPermissionEntries(new[] { Id("E1") }).ToArray();
             dbentries2 = db.LoadPermissionEntries(new[] { Id("E2") }).ToArray();
             Assert.AreEqual(1, dbentries1.Count());
@@ -1021,10 +1021,10 @@ namespace SenseNet.Security.Tests
             ed.Deny(Id("E14"), u1, false, Tools.GetPermissionTypes("___p___________"));
             ed.Apply();
 
-            Assert.AreEqual("_______________________________________________________-_______+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E1"), u1, default(int)));
-            Assert.AreEqual("______________________________________________________--______++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E2"), u1, default(int)));
-            Assert.AreEqual("_____________________________________________________---_____+_+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default(int)));
-            Assert.AreEqual("____________________________________________________-_--____++_+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E14"), u1, default(int)));
+            Assert.AreEqual("_______________________________________________________-_______+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E1"), u1, default));
+            Assert.AreEqual("______________________________________________________--______++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E2"), u1, default));
+            Assert.AreEqual("_____________________________________________________---_____+_+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default));
+            Assert.AreEqual("____________________________________________________-_--____++_+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E14"), u1, default));
         }
         [TestMethod]
         public void AclEditor_NearestHolderId()
@@ -1140,16 +1140,16 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             var acl = CurrentContext.Security.GetAcl(Id("E1"));
-            Assert.AreEqual(64, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default(int) && x.DenyFrom == default(int)).Count());
+            Assert.AreEqual(64, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default && x.DenyFrom == default).Count());
 
             acl = CurrentContext.Security.GetAcl(Id("E2"));
-            Assert.AreEqual(61, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default(int) && x.DenyFrom == default(int)).Count());
+            Assert.AreEqual(61, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default && x.DenyFrom == default).Count());
 
             acl = CurrentContext.Security.GetAcl(Id("E5"));
-            Assert.AreEqual(58, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default(int) && x.DenyFrom == default(int)).Count());
+            Assert.AreEqual(58, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default && x.DenyFrom == default).Count());
 
             acl = CurrentContext.Security.GetAcl(Id("E14"));
-            Assert.AreEqual(55, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default(int) && x.DenyFrom == default(int)).Count());
+            Assert.AreEqual(55, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default && x.DenyFrom == default).Count());
         }
 
 

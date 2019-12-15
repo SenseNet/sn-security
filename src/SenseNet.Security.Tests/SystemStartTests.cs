@@ -183,7 +183,7 @@ namespace SenseNet.Security.Tests
         private static StoredSecurityEntity CreateEntity(string name, string parentName, TestUser owner, Dictionary<int, StoredSecurityEntity> storage)
         {
             var entityId = Id(name);
-            var parentEntityId = parentName == null ? default(int) : Id(parentName);
+            var parentEntityId = parentName == null ? default : Id(parentName);
 
             StoredSecurityEntity parent = null;
             storage.TryGetValue(parentEntityId, out parent);

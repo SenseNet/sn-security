@@ -110,7 +110,7 @@ namespace SenseNet.Security.Tests
             var entity = new StoredSecurityEntity
             {
                 Id = _id++,
-                ParentId = parentEntity == null ? default(int) : parentEntity.Id,
+                ParentId = parentEntity == null ? default : parentEntity.Id,
                 IsInherited = true,
                 OwnerId = ownerId,
             };
@@ -233,7 +233,7 @@ namespace SenseNet.Security.Tests
                 entities.AddOrUpdate(entity.Id, entity, (key, val) => val);
 
                 // memorize relations
-                if (storedEntity.ParentId != default(int))
+                if (storedEntity.ParentId != default)
                     //entity.Parent = entities[storedEntity.ParentId];
                     relations.Add(new Tuple<int, int>(storedEntity.Id, storedEntity.ParentId));
             }
@@ -266,7 +266,7 @@ namespace SenseNet.Security.Tests
                 entities.Add(entity.Id, entity);
 
                 // memorize relations
-                if (storedEntity.ParentId != default(int))
+                if (storedEntity.ParentId != default)
                     //entity.Parent = entities[storedEntity.ParentId];
                     relations.Add(new Tuple<SecurityEntity, int>(entity, storedEntity.ParentId));
             }
@@ -312,7 +312,7 @@ namespace SenseNet.Security.Tests
                 entities.Add(entity.Id, entity);
 
                 // memorize relations
-                if (storedEntity.ParentId != default(int))
+                if (storedEntity.ParentId != default)
                     //entity.Parent = entities[storedEntity.ParentId];
                     relations.Add(new Tuple<SecurityEntity, int>(entity, storedEntity.ParentId));
             }
