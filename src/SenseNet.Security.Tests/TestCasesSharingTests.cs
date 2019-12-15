@@ -169,8 +169,8 @@ namespace SenseNet.Security.Tests
 
             // ACTION
             var ed = ctx.CreateAclEditor();
-            ed.BreakInheritance(Id("E5"));
-            ed.BreakInheritance(Id("E8"));
+            ed.BreakInheritance(Id("E5"), new[] { EntryType.Normal });
+            ed.BreakInheritance(Id("E8"), new[] { EntryType.Normal });
             ed.Apply();
 
             // ASSERT

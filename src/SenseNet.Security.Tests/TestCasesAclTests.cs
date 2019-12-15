@@ -992,7 +992,7 @@ namespace SenseNet.Security.Tests
 
             //# clear all permissions (inherited won't be cleared)
             var ed = CurrentContext.Security.CreateAclEditor();
-            ed.BreakInheritance(Id("E2"));
+            ed.BreakInheritance(Id("E2"), new[] { EntryType.Normal });
 
             ed.ClearPermission(Id("E2"), u1, false, Tools.GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
@@ -1162,7 +1162,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
 
             Assert.AreEqual("-E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1185,7 +1185,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E2")).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E2"), new[] { EntryType.Normal }).Apply();
 
             var aclInfo = CurrentContext.Security.GetAclInfo(Id("E2"));
             Assert.IsNotNull(aclInfo);
@@ -1210,7 +1210,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), false).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new EntryType[0]).Apply();
 
             var aclInfo = CurrentContext.Security.GetAclInfo(Id("E5"));
             Assert.IsNotNull(aclInfo);
@@ -1243,7 +1243,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E36|Normal|+G2:_+++++++++++___");                                 //     0x24    //           0x24
 
             var ctx = CurrentContext.Security;
-            ctx.CreateAclEditor().BreakInheritance(Id("E32"), false).Apply();  // 0x20
+            ctx.CreateAclEditor().BreakInheritance(Id("E32"), new EntryType[0]).Apply();  // 0x20
 
             var aclE32 = CurrentContext.Security.GetAclInfo(Id("E32"));
             var aclE35 = ctx.GetAclInfo(Id("E35"));
@@ -1287,7 +1287,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E33|Normal|+G2:_+++++_________");
             SetAcl("+E34|Normal|+G2:_+++++_________");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), false).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), new EntryType[0]).Apply();
 
             var aclE12 = CurrentContext.Security.GetAclInfo(Id("E12"));
             var aclE33 = CurrentContext.Security.GetAclInfo(Id("E33"));
@@ -1333,7 +1333,7 @@ namespace SenseNet.Security.Tests
             // breaks, tests and repeat
             for (int i = 0; i < 3; i++)
             {
-                CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), false).Apply();
+                CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), new EntryType[0]).Apply();
 
                 var aclE12 = CurrentContext.Security.GetAclInfo(Id("E12"));
                 var aclE4 = CurrentContext.Security.GetAclInfo(Id("E4"));
@@ -1373,7 +1373,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+___________++_");
 
             //#
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
 
             Assert.AreEqual("-E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1386,7 +1386,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("-E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-+++++++++++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
             //#
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), normalize: true).Apply();
+            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
 
 
             var sec = CurrentContext.Security;
@@ -1407,9 +1407,9 @@ namespace SenseNet.Security.Tests
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
 
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5")).Apply();
+            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), new EntryType[0]).Apply();
 
             Assert.AreEqual("+E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1444,7 +1444,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("E2|Normal|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(aces[0].ToString()));
 
 
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E2")).Apply();
+            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E2"), new EntryType[0]).Apply();
 
 
             Assert.AreEqual("+E2|Normal|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E2")).ToString()));
@@ -1470,11 +1470,11 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual(e2id, sec.GetSecurityEntity(e5id).GetFirstAclId());
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5")).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
 
             Assert.AreEqual(e5id, sec.GetSecurityEntity(e5id).GetFirstAclId());
 
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), normalize: true).Apply();
+            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
 
             Assert.AreEqual(e2id, sec.GetSecurityEntity(e5id).GetFirstAclId());
 
@@ -1686,7 +1686,7 @@ namespace SenseNet.Security.Tests
 
             var ctx = CurrentContext.Security;
 
-            ctx.CreateAclEditor().BreakInheritance(Id("E3"), false).Apply(); // with entry
+            ctx.CreateAclEditor().BreakInheritance(Id("E3"), new EntryType[0]).Apply(); // with entry
             var acl3 = ctx.GetAcl(Id("E3"));
             var acl9 = ctx.GetAcl(Id("E9")); // child of E3 and no entry
             var acl25 = ctx.GetAcl(Id("E25")); // deeper descendant of E3 and no entry
@@ -1694,7 +1694,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(true, acl9.Inherits);
             Assert.AreEqual(true, acl25.Inherits);
 
-            ctx.CreateAclEditor().BreakInheritance(Id("E4"), false).Apply(); // without entry
+            ctx.CreateAclEditor().BreakInheritance(Id("E4"), new EntryType[0]).Apply(); // without entry
             var acl4 = ctx.GetAcl(Id("E4"));
             var acl11 = ctx.GetAcl(Id("E11")); // child of E4 and no entry
             var acl34 = ctx.GetAcl(Id("E34")); // deeper descendant of E4 and no entry
