@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics;
 using System.IO;
-using SenseNet.Security;
 using SenseNet.Security.Data;
-using SenseNet.Security.EF6SecurityStore;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Tests.TestPortal;
 

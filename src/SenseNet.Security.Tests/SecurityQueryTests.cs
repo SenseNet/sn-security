@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Remotion.Linq.Utilities;
 using SenseNet.Security.Tests.TestPortal;
 
 namespace SenseNet.Security.Tests

@@ -1,6 +1,4 @@
-﻿using System;
-using SenseNet.Diagnostics;
-using SenseNet.Security.Messaging;
+﻿using SenseNet.Security.Messaging;
 
 namespace SenseNet.Security
 {

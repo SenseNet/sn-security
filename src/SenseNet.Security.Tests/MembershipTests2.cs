@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SenseNet.Security;
 using SenseNet.Security.Tests.TestPortal;
 using System;
 using System.Collections.Generic;

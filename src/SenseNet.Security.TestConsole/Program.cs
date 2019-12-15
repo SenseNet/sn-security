@@ -3,9 +3,6 @@ using SenseNet.Security.Tests;
 using SenseNet.Security.Tests.TestPortal;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SenseNet.Security.Data;
 
 namespace SenseNet.Security.TestConsole

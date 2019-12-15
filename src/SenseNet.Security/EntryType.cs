@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SenseNet.Security
+﻿namespace SenseNet.Security
 {
     /// <summary>
     /// Defines categories for Access Control Entry

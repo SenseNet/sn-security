@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using SenseNet.Security.Tests.TestPortal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Messaging;

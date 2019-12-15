@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Runtime.Remoting.Contexts;
-using SenseNet.Security;
 using SenseNet.Security.Messaging;
-using SenseNet.Security.Messaging.SecurityMessages;
 using System.Diagnostics;
 using System.IO;
 using SenseNet.Diagnostics;
