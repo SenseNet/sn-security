@@ -242,15 +242,16 @@ namespace SenseNet.Security
         /// Restores the permission inheritance on the requested entity.
         /// </summary>
         /// <param name="entityId">The requested entity.</param>
-        /// <param name="categoriesToNormalize">If true (default is false), unnecessary explicit entries
-        /// that match the categories will be removed.</param>
+        /// <param name="categoriesToNormalize">Unnecessary explicit entries
+        /// that match these categories will be removed.</param>
         /// <returns>A reference to this instance for calling more operations.</returns>
         public AclEditor UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize)
         {
             _breaks.Remove(entityId);
             if (!_unbreaks.Contains(entityId))
                 _unbreaks.Add(entityId);
-            NormalizeExplicitePermissions(entityId, categoriesToNormalize);
+            if (categoriesToNormalize != null && categoriesToNormalize.Length > 0)
+                NormalizeExplicitePermissions(entityId, categoriesToNormalize);
             return this;
         }
 
