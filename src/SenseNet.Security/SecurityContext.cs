@@ -80,7 +80,7 @@ namespace SenseNet.Security
         /// </summary>
         protected static void StartTheSystem(SecurityConfiguration configuration)
         {
-            _generalContext = null;
+            General = null;
 
             // The messageprovider provider must receive ongoing activities at this time.
             StartedAt = DateTime.UtcNow;
@@ -110,7 +110,7 @@ namespace SenseNet.Security
 
             CommunicationMonitor.Initialize();
 
-            _generalContext = new SecurityContext(SystemUser);
+            General = new SecurityContext(SystemUser);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
 
             _killed = false;
@@ -579,8 +579,7 @@ namespace SenseNet.Security
         }
 
         /***************** General context for built in system user ***************/
-        private static SecurityContext _generalContext;
-        internal static SecurityContext General => _generalContext;
+        internal static SecurityContext General { get; private set; }
 
         /***************** Debug info ***************/
         /// <summary>

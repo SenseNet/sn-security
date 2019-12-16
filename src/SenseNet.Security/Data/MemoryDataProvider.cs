@@ -16,8 +16,7 @@ namespace SenseNet.Security.Data
         private static readonly object MessageLock = new object();
         private static readonly object AcesLock = new object();
 
-        private static DatabaseStorage _storage;
-        internal static DatabaseStorage Storage { get { return _storage; } }
+        internal static DatabaseStorage Storage { get; private set; }
 
         private MemoryDataProvider()
         {
@@ -26,7 +25,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public MemoryDataProvider(DatabaseStorage storage)
         {
-            _storage = storage;
+            Storage = storage;
         }
 
         /* ===================================================================== interface implementation */
@@ -43,7 +42,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public void DeleteEverything()
         {
-            _storage = DatabaseStorage.CreateEmpty();
+            Storage = DatabaseStorage.CreateEmpty();
         }
         /// <inheritdoc />
         public void InstallDatabase()
@@ -53,20 +52,20 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public int GetEstimatedEntityCount()
         {
-            return _storage.Entities.Count;
+            return Storage.Entities.Count;
         }
         /// <inheritdoc />
         public IEnumerable<StoredSecurityEntity> LoadSecurityEntities()
         {
-            return _storage.Entities.Values;
+            return Storage.Entities.Values;
         }
         /// <inheritdoc />
         public IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks()
         {
             lock (AcesLock)
             {
-                var byEntries = _storage.Aces.Select(a => a.EntityId);
-                var byBreaks = _storage.Entities.Values.Where(e => e.IsInherited == false).Select(e => e.Id);
+                var byEntries = Storage.Aces.Select(a => a.EntityId);
+                var byBreaks = Storage.Entities.Values.Where(e => e.IsInherited == false).Select(e => e.Id);
                 var result = byEntries.Union(byBreaks).Distinct().ToArray();
                 return result;
             }
@@ -75,7 +74,7 @@ namespace SenseNet.Security.Data
         public IEnumerable<SecurityGroup> LoadAllGroups()
         {
             var groups = new Dictionary<int, SecurityGroup>();
-            foreach (var membership in _storage.Memberships)
+            foreach (var membership in Storage.Memberships)
             {
                 var group = EnsureGroup(membership.GroupId, groups);
                 if (membership.IsUser)
@@ -106,7 +105,7 @@ namespace SenseNet.Security.Data
         {
             lock (AcesLock)
             {
-                foreach (var dbItem in _storage.Aces)
+                foreach (var dbItem in Storage.Aces)
                 {
                     // return with a copy
                     yield return new StoredAce
@@ -125,7 +124,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public StoredSecurityEntity LoadStoredSecurityEntity(int entityId)
         {
-            _storage.Entities.TryGetValue(entityId, out var entity);
+            Storage.Entities.TryGetValue(entityId, out var entity);
             return entity;
         }
         /// <inheritdoc />
@@ -135,7 +134,7 @@ namespace SenseNet.Security.Data
             if (origEntity != null)
                 return;
 
-            _storage.Entities[entity.Id] = entity;
+            Storage.Entities[entity.Id] = entity;
         }
         /// <inheritdoc />
         public void UpdateSecurityEntity(StoredSecurityEntity entity)
@@ -143,12 +142,12 @@ namespace SenseNet.Security.Data
             var oldEntity = LoadStoredSecurityEntity(entity.Id);
             if (oldEntity == null)
                 throw new EntityNotFoundException("Cannot update entity because it does not exist: " + entity.Id);
-            _storage.Entities[entity.Id] = entity;
+            Storage.Entities[entity.Id] = entity;
         }
         /// <inheritdoc />
         public void DeleteSecurityEntity(int entityId)
         {
-            _storage.Entities.Remove(entityId);
+            Storage.Entities.Remove(entityId);
         }
         /// <inheritdoc />
         public void MoveSecurityEntity(int sourceId, int targetId)
@@ -168,7 +167,7 @@ namespace SenseNet.Security.Data
             var group = new SecurityGroup(groupId);
             var groups = new Dictionary<int, SecurityGroup> {{group.Id, group}};
             var rows = 0;
-            foreach (var membership in _storage.Memberships.Where(x => x.GroupId == groupId))
+            foreach (var membership in Storage.Memberships.Where(x => x.GroupId == groupId))
             {
                 rows++;
                 if (membership.IsUser)
@@ -204,13 +203,13 @@ namespace SenseNet.Security.Data
         public IEnumerable<StoredAce> LoadAllPermissionEntries()
         {
             lock (AcesLock)
-                return _storage.Aces.Select(x => x.Clone()).ToArray();
+                return Storage.Aces.Select(x => x.Clone()).ToArray();
         }
         /// <inheritdoc />
         public IEnumerable<StoredAce> LoadPermissionEntries(IEnumerable<int> entityIds)
         {
             lock (AcesLock)
-                return _storage.Aces.Where(a => entityIds.Contains(a.EntityId)).ToArray();
+                return Storage.Aces.Where(a => entityIds.Contains(a.EntityId)).ToArray();
         }
 
         /// <inheritdoc />
@@ -220,10 +219,10 @@ namespace SenseNet.Security.Data
             {
                 foreach (var ace in aces)
                 {
-                    var old = _storage.Aces.FirstOrDefault(x => x.EntityId == ace.EntityId && x.EntryType == ace.EntryType && x.IdentityId == ace.IdentityId && x.LocalOnly == ace.LocalOnly);
+                    var old = Storage.Aces.FirstOrDefault(x => x.EntityId == ace.EntityId && x.EntryType == ace.EntryType && x.IdentityId == ace.IdentityId && x.LocalOnly == ace.LocalOnly);
                     if (old != null)
-                        _storage.Aces.Remove(old);
-                    _storage.Aces.Add(ace);
+                        Storage.Aces.Remove(old);
+                    Storage.Aces.Add(ace);
                 }
             }
         }
@@ -235,9 +234,9 @@ namespace SenseNet.Security.Data
             {
                 foreach (var ace in aces)
                 {
-                    var old = _storage.Aces.FirstOrDefault(x => x.EntityId == ace.EntityId && x.EntryType == ace.EntryType && x.IdentityId == ace.IdentityId && x.LocalOnly == ace.LocalOnly);
+                    var old = Storage.Aces.FirstOrDefault(x => x.EntityId == ace.EntityId && x.EntryType == ace.EntryType && x.IdentityId == ace.IdentityId && x.LocalOnly == ace.LocalOnly);
                     if (old != null)
-                        _storage.Aces.Remove(old);
+                        Storage.Aces.Remove(old);
                 }
             }
         }
@@ -246,22 +245,22 @@ namespace SenseNet.Security.Data
         public void RemovePermissionEntriesByEntity(int entityId)
         {
             lock (AcesLock)
-                _storage.Aces.RemoveAll(y => y.EntityId == entityId);
+                Storage.Aces.RemoveAll(y => y.EntityId == entityId);
         }
 
         internal void RemovePermissionEntriesByGroup(int groupId)
         {
             lock (AcesLock)
-                _storage.Aces.RemoveAll(x => x.IdentityId == groupId);
+                Storage.Aces.RemoveAll(x => x.IdentityId == groupId);
         }
 
         /// <inheritdoc />
         public void DeleteEntitiesAndEntries(int entityId)
         {
             lock (AcesLock)
-                _storage.Aces.RemoveAll(y => y.EntityId == entityId);
+                Storage.Aces.RemoveAll(y => y.EntityId == entityId);
 
-            var childIds = _storage.Entities.Values.Where(se => se.ParentId == entityId).Select(sec => sec.Id).ToArray();
+            var childIds = Storage.Entities.Values.Where(se => se.ParentId == entityId).Select(sec => sec.Id).ToArray();
 
             // delete children recursively
             foreach (var childEntityId in childIds)
@@ -270,7 +269,7 @@ namespace SenseNet.Security.Data
             }
 
             // remove the entity itself
-            _storage.Entities.Remove(entityId);}
+            Storage.Entities.Remove(entityId);}
 
         /// <inheritdoc />
         public void QueryGroupRelatedEntities(int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds)
@@ -278,10 +277,10 @@ namespace SenseNet.Security.Data
             lock (AcesLock)
             {
                 var result = new List<int>();
-                entityIds = _storage.Aces.Where(x => x.IdentityId == groupId).Select(x => x.EntityId).Distinct();
+                entityIds = Storage.Aces.Where(x => x.IdentityId == groupId).Select(x => x.EntityId).Distinct();
                 foreach (var relatedEntityId in entityIds)
                 {
-                    var aces = _storage.Aces.Where(x => x.EntityId == relatedEntityId).ToArray();
+                    var aces = Storage.Aces.Where(x => x.EntityId == relatedEntityId).ToArray();
                     var groupRelatedCount = aces.Count(x => x.IdentityId == groupId);
                     if (aces.Length == groupRelatedCount)
                         result.Add(relatedEntityId);
@@ -302,7 +301,7 @@ namespace SenseNet.Security.Data
                 var id = Interlocked.Increment(ref LastActivityId);
                 var body =  SecurityActivity.SerializeActivity(activity);
                 bodySize = body.Length;
-                _storage.Messages.Add(new Tuple<int, DateTime, byte[]>(id, DateTime.UtcNow, body));
+                Storage.Messages.Add(new Tuple<int, DateTime, byte[]>(id, DateTime.UtcNow, body));
                 return id;
             }
         }
@@ -312,7 +311,7 @@ namespace SenseNet.Security.Data
         {
             lock (MessageLock)
             {
-                var lastMessage = _storage.Messages?.OrderByDescending(m => m.Item1).FirstOrDefault();
+                var lastMessage = Storage.Messages?.OrderByDescending(m => m.Item1).FirstOrDefault();
                 if (lastMessage == null)
                     return 0;
                 return lastMessage.Item1;
@@ -332,7 +331,7 @@ namespace SenseNet.Security.Data
             {
                 var result = new List<SecurityActivity>();
 
-                foreach (var item in _storage.Messages.Where(x => x.Item1 >= from && x.Item1 <= to).Take(count))
+                foreach (var item in Storage.Messages.Where(x => x.Item1 >= from && x.Item1 <= to).Take(count))
                 {
                     var activity = SecurityActivity.DeserializeActivity(item.Item3);
                     if (activity == null)
@@ -354,7 +353,7 @@ namespace SenseNet.Security.Data
             {
                 var result = new List<SecurityActivity>();
 
-                foreach (var item in _storage.Messages.Where(x => gaps.Contains(x.Item1)))
+                foreach (var item in Storage.Messages.Where(x => gaps.Contains(x.Item1)))
                 {
                     var activity = SecurityActivity.DeserializeActivity(item.Item3);
                     if (activity == null)
@@ -374,7 +373,7 @@ namespace SenseNet.Security.Data
         {
             lock (MessageLock)
             {
-                var item = _storage.Messages.FirstOrDefault(x => x.Item1 == id);
+                var item = Storage.Messages.FirstOrDefault(x => x.Item1 == id);
                 if (item == null)
                     return null;
 
@@ -391,8 +390,8 @@ namespace SenseNet.Security.Data
             {
                 var timeLimit = DateTime.UtcNow.AddMinutes(-timeLimitInMinutes);
 
-                foreach (var item in _storage.Messages.Where(x => x.Item2 < timeLimit).ToArray())
-                    _storage.Messages.Remove(item);
+                foreach (var item in Storage.Messages.Where(x => x.Item2 < timeLimit).ToArray())
+                    Storage.Messages.Remove(item);
             }
         }
 
@@ -418,7 +417,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public void DeleteIdentityAndRelatedEntries(int identityId)
         {
-            _storage.Memberships.RemoveAll(m => (m.GroupId == identityId || m.MemberId == identityId));
+            Storage.Memberships.RemoveAll(m => (m.GroupId == identityId || m.MemberId == identityId));
             RemovePermissionEntriesByGroup(identityId);
         }
 
@@ -436,16 +435,16 @@ namespace SenseNet.Security.Data
             {
                 foreach (var memberId in groupMembers)
                 {
-                    _storage.Memberships.RemoveAll(m => m.GroupId == groupId && m.MemberId == memberId);
-                    _storage.Memberships.Add(new Membership { GroupId = groupId, MemberId = memberId, IsUser = false });
+                    Storage.Memberships.RemoveAll(m => m.GroupId == groupId && m.MemberId == memberId);
+                    Storage.Memberships.Add(new Membership { GroupId = groupId, MemberId = memberId, IsUser = false });
                 }
             }
             if (userMembers != null)
             {
                 foreach (var memberId in userMembers)
                 {
-                    _storage.Memberships.RemoveAll(m => m.GroupId == groupId && m.MemberId == memberId);
-                    _storage.Memberships.Add(new Membership { GroupId = groupId, MemberId = memberId, IsUser = true });
+                    Storage.Memberships.RemoveAll(m => m.GroupId == groupId && m.MemberId == memberId);
+                    Storage.Memberships.Add(new Membership { GroupId = groupId, MemberId = memberId, IsUser = true });
                 }
             }
         }
@@ -455,10 +454,10 @@ namespace SenseNet.Security.Data
         {
             if (groupMembers != null)
                 foreach (var memberId in groupMembers)
-                    _storage.Memberships.RemoveAll(m => m.GroupId == groupId && m.MemberId == memberId);
+                    Storage.Memberships.RemoveAll(m => m.GroupId == groupId && m.MemberId == memberId);
             if (userMembers != null)
                 foreach (var memberId in userMembers)
-                    _storage.Memberships.RemoveAll(m => m.GroupId == groupId && m.MemberId == memberId);
+                    Storage.Memberships.RemoveAll(m => m.GroupId == groupId && m.MemberId == memberId);
         }
 
 
@@ -467,7 +466,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public IEnumerable<long> GetMembershipForConsistencyCheck()
         {
-            return _storage.Memberships.Select(m => (Convert.ToInt64(m.GroupId) << 32) + m.MemberId).ToArray();
+            return Storage.Memberships.Select(m => (Convert.ToInt64(m.GroupId) << 32) + m.MemberId).ToArray();
         }
     }
 }

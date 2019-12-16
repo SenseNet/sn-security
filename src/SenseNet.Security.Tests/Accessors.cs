@@ -24,7 +24,22 @@ namespace SenseNet.Security.Tests
         internal T GetFieldOrProperty<T>(string name)
         {
             var field = _wrappedType.GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
-            return (T) field.GetValue(Wrapped);
+            if (field != null)
+               return (T) field.GetValue(Wrapped);
+            var property = _wrappedType.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);
+            if (property != null)
+                return (T) property.GetValue(Wrapped);
+            throw new ApplicationException("Field or property was not found: " + name);
+        }
+        internal T GetStaticFieldOrProperty<T>(string name)
+        {
+            var field = _wrappedType.GetField(name, BindingFlags.NonPublic | BindingFlags.Static);
+            if (field != null)
+                return (T)field.GetValue(Wrapped);
+            var property = _wrappedType.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Static);
+            if (property != null)
+                return (T)property.GetValue(Wrapped);
+            throw new ApplicationException("Field or property was not found: " + name);
         }
         internal T GetStaticField<T>(string name)
         {
@@ -34,8 +49,34 @@ namespace SenseNet.Security.Tests
         internal void SetFieldOrProperty(string name, object value)
         {
             var field = _wrappedType.GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
-            
-            field.SetValue(Wrapped, value);
+            if (field != null)
+            {
+                field.SetValue(Wrapped, value);
+                return;
+            }
+            var property = _wrappedType.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);
+            if (property != null)
+            {
+                property.SetValue(Wrapped, value);
+                return;
+            }
+            throw new ApplicationException("Field or property was not found: " + name);
+        }
+        internal void SetStaticFieldOrProperty(string name, object value)
+        {
+            var field = _wrappedType.GetField(name, BindingFlags.NonPublic | BindingFlags.Static);
+            if (field != null)
+            {
+                field.SetValue(Wrapped, value);
+                return;
+            }
+            var property = _wrappedType.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Static);
+            if (property != null)
+            {
+                property.SetValue(Wrapped, value);
+                return;
+            }
+            throw new ApplicationException("Field or property was not found: " + name);
         }
     }
     internal class MemoryDataProviderAccessor : Accessor
@@ -48,7 +89,7 @@ namespace SenseNet.Security.Tests
             get
             {
                 if (_storage == null)
-                    _storage = base.GetStaticField<DatabaseStorage>("_storage");
+                    _storage = base.GetStaticFieldOrProperty<DatabaseStorage>("Storage");
                 return _storage;
             }
         }

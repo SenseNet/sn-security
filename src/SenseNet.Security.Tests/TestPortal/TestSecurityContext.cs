@@ -10,7 +10,7 @@ namespace SenseNet.Security.Tests.TestPortal
         public new static void StartTheSystem(SecurityConfiguration configuration)
         {
             SecurityContext.StartTheSystem(configuration);
-            _generalContext = new TestSecurityContext(SystemUser);
+            General = new TestSecurityContext(SystemUser);
         }
 
         public ISecurityDataProvider GetDataProvider() => DataProvider;
@@ -254,10 +254,6 @@ namespace SenseNet.Security.Tests.TestPortal
         }
 
         /***************** General context for built in system user ***************/
-        private static SecurityContext _generalContext;
-        internal new static SecurityContext General
-        {
-            get { return _generalContext; }
-        }
+        internal new static SecurityContext General { get; private set; }
     }
 }

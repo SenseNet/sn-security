@@ -56,11 +56,8 @@ namespace SenseNet.Security
         public bool IsInherited { get; internal set; }                 //  1
 
         private readonly object _childrenSync = new object();
-        private List<SecurityEntity> _children;
-        internal List<SecurityEntity> Children => _children;
-// 32 * Count
 
-        private AclInfo _acl;                                          // 32
+        internal List<SecurityEntity> Children { get; private set; }   // 32 * Count
 
         /// <summary>
         /// Parent of this entity or null.
@@ -71,22 +68,22 @@ namespace SenseNet.Security
         /// Explicit permission entries. If this contains a value, it means this entity has explicit permission entries.
         /// Serves only test purposes, do not modify this object.
         /// </summary>
-        public AclInfo Acl => _acl;
+        public AclInfo Acl { get; private set; }
 
         internal void SetAclSafe(AclInfo acl)
         {
             if (acl == null)
             {
                 // break dependency if exists
-                if (_acl != null)
-                    _acl.Entity = null;
+                if (Acl != null)
+                    Acl.Entity = null;
             }
             else
             {
                 // set dependency
                 acl.Entity = this;
             }
-            _acl = acl;
+            Acl = acl;
         }
 
         /// <summary>
@@ -110,28 +107,28 @@ namespace SenseNet.Security
         {
             // This does not have to be thread safe as it is called only by the 
             // init process and has to be as fast as possible.
-            if (_children == null)
-                _children = new List<SecurityEntity>(new[] { child });
+            if (Children == null)
+                Children = new List<SecurityEntity>(new[] { child });
             else
-                _children.Add(child);
+                Children.Add(child);
         }
         internal void AddChild(SecurityEntity child) // called only from safe methods
         {
             lock (_childrenSync)
             {
-                if (_children == null)
+                if (Children == null)
                 {
-                    _children = new List<SecurityEntity>(new[] {child});
+                    Children = new List<SecurityEntity>(new[] {child});
                 }
                 else
                 {
-                    if (_children.Contains(child)) 
+                    if (Children.Contains(child)) 
                         return;
 
                     // work with a temp list to maintain thread safety
-                    var newList = new List<SecurityEntity>(_children) {child};
+                    var newList = new List<SecurityEntity>(Children) {child};
 
-                    _children = newList;
+                    Children = newList;
                 }
             }
         }
@@ -139,14 +136,14 @@ namespace SenseNet.Security
         {
             lock (_childrenSync)
             {
-                if (_children == null)
+                if (Children == null)
                     return;
 
                 // work with a temp list to maintain thread safety
-                var newList = new List<SecurityEntity>(_children);
+                var newList = new List<SecurityEntity>(Children);
                 newList.Remove(child);
 
-                _children = newList;
+                Children = newList;
             }
         }
 

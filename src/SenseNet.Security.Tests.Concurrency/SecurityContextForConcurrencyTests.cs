@@ -8,7 +8,7 @@ namespace SenseNet.Security.Tests.TestPortal
         public new static void StartTheSystem(SecurityConfiguration configuration)
         {
             SecurityContext.StartTheSystem(configuration);
-            _generalContext = new SecurityContextForConcurrencyTests(SystemUser);
+            General = new SecurityContextForConcurrencyTests(SystemUser);
         }
 
         /*********************** Low level evaluator API **********************/
@@ -28,10 +28,6 @@ namespace SenseNet.Security.Tests.TestPortal
         }
 
         /***************** General context for built in system user ***************/
-        private static SecurityContextForConcurrencyTests _generalContext;
-        internal new static SecurityContextForConcurrencyTests General
-        {
-            get { return _generalContext; }
-        }
+        internal new static SecurityContextForConcurrencyTests General { get; private set; }
     }
 }

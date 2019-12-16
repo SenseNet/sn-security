@@ -8,9 +8,7 @@ namespace SenseNet.Security.Tests
     [TestClass]
     public abstract partial class TestCases
     {
-        // ReSharper disable once InconsistentNaming
-        private Context __context;
-        protected Context CurrentContext => __context;
+        protected Context CurrentContext { get; private set; }
 
         protected abstract ISecurityDataProvider GetDataProvider();
         protected abstract void CleanupMemberships();
@@ -22,7 +20,7 @@ namespace SenseNet.Security.Tests
             dataProvider.DeleteEverything();
             SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             Context.StartTheSystem(dataProvider, new DefaultMessageProvider());
-            __context = new Context(TestUser.User1);
+            CurrentContext = new Context(TestUser.User1);
         }
 
         /* ======================================================================= Tools */

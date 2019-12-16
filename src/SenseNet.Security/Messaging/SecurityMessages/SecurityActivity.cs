@@ -320,13 +320,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             set { _isUnprocessedActivity = value; }
         }
 
-        [NonSerialized]
-        private List<SecurityActivity> _waitingFor = new List<SecurityActivity>();
-        internal List<SecurityActivity> WaitingFor => _waitingFor;
+        [field: NonSerialized]
+        internal List<SecurityActivity> WaitingFor { get; private set; } = new List<SecurityActivity>();
 
-        [NonSerialized]
-        private List<SecurityActivity> _waitingForMe = new List<SecurityActivity>();
-        internal List<SecurityActivity> WaitingForMe => _waitingForMe;
+        [field: NonSerialized]
+        internal List<SecurityActivity> WaitingForMe { get; private set; } = new List<SecurityActivity>();
 
         internal void WaitFor(SecurityActivity olderActivity)
         {
@@ -355,8 +353,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public void OnDeserialization(object sender)
         {
-            _waitingFor = new List<SecurityActivity>();
-            _waitingForMe = new List<SecurityActivity>();
+            WaitingFor = new List<SecurityActivity>();
+            WaitingForMe = new List<SecurityActivity>();
         }
     }
 }

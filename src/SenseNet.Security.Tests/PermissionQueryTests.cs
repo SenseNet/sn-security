@@ -10,16 +10,14 @@ namespace SenseNet.Security.Tests
     [TestClass]
     public class PermissionQueryTests
     {
-        // ReSharper disable once InconsistentNaming
-        private Context __context;
-        private Context CurrentContext => __context;
+        private Context CurrentContext { get; set; }
 
         public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void StartTest()
         {
-            __context = Tools.GetEmptyContext(TestUser.User1);
+            CurrentContext = Tools.GetEmptyContext(TestUser.User1);
             CreatePlayground();
         }
 
