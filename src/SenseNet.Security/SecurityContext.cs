@@ -130,8 +130,7 @@ namespace SenseNet.Security
             SecurityActivity activity = null;
 
             // load from database if it was too big to distribute
-            var bigActivityMessage = message as BigActivityMessage;
-            if (bigActivityMessage != null)
+            if (message is BigActivityMessage bigActivityMessage)
             {
                 activity = DataHandler.LoadBigSecurityActivity(bigActivityMessage.DatabaseId);
                 if (activity == null)

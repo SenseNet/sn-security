@@ -45,17 +45,14 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             // There aren't any valid scenarios if the olderActivity is ModifySecurityEntityOwnerActivity or SetAclActivity
 
-            var createSecurityEntityActivity = olderActivity as CreateSecurityEntityActivity;
-            if (createSecurityEntityActivity != null)
+            if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
                 return createSecurityEntityActivity.EntityId == this.ParentEntityId;
 
-            var deleteSecurityEntityActivity = olderActivity as DeleteSecurityEntityActivity;
-            if (deleteSecurityEntityActivity != null)
+            if (olderActivity is DeleteSecurityEntityActivity deleteSecurityEntityActivity)
                 return deleteSecurityEntityActivity.EntityId == this.EntityId
                     || DependencyTools.IsInTree(this.Context, this.ParentEntityId, deleteSecurityEntityActivity.EntityId);
 
-            var moveSecurityEntityActivity = olderActivity as MoveSecurityEntityActivity;
-            if (moveSecurityEntityActivity != null)
+            if (olderActivity is MoveSecurityEntityActivity moveSecurityEntityActivity)
                 return (moveSecurityEntityActivity.SourceId == this.EntityId) || (moveSecurityEntityActivity.TargetId == this.EntityId);
 
             return false;

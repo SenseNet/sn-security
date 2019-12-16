@@ -39,27 +39,23 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             if (olderActivity is MembershipActivity)
                 return true;
 
-            var createSecurityEntityActivity = olderActivity as CreateSecurityEntityActivity;
-            if (createSecurityEntityActivity != null)
+            if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
             {
                 return (createSecurityEntityActivity.EntityId == this.EntityId)
                        || DependencyTools.IsInTree(this.Context, createSecurityEntityActivity.ParentEntityId, this.EntityId);
             }
 
-            var deleteSecurityEntityActivity = olderActivity as DeleteSecurityEntityActivity;
-            if (deleteSecurityEntityActivity != null)
+            if (olderActivity is DeleteSecurityEntityActivity deleteSecurityEntityActivity)
             {
                 return DependencyTools.HasAncestorRelation(this.Context, this.EntityId, deleteSecurityEntityActivity.EntityId);
             }
 
-            var modifySecurityEntityOwnerActivity = olderActivity as ModifySecurityEntityOwnerActivity;
-            if (modifySecurityEntityOwnerActivity != null)
+            if (olderActivity is ModifySecurityEntityOwnerActivity modifySecurityEntityOwnerActivity)
             {
                 return DependencyTools.IsInTree(this.Context, modifySecurityEntityOwnerActivity.EntityId, this.EntityId);
             }
 
-            var moveSecurityEntityActivity = olderActivity as MoveSecurityEntityActivity;
-            if (moveSecurityEntityActivity != null)
+            if (olderActivity is MoveSecurityEntityActivity moveSecurityEntityActivity)
             {
                 var ctx = this.Context;
                 var entities = SecurityEntity.PeekEntities(ctx, this.EntityId, moveSecurityEntityActivity.SourceId, moveSecurityEntityActivity.TargetId);
@@ -74,8 +70,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                     return true;
             }
 
-            var setAclActivity = olderActivity as SetAclActivity;
-            if (setAclActivity != null)
+            if (olderActivity is SetAclActivity setAclActivity)
                 return DependencyTools.AnyIsInTree(this.Context, setAclActivity.AllEntityIds, this.EntityId);
 
             return false;

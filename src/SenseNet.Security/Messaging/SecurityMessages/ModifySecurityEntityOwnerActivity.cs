@@ -43,8 +43,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             // There aren't any valid scenarios if the olderActivity is DeleteSecurityEntityActivity, MoveSecurityEntityActivity or SetAclActivity
 
-            var createSecurityEntityActivity = olderActivity as CreateSecurityEntityActivity;
-            if (createSecurityEntityActivity != null)
+            if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
             {
                 return createSecurityEntityActivity.EntityId == this.EntityId;
             }

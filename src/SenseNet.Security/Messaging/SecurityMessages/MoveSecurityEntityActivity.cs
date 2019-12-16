@@ -43,12 +43,10 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             // There aren't any valid scenarios if the olderActivity is ModifySecurityEntityOwnerActivity or SetAclActivity
 
-            var createSecurityEntityActivity = olderActivity as CreateSecurityEntityActivity;
-            if (createSecurityEntityActivity != null)
+            if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
                 return (this.SourceId == createSecurityEntityActivity.EntityId) || (this.TargetId == createSecurityEntityActivity.EntityId);
 
-            var deleteSecurityEntityActivity = olderActivity as DeleteSecurityEntityActivity;
-            if (deleteSecurityEntityActivity != null)
+            if (olderActivity is DeleteSecurityEntityActivity deleteSecurityEntityActivity)
             {
                 var ctx = this.Context;
                 var entities = SecurityEntity.PeekEntities(ctx, deleteSecurityEntityActivity.EntityId, this.SourceId, this.TargetId);
@@ -62,8 +60,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                 if (DependencyTools.HasAncestorRelation(ctx, moveTarget, deleteTarget))
                     return true;
             }
-            var moveSecurityEntityActivity = olderActivity as MoveSecurityEntityActivity;
-            if (moveSecurityEntityActivity != null)
+
+            if (olderActivity is MoveSecurityEntityActivity moveSecurityEntityActivity)
             {
                 var ctx = this.Context;
                 var entities = SecurityEntity.PeekEntities(ctx, this.SourceId, this.TargetId, moveSecurityEntityActivity.SourceId, moveSecurityEntityActivity.TargetId);
