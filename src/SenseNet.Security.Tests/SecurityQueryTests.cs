@@ -828,7 +828,7 @@ namespace SenseNet.Security.Tests
         }
 
         #region Helper methods
-        private Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
+        private readonly Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
 
         private int _rootEntityId = 1;
 

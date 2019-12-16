@@ -214,7 +214,7 @@ namespace SenseNet.Security.Tests
         //    // Loading times: 00:00:09.5691147, 00:00:19.1797264, Load: 00:00:12.7218657, Rel: 00:00:02.9009923, Copy: 00:00:03.5535364
         //}
 
-        static StringBuilder _log = new StringBuilder();
+        static readonly StringBuilder _log = new StringBuilder();
 
         public static IDictionary<int, SecurityEntity> LoadSecurityEntities_1(ISecurityDataProvider dataProvider)
         {

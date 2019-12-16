@@ -66,7 +66,7 @@ namespace SenseNet.Security.Tests.Concurrency
             return Tools.GetId(name);
         }
 
-        private static Random _rnd = new Random();
+        private static readonly Random _rnd = new Random();
         private static DateTime _started;
         private static volatile int _errors;
 

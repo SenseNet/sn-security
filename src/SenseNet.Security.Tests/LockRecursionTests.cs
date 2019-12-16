@@ -12,7 +12,7 @@ namespace SenseNet.Security.Tests
     {
         internal class LockRecursionUser : ISecurityUser
         {
-            private Func<int, IEnumerable<int>> _extenderMethod;
+            private readonly Func<int, IEnumerable<int>> _extenderMethod;
             public int Id { get; }
 
             public LockRecursionUser(int id, Func<int, IEnumerable<int>> extenderMethod)
@@ -43,7 +43,7 @@ namespace SenseNet.Security.Tests
             return new Context(currentUser);
         }
 
-        private Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
+        private readonly Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
 
         private void CreatePlayground(Context context)
         {
