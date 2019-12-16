@@ -234,11 +234,7 @@ namespace SenseNet.Security.Tests
         //[TestMethod]
         public void LockRecursion_NoExtension()
         {
-            var user = new LockRecursionUser(Id("E1"), entityId =>
-            {
-                // There is no extension.
-                return new int[0];
-            });
+            var user = new LockRecursionUser(Id("E1"), entityId => new int[0]);
 
             var context = GetContextAndStartTheSystem(user);
             context.Security.HasPermission(Id("E1"), PermissionType.Open);
