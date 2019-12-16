@@ -8,35 +8,35 @@ namespace SenseNet.Security.Messaging
 {
     internal class SecurityActivityLoader : IEnumerable<SecurityActivity>
     {
-        private readonly bool gapLoader;
+        private readonly bool _gapLoader;
 
-        private readonly int from;
-        private readonly int to;
-        private readonly int pageSize;
-        private readonly int[] gaps;
-        private readonly bool executingUnprocessedActivities;
+        private readonly int _from;
+        private readonly int _to;
+        private readonly int _pageSize;
+        private readonly int[] _gaps;
+        private readonly bool _executingUnprocessedActivities;
 
         public SecurityActivityLoader(int from, int to, bool executingUnprocessedActivities)
         {
-            gapLoader = false;
-            this.from = from;
-            this.to = to;
-            this.executingUnprocessedActivities = executingUnprocessedActivities;
-            this.pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
+            _gapLoader = false;
+            this._from = from;
+            this._to = to;
+            this._executingUnprocessedActivities = executingUnprocessedActivities;
+            this._pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
         }
         // ReSharper disable once UnusedParameter.Local
         public SecurityActivityLoader(int[] gaps, bool executingUnprocessedActivities)
         {
-            this.gapLoader = true;
-            this.gaps = gaps;
-            this.pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
+            this._gapLoader = true;
+            this._gaps = gaps;
+            this._pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
         }
 
         public IEnumerator<SecurityActivity> GetEnumerator()
         {
-            if (gapLoader)
-                return new GapLoader(this.gaps, this.pageSize, this.executingUnprocessedActivities);
-            return new SectionLoader(this.from, this.to, this.pageSize, this.executingUnprocessedActivities);
+            if (_gapLoader)
+                return new GapLoader(this._gaps, this._pageSize, this._executingUnprocessedActivities);
+            return new SectionLoader(this._from, this._to, this._pageSize, this._executingUnprocessedActivities);
         }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {

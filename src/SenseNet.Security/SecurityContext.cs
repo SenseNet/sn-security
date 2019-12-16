@@ -32,6 +32,7 @@ namespace SenseNet.Security
 
         internal SecurityCache Cache { get; }
 
+        // ReSharper disable once InconsistentNaming
         private PermissionEvaluator __evaluator;
         private readonly object _evaluatorSync = new object();
         internal PermissionEvaluator Evaluator

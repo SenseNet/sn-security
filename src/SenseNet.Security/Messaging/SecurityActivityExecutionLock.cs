@@ -36,7 +36,7 @@ namespace SenseNet.Security.Messaging
             _timer.Disposed += Refresh;
         }
 
-        private void Refresh(object Sender, EventArgs args)
+        private void Refresh(object sender, EventArgs args)
         {
             DataHandler.RefreshSecurityActivityExecutionLock(this._activity);
         }
@@ -49,7 +49,7 @@ namespace SenseNet.Security.Messaging
             DataHandler.ReleaseSecurityActivityExecutionLock(this._activity, this.FullExecutionEnabled);
         }
 
-        private bool disposed;
+        private bool _disposed;
         /// <summary>
         /// Releases the lock.
         /// </summary>
@@ -60,7 +60,7 @@ namespace SenseNet.Security.Messaging
         }
         private void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (!_disposed)
             {
                 if (disposing)
                 {
@@ -68,7 +68,7 @@ namespace SenseNet.Security.Messaging
                     Release();
                 }
             }
-            disposed = true;
+            _disposed = true;
         }
     }
 }

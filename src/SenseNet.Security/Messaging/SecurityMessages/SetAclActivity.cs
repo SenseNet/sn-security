@@ -102,6 +102,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         }
 
         [NonSerialized]
+        // ReSharper disable once InconsistentNaming
         private List<int> __allEntityIds;
         internal List<int> AllEntityIds => __allEntityIds ?? (__allEntityIds = CollectEntityIds());
 

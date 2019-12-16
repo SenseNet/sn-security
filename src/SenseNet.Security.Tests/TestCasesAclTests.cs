@@ -1464,25 +1464,25 @@ namespace SenseNet.Security.Tests
             var sec = CurrentContext.Security;
             var db = CurrentContext.Security.DataProvider;
 
-            var e2id = Id("E2");
-            var e5id = Id("E5");
+            var e2Id = Id("E2");
+            var e5Id = Id("E5");
 
-            Assert.AreEqual(e2id, sec.GetSecurityEntity(e5id).GetFirstAclId());
+            Assert.AreEqual(e2Id, sec.GetSecurityEntity(e5Id).GetFirstAclId());
 
             CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
 
-            Assert.AreEqual(e5id, sec.GetSecurityEntity(e5id).GetFirstAclId());
+            Assert.AreEqual(e5Id, sec.GetSecurityEntity(e5Id).GetFirstAclId());
 
             CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
 
-            Assert.AreEqual(e2id, sec.GetSecurityEntity(e5id).GetFirstAclId());
+            Assert.AreEqual(e2Id, sec.GetSecurityEntity(e5Id).GetFirstAclId());
 
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).ToArray();
             Assert.AreEqual(0, aces.Length);
 
             //Assert.IsNull(CurrentContext.Security.Cache.AclCache.Get(e5id));
-            Assert.IsNull(CurrentContext.Security.GetAclInfo(e5id));
+            Assert.IsNull(CurrentContext.Security.GetAclInfo(e5Id));
         }
 
         [TestMethod]

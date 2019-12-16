@@ -29,6 +29,7 @@
         /// <summary>
         /// Nullable representation of the ParentId. Null if there is no parent.
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public int? nullableParentId
         {
             get { return FromGuid(ParentId); }
@@ -37,6 +38,7 @@
         /// <summary>
         /// Nullable representation of the OwnerId. Null if there is no owner.
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public int? nullableOwnerId
         {
             get { return FromGuid(OwnerId); }

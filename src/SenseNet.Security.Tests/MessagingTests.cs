@@ -13,13 +13,13 @@ namespace SenseNet.Security.Tests
     [TestClass]
     public class MessagingTests
     {
-        Context context;
+        Context _context;
         public TestContext TestContext { get; set; }
 
         [TestCleanup]
         public void Finishtest()
         {
-            Tools.CheckIntegrity(TestContext.TestName, context.Security);
+            Tools.CheckIntegrity(TestContext.TestName, _context.Security);
         }
 
         //===================================================================
@@ -47,16 +47,16 @@ namespace SenseNet.Security.Tests
             msgProvider.Initialize();
             Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
 
-            context = new Context(TestUser.User1);
+            _context = new Context(TestUser.User1);
 
             // small activity
             var smallActivity = new TestActivity();
-            smallActivity.Execute(context.Security);
+            smallActivity.Execute(_context.Security);
             var smallActivityId = smallActivity.Id;
 
             // large activity
             var largeActivity = new TestActivity() { Body = new String('*', Configuration.Messaging.DistributableSecurityActivityMaxSize + 1) };
-            largeActivity.Execute(context.Security);
+            largeActivity.Execute(_context.Security);
             var largeActivityId = largeActivity.Id;
 
             // check the logger

@@ -11,13 +11,13 @@ namespace SenseNet.Security.Tests
     [TestClass]
     public class SystemStartTests
     {
-        Context context;
+        Context _context;
         public TestContext TestContext { get; set; }
 
         [TestCleanup]
         public void Finishtest()
         {
-            Tools.CheckIntegrity(TestContext.TestName, context.Security);
+            Tools.CheckIntegrity(TestContext.TestName, _context.Security);
         }
 
         //===================================================================
@@ -37,18 +37,18 @@ namespace SenseNet.Security.Tests
             Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider());
 
             //---- Start the request
-            context = new Context(TestUser.User1);
+            _context = new Context(TestUser.User1);
 
             //---- check cache
-            var dbAcc = new MemoryDataProviderAccessor((MemoryDataProvider)context.Security.DataProvider);
-            Assert.AreEqual(entities.Count, context.Security.Cache.Entities.Count);
+            var dbAcc = new MemoryDataProviderAccessor((MemoryDataProvider)_context.Security.DataProvider);
+            Assert.AreEqual(entities.Count, _context.Security.Cache.Entities.Count);
             Assert.AreEqual(entities.Count, dbAcc.Storage.Entities.Count);
-            Assert.AreEqual(groups.Count, context.Security.Cache.Groups.Count);
+            Assert.AreEqual(groups.Count, _context.Security.Cache.Groups.Count);
             Assert.AreEqual(memberships.Count, dbAcc.Storage.Memberships.Count);
             Assert.AreEqual(aces.Count, storage.Aces.Count);
 
             //---- check membership in the evaluator
-            var s = Tools.ReplaceIds(context.Security.Evaluator._traceMembership());
+            var s = Tools.ReplaceIds(_context.Security.Evaluator._traceMembership());
             var expected = @"U1:[G1,G3]U2:[G1]U3:[G2,G3]U4:[G2,G4]U5:[G5]";
             Assert.AreEqual(expected, s.Replace(Environment.NewLine, "").Replace(" ", ""));
 
@@ -59,7 +59,7 @@ namespace SenseNet.Security.Tests
             var id50 = Id("E50");
 
             //---- check nearest holder ids
-            var entityTable = context.Security.Cache.Entities;
+            var entityTable = _context.Security.Cache.Entities;
             Assert.AreEqual(id1, entityTable[Id("E1")].GetFirstAclId());
             Assert.AreEqual(id1, entityTable[Id("E2")].GetFirstAclId());
             Assert.AreEqual(id3, entityTable[Id("E3")].GetFirstAclId());
@@ -76,7 +76,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(id50, entityTable[Id("E53")].GetFirstAclId());
 
             //---- check acls in the evaluator
-            var allacls = Tools.CollectAllAcls(context.Security);
+            var allacls = Tools.CollectAllAcls(_context.Security);
             Assert.AreEqual(4, allacls.Count);
             var acl1 = GetAcl(allacls, id1);
             var acl3 = GetAcl(allacls, id3);
@@ -251,10 +251,10 @@ namespace SenseNet.Security.Tests
             Assert.IsFalse(killed);
 
             //---- Start the request
-            context = new Context(TestUser.User1);
+            _context = new Context(TestUser.User1);
 
             //---- operation
-            context.Security.HasPermission(entities.First().Value.Id, PermissionType.Open);
+            _context.Security.HasPermission(entities.First().Value.Id, PermissionType.Open);
 
             //---- kill the system
             SecurityContext.Shutdown();

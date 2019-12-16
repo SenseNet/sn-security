@@ -14,6 +14,7 @@ namespace SenseNet.Security
     [DebuggerDisplay("{ToString()}")]
     public class SecurityEntity
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly ReaderWriterLockSlim __lock = new ReaderWriterLockSlim();
         internal static void EnterReadLock()
         {

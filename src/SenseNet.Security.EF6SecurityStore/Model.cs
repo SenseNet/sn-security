@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+// ReSharper disable InconsistentNaming
 
 namespace SenseNet.Security.EF6SecurityStore
 {
