@@ -38,8 +38,7 @@ namespace SenseNet.Security
         {
             foreach (var acl in aclTable.Values)
             {
-                SecurityEntity entity;
-                if (entities.TryGetValue(acl.EntityId, out entity))
+                if (entities.TryGetValue(acl.EntityId, out var entity))
                     entity.SetAclSafe(acl);
             }
             foreach (var entity in entities.Values.Where(e => !e.IsInherited && !e.HasExplicitAcl))
@@ -79,8 +78,7 @@ namespace SenseNet.Security
         }
         private static List<int> EnsureUser(int userId, Dictionary<int, List<int>> users)
         {
-            List<int> user;
-            if (!users.TryGetValue(userId, out user))
+            if (!users.TryGetValue(userId, out var user))
             {
                 user = new List<int>();
                 users.Add(userId, user);
@@ -158,8 +156,7 @@ namespace SenseNet.Security
         }
         private SecurityGroup EnsureGroup(int groupId)
         {
-            SecurityGroup group;
-            if (!this.Groups.TryGetValue(groupId, out group))
+            if (!this.Groups.TryGetValue(groupId, out var group))
             {
                 group = new SecurityGroup(groupId);
                 this.Groups.Add(groupId, group);
@@ -203,8 +200,7 @@ namespace SenseNet.Security
         internal void DeleteSecurityGroup(SecurityContext context, int groupId)
         {
             // delete from Groups
-            SecurityGroup group;
-            if (this.Groups.TryGetValue(groupId, out group))
+            if (this.Groups.TryGetValue(groupId, out var group))
             {
                 // getting support lists
                 var allUsers = Flattener.GetAllUserIds(group);
@@ -230,8 +226,7 @@ namespace SenseNet.Security
             foreach (var identityId in identityIds)
             {
                 // delete from Groups
-                SecurityGroup group;
-                if (this.Groups.TryGetValue(identityId, out group))
+                if (this.Groups.TryGetValue(identityId, out var group))
                 {
                     // identityId is a groupId
                     var allUsers = Flattener.GetAllUserIds(group);
@@ -262,8 +257,7 @@ namespace SenseNet.Security
 
         internal void RemoveMembers(int groupId, IEnumerable<int> groupIds, IEnumerable<int> userIds, IEnumerable<int> parentGroupIds)
         {
-            SecurityGroup group;
-            if (!this.Groups.TryGetValue(groupId, out group))
+            if (!this.Groups.TryGetValue(groupId, out var group))
                 return;
 
 
@@ -320,8 +314,7 @@ namespace SenseNet.Security
 
             foreach (var parentGroupId in parentGroupIds)
             {
-                SecurityGroup group;
-                if (this.Groups.TryGetValue(parentGroupId, out group))
+                if (this.Groups.TryGetValue(parentGroupId, out var group))
                 {
                     var allUsers = Flattener.GetAllUserIds(group);
                     var allParents = Flattener.GetAllParentGroupIdsInclusive(group);
@@ -337,13 +330,11 @@ namespace SenseNet.Security
         internal bool IsInGroup(int memberId, int groupId)
         {
             // if it is a user: first look for the id in the flattened user --> groups collection
-            List<int> flattenedGroups;
-            if (Membership.TryGetValue(memberId, out flattenedGroups))
+            if (Membership.TryGetValue(memberId, out var flattenedGroups))
                 return flattenedGroups.Contains(groupId);
 
             // if it is a group: search in the group graph
-            SecurityGroup group;
-            if (Groups.TryGetValue(memberId, out group))
+            if (Groups.TryGetValue(memberId, out var group))
                 return Flattener.GetAllParentGroupIdsExclusive(group).Contains(groupId);
 
             return false;
@@ -351,8 +342,7 @@ namespace SenseNet.Security
 
         internal int[] GetGroups(int userId)
         {
-            List<int> flattenedGroups;
-            if (Membership.TryGetValue(userId, out flattenedGroups))
+            if (Membership.TryGetValue(userId, out var flattenedGroups))
                 return flattenedGroups.ToArray();
             return new int[0];
         }
@@ -376,8 +366,7 @@ namespace SenseNet.Security
                 var allParentGroupIds = GetAllParentGroupIdsInclusive(parentGroup);
 
                 // ensure user
-                List<int> user;
-                if (!usersTable.TryGetValue(userId, out user))
+                if (!usersTable.TryGetValue(userId, out var user))
                 {
                     user = new List<int>();
                     usersTable.Add(userId, user);
@@ -395,8 +384,7 @@ namespace SenseNet.Security
                 var allParentGroupIds = GetAllParentGroupIdsInclusive(parentGroup);
                 foreach (var userId in allUserIds)
                 {
-                    List<int> user;
-                    if (!usersTable.TryGetValue(userId, out user))
+                    if (!usersTable.TryGetValue(userId, out var user))
                     {
                         user = new List<int>();
                         usersTable.Add(userId, user);
@@ -429,8 +417,7 @@ namespace SenseNet.Security
             private static void RemoveUserFromGroup(int userId, List<int> allParents, Dictionary<int, List<int>> usersTable, IDictionary<int, SecurityGroup> groupsTable)
             {
                 // get user record (what groups member of?)
-                List<int> user;
-                if (!usersTable.TryGetValue(userId, out user))
+                if (!usersTable.TryGetValue(userId, out var user))
                     return;
 
                 // clone for a support list
@@ -442,8 +429,7 @@ namespace SenseNet.Security
                 // rebuild all existing groups
                 foreach (var groupId in origUser)
                 {
-                    SecurityGroup group;
-                    if (!groupsTable.TryGetValue(groupId, out group))
+                    if (!groupsTable.TryGetValue(groupId, out var group))
                         continue;
 
                     // skip if the group doesn't contain the user explicitly

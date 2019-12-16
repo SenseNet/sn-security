@@ -55,8 +55,7 @@ namespace SenseNet.Security
 
             foreach (var storedAce in dataProvider.LoadAllAces())
             {
-                AclInfo acl;
-                if (!acls.TryGetValue(storedAce.EntityId, out acl))
+                if (!acls.TryGetValue(storedAce.EntityId, out var acl))
                 {
                     acl = new AclInfo(storedAce.EntityId);
                     acls.Add(acl.EntityId, acl);
@@ -259,8 +258,7 @@ namespace SenseNet.Security
 
         internal static void SaveActivity(SecurityActivity activity)
         {
-            int bodySize;
-            var id = activity.Context.DataProvider.SaveSecurityActivity(activity, out bodySize);
+            var id = activity.Context.DataProvider.SaveSecurityActivity(activity, out var bodySize);
             activity.BodySize = bodySize;
             activity.Id = id;
         }

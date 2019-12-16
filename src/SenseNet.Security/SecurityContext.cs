@@ -85,8 +85,7 @@ namespace SenseNet.Security
             // The messageprovider provider must receive ongoing activities at this time.
             StartedAt = DateTime.UtcNow;
 
-            int lastActivityIdFromDb;
-            var uncompleted = DataHandler.LoadCompletionState(configuration.SecurityDataProvider, out lastActivityIdFromDb);
+            var uncompleted = DataHandler.LoadCompletionState(configuration.SecurityDataProvider, out var lastActivityIdFromDb);
 
             _messageProvider = configuration.MessageProvider;
             _messageProvider.MessageReceived += MessageProvider_MessageReceived;

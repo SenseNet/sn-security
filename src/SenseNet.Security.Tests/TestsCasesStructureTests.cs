@@ -404,8 +404,7 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_MoveEntity()
         {
-            TestEntity root, source, target, child1, child2;
-            CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
+            CreateStructureForMoveTests(out _, out var source, out var target, out var child1, out var child2);
 
             //#
             CurrentContext.Security.MoveEntity(source, target);
@@ -431,8 +430,7 @@ namespace SenseNet.Security.Tests
         [ExpectedException(typeof(ArgumentException))]
         public void Structure_MoveEntity_InvalidSource()
         {
-            TestEntity root, source, target, child1, child2;
-            CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
+            CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
             source.Id = default;
             CurrentContext.Security.MoveEntity(source, target);
         }
@@ -440,8 +438,7 @@ namespace SenseNet.Security.Tests
         [ExpectedException(typeof(ArgumentException))]
         public void Structure_MoveEntity_InvalidTarget()
         {
-            TestEntity root, source, target, child1, child2;
-            CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
+            CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
             target.Id = default;
             CurrentContext.Security.MoveEntity(source, target);
         }
@@ -449,8 +446,7 @@ namespace SenseNet.Security.Tests
         [ExpectedException(typeof(EntityNotFoundException))]
         public void Structure_MoveEntity_MissingSource()
         {
-            TestEntity root, source, target, child1, child2;
-            CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
+            CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
             source.Id = Id("E101");
             CurrentContext.Security.MoveEntity(source, target);
         }
@@ -458,8 +454,7 @@ namespace SenseNet.Security.Tests
         [ExpectedException(typeof(EntityNotFoundException))]
         public void Structure_MoveEntity_MissingTarget()
         {
-            TestEntity root, source, target, child1, child2;
-            CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
+            CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
             target.Id = Id("E101");
             CurrentContext.Security.MoveEntity(source, target);
         }
@@ -468,8 +463,7 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_High_BreakInheritance()
         {
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
 
             //# calling the security component for breaking permission inheritance
             CurrentContext.Security.BreakInheritance(new TestEntity { Id = ids[1], ParentId = ids[0] });
@@ -494,8 +488,7 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_Low_BreakInheritance()
         {
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
 
             //# calling the security component for breaking permission inheritance
             CurrentContext.Security.BreakInheritance(ids[1]);
@@ -520,8 +513,7 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_BreakInheritance_Breaked()
         {
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
 
             CurrentContext.Security.BreakInheritance(ids[1]);
             // valid but ineffective
@@ -562,8 +554,7 @@ namespace SenseNet.Security.Tests
         {
             StoredSecurityEntity dbEntity;
             SecurityEntity entity;
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
 
             dbEntity = GetStoredSecurityEntity(ids[1]);
@@ -594,8 +585,7 @@ namespace SenseNet.Security.Tests
         {
             StoredSecurityEntity dbEntity;
             SecurityEntity entity;
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
 
             dbEntity = GetStoredSecurityEntity(ids[1]);
@@ -626,8 +616,7 @@ namespace SenseNet.Security.Tests
         {
             StoredSecurityEntity dbEntity;
             SecurityEntity entity;
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
 
             //#

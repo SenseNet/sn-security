@@ -366,8 +366,7 @@ namespace SenseNet.Security
             var groups = new List<SecurityGroup>();
             foreach (var identity in identities.Distinct())
             {
-                SecurityGroup group;
-                if (context.Cache.Groups.TryGetValue(identity, out group))
+                if (context.Cache.Groups.TryGetValue(identity, out var group))
                 {
                     if (!groups.Contains(group))
                         groups.Add(group);
@@ -394,8 +393,7 @@ namespace SenseNet.Security
 
         public static IEnumerable<int> GetParentGroups(SecurityContext context, int identityId, bool directOnly)
         {
-            SecurityGroup group;
-            if (context.Cache.Groups.TryGetValue(identityId, out group))
+            if (context.Cache.Groups.TryGetValue(identityId, out var group))
                 return directOnly ? GetDirectOnlyParentGroups(group) : GetAllParentGroups(context, group);
             return directOnly ? GetDirectOnlyParentGroups(context, identityId) : GetAllParentGroups(context, identityId);
         }
@@ -405,8 +403,7 @@ namespace SenseNet.Security
         }
         private static IEnumerable<int> GetAllParentGroups(SecurityContext context, int userId)
         {
-            List<int> groupIds;
-            if (context.Cache.Membership.TryGetValue(userId, out groupIds))
+            if (context.Cache.Membership.TryGetValue(userId, out var groupIds))
                 return groupIds;
             return new int[0];
         }

@@ -490,8 +490,7 @@ namespace SenseNet.Security.Tests
 
             public MembershipEditor AddGroupsToUser(int userId, params int[] groupIds)
             {
-                List<int> user;
-                if (!Membership.TryGetValue(userId, out user))
+                if (!Membership.TryGetValue(userId, out var user))
                 {
                     Membership[userId] = groupIds.Distinct().ToList();
                 }
@@ -513,8 +512,7 @@ namespace SenseNet.Security.Tests
 
             internal MembershipEditor RemoveGroupsFromUser(int userId, params int[] groupIds)
             {
-                List<int> user;
-                if (Membership.TryGetValue(userId, out user))
+                if (Membership.TryGetValue(userId, out var user))
                     user.RemoveAll(x => groupIds.Contains(x));
                 return this;
             }

@@ -199,8 +199,7 @@ namespace SenseNet.Security
         /// <returns>The security entity.</returns>
         internal static SecurityEntity GetEntitySafe(SecurityContext ctx, int entityId, bool throwError)
         {
-            SecurityEntity entity;
-            ctx.Cache.Entities.TryGetValue(entityId, out entity);
+            ctx.Cache.Entities.TryGetValue(entityId, out var entity);
 
             if (entity == null)
             {
@@ -219,8 +218,7 @@ namespace SenseNet.Security
                 }
                 else
                 {
-                    int parentId, ownerId;
-                    if (ctx.GetMissingEntity(entityId, out parentId, out ownerId))
+                    if (ctx.GetMissingEntity(entityId, out var parentId, out var ownerId))
                     {
                         DataHandler.CreateSecurityEntitySafe(ctx, entityId, parentId, ownerId);
                         entity = CreateEntitySafe(ctx, entityId, parentId, ownerId);
@@ -249,9 +247,8 @@ namespace SenseNet.Security
         {
             var result = new SecurityEntity[securityEntityIds.Length];
             var entities = ctx.Cache.Entities;
-            SecurityEntity entity;
             for (var i = 0; i < securityEntityIds.Length; i++)
-                result[i] = entities.TryGetValue(securityEntityIds[i], out entity) ? entity : null;
+                result[i] = entities.TryGetValue(securityEntityIds[i], out var entity) ? entity : null;
             return result;
         }
 

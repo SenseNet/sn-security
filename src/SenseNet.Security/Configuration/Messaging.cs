@@ -31,9 +31,8 @@ namespace SenseNet.Security.Configuration
             {
                 if (!_distributableSecurityActivityMaxSize.HasValue)
                 {
-                    int intValue;
                     var value = ConfigurationManager.AppSettings[DistributableSecurityActivityMaxSizeKey];
-                    if (!int.TryParse(value, out intValue))
+                    if (!int.TryParse(value, out var intValue))
                         intValue = 200000;
                     _distributableSecurityActivityMaxSize = intValue;
                 }

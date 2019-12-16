@@ -92,8 +92,7 @@ namespace SenseNet.Security.Tests
         }
         private static AclInfo GetAcl(Dictionary<int, AclInfo> acls, int entityId)
         {
-            AclInfo acl = null;
-            acls.TryGetValue(entityId, out acl);
+            acls.TryGetValue(entityId, out var acl);
             return acl;
         }
 

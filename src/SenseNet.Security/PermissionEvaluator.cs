@@ -298,8 +298,7 @@ namespace SenseNet.Security
         }
         private void CollectIdentities(int userId, int ownerId, int entityId, List<int> collection)
         {
-            List<int> flattenedGroups;
-            if (_securityContext.Cache.Membership.TryGetValue(userId, out flattenedGroups))
+            if (_securityContext.Cache.Membership.TryGetValue(userId, out var flattenedGroups))
                 collection.AddRange(flattenedGroups);
 
             if (userId != Configuration.Identities.VisitorUserId)

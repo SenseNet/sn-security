@@ -94,8 +94,7 @@ namespace SenseNet.Security
         /// <exception cref="KeyNotFoundException">KeyNotFoundException</exception>
         public static PermissionTypeBase GetPermissionTypeByName(string name)
         {
-            PermissionTypeBase result;
-            if (_permissionDict.TryGetValue(name, out result))
+            if (_permissionDict.TryGetValue(name, out var result))
                 return result;
             return null;
         }
