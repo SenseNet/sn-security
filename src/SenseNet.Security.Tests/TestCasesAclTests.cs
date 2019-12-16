@@ -1358,7 +1358,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E34|Normal|+G2:_+++++_________");
 
             // breaks, tests and repeat
-            for (int i = 0; i < 3; i++)
+            for (var i = 0; i < 3; i++)
             {
                 CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), new EntryType[0]).Apply();
 
@@ -1620,11 +1620,11 @@ namespace SenseNet.Security.Tests
 
             //--------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
-            for (int i = 0; i < PermissionType.PermissionCount; i += 3)
+            for (var i = 0; i < PermissionType.PermissionCount; i += 3)
                 ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (int i = 1; i < PermissionType.PermissionCount; i += 3)
+            for (var i = 1; i < PermissionType.PermissionCount; i += 3)
                 ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (int i = 2; i < PermissionType.PermissionCount; i += 3)
+            for (var i = 2; i < PermissionType.PermissionCount; i += 3)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
@@ -1632,11 +1632,11 @@ namespace SenseNet.Security.Tests
 
             //--------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
-            for (int i = 1; i < PermissionType.PermissionCount; i += 3)
+            for (var i = 1; i < PermissionType.PermissionCount; i += 3)
                 ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (int i = 2; i < PermissionType.PermissionCount; i += 3)
+            for (var i = 2; i < PermissionType.PermissionCount; i += 3)
                 ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (int i = 0; i < PermissionType.PermissionCount; i += 3)
+            for (var i = 0; i < PermissionType.PermissionCount; i += 3)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
@@ -1644,11 +1644,11 @@ namespace SenseNet.Security.Tests
 
             //--------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
-            for (int i = 2; i < PermissionType.PermissionCount; i += 3)
+            for (var i = 2; i < PermissionType.PermissionCount; i += 3)
                 ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (int i = 0; i < PermissionType.PermissionCount; i += 3)
+            for (var i = 0; i < PermissionType.PermissionCount; i += 3)
                 ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (int i = 1; i < PermissionType.PermissionCount; i += 3)
+            for (var i = 1; i < PermissionType.PermissionCount; i += 3)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);

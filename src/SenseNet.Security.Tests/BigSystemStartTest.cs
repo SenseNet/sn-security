@@ -90,7 +90,7 @@ namespace SenseNet.Security.Tests
             var storage = new Dictionary<int, StoredSecurityEntity>();
 
             var root = CreateEntity_Big(null, 9999999, storage);
-            for (int level = 1; level < 2; level++)
+            for (var level = 1; level < 2; level++)
                 CreateTestEntities_Big(0, root, storage);
 
             return storage;
@@ -99,7 +99,7 @@ namespace SenseNet.Security.Tests
         {
             if (currentLevel >= _maxLevel)
                 return;
-            for (int i = 0; i < _levelWidth; i++)
+            for (var i = 0; i < _levelWidth; i++)
             {
                 var entity = CreateEntity_Big(root, root.OwnerId, storage);
                 CreateTestEntities_Big(currentLevel + 1, entity, storage);

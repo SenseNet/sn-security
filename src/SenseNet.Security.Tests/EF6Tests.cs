@@ -42,7 +42,7 @@ namespace SenseNet.Security.Tests
 
             // create 30 activities
             sctx.CreateSecurityEntity(rootEntityId, default, user1Id);
-            for (int entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
+            for (var entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
                 sctx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
 
             var lastId = Db().ExecuteTestScript<int>("select top 1 Id from [EFMessages] order by Id desc").First();
@@ -101,7 +101,7 @@ namespace SenseNet.Security.Tests
 
             // create 30 activities
             sctx.CreateSecurityEntity(rootEntityId, default, user1Id);
-            for (int entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
+            for (var entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
                 sctx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
 
             var lastId = Db().ExecuteTestScript<int>("select top 1 Id from [EFMessages] order by Id desc").First();
@@ -240,7 +240,7 @@ namespace SenseNet.Security.Tests
 
             // create some activities with gap
             sctx.CreateSecurityEntity(rootEntityId, default, user1Id);
-            for (int entityId = rootEntityId + 1; entityId < rootEntityId + 11; entityId++)
+            for (var entityId = rootEntityId + 1; entityId < rootEntityId + 11; entityId++)
             {
                 sctx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
                 Db().ExecuteTestScript(@"

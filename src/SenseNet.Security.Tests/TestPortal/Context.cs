@@ -45,7 +45,7 @@ namespace SenseNet.Security.Tests.TestPortal
             IMessageProvider messageProvider;
             try
             {
-                Type channelAdapterType = GetMessageProviderType();
+                var channelAdapterType = GetMessageProviderType();
                 messageProvider = (IMessageProvider)Activator.CreateInstance(channelAdapterType);
             }
             catch (Exception e) //logged, rethrown
@@ -57,7 +57,7 @@ namespace SenseNet.Security.Tests.TestPortal
         }
         private static Type GetMessageProviderType()
         {
-            string channelProviderTypeName = Configuration.Messaging.MessageProvider;
+            var channelProviderTypeName = Configuration.Messaging.MessageProvider;
             if (string.IsNullOrEmpty(channelProviderTypeName))
                 return typeof(DefaultMessageProvider);
 

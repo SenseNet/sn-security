@@ -80,7 +80,7 @@ namespace SenseNet.Security.Messaging.Msmq
             try
             {
                 message.MessageSent = DateTime.UtcNow;
-                Stream messageStream = SerializeMessage(message);
+                var messageStream = SerializeMessage(message);
                 InternalSend(messageStream);
             }
             catch (Exception e)
@@ -154,7 +154,7 @@ namespace SenseNet.Security.Messaging.Msmq
         }
         private void RepairSendQueues()
         {
-            bool repairHappened = false;
+            var repairHappened = false;
             for (var i = 0; i < _sendQueues.Count; i++)
             {
                 if (!_sendQueuesAvailable[i])

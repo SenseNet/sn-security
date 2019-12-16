@@ -40,7 +40,7 @@ namespace SenseNet.Security.Tests
         }
         internal static string ReplaceIds(string src)
         {
-            int p = src.IndexOf('(');
+            var p = src.IndexOf('(');
             while (p >= 0)
             {
                 var p1 = src.IndexOf(')', p);
@@ -58,7 +58,7 @@ namespace SenseNet.Security.Tests
             //+_____-____++++
             const ulong mask = 1ul;
             allowBits = denyBits = 0;
-            for (int i = src.Length - 1; i >= 0; i--)
+            for (var i = src.Length - 1; i >= 0; i--)
             {
                 var c = src[i];
                 if (c == '+')
@@ -77,7 +77,7 @@ namespace SenseNet.Security.Tests
         {
             var result = new List<PermissionTypeBase>();
             var index = 0;
-            for (int i = src.Length - 1; i >= 0; i--)
+            for (var i = src.Length - 1; i >= 0; i--)
             {
                 if (src[i] != '_')
                     result.Add(PermissionType.GetPermissionTypeByIndex(index));
