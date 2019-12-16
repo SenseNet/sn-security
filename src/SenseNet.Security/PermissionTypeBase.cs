@@ -27,7 +27,7 @@ namespace SenseNet.Security
         /*==============================================================================*/
 
         /// <summary> 0 based index. Max value is the bit count of long.</summary>
-        public int Index { get; private set; }
+        public int Index { get; }
         /// <summary>Case sensitive unique name.</summary>
         public string Name { get; }
         /// <summary>
