@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
+// ReSharper disable JoinDeclarationAndInitializer
 
 namespace SenseNet.Security.Tests
 {
@@ -556,6 +558,8 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
+        [SuppressMessage("ReSharper", "RedundantAssignment")]
+        [SuppressMessage("ReSharper", "NotAccessedVariable")]
         public void AclEditor_CreationPossibilities()
         {
             EnsureRepository();

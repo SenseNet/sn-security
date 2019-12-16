@@ -73,82 +73,81 @@ namespace SenseNet.Security.Tests
         public static Dictionary<int, StoredSecurityEntity> CreateTestEntities()
         {
             var storage = new Dictionary<int, StoredSecurityEntity>();
-            StoredSecurityEntity e;
             var u1 = TestUser.User1;
 
-            e = CreateEntity("E1", null, u1, storage);
+            CreateEntity("E1", null, u1, storage);
             {
-                e = CreateEntity("E2", "E1", u1, storage);
+                CreateEntity("E2", "E1", u1, storage);
                 {
-                    e = CreateEntity("E5", "E2", u1, storage);
+                    CreateEntity("E5", "E2", u1, storage);
                     {
-                        e = CreateEntity("E14", "E5", u1, storage);
+                        CreateEntity("E14", "E5", u1, storage);
                         {
-                            e = CreateEntity("E50", "E14", u1, storage);
+                            CreateEntity("E50", "E14", u1, storage);
                             {
-                                e = CreateEntity("E51", "E50", u1, storage);
+                                CreateEntity("E51", "E50", u1, storage);
                                 {
-                                    e = CreateEntity("E52", "E51", u1, storage);
+                                    CreateEntity("E52", "E51", u1, storage);
                                 }
-                                e = CreateEntity("E53", "E50", u1, storage);
+                                CreateEntity("E53", "E50", u1, storage);
                             }
                         }
-                        e = CreateEntity("E15", "E5", u1, storage);
+                        CreateEntity("E15", "E5", u1, storage);
                     }
-                    e = CreateEntity("E6", "E2", u1, storage);
+                    CreateEntity("E6", "E2", u1, storage);
                     {
-                        e = CreateEntity("E16", "E6", u1, storage);
-                        e = CreateEntity("E17", "E6", u1, storage);
+                        CreateEntity("E16", "E6", u1, storage);
+                        CreateEntity("E17", "E6", u1, storage);
                     }
-                    e = CreateEntity("E7", "E2", u1, storage);
+                    CreateEntity("E7", "E2", u1, storage);
                     {
-                        e = CreateEntity("E18", "E7", u1, storage);
-                        e = CreateEntity("E19", "E7", u1, storage);
+                        CreateEntity("E18", "E7", u1, storage);
+                        CreateEntity("E19", "E7", u1, storage);
                     }
                 }
-                e = CreateEntity("E3", "E1", u1, storage);
+                CreateEntity("E3", "E1", u1, storage);
                 {
-                    e = CreateEntity("E8", "E3", u1, storage);
+                    CreateEntity("E8", "E3", u1, storage);
                     {
-                        e = CreateEntity("E20", "E8", u1, storage);
-                        e = CreateEntity("E21", "E8", u1, storage);
+                        CreateEntity("E20", "E8", u1, storage);
+                        CreateEntity("E21", "E8", u1, storage);
                     }
-                    e = CreateEntity("E9", "E3", u1, storage);
-                    e = CreateEntity("E10", "E3", u1, storage);
+                    CreateEntity("E9", "E3", u1, storage);
+                    CreateEntity("E10", "E3", u1, storage);
                 }
-                e = CreateEntity("E4", "E1", u1, storage);
+                CreateEntity("E4", "E1", u1, storage);
                 {
-                    e = CreateEntity("E11", "E4", u1, storage);
-                    e = CreateEntity("E12", "E4", u1, storage);
+                    CreateEntity("E11", "E4", u1, storage);
+                    CreateEntity("E12", "E4", u1, storage);
                     {
-                        e = CreateEntity("E30", "E12", u1, storage);
+                        CreateEntity("E30", "E12", u1, storage);
                         {
-                            e = CreateEntity("E31", "E30", u1, storage);
+                            CreateEntity("E31", "E30", u1, storage);
                             {
-                                e = CreateEntity("E33", "E31", u1, storage);
-                                e = CreateEntity("E34", "E31", u1, storage);
+                                CreateEntity("E33", "E31", u1, storage);
+                                CreateEntity("E34", "E31", u1, storage);
                                 {
-                                    e = CreateEntity("E40", "E34", u1, storage);
-                                    e = CreateEntity("E43", "E34", u1, storage);
+                                    CreateEntity("E40", "E34", u1, storage);
+                                    CreateEntity("E43", "E34", u1, storage);
                                 }
                             }
-                            e = CreateEntity("E32", "E30", u1, storage);
+                            CreateEntity("E32", "E30", u1, storage);
                             {
-                                e = CreateEntity("E35", "E32", u1, storage);
+                                CreateEntity("E35", "E32", u1, storage);
                                 {
-                                    e = CreateEntity("E41", "E35", u1, storage);
+                                    CreateEntity("E41", "E35", u1, storage);
                                     {
-                                        e = CreateEntity("E42", "E41", u1, storage);
+                                        CreateEntity("E42", "E41", u1, storage);
                                     }
                                 }
-                                e = CreateEntity("E36", "E32", u1, storage);
+                                CreateEntity("E36", "E32", u1, storage);
                                 {
-                                    e = CreateEntity("E37", "E36", u1, storage);
+                                    CreateEntity("E37", "E36", u1, storage);
                                 }
                             }
                         }
                     }
-                    e = CreateEntity("E13", "E4", u1, storage);
+                    CreateEntity("E13", "E4", u1, storage);
                 }
             }
             return storage;

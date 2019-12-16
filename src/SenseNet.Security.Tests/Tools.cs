@@ -100,105 +100,104 @@ namespace SenseNet.Security.Tests
 
         internal static Dictionary<int, TestEntity> CreateRepository(TestSecurityContext context)
         {
-            TestEntity e;
             var u1 = TestUser.User1;
             var repository = new Dictionary<int, TestEntity>();
 
-            e = CreateEntity(repository, context, "E1", null, u1);
+            CreateEntity(repository, context, "E1", null, u1);
             {
-                e = CreateEntity(repository, context, "E2", "E1", u1);
+                CreateEntity(repository, context, "E2", "E1", u1);
                 {
-                    e = CreateEntity(repository, context, "E5", "E2", u1);
+                    CreateEntity(repository, context, "E5", "E2", u1);
                     {
-                        e = CreateEntity(repository, context, "E14", "E5", u1);
+                        CreateEntity(repository, context, "E14", "E5", u1);
                         {
-                            e = CreateEntity(repository, context, "E50", "E14", u1);
+                            CreateEntity(repository, context, "E50", "E14", u1);
                             {
-                                e = CreateEntity(repository, context, "E51", "E50", u1);
+                                CreateEntity(repository, context, "E51", "E50", u1);
                                 {
-                                    e = CreateEntity(repository, context, "E52", "E51", u1);
+                                    CreateEntity(repository, context, "E52", "E51", u1);
                                 }
-                                e = CreateEntity(repository, context, "E53", "E50", u1);
+                                CreateEntity(repository, context, "E53", "E50", u1);
                             }
                         }
-                        e = CreateEntity(repository, context, "E15", "E5", u1);
+                        CreateEntity(repository, context, "E15", "E5", u1);
                     }
-                    e = CreateEntity(repository, context, "E6", "E2", u1);
+                    CreateEntity(repository, context, "E6", "E2", u1);
                     {
-                        e = CreateEntity(repository, context, "E16", "E6", u1);
-                        e = CreateEntity(repository, context, "E17", "E6", u1);
+                        CreateEntity(repository, context, "E16", "E6", u1);
+                        CreateEntity(repository, context, "E17", "E6", u1);
                     }
-                    e = CreateEntity(repository, context, "E7", "E2", u1);
+                    CreateEntity(repository, context, "E7", "E2", u1);
                     {
-                        e = CreateEntity(repository, context, "E18", "E7", u1);
-                        e = CreateEntity(repository, context, "E19", "E7", u1);
+                        CreateEntity(repository, context, "E18", "E7", u1);
+                        CreateEntity(repository, context, "E19", "E7", u1);
                     }
                 }
-                e = CreateEntity(repository, context, "E3", "E1", u1);
+                CreateEntity(repository, context, "E3", "E1", u1);
                 {
-                    e = CreateEntity(repository, context, "E8", "E3", u1);
+                    CreateEntity(repository, context, "E8", "E3", u1);
                     {
-                        e = CreateEntity(repository, context, "E20", "E8", u1);
-                        e = CreateEntity(repository, context, "E21", "E8", u1);
+                        CreateEntity(repository, context, "E20", "E8", u1);
+                        CreateEntity(repository, context, "E21", "E8", u1);
                         {
-                            e = CreateEntity(repository, context, "E22", "E21", u1);
-                            e = CreateEntity(repository, context, "E23", "E21", u1);
-                            e = CreateEntity(repository, context, "E24", "E21", u1);
-                            e = CreateEntity(repository, context, "E25", "E21", u1);
-                            e = CreateEntity(repository, context, "E26", "E21", u1);
-                            e = CreateEntity(repository, context, "E27", "E21", u1);
-                            e = CreateEntity(repository, context, "E28", "E21", u1);
-                            e = CreateEntity(repository, context, "E29", "E21", u1);
+                            CreateEntity(repository, context, "E22", "E21", u1);
+                            CreateEntity(repository, context, "E23", "E21", u1);
+                            CreateEntity(repository, context, "E24", "E21", u1);
+                            CreateEntity(repository, context, "E25", "E21", u1);
+                            CreateEntity(repository, context, "E26", "E21", u1);
+                            CreateEntity(repository, context, "E27", "E21", u1);
+                            CreateEntity(repository, context, "E28", "E21", u1);
+                            CreateEntity(repository, context, "E29", "E21", u1);
                         }
                     }
-                    e = CreateEntity(repository, context, "E9", "E3", u1);
-                    e = CreateEntity(repository, context, "E10", "E3", u1);
+                    CreateEntity(repository, context, "E9", "E3", u1);
+                    CreateEntity(repository, context, "E10", "E3", u1);
                 }
-                e = CreateEntity(repository, context, "E4", "E1", u1);
+                CreateEntity(repository, context, "E4", "E1", u1);
                 {
-                    e = CreateEntity(repository, context, "E11", "E4", u1);
-                    e = CreateEntity(repository, context, "E12", "E4", u1);
+                    CreateEntity(repository, context, "E11", "E4", u1);
+                    CreateEntity(repository, context, "E12", "E4", u1);
                     {
-                        e = CreateEntity(repository, context, "E30", "E12", u1);
+                        CreateEntity(repository, context, "E30", "E12", u1);
                         {
-                            e = CreateEntity(repository, context, "E31", "E30", u1);
+                            CreateEntity(repository, context, "E31", "E30", u1);
                             {
-                                e = CreateEntity(repository, context, "E33", "E31", u1);
-                                e = CreateEntity(repository, context, "E34", "E31", u1);
+                                CreateEntity(repository, context, "E33", "E31", u1);
+                                CreateEntity(repository, context, "E34", "E31", u1);
                                 {
-                                    e = CreateEntity(repository, context, "E40", "E34", u1);
-                                    e = CreateEntity(repository, context, "E43", "E34", u1);
+                                    CreateEntity(repository, context, "E40", "E34", u1);
+                                    CreateEntity(repository, context, "E43", "E34", u1);
                                     {
-                                        e = CreateEntity(repository, context, "E44", "E43", u1);
-                                        e = CreateEntity(repository, context, "E45", "E43", u1);
-                                        e = CreateEntity(repository, context, "E46", "E43", u1);
-                                        e = CreateEntity(repository, context, "E47", "E43", u1);
-                                        e = CreateEntity(repository, context, "E48", "E43", u1);
-                                        e = CreateEntity(repository, context, "E49", "E43", u1);
+                                        CreateEntity(repository, context, "E44", "E43", u1);
+                                        CreateEntity(repository, context, "E45", "E43", u1);
+                                        CreateEntity(repository, context, "E46", "E43", u1);
+                                        CreateEntity(repository, context, "E47", "E43", u1);
+                                        CreateEntity(repository, context, "E48", "E43", u1);
+                                        CreateEntity(repository, context, "E49", "E43", u1);
                                     }
                                 }
                             }
-                            e = CreateEntity(repository, context, "E32", "E30", u1);
+                            CreateEntity(repository, context, "E32", "E30", u1);
                             {
-                                e = CreateEntity(repository, context, "E35", "E32", u1);
+                                CreateEntity(repository, context, "E35", "E32", u1);
                                 {
-                                    e = CreateEntity(repository, context, "E41", "E35", u1);
+                                    CreateEntity(repository, context, "E41", "E35", u1);
                                     {
-                                        e = CreateEntity(repository, context, "E42", "E41", u1);
+                                        CreateEntity(repository, context, "E42", "E41", u1);
                                     }
                                 }
-                                e = CreateEntity(repository, context, "E36", "E32", u1);
+                                CreateEntity(repository, context, "E36", "E32", u1);
                                 {
-                                    e = CreateEntity(repository, context, "E37", "E36", u1);
+                                    CreateEntity(repository, context, "E37", "E36", u1);
                                     {
-                                        e = CreateEntity(repository, context, "E38", "E37", u1);
-                                        e = CreateEntity(repository, context, "E39", "E37", u1);
+                                        CreateEntity(repository, context, "E38", "E37", u1);
+                                        CreateEntity(repository, context, "E39", "E37", u1);
                                     }
                                 }
                             }
                         }
                     }
-                    e = CreateEntity(repository, context, "E13", "E4", u1);
+                    CreateEntity(repository, context, "E13", "E4", u1);
                 }
             }
             return repository;

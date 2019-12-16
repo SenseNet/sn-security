@@ -42,7 +42,7 @@ namespace SenseNet.Security.Tests.TestPortal
 
         private static IMessageProvider ResolveMessageProvider()
         {
-            IMessageProvider messageProvider = null;
+            IMessageProvider messageProvider;
             try
             {
                 Type channelAdapterType = GetMessageProviderType();

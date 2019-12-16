@@ -82,6 +82,7 @@ namespace SenseNet.Security.Tests.Concurrency
             StartTheSystem(new MemoryDataProvider(storage));
 
             var ctx = new SecurityContextForConcurrencyTests(TestUser.User2);
+            // ReSharper disable once NotAccessedVariable
             var ok = ctx.HasPermission(1, PermissionType.See);
             AclEditor.Create(ctx)
                 .Allow(1, TestUser.User3.Id, false, PermissionType.Custom10)
@@ -92,6 +93,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 .Allow(51, TestUser.User3.Id, false, PermissionType.Custom10)
                 .Allow(52, TestUser.User3.Id, false, PermissionType.Custom10)
                 .Apply();
+            // ReSharper disable once RedundantAssignment
             ok = ctx.HasPermission(52, PermissionType.See);
 
             _started = DateTime.UtcNow;

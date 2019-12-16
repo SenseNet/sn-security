@@ -9,7 +9,7 @@ namespace SenseNet.Security.Tests.Concurrency
     {
         public static ProgramArguments Parse()
         {
-            ProgramArguments arguments = null;
+            ProgramArguments arguments;
             try
             {
                 arguments = CommandLine.Parse<ProgramArguments>();
