@@ -76,9 +76,10 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                     DependencyTools.HasAncestorRelation(ctx, move1Source, move2Source) ||
                     DependencyTools.HasAncestorRelation(ctx, move1Source, move2Target) ||
                     DependencyTools.HasAncestorRelation(ctx, move1Target, move2Source) ||
-                    DependencyTools.HasAncestorRelation(ctx, move1Target, move2Target)
-                    )
+                    DependencyTools.HasAncestorRelation(ctx, move1Target, move2Target))
+                {
                     return true;
+                }
             }
             return false;
         }
