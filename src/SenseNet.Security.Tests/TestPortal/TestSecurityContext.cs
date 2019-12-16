@@ -255,7 +255,7 @@ namespace SenseNet.Security.Tests.TestPortal
 
         /***************** General context for built in system user ***************/
         private static SecurityContext _generalContext;
-        internal static new SecurityContext General
+        internal new static SecurityContext General
         {
             get { return _generalContext; }
         }

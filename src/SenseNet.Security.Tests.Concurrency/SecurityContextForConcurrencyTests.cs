@@ -5,7 +5,7 @@ namespace SenseNet.Security.Tests.TestPortal
     {
         public SecurityContextForConcurrencyTests(ISecurityUser currentUser) : base(currentUser) { }
 
-        public static new void StartTheSystem(SecurityConfiguration configuration)
+        public new static void StartTheSystem(SecurityConfiguration configuration)
         {
             SecurityContext.StartTheSystem(configuration);
             _generalContext = new SecurityContextForConcurrencyTests(SystemUser);
@@ -29,7 +29,7 @@ namespace SenseNet.Security.Tests.TestPortal
 
         /***************** General context for built in system user ***************/
         private static SecurityContextForConcurrencyTests _generalContext;
-        internal static new SecurityContextForConcurrencyTests General
+        internal new static SecurityContextForConcurrencyTests General
         {
             get { return _generalContext; }
         }
