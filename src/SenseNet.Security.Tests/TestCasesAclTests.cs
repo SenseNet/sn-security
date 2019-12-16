@@ -329,14 +329,20 @@ namespace SenseNet.Security.Tests
                         CurrentContext.Security.AssertSubtreePermission(Id("E1"), perm);
                         Assert.Fail(String.Format("{0} subtree permission on E1 is true, expected: false.", perm.Name));
                     }
-                    catch { }
+                    catch
+                    {
+                        // ignored
+                    }
                     try
                     {
                         CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
                         CurrentContext.Security.AssertSubtreePermission(Id("E3"), perm);
                         Assert.Fail(String.Format("{0} subtree permission on E3 is true, expected: false.", perm.Name));
                     }
-                    catch { }
+                    catch
+                    {
+                        // ignored
+                    }
                     finally
                     {
                         CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
@@ -352,14 +358,20 @@ namespace SenseNet.Security.Tests
                 CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.Preview);
                 Assert.Fail("Edit subtree permission on E3 is true, expected: false.");
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
             try
             {
                 CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
                 CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
                 Assert.Fail("Open+Edit subtree permission on E3 is true, expected: false.");
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
             finally
             {
                 CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
@@ -395,13 +407,19 @@ namespace SenseNet.Security.Tests
                         CurrentContext.Security.AssertSubtreePermission(e1, perm);
                         Assert.Fail(String.Format("{0} subtree permission on E1 is true, expected: false.", perm.Name));
                     }
-                    catch { }
+                    catch
+                    {
+                        // ignored
+                    }
                     try
                     {
                         CurrentContext.Security.AssertSubtreePermission(e3, perm);
                         Assert.Fail(String.Format("{0} subtree permission on E3 is true, expected: false.", perm.Name));
                     }
-                    catch { }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             }
 
@@ -413,14 +431,20 @@ namespace SenseNet.Security.Tests
                 CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.Preview);
                 Assert.Fail("Edit subtree permission on E3 is true, expected: false.");
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
             try
             {
                 CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
                 CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
                 Assert.Fail("Open+Edit subtree permission on E3 is true, expected: false.");
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
             finally
             {
                 CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);

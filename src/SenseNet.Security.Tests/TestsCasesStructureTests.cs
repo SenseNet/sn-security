@@ -323,7 +323,10 @@ namespace SenseNet.Security.Tests
             };
 
             try { CurrentContext.Security.CreateSecurityEntity(entity); }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             entity.OwnerId = TestUser.User2.Id;
 
@@ -356,7 +359,10 @@ namespace SenseNet.Security.Tests
             var id = Id("E101");
 
             try { CurrentContext.Security.CreateSecurityEntity(id, default, TestUser.User1.Id); }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             //# calling the security component for modifying the entity's owner
             CurrentContext.Security.ModifyEntityOwner(id, TestUser.User2.Id);
@@ -817,7 +823,10 @@ namespace SenseNet.Security.Tests
                 CurrentContext.Security.CreateSecurityEntity(childEntity);
                 CurrentContext.Security.CreateSecurityEntity(grandChildEntity);
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             chain = new[] { rootEntity.Id, childEntity.Id, grandChildEntity.Id };
         }
