@@ -447,7 +447,7 @@ namespace SenseNet.Security.Tests
             foreach (var userId in membership.Keys.OrderBy(s => s))
             {
                 sb.Append(GetUserName(userId)).Append(":");
-                sb.Append(String.Join(",", membership[userId].OrderBy(s => s).Select(g => GetGroupName(g))));
+                sb.Append(String.Join(",", membership[userId].OrderBy(s => s).Select(GetGroupName)));
                 sb.Append("|");
             }
             sb.Length--;
@@ -478,7 +478,7 @@ namespace SenseNet.Security.Tests
                 {
                     var s = userRecord.Split(':');
                     var userId = Id(s[0]);
-                    Membership[userId] = s[1].Split(',').Select(g => Id(g)).ToList();
+                    Membership[userId] = s[1].Split(',').Select(Id).ToList();
                 }
             }
 
@@ -514,7 +514,7 @@ namespace SenseNet.Security.Tests
             internal MembershipEditor RemoveGroupsFromUser(int userId, params int[] groupIds)
             {
                 if (Membership.TryGetValue(userId, out var user))
-                    user.RemoveAll(x => groupIds.Contains(x));
+                    user.RemoveAll(groupIds.Contains);
                 return this;
             }
 

@@ -270,7 +270,7 @@ namespace SenseNet.Security.Tests
             // "+U1:____++++,+G1:____++++"
             var entity = context.GetSecurityEntity(entityId);
 
-            var aclInfo = new AclInfo(entityId) { Entries = src.Split(',').Select(x => CreateAce(x)).ToList() };
+            var aclInfo = new AclInfo(entityId) { Entries = src.Split(',').Select(CreateAce).ToList() };
 
             var emptyGuidArray = new List<int>();
             var breaked = false;

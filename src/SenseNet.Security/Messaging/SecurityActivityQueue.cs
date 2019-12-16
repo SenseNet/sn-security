@@ -314,7 +314,7 @@ namespace SenseNet.Security.Messaging
                 if (_run)
                     return;
                 _run = true;
-                Task.Run(() => ProcessActivities());
+                Task.Run(ProcessActivities);
             }
 
             private static void ProcessActivities()
