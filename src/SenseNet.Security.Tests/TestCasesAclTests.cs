@@ -124,7 +124,7 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.Preview));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See, PermissionType.Preview));
-            foreach (var perm in PermissionType.GetPermissionTypes())
+            foreach (var perm in PermissionTypeBase.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
@@ -146,7 +146,7 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.Preview));
             Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E2"), PermissionType.See, PermissionType.Preview));
-            foreach (var perm in PermissionType.GetPermissionTypes())
+            foreach (var perm in PermissionTypeBase.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
@@ -168,7 +168,7 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.AssertPermission(Id("E2"), PermissionType.See);
             CurrentContext.Security.AssertPermission(Id("E2"), PermissionType.Preview);
             CurrentContext.Security.AssertPermission(Id("E2"), PermissionType.See, PermissionType.Preview);
-            foreach (var perm in PermissionType.GetPermissionTypes())
+            foreach (var perm in PermissionTypeBase.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
@@ -204,7 +204,7 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.AssertPermission(e2, PermissionType.See);
             CurrentContext.Security.AssertPermission(e2, PermissionType.Preview);
             CurrentContext.Security.AssertPermission(e2, PermissionType.See, PermissionType.Preview);
-            foreach (var perm in PermissionType.GetPermissionTypes())
+            foreach (var perm in PermissionTypeBase.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
@@ -269,7 +269,7 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.Preview));
             Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview));
 
-            foreach (var perm in PermissionType.GetPermissionTypes())
+            foreach (var perm in PermissionTypeBase.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
@@ -322,7 +322,7 @@ namespace SenseNet.Security.Tests
                 CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
             }
 
-            foreach (var perm in PermissionType.GetPermissionTypes())
+            foreach (var perm in PermissionTypeBase.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
@@ -400,7 +400,7 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.AssertSubtreePermission(e3, PermissionType.Preview);
             CurrentContext.Security.AssertSubtreePermission(e3, PermissionType.See, PermissionType.Preview);
 
-            foreach (var perm in PermissionType.GetPermissionTypes())
+            foreach (var perm in PermissionTypeBase.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
@@ -1620,86 +1620,86 @@ namespace SenseNet.Security.Tests
 
             //--------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
-            for (var i = 0; i < PermissionType.PermissionCount; i += 3)
-                ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (var i = 1; i < PermissionType.PermissionCount; i += 3)
-                ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (var i = 2; i < PermissionType.PermissionCount; i += 3)
-                ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i += 3)
+                ed.Allow(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
+            for (var i = 1; i < PermissionTypeBase.PermissionCount; i += 3)
+                ed.Deny(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
+            for (var i = 2; i < PermissionTypeBase.PermissionCount; i += 3)
+                ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+", Tools.ReplaceIds(acl.ToString()));
 
             //--------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
-            for (var i = 1; i < PermissionType.PermissionCount; i += 3)
-                ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (var i = 2; i < PermissionType.PermissionCount; i += 3)
-                ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (var i = 0; i < PermissionType.PermissionCount; i += 3)
-                ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
+            for (var i = 1; i < PermissionTypeBase.PermissionCount; i += 3)
+                ed.Allow(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
+            for (var i = 2; i < PermissionTypeBase.PermissionCount; i += 3)
+                ed.Deny(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i += 3)
+                ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_", Tools.ReplaceIds(acl.ToString()));
 
             //--------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
-            for (var i = 2; i < PermissionType.PermissionCount; i += 3)
-                ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (var i = 0; i < PermissionType.PermissionCount; i += 3)
-                ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
-            for (var i = 1; i < PermissionType.PermissionCount; i += 3)
-                ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
+            for (var i = 2; i < PermissionTypeBase.PermissionCount; i += 3)
+                ed.Allow(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i += 3)
+                ed.Deny(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
+            for (var i = 1; i < PermissionTypeBase.PermissionCount; i += 3)
+                ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-", Tools.ReplaceIds(acl.ToString()));
 
             //========================================================
             ed = CurrentContext.Security.CreateAclEditor();
-            for (var i = 0; i < PermissionType.PermissionCount; i++)
-                ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
+                ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|", Tools.ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
-            for (var i = 0; i < PermissionType.PermissionCount; i++)
-                ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
+                ed.Allow(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
-            for (var i = 0; i < PermissionType.PermissionCount; i++)
-                ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
+                ed.Deny(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:----------------------------------------------------------------", Tools.ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
-            for (var i = 0; i < PermissionType.PermissionCount; i++)
-                ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
+                ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|", Tools.ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
-            for (var i = 0; i < PermissionType.PermissionCount; i++)
-                ed.Deny(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
+                ed.Deny(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:----------------------------------------------------------------", Tools.ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
-            for (var i = 0; i < PermissionType.PermissionCount; i++)
-                ed.Allow(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
+                ed.Allow(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", Tools.ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
-            for (var i = 0; i < PermissionType.PermissionCount; i++)
-                ed.ClearPermission(entity4Id, user6Id, false, PermissionType.GetPermissionTypeByIndex(i));
+            for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
+                ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             ed.Apply();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|", Tools.ReplaceIds(acl.ToString()));

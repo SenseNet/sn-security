@@ -80,7 +80,7 @@ namespace SenseNet.Security.Tests
             for (var i = src.Length - 1; i >= 0; i--)
             {
                 if (src[i] != '_')
-                    result.Add(PermissionType.GetPermissionTypeByIndex(index));
+                    result.Add(PermissionTypeBase.GetPermissionTypeByIndex(index));
                 index++;
             }
             return result.ToArray();
