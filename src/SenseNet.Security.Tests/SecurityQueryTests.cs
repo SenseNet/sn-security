@@ -830,7 +830,7 @@ namespace SenseNet.Security.Tests
         #region Helper methods
         private readonly Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
 
-        private readonly int _rootEntityId = 1;
+        private const int _rootEntityId = 1;
 
         private void CreatePlayground()
         {

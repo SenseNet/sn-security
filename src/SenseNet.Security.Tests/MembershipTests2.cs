@@ -38,6 +38,7 @@ namespace SenseNet.Security.Tests
         int U45 = Id("U45"); int U46 = Id("U46"); int U47 = Id("U47"); int U48 = Id("U48"); int U49 = Id("U49");
         #endregion
         #region initial membership
+        // ReSharper disable once ConvertToConstant.Local
         readonly string InitialMembership = "U1:G1,G2|U2:G1,G2|U3:G1,G4|U4:G1,G4|U5:G1,G4|U6:G1,G6|U7:G1,G3,G8|U8:G1,G3,G8|U9:G1,G3,G8|U10:G1,G3|" +
                 "U11:G1,G3,G10|U12:G1,G3,G11|U13:G1,G3,G11|U14:G1,G5,G12|U15:G1,G5,G12|U16:G1,G5,G12|U17:G1,G5,G12|U18:G1,G5,G12|" +
                 "U19:G1,G5,G12|U20:G1,G5,G12|U21:G1,G5,G13|U22:G1,G5,G14|U23:G1,G5,G14|U24:G1,G5,G15|U25:G1,G3,G9,G16|U26:G1,G3,G9,G17|" +
