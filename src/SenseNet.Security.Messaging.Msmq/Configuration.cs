@@ -5,6 +5,7 @@ namespace SenseNet.Security.Messaging.Msmq
 {
     internal static class Configuration
     {
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string MessageQueueNameKey = "SecurityMsmqChannelQueueName";
         private static string _messageQueueName;
         public static string MessageQueueName
@@ -21,6 +22,7 @@ namespace SenseNet.Security.Messaging.Msmq
             }
         }
 
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string MessageRetentionTimeKey = "MessageRetentionTime";
         private static int? _messageRetentionTime;
         /// <summary>
@@ -43,6 +45,7 @@ namespace SenseNet.Security.Messaging.Msmq
             }
         }
         
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string MsmqReconnectDelayKey = "MsmqReconnectDelay";
         private static int? _msmqReconnectDelay;
         /// <summary>

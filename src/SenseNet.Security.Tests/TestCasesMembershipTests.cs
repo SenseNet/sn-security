@@ -12,7 +12,7 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_StoreSimpleGroup()
         {
-            var groupId = 101;
+            const int groupId = 101;
             //var group = new TestGroup { Id = groupId, };
             //group.SetGroupMembers(new TestGroup[0]);
             //group.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 });
@@ -33,8 +33,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_StoreTwoGroups()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 });
@@ -68,9 +68,9 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_StoreGroupCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -109,8 +109,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_DeleteRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -136,8 +136,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_DeleteMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -164,8 +164,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_DeleteMemberGroupById()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -194,9 +194,9 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_DeleteGroupFromCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -252,8 +252,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_AddUserToRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -282,8 +282,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_AddUserToMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -312,9 +312,9 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_AddUserToGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -356,8 +356,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_RemoveUserFromRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -386,8 +386,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_RemoveUserFromMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -416,9 +416,9 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_RemoveUserFromGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -458,8 +458,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_AddGroupToRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -467,7 +467,7 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group1);
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
 
-            var groupId3 = 103;
+            const int groupId3 = 103;
             var group3 = new TestGroup { Id = groupId3 };
             group3.SetUserMembers(new ISecurityUser[] { TestUser.User3 }); group3.SetGroupMembers(new TestGroup[0]); group3.SetGroupsWhereThisIsMember(new TestGroup[0]);
             AddOrModifySecurityGroup(CurrentContext.Security, group3);
@@ -498,8 +498,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_AddGroupToMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -507,7 +507,7 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group1);
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
 
-            var groupId3 = 103;
+            const int groupId3 = 103;
             var group3 = new TestGroup { Id = groupId3 };
             group3.SetUserMembers(new ISecurityUser[] { TestUser.User3 }); group3.SetGroupMembers(new TestGroup[0]); group3.SetGroupsWhereThisIsMember(new TestGroup[0]);
             AddOrModifySecurityGroup(CurrentContext.Security, group3);
@@ -538,9 +538,9 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_AddGroupToGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -557,7 +557,7 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
             AddOrModifySecurityGroup(CurrentContext.Security, group3);
 
-            var groupId4 = 104;
+            const int groupId4 = 104;
             var group4 = new TestGroup { Id = groupId4, };
             group4.SetUserMembers(new ISecurityUser[] { TestUser.User4 });
             group4.SetGroupMembers(new TestGroup[0]);
@@ -596,9 +596,9 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_RemoveGroupFromRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -635,9 +635,9 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_RemoveGroupFromMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -674,10 +674,10 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_RemoveGroupFromGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -726,8 +726,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_AddGroupChainToRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -735,8 +735,8 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group1);
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
 
-            var groupId3 = 103;
-            var groupId4 = 104;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
             var group3 = new TestGroup { Id = groupId3 };
             var group4 = new TestGroup { Id = groupId4 };
             group3.SetUserMembers(new ISecurityUser[] { TestUser.User3 }); group3.SetGroupMembers(new[] { group4 }); group3.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -775,8 +775,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_AddGroupChainToMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -784,8 +784,8 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group1);
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
 
-            var groupId3 = 103;
-            var groupId4 = 104;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
             var group3 = new TestGroup { Id = groupId3 };
             var group4 = new TestGroup { Id = groupId4 };
             group3.SetUserMembers(new ISecurityUser[] { TestUser.User3 }); group3.SetGroupMembers(new[] { group4 }); group3.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -824,9 +824,9 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_AddGroupChainToGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -838,8 +838,8 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
             AddOrModifySecurityGroup(CurrentContext.Security, group3);
 
-            var groupId4 = 104;
-            var groupId5 = 105;
+            const int groupId4 = 104;
+            const int groupId5 = 105;
             var group4 = new TestGroup { Id = groupId4 };
             var group5 = new TestGroup { Id = groupId5 };
             group4.SetUserMembers(new ISecurityUser[] { TestUser.User4 }); group4.SetGroupMembers(new[] { group5 }); group4.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -884,10 +884,10 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_RemoveGroupChainFromRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -932,10 +932,10 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_RemoveGroupChainFromMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -980,11 +980,11 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_RemoveGroupChainFromGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
-            var groupId5 = 105;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
+            const int groupId5 = 105;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -1064,11 +1064,11 @@ namespace SenseNet.Security.Tests
         }
         private Context Prepare_GroupThatContainsCircle_Test()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
-            var groupId5 = 105;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
+            const int groupId5 = 105;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -1099,11 +1099,11 @@ namespace SenseNet.Security.Tests
         public void Membership_Flattening()
         {
             // make two disjunct structure
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
-            var groupId5 = 105;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
+            const int groupId5 = 105;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -1184,11 +1184,11 @@ namespace SenseNet.Security.Tests
 
             // #1: Create the identity structure: G1(U1,G2), G2(U2, G3), G3(U3, G1), G4(U4, G5), G5(U5)
 
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
-            var groupId5 = 105;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
+            const int groupId5 = 105;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };

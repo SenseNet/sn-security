@@ -308,7 +308,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E20|Normal|+G3:_+___________+_,Normal|+G4:____+_________+");
 
             var origOwnerId = Id("U1");
-            var differentOwnerId = int.MaxValue;
+            const int differentOwnerId = int.MaxValue;
 
             CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See);
             CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.Preview);
@@ -391,7 +391,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E20|Normal|+G3:_+___________+_,Normal|+G4:____+_________+");
 
             var origOwnerId = Id("U1");
-            var differentOwnerId = int.MaxValue;
+            const int differentOwnerId = int.MaxValue;
 
             var e1 = GetRepositoryEntity(Id("E1"));
             var e3 = GetRepositoryEntity(Id("E3"));
@@ -1064,7 +1064,7 @@ namespace SenseNet.Security.Tests
             var db = CurrentContext.Security.DataProvider;
 
             var u1 = Id("U1");
-            var eid0 = default(int);
+            const int eid0 = default;
             var eid1 = Id("E1");
             var eid2 = Id("E2");
             var eid3 = Id("E3");

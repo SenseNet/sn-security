@@ -348,8 +348,8 @@ namespace SenseNet.Security.Tests.Concurrency
 
             StartTheSystem(new MemoryDataProvider(storage));
 
-            var retryCount = 100;
-            var threadCount = 6;
+            const int retryCount = 100;
+            const int threadCount = 6;
             var mainWatch = Stopwatch.StartNew();
 
             for (var i = 0; i < retryCount; i++)

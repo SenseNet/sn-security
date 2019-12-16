@@ -666,7 +666,9 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             var repo = Tools.CreateRepository(ctx);
 
-            var expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21" +
+                                    "{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44" +
+                                    "E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -679,7 +681,9 @@ namespace SenseNet.Security.Tests
 
             ctx.CreateSecurityEntity(Id("E54"), Id("E53"), 1);
 
-            var expected = "{E1{E2{E5{E14{E50{E51{E52}E53{E54}}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53{E54}}}E15}E6{E16E17}E7{E18E19}}E3" +
+                                    "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E3" +
+                                    "3E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -692,7 +696,9 @@ namespace SenseNet.Security.Tests
 
             ctx.CreateSecurityEntity(Id("E54"), Id("E50"), 1);
 
-            var expected = "{E1{E2{E5{E14{E50{E51{E52}E53E54}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string  expected = "{E1{E2{E5{E14{E50{E51{E52}E53E54}}E15}E6{E16E17}E7{E18E19}}E3" +
+                                     "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{" +
+                                     "E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -704,7 +710,9 @@ namespace SenseNet.Security.Tests
 
             ctx.DeleteEntity(Id("E52"));
 
-            var expected = "{E1{E2{E5{E14{E50{E51E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14{E50{E51E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21" +
+                                    "{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E4" +
+                                    "3{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -717,7 +725,9 @@ namespace SenseNet.Security.Tests
 
             ctx.DeleteEntity(Id("E25"));
 
-            var expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E6{E16E17}E7{E18E19}}E3{E8" +
+                                    "{E20E21{E22E23E24E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34" +
+                                    "{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -730,7 +740,9 @@ namespace SenseNet.Security.Tests
 
             ctx.MoveEntity(Id("E50"), Id("E15"));
 
-            var expected = "{E1{E2{E5{E14E15{E50{E51{E52}E53}}}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14E15{E50{E51{E52}E53}}}E6{E16E17}E7{E18E19}}E3" +
+                                    "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E" +
+                                    "31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -743,7 +755,9 @@ namespace SenseNet.Security.Tests
 
             ctx.MoveEntity(Id("E50"), Id("E2"));
 
-            var expected = "{E1{E2{E5{E14E15}E6{E16E17}E7{E18E19}E50{E51{E52}E53}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14E15}E6{E16E17}E7{E18E19}E50{E51{E52}E53}}E3" +
+                                    "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30" +
+                                    "{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -756,7 +770,9 @@ namespace SenseNet.Security.Tests
 
             ctx.MoveEntity(Id("E6"), Id("E3"));
 
-            var expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E7{E18E19}}E3{E6{E16E17}E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E7{E18E19}}E3{E6{E16E17}E8" +
+                                    "{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33" +
+                                    "E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);

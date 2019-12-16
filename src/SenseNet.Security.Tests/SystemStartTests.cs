@@ -49,7 +49,7 @@ namespace SenseNet.Security.Tests
 
             //---- check membership in the evaluator
             var s = Tools.ReplaceIds(_context.Security.Evaluator._traceMembership());
-            var expected = @"U1:[G1,G3]U2:[G1]U3:[G2,G3]U4:[G2,G4]U5:[G5]";
+            const string expected = @"U1:[G1,G3]U2:[G1]U3:[G2,G3]U4:[G2,G4]U5:[G5]";
             Assert.AreEqual(expected, s.Replace(Environment.NewLine, "").Replace(" ", ""));
 
             //---- preload

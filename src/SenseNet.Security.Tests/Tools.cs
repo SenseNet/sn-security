@@ -56,7 +56,7 @@ namespace SenseNet.Security.Tests
         internal static void ParsePermissions(string src, out ulong allowBits, out ulong denyBits)
         {
             //+_____-____++++
-            var mask = 1ul;
+            const ulong mask = 1ul;
             allowBits = denyBits = 0;
             for (int i = src.Length - 1; i >= 0; i--)
             {

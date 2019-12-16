@@ -269,6 +269,7 @@ DELETE E1 FROM EFEntities E1 INNER JOIN @EntityIdTable E2 ON E2.EntityId = E1.Id
             this.Database.ExecuteSqlRaw(CleanupSecurityActivitiesScript, new SqlParameter("@TimeLimit", timeLimitInMinutes));
         }
 
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string AcquireSecurityActivityExecutionLock_Script = @"UPDATE EFMessages
 	SET ExecutionState = '" + ExecutionState.Executing + @"', LockedBy = @LockedBy, LockedAt = GETUTCDATE()
 	WHERE Id = @ActivityId AND ((ExecutionState = '" + ExecutionState.Wait + @"') OR (ExecutionState = '" + ExecutionState.Executing + @"' AND LockedAt < DATEADD(second, -@TimeLimit, GETUTCDATE())))
@@ -300,6 +301,7 @@ ELSE
             return result;
         }
 
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string RefreshSecurityActivityExecutionLock_Script = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";
         public void RefreshSecurityActivityExecutionLock(int securityActivityId)
         {
@@ -309,6 +311,7 @@ ELSE
                     new SqlParameter("@ActivityId", securityActivityId));
         }
 
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string ReleaseSecurityActivityExecutionLock_Script = @"UPDATE EFMessages SET ExecutionState = '" + ExecutionState.Done + @"' WHERE Id = @ActivityId";
         public void ReleaseSecurityActivityExecutionLock(int securityActivityId)
         {

@@ -586,7 +586,7 @@ namespace SenseNet.Security.Tests
             var identityNames = new[] { "U1", "U2", "U3", "U4", "U8" };
 
             // ---- ALLOWED
-            var expectedAllowedPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3|U4|U8";
+            const string expectedAllowedPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3|U4|U8";
             var allowedPermCountsByIdentities = ResultToString(identityNames
                 .Select(identityName => new
                 {
@@ -609,7 +609,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expectedAllowedPermCounts, allowedPermCountsByIdentities);
 
             // ---- DENIED
-            var expectedDeniedPermCounts = "U1|U2|U3:p32:4|U4|U8";
+            const string expectedDeniedPermCounts = "U1|U2|U3:p32:4|U4|U8";
             var deniedPermCountsByIdentities = ResultToString(identityNames
                 .Select(identityName => new
                 {
@@ -632,7 +632,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expectedDeniedPermCounts, deniedPermCountsByIdentities);
 
             // ALLOWED OR DENIED
-            var expectedAllPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3:p32:4|U4|U8";
+            const string expectedAllPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3:p32:4|U4|U8";
             var allPermCountsByIdentities = ResultToString(identityNames
                 .Select(identityName => new
                 {
@@ -830,7 +830,7 @@ namespace SenseNet.Security.Tests
         #region Helper methods
         private readonly Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
 
-        private int _rootEntityId = 1;
+        private readonly int _rootEntityId = 1;
 
         private void CreatePlayground()
         {
