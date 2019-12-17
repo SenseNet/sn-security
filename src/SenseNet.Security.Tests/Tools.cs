@@ -284,7 +284,6 @@ namespace SenseNet.Security.Tests
                 breaked ? new List<int> { entityId } : new List<int>(),
                 unbreaked ? new List<int> { entityId } : new List<int>()
                 );
-            return;
         }
         private static AceInfo CreateAce(string src)
         {
@@ -316,7 +315,6 @@ namespace SenseNet.Security.Tests
         internal static void CheckIntegrity(string testName, SecurityContext context, IEnumerable<StoredSecurityEntity> entities, IEnumerable<SecurityGroup> groups)
         {
             //TODO: REWRITE WHOLE CONSISTENY CHECK
-            return;
         }
 
         internal static Dictionary<int, AclInfo> CollectAllAcls(SecurityContext ctx)
