@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+// ReSharper disable UnusedMember.Global
 
 namespace SenseNet.Security.Tests.TestPortal
 {

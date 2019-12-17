@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 // ReSharper disable InconsistentNaming
 // ReSharper disable FieldCanBeMadeReadOnly.Local
+// ReSharper disable UnusedMember.Local
 
 namespace SenseNet.Security.Tests
 {
