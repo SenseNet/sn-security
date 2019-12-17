@@ -1461,7 +1461,7 @@ namespace SenseNet.Security.Tests
 
             var sec = CurrentContext.Security;
             var db = CurrentContext.Security.DataProvider;
-            var aceTable = db.LoadAllAces();
+            var aceTable = db.LoadAllAces().ToArray();
 
             Assert.AreEqual("+E2|Normal|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E2")).ToString()));
             var entity = sec.GetSecurityEntity(Id("E2"));
