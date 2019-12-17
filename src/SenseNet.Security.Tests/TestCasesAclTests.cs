@@ -638,8 +638,8 @@ namespace SenseNet.Security.Tests
 
             var ace1 = aces.FirstOrDefault(x => x.IdentityId == userId1 && x.LocalOnly == false);
             var ace2 = aces.FirstOrDefault(x => x.IdentityId == userId2 && x.LocalOnly == false);
-            var ace3 = aces.FirstOrDefault(x => x.IdentityId == userId1 && x.LocalOnly == true);
-            var ace4 = aces.FirstOrDefault(x => x.IdentityId == userId2 && x.LocalOnly == true);
+            var ace3 = aces.FirstOrDefault(x => x.IdentityId == userId1 && x.LocalOnly);
+            var ace4 = aces.FirstOrDefault(x => x.IdentityId == userId2 && x.LocalOnly);
 
             Assert.AreEqual(userId1, ace1?.IdentityId);
             Assert.AreEqual(false, ace1?.LocalOnly);
@@ -697,8 +697,8 @@ namespace SenseNet.Security.Tests
 
             var ace1 = aces.FirstOrDefault(x => x.IdentityId == userId1 && x.LocalOnly == false);
             var ace2 = aces.FirstOrDefault(x => x.IdentityId == userId2 && x.LocalOnly == false);
-            var ace3 = aces.FirstOrDefault(x => x.IdentityId == userId1 && x.LocalOnly == true);
-            var ace4 = aces.FirstOrDefault(x => x.IdentityId == userId2 && x.LocalOnly == true);
+            var ace3 = aces.FirstOrDefault(x => x.IdentityId == userId1 && x.LocalOnly);
+            var ace4 = aces.FirstOrDefault(x => x.IdentityId == userId2 && x.LocalOnly);
 
             Assert.AreEqual(userId1, ace1?.IdentityId);
             Assert.AreEqual(false, ace1?.LocalOnly);
