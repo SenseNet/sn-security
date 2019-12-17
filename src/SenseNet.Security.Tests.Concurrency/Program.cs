@@ -441,7 +441,7 @@ namespace SenseNet.Security.Tests.Concurrency
     }
 
     [Serializable]
-    internal class TestWaitActivity : SenseNet.Security.Messaging.SecurityMessages.SecurityActivity
+    internal class TestWaitActivity : Messaging.SecurityMessages.SecurityActivity
     {
         int _sleepInMillisconds;
 
@@ -461,7 +461,7 @@ namespace SenseNet.Security.Tests.Concurrency
             Thread.Sleep(_sleepInMillisconds);
         }
 
-        internal override bool MustWaitFor(SenseNet.Security.Messaging.SecurityMessages.SecurityActivity olderActivity)
+        internal override bool MustWaitFor(Messaging.SecurityMessages.SecurityActivity olderActivity)
         {
             return false;
         }
