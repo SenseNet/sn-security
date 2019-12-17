@@ -24,7 +24,7 @@ namespace SenseNet.Security
     /// </summary>
     public class SecurityQuery
     {
-        private enum Axis { All, ParentChain, Subtree };
+        private enum Axis { All, ParentChain, Subtree }
 
         /* ============================================================ Static part */
 
