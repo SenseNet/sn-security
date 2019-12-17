@@ -164,7 +164,7 @@ namespace SenseNet.Security.Tests
                 Id = entityId,
                 ParentId = parentEntityId,
                 IsInherited = true,
-                OwnerId = owner.Id,
+                OwnerId = owner.Id
             };
             storage[entityId] = entity;
 

@@ -209,7 +209,7 @@ namespace SenseNet.Security.Tests
                 Id = GetId(name),
                 Name = name,
                 OwnerId = owner == null ? default : owner.Id,
-                Parent = parentName == null ? null : repository[GetId(parentName)],
+                Parent = parentName == null ? null : repository[GetId(parentName)]
             };
             repository.Add(entity.Id, entity);
             context.CreateSecurityEntity(entity);

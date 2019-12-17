@@ -28,7 +28,7 @@ namespace SenseNet.Security.Tests
                 new { eLevel = 3, eWidth=10 },
                 new { eLevel = 4, eWidth=10 },
                 new { eLevel = 5, eWidth=10 },
-                new { eLevel = 6, eWidth=10 },
+                new { eLevel = 6, eWidth=10 }
             };
             var results = new LoadingTimeTestResult[testCases.Length];
             var i = 0;
@@ -112,7 +112,7 @@ namespace SenseNet.Security.Tests
                 Id = _id++,
                 ParentId = parentEntity == null ? default : parentEntity.Id,
                 IsInherited = true,
-                OwnerId = ownerId,
+                OwnerId = ownerId
             };
             storage[entity.Id] = entity;
 

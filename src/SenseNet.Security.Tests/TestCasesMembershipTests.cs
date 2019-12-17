@@ -558,7 +558,7 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group3);
 
             const int groupId4 = 104;
-            var group4 = new TestGroup { Id = groupId4, };
+            var group4 = new TestGroup { Id = groupId4 };
             group4.SetUserMembers(new ISecurityUser[] { TestUser.User4 });
             group4.SetGroupMembers(new TestGroup[0]);
             group4.SetGroupsWhereThisIsMember(new TestGroup[0]);

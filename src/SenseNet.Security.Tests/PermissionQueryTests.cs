@@ -147,7 +147,7 @@ namespace SenseNet.Security.Tests
             {"P3", PermissionType.Custom03},
             {"P4", PermissionType.Custom04},
             {"P5", PermissionType.Custom05},
-            {"P6", PermissionType.Custom06},
+            {"P6", PermissionType.Custom06}
         };
 
         [TestMethod]
@@ -446,7 +446,7 @@ namespace SenseNet.Security.Tests
                 Id = Id(name),
                 Name = name,
                 OwnerId = owner?.Id ?? default,
-                Parent = parentName == null ? null : _repository[Id(parentName)],
+                Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
             CurrentContext.Security.CreateSecurityEntity(entity);

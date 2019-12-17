@@ -57,7 +57,7 @@ namespace SenseNet.Security.Tests.Concurrency
             {
                 SecurityDataProvider = securityDataProvider,
                 MessageProvider = new DefaultMessageProvider(),
-                CommunicationMonitorRunningPeriodInSeconds = 31,
+                CommunicationMonitorRunningPeriodInSeconds = 31
             });
         }
 

@@ -34,7 +34,7 @@ namespace SenseNet.Security.Tests.TestPortal
             {
                 SecurityDataProvider = securityDataProvider,
                 MessageProvider = messageProvider,
-                CommunicationMonitorRunningPeriodInSeconds = 31,
+                CommunicationMonitorRunningPeriodInSeconds = 31
             });
             // Staring message system. Messages before 'startingThesystem' will be ignored.
             messageProvider.Start(startingThesystem);
