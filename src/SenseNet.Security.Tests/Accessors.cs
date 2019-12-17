@@ -89,12 +89,7 @@ namespace SenseNet.Security.Tests
         private DatabaseStorage _storage;
         internal DatabaseStorage Storage
         {
-            get
-            {
-                if (_storage == null)
-                    _storage = GetStaticFieldOrProperty<DatabaseStorage>("Storage");
-                return _storage;
-            }
+            get { return _storage ?? (_storage = GetStaticFieldOrProperty<DatabaseStorage>("Storage")); }
         }
     }
 
