@@ -125,11 +125,11 @@ namespace SenseNet.Security.Tests
                     where Id in (@last-2, @last-6)
                 ");
 
-            var expectedIsFromDb1 = String.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId });
+            var expectedIsFromDb1 = string.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId });
             uncompleted = DataHandler.LoadCompletionState(SecurityContext.General.DataProvider, out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs1 = SecurityActivityQueue.GetCurrentState().Termination;
-            var idsFromDb1 = String.Join(", ", Db().GetUnprocessedActivityIds());
+            var idsFromDb1 = string.Join(", ", Db().GetUnprocessedActivityIds());
             Assert.AreEqual(expectedCs.ToString(), cs1.ToString());
             Assert.AreEqual(expectedIsFromDb1, idsFromDb1);
 
@@ -143,11 +143,11 @@ namespace SenseNet.Security.Tests
                     where Id in (@last-2, @last-6)
                 ");
 
-            var expectedIsFromDb2 = String.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId, lastId });
+            var expectedIsFromDb2 = string.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId, lastId });
             uncompleted = DataHandler.LoadCompletionState(SecurityContext.General.DataProvider, out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs2 = SecurityActivityQueue.GetCurrentState().Termination;
-            var idsFromDb2 = String.Join(", ", Db().GetUnprocessedActivityIds());
+            var idsFromDb2 = string.Join(", ", Db().GetUnprocessedActivityIds());
             Assert.AreEqual(expectedCs.ToString(), cs2.ToString());
             Assert.AreEqual(expectedIsFromDb2, idsFromDb2);
         }
@@ -189,9 +189,9 @@ namespace SenseNet.Security.Tests
                 // dump
                 var waitingActivities = SecurityActivityQueue.__getWaitingSet();
                 var x = waitingActivities.Select(a => "{"
-                   + $"id:{a.Id}, w:[{String.Join(",", a.WaitingFor.Select(b => b.Id))}], wm:[{String.Join(",", a.WaitingForMe.Select(c => c.Id))}]"
+                   + $"id:{a.Id}, w:[{string.Join(",", a.WaitingFor.Select(b => b.Id))}], wm:[{string.Join(",", a.WaitingForMe.Select(c => c.Id))}]"
                                                      + "}");
-                waitingActivitiesDump = String.Join(",", x);
+                waitingActivitiesDump = string.Join(",", x);
             }
             finally
             {

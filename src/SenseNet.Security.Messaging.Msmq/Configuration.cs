@@ -15,8 +15,8 @@ namespace SenseNet.Security.Messaging.Msmq
                 if (_messageQueueName == null)
                 {
                     _messageQueueName = ConfigurationManager.AppSettings[MessageQueueNameKey];
-                    if (String.IsNullOrEmpty(_messageQueueName))
-                        _messageQueueName = String.Empty;
+                    if (string.IsNullOrEmpty(_messageQueueName))
+                        _messageQueueName = string.Empty;
                 }
                 return _messageQueueName;
             }
@@ -35,7 +35,7 @@ namespace SenseNet.Security.Messaging.Msmq
                 if (_messageRetentionTime == null)
                 {
                     var setting = ConfigurationManager.AppSettings[MessageRetentionTimeKey];
-                    if (String.IsNullOrEmpty(setting) || !Int32.TryParse(setting, out var value))
+                    if (string.IsNullOrEmpty(setting) || !int.TryParse(setting, out var value))
                         value = 10;
                     if (value < 2)
                         value = 2;
@@ -58,7 +58,7 @@ namespace SenseNet.Security.Messaging.Msmq
                 if (!_msmqReconnectDelay.HasValue)
                 {
                     var setting = ConfigurationManager.AppSettings[MsmqReconnectDelayKey];
-                    if (String.IsNullOrEmpty(setting) || !Int32.TryParse(setting, out var value))
+                    if (string.IsNullOrEmpty(setting) || !int.TryParse(setting, out var value))
                         value = 30;
                     _msmqReconnectDelay = value * 1000;
                 }

@@ -55,12 +55,12 @@ namespace SenseNet.Security.Tests
             var smallActivityId = smallActivity.Id;
 
             // large activity
-            var largeActivity = new TestActivity { Body = new String('*', Configuration.Messaging.DistributableSecurityActivityMaxSize + 1) };
+            var largeActivity = new TestActivity { Body = new string('*', Configuration.Messaging.DistributableSecurityActivityMaxSize + 1) };
             largeActivity.Execute(_context.Security);
             var largeActivityId = largeActivity.Id;
 
             // check the logger
-            var expected = String.Format("Executing unprocessed security activities., " +
+            var expected = string.Format("Executing unprocessed security activities., " +
                                          "Send: TestActivity, Applied: #{0}, " +
                                          "Send: BigActivityMessage, LoadMessage: TestActivity#{1}, Applied: #{1}",
                 smallActivityId, largeActivityId);

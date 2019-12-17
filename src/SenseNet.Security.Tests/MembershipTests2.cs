@@ -442,13 +442,13 @@ namespace SenseNet.Security.Tests
         public static string DumpMembership(Dictionary<int, List<int>> membership)
         {
             if (membership.Count == 0)
-                return String.Empty;
+                return string.Empty;
 
             var sb = new StringBuilder();
             foreach (var userId in membership.Keys.OrderBy(s => s))
             {
                 sb.Append(GetUserName(userId)).Append(":");
-                sb.Append(String.Join(",", membership[userId].OrderBy(s => s).Select(GetGroupName)));
+                sb.Append(string.Join(",", membership[userId].OrderBy(s => s).Select(GetGroupName)));
                 sb.Append("|");
             }
             sb.Length--;
