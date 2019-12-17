@@ -55,7 +55,7 @@ namespace SenseNet.Security.Tests
             var smallActivityId = smallActivity.Id;
 
             // large activity
-            var largeActivity = new TestActivity() { Body = new String('*', Configuration.Messaging.DistributableSecurityActivityMaxSize + 1) };
+            var largeActivity = new TestActivity { Body = new String('*', Configuration.Messaging.DistributableSecurityActivityMaxSize + 1) };
             largeActivity.Execute(_context.Security);
             var largeActivityId = largeActivity.Id;
 

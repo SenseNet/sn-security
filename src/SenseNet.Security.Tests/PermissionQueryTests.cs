@@ -153,10 +153,10 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void PermissionQuery_GetAllowedUsers_Prerequisits()
         {
-            var u10 = new TestUser() { Id = Id("U10"), Name = "U10" };
-            var u11 = new TestUser() { Id = Id("U11"), Name = "U11" };
-            var u12 = new TestUser() { Id = Id("U12"), Name = "U12" };
-            var u13 = new TestUser() { Id = Id("U13"), Name = "U13" };
+            var u10 = new TestUser { Id = Id("U10"), Name = "U10" };
+            var u11 = new TestUser { Id = Id("U11"), Name = "U11" };
+            var u12 = new TestUser { Id = Id("U12"), Name = "U12" };
+            var u13 = new TestUser { Id = Id("U13"), Name = "U13" };
             var id10 = u10.Id;
             var id11 = u11.Id;
             var id12 = u12.Id;
