@@ -270,7 +270,7 @@ namespace SenseNet.Security.Tests
             public MemoryDataProviderForMessagingTests(DatabaseStorage storage) : base(storage) { }
             public override ISecurityDataProvider CreateNew()
             {
-                return new MemoryDataProviderForMessagingTests(MemoryDataProvider.Storage);
+                return new MemoryDataProviderForMessagingTests(Storage);
             }
             public override SecurityActivity LoadSecurityActivity(int id)
             {

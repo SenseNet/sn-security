@@ -46,7 +46,7 @@ namespace SenseNet.Security.Tests
                 var p1 = src.IndexOf(')', p);
                 var s = src.Substring(p + 1, p1 - p - 1);
                 var id = int.Parse(s);
-                var name = Tools.IdToName(id);
+                var name = IdToName(id);
                 src = string.Concat(src.Substring(0, p), name, src.Substring(p1 + 1));
                 p = src.IndexOf('(');
             }
@@ -295,7 +295,7 @@ namespace SenseNet.Security.Tests
             var localOnly = segments[1][0] != '+';
             var a = segments[1].Substring(1).Split(':');
 
-            Tools.ParsePermissions(a[1], out var allowBits, out var denyBits);
+            ParsePermissions(a[1], out var allowBits, out var denyBits);
             return new AceInfo
             {
                 EntryType = entryType,
