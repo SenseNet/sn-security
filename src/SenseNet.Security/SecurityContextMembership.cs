@@ -56,7 +56,7 @@ namespace SenseNet.Security
         /// group or groups are already known when this method is called. Can be null or empty.</param>
         protected void AddMembersToSecurityGroup(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups = null)
         {
-            if (groupId == default(int))
+            if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
             if (AllNullOrEmpty(groupMembers, userMembers, parentGroups))
                 return;
@@ -74,7 +74,7 @@ namespace SenseNet.Security
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
         protected void RemoveMembersFromSecurityGroup(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups = null)
         {
-            if (groupId == default(int))
+            if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
             if (AllNullOrEmpty(groupMembers, userMembers, parentGroups))
                 return;
@@ -90,7 +90,7 @@ namespace SenseNet.Security
         /// <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
         protected void AddGroupsToSecurityGroup(int groupId, IEnumerable<int> groupMembers)
         {
-            if (groupId == default(int))
+            if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
             if (AllNullOrEmpty(groupMembers))
                 return;
@@ -105,7 +105,7 @@ namespace SenseNet.Security
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
         protected void AddGroupToSecurityGroups(int groupId, IEnumerable<int> parentGroups)
         {
-            if (groupId == default(int))
+            if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
             if (AllNullOrEmpty(parentGroups))
                 return;
@@ -121,7 +121,7 @@ namespace SenseNet.Security
         /// <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
         protected void RemoveGroupsFromSecurityGroup(int groupId, IEnumerable<int> groupMembers)
         {
-            if (groupId == default(int))
+            if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
             if (AllNullOrEmpty(groupMembers))
                 return;
@@ -137,7 +137,7 @@ namespace SenseNet.Security
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
         protected void RemoveGroupFromSecurityGroups(int groupId, IEnumerable<int> parentGroups)
         {
-            if (groupId == default(int))
+            if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
             if (AllNullOrEmpty(parentGroups))
                 return;
@@ -153,7 +153,7 @@ namespace SenseNet.Security
         /// <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
         protected void AddUsersToSecurityGroup(int groupId, IEnumerable<int> userMembers)
         {
-            if (groupId == default(int))
+            if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
             if (AllNullOrEmpty(userMembers))
                 return;
@@ -168,7 +168,7 @@ namespace SenseNet.Security
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
         protected void AddUserToSecurityGroups(int userId, IEnumerable<int> parentGroups)
         {
-            if (userId == default(int))
+            if (userId == default)
                 throw new ArgumentException("The userId cannot be " + default(int));
             if (AllNullOrEmpty(parentGroups))
                 return;
@@ -184,7 +184,7 @@ namespace SenseNet.Security
         /// <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
         protected void RemoveUsersFromSecurityGroup(int groupId, IEnumerable<int> userMembers)
         {
-            if (groupId == default(int))
+            if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
             if (AllNullOrEmpty(userMembers))
                 return;
@@ -199,7 +199,7 @@ namespace SenseNet.Security
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
         protected void RemoveUserFromSecurityGroups(int userId, IEnumerable<int> parentGroups)
         {
-            if (userId == default(int))
+            if (userId == default)
                 throw new ArgumentException("The userId cannot be " + default(int));
             if (AllNullOrEmpty(parentGroups))
                 return;
@@ -212,7 +212,7 @@ namespace SenseNet.Security
         /// </summary>
         protected void DeleteSecurityGroup(int groupId)
         {
-            if (groupId == default(int))
+            if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
             var activity = new DeleteGroupActivity(groupId);
             activity.Execute(this);
@@ -222,7 +222,7 @@ namespace SenseNet.Security
         /// </summary>
         protected void DeleteUser(int userId)
         {
-            if (userId == default(int))
+            if (userId == default)
                 throw new ArgumentException("The userId cannot be " + default(int));
             var activity = new DeleteUserActivity(userId);
             activity.Execute(this);
@@ -232,7 +232,7 @@ namespace SenseNet.Security
         /// </summary>
         protected void DeleteIdentity(int id)
         {
-            if (id == default(int))
+            if (id == default)
                 throw new ArgumentException("The id cannot be " + default(int));
             var activity = new DeleteIdentitiesActivity(new[] { id });
             activity.Execute(this);
@@ -250,7 +250,7 @@ namespace SenseNet.Security
 
         private bool AllNullOrEmpty(params IEnumerable<int>[] args)
         {
-            return !args.Any(a => a != null && a.FirstOrDefault() != default(int));
+            return !args.Any(a => a != null && a.FirstOrDefault() != default);
         }
 
         /*********************** Membership extension API **********************/

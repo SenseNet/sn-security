@@ -29,7 +29,7 @@ namespace SenseNet.Security
                 entities.Add(entity.Id, entity);
 
                 // memorize relations
-                if (storedEntity.ParentId != default(int))
+                if (storedEntity.ParentId != default)
                     relations.Add(new Tuple<SecurityEntity, int>(entity, storedEntity.ParentId));
             }
 
@@ -81,10 +81,10 @@ namespace SenseNet.Security
         }
         private static void CreateSecurityEntity(SecurityContext context, int entityId, int parentEntityId, int ownerId, bool safe)
         {
-            if (entityId == default(int))
+            if (entityId == default)
                 throw new ArgumentException("entityId cannot be default(int)");
 
-            if (parentEntityId != default(int))
+            if (parentEntityId != default)
             {
                 // load or create parent
                 var parent = safe

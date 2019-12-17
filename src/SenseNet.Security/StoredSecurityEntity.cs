@@ -47,11 +47,11 @@
 
         private int? FromGuid(int value)
         {
-            return value == default(int) ? null : (int?)value;
+            return value == default ? null : (int?)value;
         }
         private int ToGuid(int? value)
         {
-            return value ?? default(int);
+            return value ?? default;
         }
     }
 }

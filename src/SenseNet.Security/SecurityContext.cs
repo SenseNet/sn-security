@@ -377,7 +377,7 @@ namespace SenseNet.Security
         /// <param name="ownerId">Id of the entity's owner identity.</param>
         protected void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId)
         {
-            if (entityId == default(int))
+            if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
             var activity = new CreateSecurityEntityActivity(entityId, parentEntityId, ownerId);
             activity.Execute(this);
@@ -389,7 +389,7 @@ namespace SenseNet.Security
         /// <param name="ownerId">Id of the entity's owner identity.</param>
         protected void ModifyEntityOwner(int entityId, int ownerId)
         {
-            if (entityId == default(int))
+            if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
             var activity = new ModifySecurityEntityOwnerActivity(entityId, ownerId);
             activity.Execute(this);
@@ -400,7 +400,7 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         protected void DeleteEntity(int entityId)
         {
-            if (entityId == default(int))
+            if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
             var activity = new DeleteSecurityEntityActivity(entityId);
             activity.Execute(this);
@@ -413,9 +413,9 @@ namespace SenseNet.Security
         /// <param name="targetId">Id of the target entity that will contain the source. Cannot be 0.</param>
         protected void MoveEntity(int sourceId, int targetId)
         {
-            if (sourceId == default(int))
+            if (sourceId == default)
                 throw new ArgumentException("Id of the source Entity cannot be " + default(int));
-            if (targetId == default(int))
+            if (targetId == default)
                 throw new ArgumentException("Id of the target Entity cannot be " + default(int));
             var activity = new MoveSecurityEntityActivity(sourceId, targetId);
             activity.Execute(this);
@@ -426,7 +426,7 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         protected bool IsEntityInherited(int entityId)
         {
-            if (entityId == default(int))
+            if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
             var entity = GetSecurityEntity(entityId, true);
             return entity.IsInherited;
@@ -474,7 +474,7 @@ namespace SenseNet.Security
                 var entity = GetSecurityEntity(descendantId);
                 if (entity == null)
                     return false;
-                descendantId = entity.Parent?.Id ?? default(int);
+                descendantId = entity.Parent?.Id ?? default;
             }
         }
         internal int GetOwnerId(int entityId)

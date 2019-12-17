@@ -418,7 +418,7 @@ namespace SenseNet.Security
         internal static SecurityEntity CreateEntitySafe(SecurityContext ctx, int entityId, int parentEntityId, int ownerId, bool? isInherited = null, bool? hasExplicitEntry = null)
         {
             SecurityEntity parent = null;
-            if (parentEntityId != default(int))
+            if (parentEntityId != default)
             {
                 // if the parent cannot be loaded (even from the db), this will throw an exception
                 parent = GetEntitySafe(ctx, parentEntityId, true);
@@ -541,7 +541,7 @@ namespace SenseNet.Security
 
                     RemoveEntriesSafe(ctx, entriesToRemove);
 
-                    var aclsToRemove = emptyAcls.Where(x => x != default(int) && ctx.Cache.Entities[x].IsInherited).ToArray();
+                    var aclsToRemove = emptyAcls.Where(x => x != default && ctx.Cache.Entities[x].IsInherited).ToArray();
                     SecurityEntity.RemoveAclsSafe(ctx, aclsToRemove);
 
                     op.Successful = true;
