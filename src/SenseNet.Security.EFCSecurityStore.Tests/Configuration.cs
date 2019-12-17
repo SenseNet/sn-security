@@ -2,7 +2,7 @@
 
 namespace SenseNet.Security.EFCSecurityStore.Tests
 {
-    static class Configuration
+    internal static class Configuration
     {
         public static IConfiguration Instance { get; set; }
 

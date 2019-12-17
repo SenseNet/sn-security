@@ -7,7 +7,7 @@ using SenseNet.Security.Data;
 
 namespace SenseNet.Security.TestConsole
 {
-    class Program
+    internal class Program
     {
         static void Main(string[] args)
         {

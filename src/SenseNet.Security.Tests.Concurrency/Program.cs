@@ -11,7 +11,7 @@ using SenseNet.Security.Data;
 
 namespace SenseNet.Security.Tests.Concurrency
 {
-    class Program
+    internal class Program
     {
         static bool _stopped;
 
