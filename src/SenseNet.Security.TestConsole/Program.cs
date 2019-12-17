@@ -27,9 +27,9 @@ namespace SenseNet.Security.TestConsole
 
             //======== Test
             var channel = context.Security.MessageProvider;
-            channel.MessageReceived += new MessageReceivedEventHandler(MessageReceived);
-            channel.SendException += new SendExceptionEventHandler(SendException);
-            channel.ReceiveException += new ReceiveExceptionEventHandler(ReceiveException);
+            channel.MessageReceived += MessageReceived;
+            channel.SendException += SendException;
+            channel.ReceiveException += ReceiveException;
 
             Console.WriteLine("S<enter>: sent test, <enter>: clear screen, X<enter>: exit...");
             Console.WriteLine("Receiver: " + channel.ReceiverName);
