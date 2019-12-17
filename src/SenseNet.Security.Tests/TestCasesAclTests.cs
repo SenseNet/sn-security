@@ -637,10 +637,10 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual(4, aces.Count);
 
-            var ace1 = aces.Where(x => x.IdentityId == userId1 && x.LocalOnly == false).FirstOrDefault();
-            var ace2 = aces.Where(x => x.IdentityId == userId2 && x.LocalOnly == false).FirstOrDefault();
-            var ace3 = aces.Where(x => x.IdentityId == userId1 && x.LocalOnly == true).FirstOrDefault();
-            var ace4 = aces.Where(x => x.IdentityId == userId2 && x.LocalOnly == true).FirstOrDefault();
+            var ace1 = aces.FirstOrDefault(x => x.IdentityId == userId1 && x.LocalOnly == false);
+            var ace2 = aces.FirstOrDefault(x => x.IdentityId == userId2 && x.LocalOnly == false);
+            var ace3 = aces.FirstOrDefault(x => x.IdentityId == userId1 && x.LocalOnly == true);
+            var ace4 = aces.FirstOrDefault(x => x.IdentityId == userId2 && x.LocalOnly == true);
 
             Assert.AreEqual(userId1, ace1?.IdentityId);
             Assert.AreEqual(false, ace1?.LocalOnly);
@@ -696,10 +696,10 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual(4, aces.Count);
 
-            var ace1 = aces.Where(x => x.IdentityId == userId1 && x.LocalOnly == false).FirstOrDefault();
-            var ace2 = aces.Where(x => x.IdentityId == userId2 && x.LocalOnly == false).FirstOrDefault();
-            var ace3 = aces.Where(x => x.IdentityId == userId1 && x.LocalOnly == true).FirstOrDefault();
-            var ace4 = aces.Where(x => x.IdentityId == userId2 && x.LocalOnly == true).FirstOrDefault();
+            var ace1 = aces.FirstOrDefault(x => x.IdentityId == userId1 && x.LocalOnly == false);
+            var ace2 = aces.FirstOrDefault(x => x.IdentityId == userId2 && x.LocalOnly == false);
+            var ace3 = aces.FirstOrDefault(x => x.IdentityId == userId1 && x.LocalOnly == true);
+            var ace4 = aces.FirstOrDefault(x => x.IdentityId == userId2 && x.LocalOnly == true);
 
             Assert.AreEqual(userId1, ace1?.IdentityId);
             Assert.AreEqual(false, ace1?.LocalOnly);
@@ -1174,16 +1174,16 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             var acl = CurrentContext.Security.GetAcl(Id("E1"));
-            Assert.AreEqual(64, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default && x.DenyFrom == default).Count());
+            Assert.AreEqual(64, acl.Entries.First().Permissions.Count(x => x.AllowFrom == default && x.DenyFrom == default));
 
             acl = CurrentContext.Security.GetAcl(Id("E2"));
-            Assert.AreEqual(61, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default && x.DenyFrom == default).Count());
+            Assert.AreEqual(61, acl.Entries.First().Permissions.Count(x => x.AllowFrom == default && x.DenyFrom == default));
 
             acl = CurrentContext.Security.GetAcl(Id("E5"));
-            Assert.AreEqual(58, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default && x.DenyFrom == default).Count());
+            Assert.AreEqual(58, acl.Entries.First().Permissions.Count(x => x.AllowFrom == default && x.DenyFrom == default));
 
             acl = CurrentContext.Security.GetAcl(Id("E14"));
-            Assert.AreEqual(55, acl.Entries.First().Permissions.Where(x => x.AllowFrom == default && x.DenyFrom == default).Count());
+            Assert.AreEqual(55, acl.Entries.First().Permissions.Count(x => x.AllowFrom == default && x.DenyFrom == default));
         }
 
 
