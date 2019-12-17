@@ -74,8 +74,8 @@ namespace SenseNet.Security.Tests
 
             public override string ToString()
             {
-                return String.Format("Entities: {0}, Users: {1}, Groups: {2}, Members: {3}, Aces: {4} LoadingTime: {5}",
-                    Entities, Users, Groups, Members, Aces, LoadingTime);
+                return $"Entities: {Entities}, Users: {Users}, Groups: {Groups}, " +
+                       $"Members: {Members}, Aces: {Aces} LoadingTime: {LoadingTime}";
             }
         }
 

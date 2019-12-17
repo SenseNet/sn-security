@@ -128,8 +128,10 @@ namespace SenseNet.Security.Tests
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
-                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), perm), String.Format("{0} permission on E1 is true, expected: false.", perm.Name));
-                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E2"), perm), String.Format("{0} permission on E2 is true, expected: false.", perm.Name));
+                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), perm),
+                        $"{perm.Name} permission on E1 is true, expected: false.");
+                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E2"), perm),
+                        $"{perm.Name} permission on E2 is true, expected: false.");
                 }
             }
         }
@@ -150,8 +152,10 @@ namespace SenseNet.Security.Tests
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
-                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), perm), String.Format("{0} permission on E1 is true, expected: false.", perm.Name));
-                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E2"), perm), String.Format("{0} permission on E2 is true, expected: false.", perm.Name));
+                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E1"), perm),
+                        $"{perm.Name} permission on E1 is true, expected: false.");
+                    Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E2"), perm),
+                        $"{perm.Name} permission on E2 is true, expected: false.");
                 }
             }
         }
@@ -181,7 +185,7 @@ namespace SenseNet.Security.Tests
                     try
                     {
                         CurrentContext.Security.AssertPermission(Id("E2"), perm);
-                        Assert.Fail(String.Format("{0} permission on E2 is true, expected: false.", perm.Name));
+                        Assert.Fail($"{perm.Name} permission on E2 is true, expected: false.");
                     }
                     catch (AccessDeniedException) { }
                 }
@@ -211,13 +215,13 @@ namespace SenseNet.Security.Tests
                     try
                     {
                         CurrentContext.Security.AssertPermission(e1, perm);
-                        Assert.Fail(String.Format("{0} permission on E1 is true, expected: false.", perm.Name));
+                        Assert.Fail($"{perm.Name} permission on E1 is true, expected: false.");
                     }
                     catch (AccessDeniedException) { }
                     try
                     {
                         CurrentContext.Security.AssertPermission(e2, perm);
-                        Assert.Fail(String.Format("{0} permission on E2 is true, expected: false.", perm.Name));
+                        Assert.Fail($"{perm.Name} permission on E2 is true, expected: false.");
                     }
                     catch (AccessDeniedException) { }
                 }
@@ -273,8 +277,10 @@ namespace SenseNet.Security.Tests
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
-                    Assert.IsFalse(CurrentContext.Security.HasSubtreePermission(Id("E1"), perm), String.Format("{0} subtree permission on E1 is true, expected: false.", perm.Name));
-                    Assert.IsFalse(CurrentContext.Security.HasSubtreePermission(Id("E3"), perm), String.Format("{0} subtree permission on E3 is true, expected: false.", perm.Name));
+                    Assert.IsFalse(CurrentContext.Security.HasSubtreePermission(Id("E1"), perm),
+                        $"{perm.Name} subtree permission on E1 is true, expected: false.");
+                    Assert.IsFalse(CurrentContext.Security.HasSubtreePermission(Id("E3"), perm),
+                        $"{perm.Name} subtree permission on E3 is true, expected: false.");
                 }
             }
 
@@ -329,7 +335,7 @@ namespace SenseNet.Security.Tests
                     try
                     {
                         CurrentContext.Security.AssertSubtreePermission(Id("E1"), perm);
-                        Assert.Fail(String.Format("{0} subtree permission on E1 is true, expected: false.", perm.Name));
+                        Assert.Fail($"{perm.Name} subtree permission on E1 is true, expected: false.");
                     }
                     catch
                     {
@@ -339,7 +345,7 @@ namespace SenseNet.Security.Tests
                     {
                         CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
                         CurrentContext.Security.AssertSubtreePermission(Id("E3"), perm);
-                        Assert.Fail(String.Format("{0} subtree permission on E3 is true, expected: false.", perm.Name));
+                        Assert.Fail($"{perm.Name} subtree permission on E3 is true, expected: false.");
                     }
                     catch
                     {
@@ -407,7 +413,7 @@ namespace SenseNet.Security.Tests
                     try
                     {
                         CurrentContext.Security.AssertSubtreePermission(e1, perm);
-                        Assert.Fail(String.Format("{0} subtree permission on E1 is true, expected: false.", perm.Name));
+                        Assert.Fail($"{perm.Name} subtree permission on E1 is true, expected: false.");
                     }
                     catch
                     {
@@ -416,7 +422,7 @@ namespace SenseNet.Security.Tests
                     try
                     {
                         CurrentContext.Security.AssertSubtreePermission(e3, perm);
-                        Assert.Fail(String.Format("{0} subtree permission on E3 is true, expected: false.", perm.Name));
+                        Assert.Fail($"{perm.Name} subtree permission on E3 is true, expected: false.");
                     }
                     catch
                     {

@@ -375,7 +375,7 @@ namespace SenseNet.Security.Tests.Concurrency
                     var delWatch = Stopwatch.StartNew();
                     SecurityContextForConcurrencyTests.General.DeleteEntity(60);
                     delWatch.Stop();
-                    Trace.WriteLine(string.Format("SECDEL> End DEL thread. Elapsed time: {0}", delWatch.ElapsedMilliseconds));
+                    Trace.WriteLine($"SECDEL> End DEL thread. Elapsed time: {delWatch.ElapsedMilliseconds}");
                     _stopped = true;
                 }));
 
@@ -386,7 +386,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 sw.Stop();
 
                 Console.WriteLine("Iteration {0}. Duration: {1} sec", i, Math.Round(sw.Elapsed.TotalSeconds));
-                Trace.WriteLine(string.Format("SECDEL> Iteration {0}. Duration: {1} sec", i, Math.Round(sw.Elapsed.TotalSeconds)));
+                Trace.WriteLine($"SECDEL> Iteration {i}. Duration: {Math.Round(sw.Elapsed.TotalSeconds)} sec");
             }
 
             mainWatch.Stop();
