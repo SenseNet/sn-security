@@ -35,7 +35,7 @@ namespace SenseNet.Security.Tests
             foreach (var testCase in testCases)
                 results[i++] = TestLoadingBigStructure(testCase.eLevel, testCase.eWidth);
 
-            var context = new Context(TestUser.User1);
+            var _ = new Context(TestUser.User1);
         }
         private static LoadingTimeTestResult TestLoadingBigStructure(int entityMaxLevel, int entityLevelWidth)
         {

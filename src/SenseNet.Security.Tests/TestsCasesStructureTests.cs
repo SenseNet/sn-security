@@ -418,8 +418,8 @@ namespace SenseNet.Security.Tests
             // check in database
             var movedDbEntity = GetStoredSecurityEntity(source.Id);
             var targetDbEntity = GetStoredSecurityEntity(target.Id);
-            var child1DbEntity = GetStoredSecurityEntity(child1.Id);
-            var child2DbEntity = GetStoredSecurityEntity(child2.Id);
+            //var child1DbEntity = GetStoredSecurityEntity(child1.Id);
+            //var child2DbEntity = GetStoredSecurityEntity(child2.Id);
             Assert.AreEqual(movedDbEntity.ParentId, targetDbEntity.Id);
 
             // check in memory
@@ -664,7 +664,7 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_Initial()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21" +
                                     "{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44" +
@@ -677,7 +677,7 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_CreateUnderLeaf()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.CreateSecurityEntity(Id("E54"), Id("E53"), 1);
 
@@ -692,7 +692,7 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_CreateUnderNotLeaf()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.CreateSecurityEntity(Id("E54"), Id("E50"), 1);
 
@@ -706,7 +706,7 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_DeleteTheLastOne()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.DeleteEntity(Id("E52"));
 
@@ -721,7 +721,7 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_DeleteNotLast()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.DeleteEntity(Id("E25"));
 
@@ -736,7 +736,7 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_MoveUnderLeaf()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.MoveEntity(Id("E50"), Id("E15"));
 
@@ -751,7 +751,7 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_MoveUnderNotLeaf()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.MoveEntity(Id("E50"), Id("E2"));
 
@@ -766,7 +766,7 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_MoveSiblingToSibling()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.MoveEntity(Id("E6"), Id("E3"));
 

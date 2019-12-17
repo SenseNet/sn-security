@@ -272,7 +272,6 @@ namespace SenseNet.Security.Tests
 
             var aclInfo = new AclInfo(entityId) { Entries = src.Split(',').Select(CreateAce).ToList() };
 
-            var emptyGuidArray = new List<int>();
             var breaked = false;
             var unbreaked = false;
             if (entity.IsInherited && !isInherited)

@@ -113,7 +113,6 @@ namespace SenseNet.Security.Tests.Concurrency
             var name = "Reader-" + id;
             var ctx = new SecurityContextForConcurrencyTests(TestUser.User2);
             var count = 0;
-            var rnd = new Random();
             while (!_stopped)
             {
                 Thread.Sleep(1);
@@ -221,7 +220,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 if (0 == (count % 100))
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
-                var ctx = new SecurityContext(TestUser.User2);
+                var _ = new SecurityContext(TestUser.User2);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
                 DataHandler.SaveActivity(activity);
 
@@ -245,7 +244,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 if (0 == (count % 100))
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
-                var ctx = new SecurityContext(TestUser.User2);
+                var _ = new SecurityContext(TestUser.User2);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
                 DataHandler.SaveActivity(activity);
 
@@ -267,11 +266,11 @@ namespace SenseNet.Security.Tests.Concurrency
             StartTheSystem(new MemoryDataProvider(storage));
 
             var ctx = new TestSecurityContext(TestUser.User3);
-            var ok = ctx.HasPermission(52, PermissionType.Custom01);
+            var unused1 = ctx.HasPermission(52, PermissionType.Custom01);
 
             _started = DateTime.UtcNow;
 
-            var _ = Enumerable.Range(1, 4).Select(x => Task.Run(() => MoveExercise(x))).ToArray();
+            var unused2 = Enumerable.Range(1, 4).Select(x => Task.Run(() => MoveExercise(x))).ToArray();
         }
         private static void MoveExercise(int id)
         {

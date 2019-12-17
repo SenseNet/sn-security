@@ -498,7 +498,7 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             AclEditor ed;
-            var db = CurrentContext.Security.DataProvider;
+            var _ = CurrentContext.Security.DataProvider;
 
             var u1 = Id("U1");
             var u2 = Id("U2");
@@ -585,7 +585,6 @@ namespace SenseNet.Security.Tests
             var acls = new AclEditorAccessor(ed).Acls;
             var userId = Id("U1");
             var ace = new AceInfo { IdentityId = userId };
-            var level = entity.Level;
             var acl = new AclInfo(entity.Id);
             acl.Entries.Add(ace);
             acls[entity.Id] = acl;
@@ -1066,7 +1065,6 @@ namespace SenseNet.Security.Tests
 
             AclEditor ed;
             var sec = CurrentContext.Security;
-            var db = CurrentContext.Security.DataProvider;
 
             var u1 = Id("U1");
             const int eid0 = default;
@@ -1162,7 +1160,6 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             AclEditor ed;
-            var db = CurrentContext.Security.DataProvider;
 
             var u1 = Id("U1");
 
@@ -1368,7 +1365,7 @@ namespace SenseNet.Security.Tests
                 CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), new EntryType[0]).Apply();
 
                 var aclE12 = CurrentContext.Security.GetAclInfo(Id("E12"));
-                var aclE4 = CurrentContext.Security.GetAclInfo(Id("E4"));
+                //var aclE4 = CurrentContext.Security.GetAclInfo(Id("E4"));
                 var aclE33 = CurrentContext.Security.GetAclInfo(Id("E33"));
                 var aclE34 = CurrentContext.Security.GetAclInfo(Id("E34"));
                 Assert.IsNotNull(aclE12);

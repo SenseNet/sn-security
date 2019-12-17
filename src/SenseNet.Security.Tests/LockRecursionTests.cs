@@ -247,7 +247,7 @@ namespace SenseNet.Security.Tests
             {
                 // Simulate permission check in the getter of the PortalContext.ContextNode 
                 var elevatedContext = GetContext(new LockRecursionUser(-1, e => new int[0]));
-                var aces = elevatedContext.Security.GetEffectiveEntries(Id("E1"), new[] {Id("U1")});
+                var _ = elevatedContext.Security.GetEffectiveEntries(Id("E1"), new[] {Id("U1")});
                 return new int[0];
             });
 
