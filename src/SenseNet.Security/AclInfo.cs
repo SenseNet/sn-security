@@ -91,6 +91,7 @@ namespace SenseNet.Security
                                 ace = CreateEmptyAce(aceInfo);
                                 localOnlyAces.Add(ace.IdentityId, ace);
                             }
+                            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                             ProcessPermissions(aclInfo, aceInfo, ace, isLocalAcl);
                         }
                     }
