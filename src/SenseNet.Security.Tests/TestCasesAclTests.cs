@@ -636,25 +636,25 @@ namespace SenseNet.Security.Tests
             var ace3 = aces.Where(x => x.IdentityId == userId1 && x.LocalOnly == true).FirstOrDefault();
             var ace4 = aces.Where(x => x.IdentityId == userId2 && x.LocalOnly == true).FirstOrDefault();
 
-            Assert.AreEqual(userId1, ace1.IdentityId);
-            Assert.AreEqual(false, ace1.LocalOnly);
-            Assert.AreEqual(PermissionType.See.Mask | PermissionType.Preview.Mask | PermissionType.PreviewWithoutWatermark.Mask, ace1.AllowBits);
-            Assert.AreEqual(PermissionType.Publish.Mask | PermissionType.Delete.Mask, ace1.DenyBits);
+            Assert.AreEqual(userId1, ace1?.IdentityId);
+            Assert.AreEqual(false, ace1?.LocalOnly);
+            Assert.AreEqual(PermissionType.See.Mask | PermissionType.Preview.Mask | PermissionType.PreviewWithoutWatermark.Mask, ace1?.AllowBits);
+            Assert.AreEqual(PermissionType.Publish.Mask | PermissionType.Delete.Mask, ace1?.DenyBits);
 
-            Assert.AreEqual(userId2, ace2.IdentityId);
-            Assert.AreEqual(false, ace2.LocalOnly);
-            Assert.AreEqual(PermissionType.See.Mask | PermissionType.Preview.Mask | PermissionType.PreviewWithoutWatermark.Mask, ace2.AllowBits);
-            Assert.AreEqual(PermissionType.Publish.Mask | PermissionType.Delete.Mask, ace2.DenyBits);
+            Assert.AreEqual(userId2, ace2?.IdentityId);
+            Assert.AreEqual(false, ace2?.LocalOnly);
+            Assert.AreEqual(PermissionType.See.Mask | PermissionType.Preview.Mask | PermissionType.PreviewWithoutWatermark.Mask, ace2?.AllowBits);
+            Assert.AreEqual(PermissionType.Publish.Mask | PermissionType.Delete.Mask, ace2?.DenyBits);
 
-            Assert.AreEqual(userId1, ace3.IdentityId);
-            Assert.AreEqual(true, ace3.LocalOnly);
-            Assert.AreEqual(PermissionType.PreviewWithoutRedaction.Mask | PermissionType.Open.Mask, ace3.AllowBits);
-            Assert.AreEqual(PermissionType.DeleteOldVersion.Mask | PermissionType.RecallOldVersion.Mask, ace3.DenyBits);
+            Assert.AreEqual(userId1, ace3?.IdentityId);
+            Assert.AreEqual(true, ace3?.LocalOnly);
+            Assert.AreEqual(PermissionType.PreviewWithoutRedaction.Mask | PermissionType.Open.Mask, ace3?.AllowBits);
+            Assert.AreEqual(PermissionType.DeleteOldVersion.Mask | PermissionType.RecallOldVersion.Mask, ace3?.DenyBits);
 
-            Assert.AreEqual(userId2, ace4.IdentityId);
-            Assert.AreEqual(true, ace4.LocalOnly);
-            Assert.AreEqual(PermissionType.PreviewWithoutRedaction.Mask | PermissionType.Open.Mask, ace4.AllowBits);
-            Assert.AreEqual(PermissionType.DeleteOldVersion.Mask | PermissionType.RecallOldVersion.Mask, ace4.DenyBits);
+            Assert.AreEqual(userId2, ace4?.IdentityId);
+            Assert.AreEqual(true, ace4?.LocalOnly);
+            Assert.AreEqual(PermissionType.PreviewWithoutRedaction.Mask | PermissionType.Open.Mask, ace4?.AllowBits);
+            Assert.AreEqual(PermissionType.DeleteOldVersion.Mask | PermissionType.RecallOldVersion.Mask, ace4?.DenyBits);
         }
         [TestMethod]
         public void AclEditor_AllowDenyAll()
@@ -695,25 +695,25 @@ namespace SenseNet.Security.Tests
             var ace3 = aces.Where(x => x.IdentityId == userId1 && x.LocalOnly == true).FirstOrDefault();
             var ace4 = aces.Where(x => x.IdentityId == userId2 && x.LocalOnly == true).FirstOrDefault();
 
-            Assert.AreEqual(userId1, ace1.IdentityId);
-            Assert.AreEqual(false, ace1.LocalOnly);
-            Assert.AreEqual(PermissionType.See.Mask | PermissionType.Preview.Mask | PermissionType.PreviewWithoutWatermark.Mask, ace1.AllowBits);
-            Assert.AreEqual(PermissionType.Publish.Mask | PermissionType.Delete.Mask, ace1.DenyBits);
+            Assert.AreEqual(userId1, ace1?.IdentityId);
+            Assert.AreEqual(false, ace1?.LocalOnly);
+            Assert.AreEqual(PermissionType.See.Mask | PermissionType.Preview.Mask | PermissionType.PreviewWithoutWatermark.Mask, ace1?.AllowBits);
+            Assert.AreEqual(PermissionType.Publish.Mask | PermissionType.Delete.Mask, ace1?.DenyBits);
 
-            Assert.AreEqual(userId2, ace2.IdentityId);
-            Assert.AreEqual(false, ace2.LocalOnly);
-            Assert.AreEqual(PermissionType.See.Mask | PermissionType.Preview.Mask | PermissionType.PreviewWithoutWatermark.Mask, ace2.AllowBits);
-            Assert.AreEqual(PermissionType.Publish.Mask | PermissionType.Delete.Mask, ace2.DenyBits);
+            Assert.AreEqual(userId2, ace2?.IdentityId);
+            Assert.AreEqual(false, ace2?.LocalOnly);
+            Assert.AreEqual(PermissionType.See.Mask | PermissionType.Preview.Mask | PermissionType.PreviewWithoutWatermark.Mask, ace2?.AllowBits);
+            Assert.AreEqual(PermissionType.Publish.Mask | PermissionType.Delete.Mask, ace2?.DenyBits);
 
-            Assert.AreEqual(userId1, ace3.IdentityId);
-            Assert.AreEqual(true, ace3.LocalOnly);
-            Assert.AreEqual(PermissionType.PreviewWithoutRedaction.Mask | PermissionType.Open.Mask, ace3.AllowBits);
-            Assert.AreEqual(PermissionType.DeleteOldVersion.Mask | PermissionType.RecallOldVersion.Mask, ace3.DenyBits);
+            Assert.AreEqual(userId1, ace3?.IdentityId);
+            Assert.AreEqual(true, ace3?.LocalOnly);
+            Assert.AreEqual(PermissionType.PreviewWithoutRedaction.Mask | PermissionType.Open.Mask, ace3?.AllowBits);
+            Assert.AreEqual(PermissionType.DeleteOldVersion.Mask | PermissionType.RecallOldVersion.Mask, ace3?.DenyBits);
 
-            Assert.AreEqual(userId2, ace4.IdentityId);
-            Assert.AreEqual(true, ace4.LocalOnly);
-            Assert.AreEqual(PermissionType.PreviewWithoutRedaction.Mask | PermissionType.Open.Mask, ace4.AllowBits);
-            Assert.AreEqual(PermissionType.DeleteOldVersion.Mask | PermissionType.RecallOldVersion.Mask, ace4.DenyBits);
+            Assert.AreEqual(userId2, ace4?.IdentityId);
+            Assert.AreEqual(true, ace4?.LocalOnly);
+            Assert.AreEqual(PermissionType.PreviewWithoutRedaction.Mask | PermissionType.Open.Mask, ace4?.AllowBits);
+            Assert.AreEqual(PermissionType.DeleteOldVersion.Mask | PermissionType.RecallOldVersion.Mask, ace4?.DenyBits);
         }
         [TestMethod]
         public void AclEditor_AllowMoreEntriesInOneEditor()

@@ -223,9 +223,12 @@ namespace SenseNet.Security.Tests.Concurrency
                 var ctx = new SecurityContext(TestUser.User2);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
                 DataHandler.SaveActivity(activity);
-                var method = typeof(SecurityContext).GetMethod("MessageProvider_MessageReceived", BindingFlags.Static | BindingFlags.NonPublic);
-                method.Invoke(null, new object[] { null, new MessageReceivedEventArgs(activity) });
 
+                var method = typeof(SecurityContext).GetMethod("MessageProvider_MessageReceived", BindingFlags.Static | BindingFlags.NonPublic);
+                if (method == null)
+                    throw new ApplicationException("Method not found: MessageProvider_MessageReceived");
+
+                method.Invoke(null, new object[] { null, new MessageReceivedEventArgs(activity) });
                 count++;
             }
 

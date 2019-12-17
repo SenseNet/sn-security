@@ -36,7 +36,7 @@ namespace SenseNet.Security.TestConsole
             while (true)
             {
                 var s = Console.ReadLine();
-                if ("S" == s.ToUpper())
+                if ("S" == s?.ToUpper())
                 {
                     channel.SendMessage(new PingMessage());
                     Console.WriteLine("A ping message was sent.");
@@ -48,7 +48,7 @@ namespace SenseNet.Security.TestConsole
                         );
                     activity.Execute(context.Security);
                 }
-                else if ("X" == s.ToUpper())
+                else if ("X" == s?.ToUpper())
                     break;
                 else if ("" == s)
                 {

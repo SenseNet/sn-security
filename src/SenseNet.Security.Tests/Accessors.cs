@@ -18,7 +18,8 @@ namespace SenseNet.Security.Tests
         internal T Invoke<T>(string name, params object[] parameters)
         {
             var method = _wrappedType.GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance);
-
+            if (method == null)
+                throw new ApplicationException("Method not found: " + name);
             return (T)method.Invoke(Wrapped, parameters);
         }
         internal T GetFieldOrProperty<T>(string name)
@@ -44,6 +45,8 @@ namespace SenseNet.Security.Tests
         internal T GetStaticField<T>(string name)
         {
             var field = _wrappedType.GetField(name, BindingFlags.NonPublic | BindingFlags.Static);
+            if (field == null)
+                throw new ApplicationException("Field not found: " + name);
             return (T)field.GetValue(Wrapped);
         }
         internal void SetFieldOrProperty(string name, object value)
