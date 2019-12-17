@@ -179,7 +179,7 @@ namespace SenseNet.Security.Tests
                     try
                     {
                         CurrentContext.Security.AssertPermission(Id("E1"), perm);
-                        Assert.Fail(String.Format("{0} permission on E1 is true, expected: false.", perm.Name));
+                        Assert.Fail($"{perm.Name} permission on E1 is true, expected: false.");
                     }
                     catch (AccessDeniedException) { }
                     try
