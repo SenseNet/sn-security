@@ -1062,7 +1062,7 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual("U1:G1|U3:G3,G4,G5|U4:G3,G4,G5|U5:G3,G4,G5", DumpMembership(CurrentContext.Security));
         }
-        private Context Prepare_GroupThatContainsCircle_Test()
+        private void Prepare_GroupThatContainsCircle_Test()
         {
             const int groupId1 = 101;
             const int groupId2 = 102;
@@ -1090,8 +1090,6 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group3);
             AddOrModifySecurityGroup(CurrentContext.Security, group4);
             AddOrModifySecurityGroup(CurrentContext.Security, group5);
-
-            return CurrentContext;
         }
 
 

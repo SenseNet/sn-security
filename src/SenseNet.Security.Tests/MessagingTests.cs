@@ -152,7 +152,8 @@ namespace SenseNet.Security.Tests
             }
             return storage;
         }
-        private static StoredSecurityEntity CreateEntity(string name, string parentName, TestUser owner, Dictionary<int, StoredSecurityEntity> storage)
+        private static void CreateEntity(string name, string parentName, TestUser owner,
+            Dictionary<int, StoredSecurityEntity> storage)
         {
             var entityId = Id(name);
             var parentEntityId = parentName == null ? default : Id(parentName);
@@ -167,8 +168,6 @@ namespace SenseNet.Security.Tests
                 OwnerId = owner.Id
             };
             storage[entityId] = entity;
-
-            return entity;
         }
 
         public static List<StoredAce> CreateTestAces()

@@ -202,7 +202,8 @@ namespace SenseNet.Security.Tests
             }
             return repository;
         }
-        private static TestEntity CreateEntity(Dictionary<int, TestEntity> repository, TestSecurityContext context, string name, string parentName, TestUser owner)
+        private static void CreateEntity(Dictionary<int, TestEntity> repository, TestSecurityContext context,
+            string name, string parentName, TestUser owner)
         {
             var entity = new TestEntity
             {
@@ -213,7 +214,6 @@ namespace SenseNet.Security.Tests
             };
             repository.Add(entity.Id, entity);
             context.CreateSecurityEntity(entity);
-            return entity;
         }
         internal static string EntityIdStructureToString(SecurityContext ctx)
         {

@@ -140,7 +140,7 @@ namespace SenseNet.Security.Tests
                 }
             }
         }
-        private TestEntity CreateEntity(string name, string parentName, TestUser owner)
+        private void CreateEntity(string name, string parentName, TestUser owner)
         {
             var entity = new TestEntity
             {
@@ -151,7 +151,6 @@ namespace SenseNet.Security.Tests
             };
             _repository.Add(entity.Id, entity);
             CurrentContext.Security.CreateSecurityEntity(entity);
-            return entity;
         }
 
         private TestEntity GetRepositoryEntity(int id)
