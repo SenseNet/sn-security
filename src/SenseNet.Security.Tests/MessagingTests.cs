@@ -157,8 +157,7 @@ namespace SenseNet.Security.Tests
             var entityId = Id(name);
             var parentEntityId = parentName == null ? default : Id(parentName);
 
-            StoredSecurityEntity parent = null;
-            storage.TryGetValue(parentEntityId, out parent);
+            storage.TryGetValue(parentEntityId, out _);
 
             var entity = new StoredSecurityEntity
             {
