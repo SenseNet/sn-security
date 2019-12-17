@@ -110,7 +110,7 @@ namespace SenseNet.Security.Tests
             var entity = new StoredSecurityEntity
             {
                 Id = _id++,
-                ParentId = parentEntity == null ? default : parentEntity.Id,
+                ParentId = parentEntity?.Id ?? default,
                 IsInherited = true,
                 OwnerId = ownerId
             };
