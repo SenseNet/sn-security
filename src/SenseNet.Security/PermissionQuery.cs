@@ -179,7 +179,7 @@ namespace SenseNet.Security
             {
                 if ((b & mask) > 0)
                     counters[pt.Index]++;
-                mask = mask << 1;
+                mask <<= 1;
             }
         }
 

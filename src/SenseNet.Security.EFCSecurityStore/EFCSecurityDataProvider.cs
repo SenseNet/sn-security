@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Threading;
@@ -674,6 +675,7 @@ namespace SenseNet.Security.EFCSecurityStore
         /// <param name="groupId">Id of the group that will have new members.</param>
         /// <param name="userMembers">Contains the ids of new users. Can be null or an empty list too.</param>
         /// <param name="groupMembers">Contains the ids of new groups. Can be null or an empty list too.</param>
+        [SuppressMessage("ReSharper", "ConvertToNullCoalescingCompoundAssignment")]
         public void AddMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
             groupMembers = groupMembers ?? new int[0];

@@ -667,7 +667,7 @@ namespace SenseNet.Security.Tests
                 {
                     if ((b & mask) > 0)
                         counters[pt.Index]++;
-                    mask = mask << 1;
+                    mask <<= 1;
                 }
             }
 
@@ -712,7 +712,7 @@ namespace SenseNet.Security.Tests
                 {
                     if ((b & mask) > 0)
                         counters[pt.Index]++;
-                    mask = mask << 1;
+                    mask <<= 1;
                 }
             }
 
