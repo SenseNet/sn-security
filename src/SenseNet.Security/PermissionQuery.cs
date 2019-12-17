@@ -155,6 +155,7 @@ namespace SenseNet.Security
         }
         private static void SetPermissionsCountersByPermissionLevel(int[] counters, PermissionLevel level, ulong allowBits, ulong denyBits)
         {
+            // ReSharper disable once SwitchStatementMissingSomeCases
             switch (level)
             {
                 case PermissionLevel.Allowed:
@@ -166,8 +167,6 @@ namespace SenseNet.Security
                 case PermissionLevel.AllowedOrDenied:
                     IncrementCounters(allowBits, counters);
                     IncrementCounters(denyBits, counters);
-                    break;
-                default:
                     break;
             }
         }
