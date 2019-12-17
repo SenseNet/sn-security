@@ -99,7 +99,7 @@ namespace SenseNet.Security.Tests.Concurrency
             _started = DateTime.UtcNow;
 
             Task.Run(() => AclExercise1(0));
-            Enumerable.Range(1, arguments.Agents).Select(x => Task.Run(() => AclExercise(x))).ToArray();
+            var _ = Enumerable.Range(1, arguments.Agents).Select(x => Task.Run(() => AclExercise(x))).ToArray();
         }
         private static void AclExercise(int id)
         {
@@ -170,7 +170,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
             _started = DateTime.UtcNow;
 
-            Enumerable.Range(1, arguments.Agents).Select(x => Task.Run(() => SaqExercise(x))).ToArray();
+            var _ = Enumerable.Range(1, arguments.Agents).Select(x => Task.Run(() => SaqExercise(x))).ToArray();
         }
         private static void SaqExercise(int id)
         {
@@ -270,7 +270,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
             _started = DateTime.UtcNow;
 
-            Enumerable.Range(1, 4).Select(x => Task.Run(() => MoveExercise(x))).ToArray();
+            var _ = Enumerable.Range(1, 4).Select(x => Task.Run(() => MoveExercise(x))).ToArray();
         }
         private static void MoveExercise(int id)
         {
