@@ -42,9 +42,9 @@ namespace SenseNet.Security.TestConsole
                     Console.WriteLine("A ping message was sent.");
                     //var activity = new Transperfect.Infrastructure.Security.Messaging.SecurityMessages.BreakInheritanceActivity(Id("E2"));
                     var activity = new Messaging.SecurityMessages.SetAclActivity(
-                        acls: new[] { new AclInfo(1) },
-                        breaks: new List<int>(),
-                        unbreaks: new List<int>()
+                        new[] { new AclInfo(1) },
+                        new List<int>(),
+                        new List<int>()
                         );
                     activity.Execute(context.Security);
                 }
