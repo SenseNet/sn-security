@@ -7,7 +7,7 @@ namespace SenseNet.Security
     /// <summary>
     /// Represents a group node int the in-memory membership graph.
     /// </summary>
-    [DebuggerDisplay("{ToString()}")]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class SecurityGroup
     {
         /// <summary>

@@ -7,7 +7,7 @@ namespace SenseNet.Security
     /// <summary>
     /// Permission representation in AccessControlEntry.
     /// </summary>
-    [DebuggerDisplay("{ToString()}")]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     [Serializable]
     public class Permission
     {

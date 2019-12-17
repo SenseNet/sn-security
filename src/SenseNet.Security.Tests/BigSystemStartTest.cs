@@ -62,7 +62,7 @@ namespace SenseNet.Security.Tests
             };
         }
 
-        [DebuggerDisplay("{ToString()}")]
+        [DebuggerDisplay("{" + nameof(ToString) + "()}")]
         class LoadingTimeTestResult
         {
             public int Entities;

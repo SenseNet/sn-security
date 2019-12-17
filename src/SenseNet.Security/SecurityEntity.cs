@@ -11,7 +11,7 @@ namespace SenseNet.Security
     /// <summary>
     /// Represents an entity that can be used to build a tree from and have security entries.
     /// </summary>
-    [DebuggerDisplay("{ToString()}")]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class SecurityEntity
     {
         // ReSharper disable once InconsistentNaming

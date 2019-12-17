@@ -6,7 +6,7 @@ namespace SenseNet.Security
     /// <summary>
     /// Represents in-memory information about an access control entry.
     /// </summary>
-    [DebuggerDisplay("{ToString()}")]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     [Serializable]
     public class AceInfo
     {

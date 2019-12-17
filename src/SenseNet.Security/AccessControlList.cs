@@ -10,7 +10,7 @@ namespace SenseNet.Security
     /// for building a rich user interface. All changes should be made through the AclEditor class.
     /// </summary>
     [Serializable]
-    [DebuggerDisplay("{ToString()}")]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class AccessControlList
     {
         /// <summary>Id of the related entity.</summary>
