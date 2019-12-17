@@ -1218,11 +1218,11 @@ namespace SenseNet.Security.Tests
             ctx.CreateSecurityEntity(entityId, 0, int.MaxValue);
 
             var ed = ctx.CreateAclEditor();
-            ed.Allow(entityId, group1.Id, false, new[] { PermissionType.Open, PermissionType.Custom01 });
-            ed.Allow(entityId, group2.Id, false, new[] { PermissionType.Open, PermissionType.Custom02 });
-            ed.Allow(entityId, group3.Id, false, new[] { PermissionType.Open, PermissionType.Custom03 });
-            ed.Allow(entityId, group4.Id, false, new[] { PermissionType.Open, PermissionType.Custom04 });
-            ed.Allow(entityId, group5.Id, false, new[] { PermissionType.Open, PermissionType.Custom05 });
+            ed.Allow(entityId, group1.Id, false, PermissionType.Open, PermissionType.Custom01);
+            ed.Allow(entityId, group2.Id, false, PermissionType.Open, PermissionType.Custom02);
+            ed.Allow(entityId, group3.Id, false, PermissionType.Open, PermissionType.Custom03);
+            ed.Allow(entityId, group4.Id, false, PermissionType.Open, PermissionType.Custom04);
+            ed.Allow(entityId, group5.Id, false, PermissionType.Open, PermissionType.Custom05);
             ed.Apply();
 
             // #3: Validate the initial conditions: User4 has only Open and Custom04
