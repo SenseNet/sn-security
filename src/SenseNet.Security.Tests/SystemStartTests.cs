@@ -213,7 +213,7 @@ namespace SenseNet.Security.Tests
 
         public static List<StoredAce> CreateTestAces()
         {
-            return new List<StoredAce>()
+            return new List<StoredAce>
             {
                 new StoredAce { EntityId = Id("E1"), IdentityId = Id("G1"), LocalOnly = false, AllowBits = 0x0EF, DenyBits = 0x000 },
                 new StoredAce { EntityId = Id("E1"), IdentityId = Id("U1"), LocalOnly = false, AllowBits = 0x0EE, DenyBits = 0x001 },
