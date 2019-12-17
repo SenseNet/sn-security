@@ -216,6 +216,7 @@ namespace SenseNet.Security.Tests
             public void Write(object message, ICollection<string> categories, int priority, int eventId, TraceEventType severity, string title,
                 IDictionary<string, object> properties)
             {
+                // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (severity)
                 {
                     case TraceEventType.Information:

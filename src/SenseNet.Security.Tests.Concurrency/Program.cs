@@ -174,6 +174,7 @@ namespace SenseNet.Security.Tests.Concurrency
         }
         private static void SaqExercise(int id)
         {
+            // ReSharper disable once SwitchStatementMissingSomeCases
             switch (id % 3)
             {
                 case 0:
