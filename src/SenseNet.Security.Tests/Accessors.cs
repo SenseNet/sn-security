@@ -92,7 +92,7 @@ namespace SenseNet.Security.Tests
             get
             {
                 if (_storage == null)
-                    _storage = base.GetStaticFieldOrProperty<DatabaseStorage>("Storage");
+                    _storage = GetStaticFieldOrProperty<DatabaseStorage>("Storage");
                 return _storage;
             }
         }
@@ -101,6 +101,6 @@ namespace SenseNet.Security.Tests
     public class AclEditorAccessor : Accessor
     {
         public AclEditorAccessor(AclEditor editor) : base(editor) { }
-        public Dictionary<int, AclInfo> Acls => base.GetFieldOrProperty<Dictionary<int, AclInfo>>("_acls");
+        public Dictionary<int, AclInfo> Acls => GetFieldOrProperty<Dictionary<int, AclInfo>>("_acls");
     }
 }
