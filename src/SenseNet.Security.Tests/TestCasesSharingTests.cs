@@ -34,12 +34,12 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("Normal|-G1:_____________________________________________________________+__", Tools.ReplaceIds(entries[1].ToString()));
 
             // ACTION 3 root, Normal only
-            entries = ctx.GetAcl(Id("E1"), EntryType.Normal).Entries
+            entries = ctx.GetAcl(Id("E1")).Entries
                 .OrderBy(x => x.LocalOnly).ThenBy(x => x.EntryType).ToList();
             Assert.AreEqual("Normal|+G1:_______________________________________________________________+", Tools.ReplaceIds(entries[0].ToString()));
 
             // ACTION 4 child, Normal only
-            entries = ctx.GetAcl(Id("E2"), EntryType.Normal).Entries
+            entries = ctx.GetAcl(Id("E2")).Entries
                 .OrderBy(x => x.LocalOnly).ThenBy(x => x.EntryType).ToList();
             Assert.AreEqual("Normal|+G1:______________________________________________________________++", Tools.ReplaceIds(entries[0].ToString()));
             Assert.AreEqual("Normal|-G1:_____________________________________________________________+__", Tools.ReplaceIds(entries[1].ToString()));
@@ -71,7 +71,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("Normal|+G1:____________________________________________________________++++", Tools.ReplaceIds(entry.ToString()));
 
             // ACTION 2: Normal only
-            entry = ctx.GetAcl(Id("E5"), EntryType.Normal).Entries.First();
+            entry = ctx.GetAcl(Id("E5")).Entries.First();
             Assert.AreEqual("Normal|+G1:____________________________________________________________++++", Tools.ReplaceIds(entry.ToString()));
 
             // ACTION 3: Sharing only

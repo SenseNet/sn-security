@@ -790,9 +790,9 @@ namespace SenseNet.Security.Tests
 
             try
             {
-                var entity = CurrentContext.Security.GetSecurityEntity(17, false);
+                var entity = CurrentContext.Security.GetSecurityEntity(17);
                 Assert.IsNull(entity);
-                entity = CurrentContext.Security.GetSecurityEntity(42, false);
+                entity = CurrentContext.Security.GetSecurityEntity(42);
                 Assert.IsNotNull(entity);
                 Assert.AreEqual(17, entity.OwnerId);
             }

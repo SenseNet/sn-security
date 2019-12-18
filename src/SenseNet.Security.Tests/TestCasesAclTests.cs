@@ -13,7 +13,7 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            var acl = CurrentContext.Security.GetAclInfo(int.MaxValue, false);
+            var acl = CurrentContext.Security.GetAclInfo(int.MaxValue);
             Assert.IsNull(acl);
         }
         [TestMethod]
