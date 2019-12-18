@@ -13,7 +13,7 @@ namespace SenseNet.Security.Tests
     [TestClass]
     public class MessagingTests
     {
-        Context _context;
+        private Context _context;
         public TestContext TestContext { get; set; }
 
         [TestCleanup]

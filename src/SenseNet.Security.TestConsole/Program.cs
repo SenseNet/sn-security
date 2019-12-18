@@ -9,7 +9,7 @@ namespace SenseNet.Security.TestConsole
 {
     internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             //---- Ensure test data
             var entities = SystemStartTests.CreateTestEntities();
@@ -62,18 +62,18 @@ namespace SenseNet.Security.TestConsole
 
         }
 
-        static void MessageReceived(object sender, MessageReceivedEventArgs args)
+        private static void MessageReceived(object sender, MessageReceivedEventArgs args)
         {
             var message = args.Message;
             Console.WriteLine("MessageReceived: {0} from {1}", args.Message.GetType().Name, message.Sender.ComputerID);
         }
 
-        static void ReceiveException(object sender, ExceptionEventArgs args)
+        private static void ReceiveException(object sender, ExceptionEventArgs args)
         {
             Console.WriteLine("ReceiveException: " + args.Message);
         }
 
-        static void SendException(object sender, ExceptionEventArgs args)
+        private static void SendException(object sender, ExceptionEventArgs args)
         {
             Console.WriteLine("SendException: " + args.Exception.Message);
         }

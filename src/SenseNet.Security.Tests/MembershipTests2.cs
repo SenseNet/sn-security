@@ -13,40 +13,108 @@ namespace SenseNet.Security.Tests
     public class MembershipTests2
     {
         #region G1-G23: initial groups (well known when any test starting)
-        int G1 = Id("G1"); int G2 = Id("G2"); int G3 = Id("G3"); int G4 = Id("G4"); int G5 = Id("G5");
-        int G6 = Id("G6"); int G7 = Id("G7"); int G8 = Id("G8"); int G9 = Id("G9"); int G10 = Id("G10");
-        int G11 = Id("G11"); int G12 = Id("G12"); int G13 = Id("G13"); int G14 = Id("G14"); int G15 = Id("G15");
-        int G16 = Id("G16"); int G17 = Id("G17"); int G18 = Id("G18"); int G19 = Id("G19"); int G20 = Id("G20");
-        int G21 = Id("G21"); int G22 = Id("G22"); int G23 = Id("G23");
+
+        private int G1 = Id("G1");
+        private int G2 = Id("G2");
+        private int G3 = Id("G3");
+        private int G4 = Id("G4");
+        private int G5 = Id("G5");
+        private int G6 = Id("G6");
+        private int G7 = Id("G7");
+        private int G8 = Id("G8");
+        private int G9 = Id("G9");
+        private int G10 = Id("G10");
+        private int G11 = Id("G11");
+        private int G12 = Id("G12");
+        private int G13 = Id("G13");
+        private int G14 = Id("G14");
+        private int G15 = Id("G15");
+        private int G16 = Id("G16");
+        private int G17 = Id("G17");
+        private int G18 = Id("G18");
+        private int G19 = Id("G19");
+        private int G20 = Id("G20");
+        private int G21 = Id("G21");
+        private int G22 = Id("G22");
+        private int G23 = Id("G23");
         #endregion
         #region G30-G39: additional groups (for any test purposes)
-        int G30 = Id("G30"); int G31 = Id("G31"); int G32 = Id("G32"); int G33 = Id("G33"); int G34 = Id("G34");
-        int G35 = Id("G35"); int G36 = Id("G36"); int G37 = Id("G37"); int G38 = Id("G38"); int G39 = Id("G39");
+
+        private int G30 = Id("G30");
+        private int G31 = Id("G31");
+        private int G32 = Id("G32");
+        private int G33 = Id("G33");
+        private int G34 = Id("G34");
+        private int G35 = Id("G35");
+        private int G36 = Id("G36");
+        private int G37 = Id("G37");
+        private int G38 = Id("G38");
+        private int G39 = Id("G39");
         #endregion
         #region U1-U38: initial users (well known when any test starting)
-        int U1 = Id("U1"); int U2 = Id("U2"); int U3 = Id("U3"); int U4 = Id("U4"); int U5 = Id("U5");
-        int U6 = Id("U6"); int U7 = Id("U7"); int U8 = Id("U8"); int U9 = Id("U9"); int U10 = Id("U10");
-        int U11 = Id("U11"); int U12 = Id("U12"); int U13 = Id("U13"); int U14 = Id("U14"); int U15 = Id("U15");
-        int U16 = Id("U16"); int U17 = Id("U17"); int U18 = Id("U18"); int U19 = Id("U19"); int U20 = Id("U20");
-        int U21 = Id("U21"); int U22 = Id("U22"); int U23 = Id("U23"); int U24 = Id("U24"); int U25 = Id("U25");
-        int U26 = Id("U26"); int U27 = Id("U27"); int U28 = Id("U28"); int U29 = Id("U29"); int U30 = Id("U30");
-        int U31 = Id("U31"); int U32 = Id("U32"); int U33 = Id("U33"); int U34 = Id("U34"); int U35 = Id("U35");
-        int U36 = Id("U36"); int U37 = Id("U37"); int U38 = Id("U38");
+
+        private int U1 = Id("U1");
+        private int U2 = Id("U2");
+        private int U3 = Id("U3");
+        private int U4 = Id("U4");
+        private int U5 = Id("U5");
+        private int U6 = Id("U6");
+        private int U7 = Id("U7");
+        private int U8 = Id("U8");
+        private int U9 = Id("U9");
+        private int U10 = Id("U10");
+        private int U11 = Id("U11");
+        private int U12 = Id("U12");
+        private int U13 = Id("U13");
+        private int U14 = Id("U14");
+        private int U15 = Id("U15");
+        private int U16 = Id("U16");
+        private int U17 = Id("U17");
+        private int U18 = Id("U18");
+        private int U19 = Id("U19");
+        private int U20 = Id("U20");
+        private int U21 = Id("U21");
+        private int U22 = Id("U22");
+        private int U23 = Id("U23");
+        private int U24 = Id("U24");
+        private int U25 = Id("U25");
+        private int U26 = Id("U26");
+        private int U27 = Id("U27");
+        private int U28 = Id("U28");
+        private int U29 = Id("U29");
+        private int U30 = Id("U30");
+        private int U31 = Id("U31");
+        private int U32 = Id("U32");
+        private int U33 = Id("U33");
+        private int U34 = Id("U34");
+        private int U35 = Id("U35");
+        private int U36 = Id("U36");
+        private int U37 = Id("U37");
+        private int U38 = Id("U38");
         #endregion
         #region U40-U49: additional users (for any test purposes)
-        int U40 = Id("U40"); int U41 = Id("U41"); int U42 = Id("U42"); int U43 = Id("U43"); int U44 = Id("U44");
-        int U45 = Id("U45"); int U46 = Id("U46"); int U47 = Id("U47"); int U48 = Id("U48"); int U49 = Id("U49");
+
+        private int U40 = Id("U40");
+        private int U41 = Id("U41");
+        private int U42 = Id("U42");
+        private int U43 = Id("U43");
+        private int U44 = Id("U44");
+        private int U45 = Id("U45");
+        private int U46 = Id("U46");
+        private int U47 = Id("U47");
+        private int U48 = Id("U48");
+        private int U49 = Id("U49");
         #endregion
         #region initial membership
         // ReSharper disable once ConvertToConstant.Local
-        readonly string InitialMembership = "U1:G1,G2|U2:G1,G2|U3:G1,G4|U4:G1,G4|U5:G1,G4|U6:G1,G6|U7:G1,G3,G8|U8:G1,G3,G8|U9:G1,G3,G8|U10:G1,G3|" +
+        private readonly string InitialMembership = "U1:G1,G2|U2:G1,G2|U3:G1,G4|U4:G1,G4|U5:G1,G4|U6:G1,G6|U7:G1,G3,G8|U8:G1,G3,G8|U9:G1,G3,G8|U10:G1,G3|" +
                 "U11:G1,G3,G10|U12:G1,G3,G11|U13:G1,G3,G11|U14:G1,G5,G12|U15:G1,G5,G12|U16:G1,G5,G12|U17:G1,G5,G12|U18:G1,G5,G12|" +
                 "U19:G1,G5,G12|U20:G1,G5,G12|U21:G1,G5,G13|U22:G1,G5,G14|U23:G1,G5,G14|U24:G1,G5,G15|U25:G1,G3,G9,G16|U26:G1,G3,G9,G17|" +
                 "U27:G1,G3,G9,G18|U28:G1,G3,G9,G18|U29:G1,G3,G9,G19|U30:G20|U31:G20|U32:G20|U33:G20|U34:G20,G21|U35:G20,G21|U36:G20,G22|" +
                 "U37:G20,G23|U38:G20,G23";
         #endregion
 
-        Context context;
+        private Context context;
         public TestContext TestContext { get; set; }
 
         [TestInitialize]
@@ -471,7 +539,7 @@ namespace SenseNet.Security.Tests
 
         private class MembershipEditor
         {
-            Dictionary<int, List<int>> Membership = new Dictionary<int, List<int>>();
+            private Dictionary<int, List<int>> Membership = new Dictionary<int, List<int>>();
 
             public MembershipEditor(string initialState)
             {

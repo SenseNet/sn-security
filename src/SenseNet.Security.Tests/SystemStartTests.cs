@@ -11,7 +11,7 @@ namespace SenseNet.Security.Tests
     [TestClass]
     public class SystemStartTests
     {
-        Context _context;
+        private Context _context;
         public TestContext TestContext { get; set; }
 
         [TestCleanup]

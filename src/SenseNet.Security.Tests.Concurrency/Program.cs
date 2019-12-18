@@ -13,9 +13,9 @@ namespace SenseNet.Security.Tests.Concurrency
 {
     internal class Program
     {
-        static bool _stopped;
+        private static bool _stopped;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var arguments = ProgramArguments.Parse();
             if (arguments == null)
@@ -443,7 +443,7 @@ namespace SenseNet.Security.Tests.Concurrency
     [Serializable]
     internal class TestWaitActivity : Messaging.SecurityMessages.SecurityActivity
     {
-        int _sleepInMillisconds;
+        private int _sleepInMillisconds;
 
         public TestWaitActivity(int sleepInMillisconds)
         {
