@@ -16,6 +16,7 @@ namespace SenseNet.Security.Tests.Concurrency
     {
         private static bool _stopped;
 
+        // ReSharper disable once UnusedParameter.Local
         private static void Main(string[] args)
         {
             var arguments = ProgramArguments.Parse();
@@ -254,6 +255,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
         }
 
+        // ReSharper disable once UnusedParameter.Local
         private static void RunMove(ProgramArguments arguments)
         {
             var entities = SystemStartTests.CreateTestEntities();
@@ -341,6 +343,7 @@ namespace SenseNet.Security.Tests.Concurrency
         }
 
         [SuppressMessage("ReSharper", "UseObjectOrCollectionInitializer")]
+        // ReSharper disable once UnusedParameter.Local
         private static void RunDelete(ProgramArguments arguments)
         {
             var entities = SystemStartTests.CreateTestEntities();
