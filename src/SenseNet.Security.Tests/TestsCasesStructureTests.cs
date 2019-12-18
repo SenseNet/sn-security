@@ -64,13 +64,11 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.CreateSecurityEntity(grandChildEntity);
 
             // inspection
-            SecurityEntity memEntity;
-            StoredSecurityEntity dbEntity;
-            memEntity = CurrentContext.Security.GetSecurityEntity(rootId);
+            var memEntity = CurrentContext.Security.GetSecurityEntity(rootId);
             Assert.AreEqual(0, memEntity.Level);
             Assert.IsNull(memEntity.Parent);
             Assert.AreEqual(TestUser.User1.Id, memEntity.OwnerId);
-            dbEntity = GetStoredSecurityEntity(rootId);
+            var dbEntity = GetStoredSecurityEntity(rootId);
             Assert.AreEqual(default, dbEntity.ParentId);
             Assert.AreEqual(TestUser.User1.Id, dbEntity.OwnerId);
 
@@ -105,13 +103,11 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.CreateSecurityEntity(grandChildId, childId, TestUser.User3.Id);
 
             // inspection
-            SecurityEntity memEntity;
-            StoredSecurityEntity dbEntity;
-            memEntity = CurrentContext.Security.GetSecurityEntity(rootId);
+            var memEntity = CurrentContext.Security.GetSecurityEntity(rootId);
             Assert.AreEqual(0, memEntity.Level);
             Assert.IsNull(memEntity.Parent);
             Assert.AreEqual(TestUser.User1.Id, memEntity.OwnerId);
-            dbEntity = GetStoredSecurityEntity(rootId);
+            var dbEntity = GetStoredSecurityEntity(rootId);
             Assert.AreEqual(default, dbEntity.ParentId);
             Assert.AreEqual(TestUser.User1.Id, dbEntity.OwnerId);
 
@@ -158,8 +154,7 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.CreateSecurityEntity(grandChildEntity3);
 
             // checking target object structure in memory
-            SecurityEntity entity;
-            entity = CurrentContext.Security.GetSecurityEntity(rootId);
+            var entity = CurrentContext.Security.GetSecurityEntity(rootId);
             Assert.AreEqual(0, entity.Level);
             entity = CurrentContext.Security.GetSecurityEntity(childId1);
             Assert.AreEqual(1, entity.Level);
@@ -475,16 +470,14 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.BreakInheritance(new TestEntity { Id = ids[1], ParentId = ids[0] });
 
             // inspection
-            StoredSecurityEntity dbEntity;
-            dbEntity = GetStoredSecurityEntity(ids[0]);
+            var dbEntity = GetStoredSecurityEntity(ids[0]);
             Assert.IsTrue(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsFalse(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[2]);
             Assert.IsTrue(dbEntity.IsInherited);
 
-            SecurityEntity entity;
-            entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
             Assert.IsTrue(entity.IsInherited);
             entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
@@ -500,16 +493,14 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.BreakInheritance(ids[1]);
 
             // inspection
-            StoredSecurityEntity dbEntity;
-            dbEntity = GetStoredSecurityEntity(ids[0]);
+            var dbEntity = GetStoredSecurityEntity(ids[0]);
             Assert.IsTrue(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsFalse(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[2]);
             Assert.IsTrue(dbEntity.IsInherited);
 
-            SecurityEntity entity;
-            entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
             Assert.IsTrue(entity.IsInherited);
             entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
@@ -526,16 +517,14 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.BreakInheritance(ids[1]);
 
             // inspection
-            StoredSecurityEntity dbEntity;
-            dbEntity = GetStoredSecurityEntity(ids[0]);
+            var dbEntity = GetStoredSecurityEntity(ids[0]);
             Assert.IsTrue(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsFalse(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[2]);
             Assert.IsTrue(dbEntity.IsInherited);
 
-            SecurityEntity entity;
-            entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
             Assert.IsTrue(entity.IsInherited);
             entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
@@ -558,14 +547,12 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_High_UnbreakInheritance()
         {
-            StoredSecurityEntity dbEntity;
-            SecurityEntity entity;
             CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
 
-            dbEntity = GetStoredSecurityEntity(ids[1]);
+            var dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsFalse(dbEntity.IsInherited);
-            entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
 
             //# calling the security component for restoring breaked permission inheritance
@@ -589,14 +576,12 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_Low_UnbreakInheritance()
         {
-            StoredSecurityEntity dbEntity;
-            SecurityEntity entity;
             CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
 
-            dbEntity = GetStoredSecurityEntity(ids[1]);
+            var dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsFalse(dbEntity.IsInherited);
-            entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
 
             //# calling the security component for restoring breaked permission inheritance
@@ -620,8 +605,6 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_UnbreakInheritance_Unbreaked()
         {
-            StoredSecurityEntity dbEntity;
-            SecurityEntity entity;
             CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
 
@@ -631,14 +614,14 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.UnbreakInheritance(ids[1]);
 
             // inspection
-            dbEntity = GetStoredSecurityEntity(ids[0]);
+            var dbEntity = GetStoredSecurityEntity(ids[0]);
             Assert.IsTrue(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsTrue(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[2]);
             Assert.IsTrue(dbEntity.IsInherited);
 
-            entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
             Assert.IsTrue(entity.IsInherited);
             entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsTrue(entity.IsInherited);

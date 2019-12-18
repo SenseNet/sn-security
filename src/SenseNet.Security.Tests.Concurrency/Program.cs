@@ -143,11 +143,9 @@ namespace SenseNet.Security.Tests.Concurrency
                 if (0 == count % 1000)
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
-                PermissionType perm1, perm2;
-
                 var i = count % 2;
-                perm1 = permTypes[i];
-                perm2 = permTypes[1 - i];
+                var perm1 = permTypes[i];
+                var perm2 = permTypes[1 - i];
 
                 AclEditor.Create(ctx)
                     .Allow(5, TestUser.User1.Id, false, perm1)

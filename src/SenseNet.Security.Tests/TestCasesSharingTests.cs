@@ -92,14 +92,13 @@ namespace SenseNet.Security.Tests
             // Two level down: The sharing permits less than on parent.
             SetAcl("+E5|Sharing|+U1:_____________+++++"); // Open
 
-            PermissionValue see, open, save, run;
             var ctx = CurrentContext.Security;
 
             var entityId = Id("E1"); // Root
-            see = ctx.GetPermission(entityId, PermissionType.See);
-            open = ctx.GetPermission(entityId, PermissionType.Open);
-            save = ctx.GetPermission(entityId, PermissionType.Save);
-            run = ctx.GetPermission(entityId, PermissionType.RunApplication);
+            var see = ctx.GetPermission(entityId, PermissionType.See);
+            var open = ctx.GetPermission(entityId, PermissionType.Open);
+            var save = ctx.GetPermission(entityId, PermissionType.Save);
+            var run = ctx.GetPermission(entityId, PermissionType.RunApplication);
             Assert.AreEqual(PermissionValue.Allowed, see);
             Assert.AreEqual(PermissionValue.Undefined, open);
             Assert.AreEqual(PermissionValue.Undefined, save);
