@@ -47,7 +47,7 @@ namespace SenseNet.Security.Messaging.Msmq
                 _sendQueuesAvailable.Add(true);
             }
         }
-        private MessageQueue CreateQueue(string queuepath)
+        private static MessageQueue CreateQueue(string queuepath)
         {
             return new MessageQueue(queuepath) {Formatter = new BinaryMessageFormatter()};
         }

@@ -45,11 +45,11 @@
             set => OwnerId = ToGuid(value);
         }
 
-        private int? FromGuid(int value)
+        private static int? FromGuid(int value)
         {
             return value == default ? null : (int?)value;
         }
-        private int ToGuid(int? value)
+        private static int ToGuid(int? value)
         {
             return value ?? default;
         }

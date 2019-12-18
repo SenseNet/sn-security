@@ -248,7 +248,7 @@ namespace SenseNet.Security
             activity.Execute(this);
         }
 
-        private bool AllNullOrEmpty(params IEnumerable<int>[] args)
+        private static bool AllNullOrEmpty(params IEnumerable<int>[] args)
         {
             return !args.Any(a => a != null && a.FirstOrDefault() != default);
         }

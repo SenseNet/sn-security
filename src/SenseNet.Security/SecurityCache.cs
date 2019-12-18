@@ -34,7 +34,7 @@ namespace SenseNet.Security
             this.Membership = FlattenUserMembership(this.Groups);
         }
 
-        private void BuildAcls(IDictionary<int, SecurityEntity> entities, Dictionary<int, AclInfo> aclTable)
+        private static void BuildAcls(IDictionary<int, SecurityEntity> entities, Dictionary<int, AclInfo> aclTable)
         {
             foreach (var acl in aclTable.Values)
             {
@@ -104,7 +104,7 @@ namespace SenseNet.Security
             missingInFlattening = expected.Except(actual).ToArray();
             unknownInFlattening = actual.Except(expected).ToArray();
         }
-        private IEnumerable<long> ConvertFlattenedUserMembershipToControlData(Dictionary<int, List<int>> membership)
+        private static IEnumerable<long> ConvertFlattenedUserMembershipToControlData(Dictionary<int, List<int>> membership)
         {
             var result = new List<long>(membership.Count * 2);
             foreach (var item in membership)
@@ -163,7 +163,7 @@ namespace SenseNet.Security
             }
             return group;
         }
-        private void AddRelation(List<SecurityGroup> container, SecurityGroup item)
+        private static void AddRelation(List<SecurityGroup> container, SecurityGroup item)
         {
             if (container.All(x => x.Id != item.Id))
                 container.Add(item);

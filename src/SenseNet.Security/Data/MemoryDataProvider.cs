@@ -90,7 +90,7 @@ namespace SenseNet.Security.Data
             }
             return groups.Values;
         }
-        private SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
+        private static SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
         {
             if (!groups.TryGetValue(groupId, out var group))
             {

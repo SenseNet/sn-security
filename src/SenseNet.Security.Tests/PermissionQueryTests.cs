@@ -192,7 +192,7 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(HasNormalPermission(id12, Id("E66"), _permissions["P6"]));
             Assert.IsFalse(HasNormalPermission(id13, Id("E66"), _permissions["P6"]));
         }
-        private bool HasNormalPermission(int userId, int entityId, PermissionType permission)
+        private static bool HasNormalPermission(int userId, int entityId, PermissionType permission)
         {
             return new TestSecurityContext(TestUser.User1).Evaluator.GetPermission(userId, entityId, 0, EntryType.Normal,
                 permission) == PermissionValue.Allowed;
@@ -453,7 +453,7 @@ namespace SenseNet.Security.Tests
             return entity;
         }
 
-        private int Id(string name)
+        private static int Id(string name)
         {
             return Tools.GetId(name);
         } 

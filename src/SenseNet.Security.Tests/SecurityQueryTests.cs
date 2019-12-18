@@ -810,7 +810,7 @@ namespace SenseNet.Security.Tests
                 .Apply();
         }
 
-        private int[] GetSortedIds(IEnumerable<SecurityEntity> entities)
+        private static int[] GetSortedIds(IEnumerable<SecurityEntity> entities)
         {
             return entities.Select(e => e.Id).OrderBy(i => i).ToArray();
         }
@@ -818,11 +818,11 @@ namespace SenseNet.Security.Tests
         {
             return string.Join(",", GetSortedIds(entities).Select(i => i.ToString()).ToArray());
         }
-        private string GetSortedIdString(IEnumerable<int> ids)
+        private static string GetSortedIdString(IEnumerable<int> ids)
         {
             return string.Join(",", ids.OrderBy(i => i).Select(i => i.ToString()).ToArray());
         }
-        private string GetIdString(IEnumerable<int> ids)
+        private static string GetIdString(IEnumerable<int> ids)
         {
             return string.Join(",", ids.Select(i => i.ToString()).ToArray());
         }
@@ -1012,7 +1012,7 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.CreateSecurityEntity(entity);
         }
 
-        private int Id(string name)
+        private static int Id(string name)
         {
             return Tools.GetId(name);
         }

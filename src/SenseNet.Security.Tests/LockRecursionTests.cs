@@ -36,7 +36,7 @@ namespace SenseNet.Security.Tests
             CreatePlayground(context);
             return context;
         }
-        private Context GetContext(LockRecursionUser currentUser)
+        private static Context GetContext(LockRecursionUser currentUser)
         {
             SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             MemoryDataProvider.LastActivityId = 0;
@@ -225,7 +225,7 @@ namespace SenseNet.Security.Tests
             context.Security.CreateSecurityEntity(entity);
         }
 
-        private int Id(string name)
+        private static int Id(string name)
         {
             return Tools.GetId(name);
         }

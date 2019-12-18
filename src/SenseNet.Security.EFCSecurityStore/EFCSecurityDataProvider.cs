@@ -553,7 +553,7 @@ namespace SenseNet.Security.EFCSecurityStore
 
         //===================================================================== Tools
 
-        private EFEntity LoadEFEntity(int entityId, SecurityStorage db)
+        private static EFEntity LoadEFEntity(int entityId, SecurityStorage db)
         {
             return db.EFEntities.FirstOrDefault(x => x.Id == entityId);
         }
@@ -614,7 +614,7 @@ namespace SenseNet.Security.EFCSecurityStore
             }
             return groups.Values;
         }
-        private SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
+        private static SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
         {
             if (groups.TryGetValue(groupId, out var group))
                 return group;

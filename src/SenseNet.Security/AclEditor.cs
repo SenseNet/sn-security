@@ -368,7 +368,7 @@ namespace SenseNet.Security
                     AggregateAffectedPermissions(permission, aggregationType, aggregation);
             return aggregation.Values.ToArray();
         }
-        private void AggregateAffectedPermissions(PermissionTypeBase permission, AggregationType aggregationType, Dictionary<int, PermissionTypeBase> aggregation)
+        private static void AggregateAffectedPermissions(PermissionTypeBase permission, AggregationType aggregationType, Dictionary<int, PermissionTypeBase> aggregation)
         {
             if (aggregation.ContainsKey(permission.Index))
                 return;

@@ -263,7 +263,7 @@ namespace SenseNet.Security
         {
             return GetExplicitEntriesSafe(entityId, SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true), relatedIdentities, entryType);
         }
-        private List<AceInfo> GetExplicitEntriesSafe(int entityId, AclInfo acl, IEnumerable<int> relatedIdentities, EntryType? entryType)
+        private static List<AceInfo> GetExplicitEntriesSafe(int entityId, AclInfo acl, IEnumerable<int> relatedIdentities, EntryType? entryType)
         {
             IEnumerable<AceInfo> aces = null;
 

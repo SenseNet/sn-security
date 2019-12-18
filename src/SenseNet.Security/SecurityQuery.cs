@@ -203,7 +203,7 @@ namespace SenseNet.Security
             }
         }
 
-        private IEnumerable<SecurityEntity> GetEntitiesFromParentChain(SecurityEntity entity, BreakOptions handleBreaks)
+        private static IEnumerable<SecurityEntity> GetEntitiesFromParentChain(SecurityEntity entity, BreakOptions handleBreaks)
         {
             if ((handleBreaks & BreakOptions.StopAtParentBreak) != 0)
             {
@@ -221,7 +221,7 @@ namespace SenseNet.Security
             }
         }
 
-        private IEnumerable<SecurityEntity> GetEntitiesFromSubtree(SecurityEntity root, BreakOptions handleBreaks)
+        private static IEnumerable<SecurityEntity> GetEntitiesFromSubtree(SecurityEntity root, BreakOptions handleBreaks)
         {
             return root == null
                 ? Enumerable.Empty<SecurityEntity>()
