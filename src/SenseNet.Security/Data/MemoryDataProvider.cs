@@ -312,9 +312,7 @@ namespace SenseNet.Security.Data
             lock (MessageLock)
             {
                 var lastMessage = Storage.Messages?.OrderByDescending(m => m.Item1).FirstOrDefault();
-                if (lastMessage == null)
-                    return 0;
-                return lastMessage.Item1;
+                return lastMessage?.Item1 ?? 0;
             }
         }
 

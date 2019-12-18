@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SenseNet.Security
@@ -327,6 +328,7 @@ namespace SenseNet.Security
             }
         }
 
+        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         internal bool IsInGroup(int memberId, int groupId)
         {
             // if it is a user: first look for the id in the flattened user --> groups collection
@@ -342,9 +344,9 @@ namespace SenseNet.Security
 
         internal int[] GetGroups(int userId)
         {
-            if (Membership.TryGetValue(userId, out var flattenedGroups))
-                return flattenedGroups.ToArray();
-            return new int[0];
+            return Membership.TryGetValue(userId, out var flattenedGroups)
+                ? flattenedGroups.ToArray()
+                : new int[0];
         }
 
         internal IEnumerable<int> GetAllUsersInGroup(SecurityGroup group)

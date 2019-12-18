@@ -45,6 +45,7 @@ namespace SenseNet.Security
 
         /// <summary>Converts the value of this instance to a System.String.</summary>
         [ExcludeFromCodeCoverage]
+        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         public override string ToString()
         {
             if (Deny)

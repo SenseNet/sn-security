@@ -160,6 +160,7 @@ namespace SenseNet.Security
                 entity = entity.Parent;
             return entity?.Acl;
         }
+        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         internal int GetFirstAclId()
         {
             var entity = this;
@@ -256,9 +257,9 @@ namespace SenseNet.Security
             {
                 var entity = SecurityEntity.GetEntitySafe(ctx, entityId, true);
                 var aclInfo = GetFirstAclSafe(ctx, entityId, false);
-                if (aclInfo == null)
-                    return AclInfo.CreateEmptyAccessControlList(entityId, entity.IsInherited); //means breaked and cleared
-                return aclInfo.ToAccessContolList(entityId, entryType);
+                return aclInfo == null
+                    ? AclInfo.CreateEmptyAccessControlList(entityId, entity.IsInherited)
+                    : aclInfo.ToAccessContolList(entityId, entryType);
             }
             finally
             {
@@ -270,9 +271,7 @@ namespace SenseNet.Security
         {
             var entity = GetEntitySafe(ctx, entityId, false);
             var acl = entity?.Acl;
-            if (acl == null)
-                return null;
-            return entity.Acl.Copy(entryType);
+            return acl == null ? null : entity.Acl.Copy(entryType);
         }
 
         //---- todo
@@ -297,9 +296,7 @@ namespace SenseNet.Security
         internal static int GetFirstAclId(SecurityContext ctx, int entityId)
         {
             var acl = GetFirstAcl(ctx, entityId, false);
-            if (acl == null)
-                return 0;
-            return acl.Entity.Id;
+            return acl?.Entity.Id ?? 0;
         }
 
         /// <summary>

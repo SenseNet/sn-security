@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -73,6 +74,7 @@ namespace SenseNet.Security
         {
             return GetPermissionSafe(userId, entityId, ownerId, null, permissions);
         }
+        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         internal PermissionValue GetPermissionSafe(int userId, int entityId, int ownerId, EntryType? entryType, params PermissionTypeBase[] permissions)
         {
             if (userId == Configuration.Identities.SystemUserId)
