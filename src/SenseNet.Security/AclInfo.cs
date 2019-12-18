@@ -15,7 +15,7 @@ namespace SenseNet.Security
     {
         [NonSerialized]
         private SecurityEntity _entity;
-        internal SecurityEntity Entity { get { return _entity; } set { _entity = value; } } // managed in SecurityEntity only
+        internal SecurityEntity Entity { get => _entity; set => _entity = value; } // managed in SecurityEntity only
 
         /// <summary>
         /// Id of the entity.
@@ -26,10 +26,7 @@ namespace SenseNet.Security
         /// </summary>
         public bool Inherits
         {
-            get
-            {
-                return _entity == null || _entity.IsInherited;
-            }
+            get => _entity == null || _entity.IsInherited;
             internal set
             {
                 if (_entity == null)

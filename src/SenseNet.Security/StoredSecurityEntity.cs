@@ -32,8 +32,8 @@
         // ReSharper disable once InconsistentNaming
         public int? nullableParentId
         {
-            get { return FromGuid(ParentId); }
-            set { ParentId = ToGuid(value); }
+            get => FromGuid(ParentId);
+            set => ParentId = ToGuid(value);
         }
         /// <summary>
         /// Nullable representation of the OwnerId. Null if there is no owner.
@@ -41,8 +41,8 @@
         // ReSharper disable once InconsistentNaming
         public int? nullableOwnerId
         {
-            get { return FromGuid(OwnerId); }
-            set { OwnerId = ToGuid(value); }
+            get => FromGuid(OwnerId);
+            set => OwnerId = ToGuid(value);
         }
 
         private int? FromGuid(int value)

@@ -228,8 +228,8 @@ namespace SenseNet.Security.Tests
         }
         private class TestMessageProvider : IMessageProvider
         {
-            public string ReceiverName { get { return "TestMessageProvider"; } }
-            public int IncomingMessageCount { get { return 0; } }
+            public string ReceiverName => "TestMessageProvider";
+            public int IncomingMessageCount => 0;
 
             public void Initialize() {}
 

@@ -9,7 +9,7 @@
         private TestEntity _parent;
         public TestEntity Parent
         {
-            get { return _parent; }
+            get => _parent;
             set { _parent = value; ParentId = value?.Id ?? default; }
         }
 

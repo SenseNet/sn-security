@@ -165,7 +165,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
         [NonSerialized]
         private SecurityActivity _attachedActivity;
-        internal SecurityActivity AttachedActivity { get { return _attachedActivity; } private set { _attachedActivity = value; } }
+        internal SecurityActivity AttachedActivity
+        {
+            get => _attachedActivity;
+            private set => _attachedActivity = value;
+        }
 
         /// <summary>
         /// When an activity gets executed and needs to be finalized, all activity objects that have
@@ -294,8 +298,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public bool FromReceiver
         {
-            get { return _fromReceiver; }
-            set { _fromReceiver = value; }
+            get => _fromReceiver;
+            set => _fromReceiver = value;
         }
 
         [NonSerialized]
@@ -305,8 +309,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public bool FromDatabase
         {
-            get { return _fromDatabase; }
-            set { _fromDatabase = value; }
+            get => _fromDatabase;
+            set => _fromDatabase = value;
         }
 
         [NonSerialized]
@@ -316,8 +320,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public bool IsUnprocessedActivity
         {
-            get { return _isUnprocessedActivity; }
-            set { _isUnprocessedActivity = value; }
+            get => _isUnprocessedActivity;
+            set => _isUnprocessedActivity = value;
         }
 
         [field: NonSerialized]

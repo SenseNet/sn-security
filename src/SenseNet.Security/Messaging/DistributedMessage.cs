@@ -34,8 +34,8 @@ namespace SenseNet.Security.Messaging
         private int _bodySize;
         internal int BodySize
         {
-            get { return _bodySize; }
-            set { _bodySize = value; }
+            get => _bodySize;
+            set => _bodySize = value;
         }
     }
 }
