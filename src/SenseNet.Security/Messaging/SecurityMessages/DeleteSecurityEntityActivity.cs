@@ -41,7 +41,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
             {
-                return (createSecurityEntityActivity.EntityId == this.EntityId)
+                return createSecurityEntityActivity.EntityId == this.EntityId
                        || DependencyTools.IsInTree(this.Context, createSecurityEntityActivity.ParentEntityId, this.EntityId);
             }
 

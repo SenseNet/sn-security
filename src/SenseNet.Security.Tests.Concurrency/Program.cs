@@ -103,7 +103,7 @@ namespace SenseNet.Security.Tests.Concurrency
         }
         private static void AclExercise(int id)
         {
-            if (0 == (id % 2))
+            if (0 == id % 2)
                 AclExercise1(id);
             else
                 AclExercise2(id);
@@ -117,7 +117,7 @@ namespace SenseNet.Security.Tests.Concurrency
             {
                 Thread.Sleep(1);
 
-                if (0 == (count % 10000))
+                if (0 == count % 10000)
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
                 var ok = ctx.HasPermission(52, PermissionType.See);
@@ -138,7 +138,7 @@ namespace SenseNet.Security.Tests.Concurrency
             {
                 Thread.Sleep(10);
 
-                if (0 == (count % 1000))
+                if (0 == count % 1000)
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
                 PermissionType perm1, perm2;
@@ -198,7 +198,7 @@ namespace SenseNet.Security.Tests.Concurrency
             {
                 Thread.Sleep(10);
 
-                if (0 == (count % 100))
+                if (0 == count % 100)
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
                 var ctx = new SecurityContext(TestUser.User2);
@@ -217,7 +217,7 @@ namespace SenseNet.Security.Tests.Concurrency
             {
                 Thread.Sleep(10);
 
-                if (0 == (count % 100))
+                if (0 == count % 100)
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
                 var _ = new SecurityContext(TestUser.User2);
@@ -241,7 +241,7 @@ namespace SenseNet.Security.Tests.Concurrency
             {
                 Thread.Sleep(30);
 
-                if (0 == (count % 100))
+                if (0 == count % 100)
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
                 var _ = new SecurityContext(TestUser.User2);
@@ -274,7 +274,7 @@ namespace SenseNet.Security.Tests.Concurrency
         }
         private static void MoveExercise(int id)
         {
-            if ((id % 4) == 1)
+            if (id % 4 == 1)
                 MoveExerciseWriter(id);
             else
                 MoveExerciseReader(id);
@@ -287,7 +287,7 @@ namespace SenseNet.Security.Tests.Concurrency
             {
                 //Thread.Sleep(1);
 
-                if (0 == (count % 10000000))
+                if (0 == count % 10000000)
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
                 //---------------------- work
@@ -298,7 +298,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 var target0 = entities[1];
                 var target1 = entities[52];
 
-                var target = (source.Parent == target0) ? target1 : target0;
+                var target = source.Parent == target0 ? target1 : target0;
                 SecurityEntity.MoveEntity(ctx, source.Id, target.Id);
 
                 //----------------------
@@ -321,7 +321,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 //if(_rnd.Next(0, 6) == 0)
                 //    Thread.Sleep(1);
 
-                if (0 == (count % 10000000))
+                if (0 == count % 10000000)
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
                 //---------------------- work

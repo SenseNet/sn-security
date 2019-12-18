@@ -44,7 +44,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             // There aren't any valid scenarios if the olderActivity is ModifySecurityEntityOwnerActivity or SetAclActivity
 
             if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
-                return (this.SourceId == createSecurityEntityActivity.EntityId) || (this.TargetId == createSecurityEntityActivity.EntityId);
+                return this.SourceId == createSecurityEntityActivity.EntityId || this.TargetId == createSecurityEntityActivity.EntityId;
 
             if (olderActivity is DeleteSecurityEntityActivity deleteSecurityEntityActivity)
             {

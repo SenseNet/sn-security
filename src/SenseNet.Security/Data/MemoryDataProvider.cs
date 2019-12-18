@@ -417,7 +417,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public void DeleteIdentityAndRelatedEntries(int identityId)
         {
-            Storage.Memberships.RemoveAll(m => (m.GroupId == identityId || m.MemberId == identityId));
+            Storage.Memberships.RemoveAll(m => m.GroupId == identityId || m.MemberId == identityId);
             RemovePermissionEntriesByGroup(identityId);
         }
 

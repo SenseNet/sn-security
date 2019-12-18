@@ -1279,11 +1279,11 @@ namespace SenseNet.Security.Tests
         }
         private static string GetUserName(int userId)
         {
-            return "U" + (userId % 100);
+            return "U" + userId % 100;
         }
         private static string GetGroupName(int groupId)
         {
-            return "G" + (groupId % 100);
+            return "G" + groupId % 100;
         }
 
     }

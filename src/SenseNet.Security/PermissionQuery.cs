@@ -20,7 +20,7 @@ namespace SenseNet.Security
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
-                    if (!entity.HasExplicitAcl || (entity.Id == entityId && !includeRoot))
+                    if (!entity.HasExplicitAcl || entity.Id == entityId && !includeRoot)
                         continue;
 
                     // if breaked, adding existing parent-s effective identities because all identities are related.

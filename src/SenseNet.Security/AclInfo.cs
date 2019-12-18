@@ -113,7 +113,7 @@ namespace SenseNet.Security
             return new AccessControlList
             {
                 EntityId = requestedEntityId,
-                Inherits = (this.EntityId != requestedEntityId) || this.Inherits,
+                Inherits = this.EntityId != requestedEntityId || this.Inherits,
                 Entries = aces.Values.Concat(localOnlyAces.Values).OrderBy(x => x.IdentityId).ThenBy(x => x.LocalOnly).ToArray()
             };
         }

@@ -53,7 +53,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                     || DependencyTools.IsInTree(this.Context, this.ParentEntityId, deleteSecurityEntityActivity.EntityId);
 
             if (olderActivity is MoveSecurityEntityActivity moveSecurityEntityActivity)
-                return (moveSecurityEntityActivity.SourceId == this.EntityId) || (moveSecurityEntityActivity.TargetId == this.EntityId);
+                return moveSecurityEntityActivity.SourceId == this.EntityId || moveSecurityEntityActivity.TargetId == this.EntityId;
 
             return false;
         }
