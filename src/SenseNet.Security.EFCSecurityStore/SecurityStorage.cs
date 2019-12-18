@@ -270,7 +270,7 @@ DELETE E1 FROM EFEntities E1 INNER JOIN @EntityIdTable E2 ON E2.EntityId = E1.Id
         }
 
         // ReSharper disable once ConvertToConstant.Local
-        private static readonly string AcquireSecurityActivityExecutionLock_Script = @"UPDATE EFMessages
+        private static readonly string _acquireSecurityActivityExecutionLockScript = @"UPDATE EFMessages
 	SET ExecutionState = '" + ExecutionState.Executing + @"', LockedBy = @LockedBy, LockedAt = GETUTCDATE()
 	WHERE Id = @ActivityId AND ((ExecutionState = '" + ExecutionState.Wait + @"') OR (ExecutionState = '" + ExecutionState.Executing + @"' AND LockedAt < DATEADD(second, -@TimeLimit, GETUTCDATE())))
 IF (@@rowcount > 0)
@@ -281,7 +281,7 @@ ELSE
         public string AcquireSecurityActivityExecutionLock(int securityActivityId, string lockedBy, int timeoutInSeconds)
         {
             var query = EfcStringSet
-                .FromSqlRaw(AcquireSecurityActivityExecutionLock_Script,
+                .FromSqlRaw(_acquireSecurityActivityExecutionLockScript,
                         new SqlParameter("@ActivityId", securityActivityId),
                         new SqlParameter("@LockedBy", lockedBy ?? ""),
                         new SqlParameter("@TimeLimit", timeoutInSeconds));
