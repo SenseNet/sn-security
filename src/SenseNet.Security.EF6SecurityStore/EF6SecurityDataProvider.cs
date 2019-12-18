@@ -536,6 +536,7 @@ namespace SenseNet.Security.EF6SecurityStore
 
         //===================================================================== Tools
 
+        // ReSharper disable once InconsistentNaming
         private static EFEntity LoadEFEntity(int entityId, SecurityStorage db)
         {
             return db.EFEntities.FirstOrDefault(x => x.Id == entityId);
