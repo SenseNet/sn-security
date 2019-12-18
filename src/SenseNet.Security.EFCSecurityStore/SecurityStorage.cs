@@ -302,22 +302,22 @@ ELSE
         }
 
         // ReSharper disable once ConvertToConstant.Local
-        private static readonly string RefreshSecurityActivityExecutionLock_Script = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";
+        private static readonly string _refreshSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";
         public void RefreshSecurityActivityExecutionLock(int securityActivityId)
         {
             this.Database
                 .ExecuteSqlRaw(
-                    RefreshSecurityActivityExecutionLock_Script,
+                    _refreshSecurityActivityExecutionLockScript,
                     new SqlParameter("@ActivityId", securityActivityId));
         }
 
         // ReSharper disable once ConvertToConstant.Local
-        private static readonly string ReleaseSecurityActivityExecutionLock_Script = @"UPDATE EFMessages SET ExecutionState = '" + ExecutionState.Done + @"' WHERE Id = @ActivityId";
+        private static readonly string _releaseSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET ExecutionState = '" + ExecutionState.Done + @"' WHERE Id = @ActivityId";
         public void ReleaseSecurityActivityExecutionLock(int securityActivityId)
         {
             this.Database
                 .ExecuteSqlRaw(
-                    ReleaseSecurityActivityExecutionLock_Script,
+                    _releaseSecurityActivityExecutionLockScript,
                     new SqlParameter("@ActivityId", securityActivityId));
         }
 

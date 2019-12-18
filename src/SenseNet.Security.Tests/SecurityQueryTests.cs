@@ -29,7 +29,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
 
             // ACTION
-            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId);
+            var result = SecurityQuery.All(ctx).GetEntities(RootEntityId);
 
             // ASSERT
             var ids = GetSortedIds(result);
@@ -44,7 +44,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             const string expected = "2,4,5,10,11,12,15,16,20,22,25,28,32,34,35,36,37,41";
 
-            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId).Where(e => e.Acl != null);
+            var result = SecurityQuery.All(ctx).GetEntities(RootEntityId).Where(e => e.Acl != null);
 
             Assert.AreEqual(expected, GetSortedIdString(result));
         }
@@ -54,7 +54,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             const string expected = "22,34,35,36,37,41";
 
-            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId).Where(e => !e.IsInherited);
+            var result = SecurityQuery.All(ctx).GetEntities(RootEntityId).Where(e => !e.IsInherited);
 
             Assert.AreEqual(expected, GetSortedIdString(result));
         }
@@ -64,7 +64,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             const string expected = "101,102,201,202,203";
 
-            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId)
+            var result = SecurityQuery.All(ctx).GetEntities(RootEntityId)
                 .Where(e => e.Acl != null)
                 .SelectMany(e => e.Acl.Entries)
                 .Select(e => e.IdentityId)
@@ -77,12 +77,12 @@ namespace SenseNet.Security.Tests
         {
             var ctx = CurrentContext.Security;
 
-            var resultWithFilter = SecurityQuery.All(ctx).GetEntities(_rootEntityId)
+            var resultWithFilter = SecurityQuery.All(ctx).GetEntities(RootEntityId)
                 .Where(e => e.Acl != null)
                 .SelectMany(e => e.Acl.Entries);
 
             // ACTION
-            var result = SecurityQuery.All(ctx).GetEntries(_rootEntityId);
+            var result = SecurityQuery.All(ctx).GetEntries(RootEntityId);
 
             // ASSERT
             var expected = string.Join(" | ", resultWithFilter.Select(x => x.ToString()).OrderBy(x => x));
@@ -830,7 +830,7 @@ namespace SenseNet.Security.Tests
         #region Helper methods
         private readonly Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
 
-        private const int _rootEntityId = 1;
+        private const int RootEntityId = 1;
 
         private void CreatePlayground()
         {
