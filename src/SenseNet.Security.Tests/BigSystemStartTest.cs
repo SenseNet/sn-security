@@ -238,10 +238,10 @@ namespace SenseNet.Security.Tests
             }
 
             // set parent/child relationship
-            foreach (var rel in relations)
+            foreach (var (id, parentId) in relations)
             {
-                entities[rel.Item1].Parent = entities[rel.Item2];
-                entities[rel.Item2].AddChild(entities[rel.Item1]);
+                entities[id].Parent = entities[parentId];
+                entities[parentId].AddChild(entities[id]);
             }
 
             return entities;
@@ -274,11 +274,11 @@ namespace SenseNet.Security.Tests
             timer = Stopwatch.StartNew();
 
             // set parent/child relationship
-            foreach (var rel in relations)
+            foreach (var (securityEntity, parentId) in relations)
             {
-                var parentEntity = entities[rel.Item2];
-                rel.Item1.Parent = parentEntity;
-                parentEntity.AddChild(rel.Item1);
+                var parentEntity = entities[parentId];
+                securityEntity.Parent = parentEntity;
+                parentEntity.AddChild(securityEntity);
             }
             _log.Append("Rel:").Append(timer.Elapsed).Append(", ");
             timer.Stop();
@@ -320,11 +320,11 @@ namespace SenseNet.Security.Tests
             timer = Stopwatch.StartNew();
 
             // set parent/child relationship
-            foreach (var rel in relations)
+            foreach (var (securityEntity, parentId) in relations)
             {
-                var parentEntity = entities[rel.Item2];
-                rel.Item1.Parent = parentEntity;
-                parentEntity.AddChild_Unsafe(rel.Item1);
+                var parentEntity = entities[parentId];
+                securityEntity.Parent = parentEntity;
+                parentEntity.AddChild_Unsafe(securityEntity);
             }
             _log.Append("Rel:").Append(timer.Elapsed).Append(", ");
             timer.Stop();

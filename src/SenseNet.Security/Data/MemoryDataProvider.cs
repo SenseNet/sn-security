@@ -331,12 +331,12 @@ namespace SenseNet.Security.Data
             {
                 var result = new List<SecurityActivity>();
 
-                foreach (var item in Storage.Messages.Where(x => x.Item1 >= from && x.Item1 <= to).Take(count))
+                foreach (var (id, savedAt, body) in Storage.Messages.Where(x => x.Item1 >= from && x.Item1 <= to).Take(count))
                 {
-                    var activity = SecurityActivity.DeserializeActivity(item.Item3);
+                    var activity = SecurityActivity.DeserializeActivity(body);
                     if (activity == null)
                         continue;
-                    activity.Id = item.Item1;
+                    activity.Id = id;
                     activity.FromDatabase = true;
                     activity.IsUnprocessedActivity = executingUnprocessedActivities;
                     result.Add(activity);
@@ -353,12 +353,12 @@ namespace SenseNet.Security.Data
             {
                 var result = new List<SecurityActivity>();
 
-                foreach (var item in Storage.Messages.Where(x => gaps.Contains(x.Item1)))
+                foreach (var (id, savedAt, body) in Storage.Messages.Where(x => gaps.Contains(x.Item1)))
                 {
-                    var activity = SecurityActivity.DeserializeActivity(item.Item3);
+                    var activity = SecurityActivity.DeserializeActivity(body);
                     if (activity == null)
                         continue;
-                    activity.Id = item.Item1;
+                    activity.Id = id;
                     activity.FromDatabase = true;
                     activity.IsUnprocessedActivity = executingUnprocessedActivities;
                     result.Add(activity);

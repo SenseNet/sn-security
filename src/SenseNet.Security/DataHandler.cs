@@ -34,11 +34,11 @@ namespace SenseNet.Security
             }
 
             // set parent/child relationship
-            foreach (var rel in relations)
+            foreach (var (securityEntity, parentId) in relations)
             {
-                var parentEntity = entities[rel.Item2];
-                rel.Item1.Parent = parentEntity;
-                parentEntity.AddChild_Unsafe(rel.Item1);
+                var parentEntity = entities[parentId];
+                securityEntity.Parent = parentEntity;
+                parentEntity.AddChild_Unsafe(securityEntity);
             }
 
             return new ConcurrentDictionary<int, SecurityEntity>(entities);
