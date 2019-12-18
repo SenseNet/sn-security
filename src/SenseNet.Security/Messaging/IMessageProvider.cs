@@ -36,6 +36,7 @@ namespace SenseNet.Security.Messaging
         /// <summary>
         /// Stops sending and receiving messages.
         /// </summary>
+        // ReSharper disable once UnusedMemberInSuper.Global
         void Stop();
         /// <summary>
         /// Clears all messages that are not sent (if there are).

@@ -11,6 +11,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Control data for building a connection to the database server.
         /// </summary>
+        // ReSharper disable once UnusedMemberInSuper.Global
         string ConnectionString { get; set; }
 
         /// <summary>
@@ -26,6 +27,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Creates the database schema and other components (tables, etc.). It requires an existing database.
         /// </summary>
+        // ReSharper disable once UnusedMemberInSuper.Global
         void InstallDatabase();
 
         /******************************************* structure preloaders */

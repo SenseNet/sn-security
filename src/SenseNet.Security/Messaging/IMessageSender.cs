@@ -14,6 +14,7 @@
         /// Technical identifier. Must be unique.
         /// </summary>
         // ReSharper disable once InconsistentNaming
+        // ReSharper disable once UnusedMemberInSuper.Global
         string InstanceID { get; }
         /// <summary>
         /// Returs true if the message was sent from the current appdomain.
