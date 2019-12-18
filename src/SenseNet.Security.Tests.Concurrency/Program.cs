@@ -3,6 +3,7 @@ using SenseNet.Security.Tests.TestPortal;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -339,6 +340,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
         }
 
+        [SuppressMessage("ReSharper", "UseObjectOrCollectionInitializer")]
         private static void RunDelete(ProgramArguments arguments)
         {
             var entities = SystemStartTests.CreateTestEntities();
