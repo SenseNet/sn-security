@@ -959,8 +959,8 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("_________________________________________________+-+-+-+-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default));
             var dbentries1 = db.LoadPermissionEntries(new[] { Id("E1") }).ToArray();
             var dbentries2 = db.LoadPermissionEntries(new[] { Id("E2") }).ToArray();
-            Assert.AreEqual(1, dbentries1.Count());
-            Assert.AreEqual(1, dbentries2.Count());
+            Assert.AreEqual(1, dbentries1.Length);
+            Assert.AreEqual(1, dbentries2.Length);
 
             //# clear all permissions (inherited won't be cleared)
             var ed = CurrentContext.Security.CreateAclEditor();
@@ -970,8 +970,8 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("________________________________________________________-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), u1, default));
             dbentries1 = db.LoadPermissionEntries(new[] { Id("E1") }).ToArray();
             dbentries2 = db.LoadPermissionEntries(new[] { Id("E2") }).ToArray();
-            Assert.AreEqual(1, dbentries1.Count());
-            Assert.AreEqual(0, dbentries2.Count());
+            Assert.AreEqual(1, dbentries1.Length);
+            Assert.AreEqual(0, dbentries2.Length);
         }
         [TestMethod]
         public void AclEditor_EmptyEntriesRemovedFromMemory()
