@@ -300,10 +300,11 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
         {
+            var storedAces = aces as StoredAce[] ?? aces.ToArray();
             try
             {
                 using var db = Db();
-                db.WritePermissionEntries(aces);
+                db.WritePermissionEntries(storedAces);
             }
             catch (SqlException ex)
             {
@@ -311,7 +312,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 var message = ex.Message.StartsWith("The INSERT statement conflicted with the FOREIGN KEY constraint")
                     ? "Cannot write permission entries because one of the entities is missing from the database. " +
                         // ReSharper disable once PossibleMultipleEnumeration
-                        string.Join(",", aces.Select(a => a.EntityId).Distinct().OrderBy(ei => ei))
+                        string.Join(",", storedAces.Select(a => a.EntityId).Distinct().OrderBy(ei => ei))
                     : "Cannot write permission entries because of a database error.";
 
                 throw new SecurityStructureException(message, ex);
