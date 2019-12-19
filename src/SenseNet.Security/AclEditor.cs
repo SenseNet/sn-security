@@ -360,7 +360,7 @@ namespace SenseNet.Security
             return aclInfo;
         }
 
-        private IEnumerable<PermissionTypeBase> AggregateAffectedPermissions(PermissionTypeBase[] permissions, AggregationType aggregationType)
+        private static IEnumerable<PermissionTypeBase> AggregateAffectedPermissions(PermissionTypeBase[] permissions, AggregationType aggregationType)
         {
             var aggregation = new Dictionary<int, PermissionTypeBase>();
             if (permissions != null)

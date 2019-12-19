@@ -52,7 +52,7 @@ namespace SenseNet.Security.Messaging.Msmq
             return new MessageQueue(queuepath) {Formatter = new BinaryMessageFormatter()};
         }
 
-        private MessageQueue RecoverQueue(MessageQueue queue)
+        private static MessageQueue RecoverQueue(MessageQueue queue)
         {
             // the queue must be closed and the connection cache cleared before we try to reconnect
             queue.Close();

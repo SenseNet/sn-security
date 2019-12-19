@@ -760,7 +760,7 @@ namespace SenseNet.Security.Tests
         }
 
         /* ============================================================================= Tools */
-        private void AddPermissionsForIdentityTests(TestSecurityContext ctx)
+        private static void AddPermissionsForIdentityTests(TestSecurityContext ctx)
         {
             ctx.CreateAclEditor()
                 // additions for easy checking of differences between parent-chain and the subtree
@@ -771,7 +771,7 @@ namespace SenseNet.Security.Tests
                 .Allow(Id("E38"), Id("G7"), true, PermissionType.Custom04)
                 .Apply();
         }
-        private void AddPermissionsForCategorySelectionTests(TestSecurityContext ctx)
+        private static void AddPermissionsForCategorySelectionTests(TestSecurityContext ctx)
         {
             ctx.CreateAclEditor()
                 // additions for easy checking of differences between parent-chain and the subtree
@@ -790,7 +790,7 @@ namespace SenseNet.Security.Tests
                 .Allow(Id("E39"), Id("G9"), false, PermissionType.Custom04)
                 .Apply();
         }
-        private void AddPermissionsForIdentityByPermissionTests(TestSecurityContext ctx)
+        private static void AddPermissionsForIdentityByPermissionTests(TestSecurityContext ctx)
         {
             var p1 = PermissionType.Custom11;
             var p2 = PermissionType.Custom12;
@@ -814,7 +814,7 @@ namespace SenseNet.Security.Tests
         {
             return entities.Select(e => e.Id).OrderBy(i => i).ToArray();
         }
-        private string GetSortedIdString(IEnumerable<SecurityEntity> entities)
+        private static string GetSortedIdString(IEnumerable<SecurityEntity> entities)
         {
             return string.Join(",", GetSortedIds(entities).Select(i => i.ToString()).ToArray());
         }
