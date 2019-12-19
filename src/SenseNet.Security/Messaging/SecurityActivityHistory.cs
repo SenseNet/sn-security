@@ -108,10 +108,9 @@ namespace SenseNet.Security.Messaging
         {
             lock (_lock)
             {
-                // avoiding duplication
-                foreach (var item in _history)
-                    if (item != null && item.Id == activity.Id)
-                        return;
+                // avoid duplication
+                if (_history.Any(item => item != null && item.Id == activity.Id))
+                    return;
 
                 var retired = _history[_position];
                 _history[_position] = new SecurityActivityHistoryItem

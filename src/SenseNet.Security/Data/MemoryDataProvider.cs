@@ -278,6 +278,7 @@ namespace SenseNet.Security.Data
             {
                 var result = new List<int>();
                 entityIds = Storage.Aces.Where(x => x.IdentityId == groupId).Select(x => x.EntityId).Distinct();
+                // ReSharper disable once LoopCanBeConvertedToQuery
                 foreach (var relatedEntityId in entityIds)
                 {
                     var aces = Storage.Aces.Where(x => x.EntityId == relatedEntityId).ToArray();

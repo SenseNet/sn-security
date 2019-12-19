@@ -575,6 +575,7 @@ namespace SenseNet.Security.EFCSecurityStore
             using (var db = Db())
             {
                 entityIds = db.EFEntries.Where(x => x.IdentityId == groupId).Select(x => x.EFEntityId).Distinct().ToArray();
+                // ReSharper disable once LoopCanBeConvertedToQuery
                 foreach (var relatedEntityId in entityIds)
                 {
                     var aces = db.EFEntries.Where(x => x.EFEntityId == relatedEntityId).ToArray();

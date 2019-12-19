@@ -271,10 +271,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             internal static bool AnyIsInTree(SecurityContext ctx, IEnumerable<int> descendatIds, int ancestorId)
             {
                 var entities = SecurityEntity.PeekEntities(ctx, descendatIds.ToArray());
-                foreach (var entity in entities)
-                    if (ctx.IsEntityInTree(entity, ancestorId))
-                        return true;
-                return false;
+                return entities.Any(entity => ctx.IsEntityInTree(entity, ancestorId));
             }
         }
 

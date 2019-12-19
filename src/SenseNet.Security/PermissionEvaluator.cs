@@ -175,6 +175,7 @@ namespace SenseNet.Security
                     if (descendantEntity.IsInherited)
                     {
                         // if inherited, only denied bits play
+                        // ReSharper disable once LoopCanBeConvertedToQuery
                         foreach (var ace in relevantAces)
                             deny |= ace.DenyBits;
                         if ((deny & mask) != 0uL)

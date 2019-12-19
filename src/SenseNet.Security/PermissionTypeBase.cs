@@ -107,6 +107,7 @@ namespace SenseNet.Security
         {
             var permTypes = permissionTypes ?? _permissionArray;
             var mask = 0ul;
+            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var permissionType in permTypes)
                 mask |= permissionType.Mask;
             return mask;

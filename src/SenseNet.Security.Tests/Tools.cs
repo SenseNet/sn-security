@@ -345,12 +345,14 @@ namespace SenseNet.Security.Tests
         internal static void InitializeInMemoryMembershipTable(string src, List<Membership> table)
         {
             table.Clear();
+            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var groupSrc in src.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 var g = groupSrc.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
                 if (g.Length > 1)
                 {
                     var groupId = GetId(g[0].Trim());
+                    // ReSharper disable once LoopCanBeConvertedToQuery
                     foreach (var memberSrc in g[1].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                         table.Add(new Membership { GroupId = groupId, MemberId = GetId(memberSrc), IsUser = memberSrc[0] == 'U' });
                 }
