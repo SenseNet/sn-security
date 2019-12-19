@@ -332,7 +332,7 @@ namespace SenseNet.Security
             return flattened;
         }
 
-        [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+        [ExcludeFromCodeCoverage]
         internal string _traceEffectivePermissionValues(int entityId, int userId, int ownerId)
         {
             var values = new char[PermissionTypeBase.PermissionCount];
@@ -351,7 +351,7 @@ namespace SenseNet.Security
             }
             return new string(values);
         }
-        [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+        [ExcludeFromCodeCoverage]
         internal string _traceMembership()
         {
             var sb = new StringBuilder();
