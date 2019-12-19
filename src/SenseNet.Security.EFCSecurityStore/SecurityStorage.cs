@@ -369,16 +369,12 @@ COMMIT TRANSACTION";
         {
             var assembly = Assembly.GetExecutingAssembly();
 
-            using (var scriptStream = assembly.GetManifestResourceStream(resourceName))
-            {
-                if (scriptStream == null)
-                    throw new ApplicationException("Script resource not found in the assembly: " + resourceName);
+            using var scriptStream = assembly.GetManifestResourceStream(resourceName);
+            if (scriptStream == null)
+                throw new ApplicationException("Script resource not found in the assembly: " + resourceName);
 
-                using (var reader = new StreamReader(scriptStream))
-                {
-                    return reader.ReadToEnd();
-                }
-            }
+            using var reader = new StreamReader(scriptStream);
+            return reader.ReadToEnd();
         }
     }
 }

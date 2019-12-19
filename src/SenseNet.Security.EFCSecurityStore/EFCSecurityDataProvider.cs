@@ -69,10 +69,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public void DeleteEverything()
         {
-            using (var db = Db())
-            {
-                db.CleanupDatabase();
-            }
+            using var db = Db();
+            db.CleanupDatabase();
         }
 
         /// <summary>
@@ -80,10 +78,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public void InstallDatabase()
         {
-            using (var db = Db())
-            {
-                db.InstallDatabase();
-            }
+            using var db = Db();
+            db.InstallDatabase();
         }
 
         /// <summary>
@@ -92,8 +88,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public int GetEstimatedEntityCount()
         {
-            using (var db = Db())
-                return db.GetEstimatedEntityCount();
+            using var db = Db();
+            return db.GetEstimatedEntityCount();
         }
 
         /// <summary>
@@ -101,16 +97,14 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public IEnumerable<StoredSecurityEntity> LoadSecurityEntities()
         {
-            using (var db = Db())
+            using var db = Db();
+            return db.EFEntities.Select(x => new StoredSecurityEntity
             {
-                return db.EFEntities.Select(x => new StoredSecurityEntity
-                {
-                    Id = x.Id,
-                    nullableOwnerId = x.OwnerId,
-                    nullableParentId = x.ParentId,
-                    IsInherited = x.IsInherited
-                }).ToArray();
-            }
+                Id = x.Id,
+                nullableOwnerId = x.OwnerId,
+                nullableParentId = x.ParentId,
+                IsInherited = x.IsInherited
+            }).ToArray();
         }
         /// <summary>
         /// Loads the set of security holder entity ids.
@@ -118,21 +112,19 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks()
         {
-            using (var db = Db())
-                return db.LoadAffectedEntityIdsByEntriesAndBreaks();
+            using var db = Db();
+            return db.LoadAffectedEntityIdsByEntriesAndBreaks();
         }
         /// <summary>
         /// Loader method for retrieving all ACE-s. Called during system start.
         /// </summary>
         public IEnumerable<StoredAce> LoadAllAces()
         {
-            using (var db = Db())
+            using var db = Db();
+            foreach (var dbItem in db.EFEntries)
             {
-                foreach (var dbItem in db.EFEntries)
-                {
-                    var item = dbItem.ToStoredAce();
-                    yield return item;
-                }
+                var item = dbItem.ToStoredAce();
+                yield return item;
             }
         }
 
@@ -141,35 +133,33 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public StoredSecurityEntity LoadStoredSecurityEntity(int entityId)
         {
-            using (var db = Db())
-                return db.LoadStoredSecurityEntityById(entityId);
+            using var db = Db();
+            return db.LoadStoredSecurityEntityById(entityId);
         }
         /// <summary>
         /// Writes the given entity to the database. If it exists before writing, the operation will be skipped.
         /// </summary>
         public void InsertSecurityEntity(StoredSecurityEntity entity)
         {
-            using (var db = Db())
-            {
-                var origEntity = LoadEFEntity(entity.Id, db);
-                if (origEntity != null)
-                    return;
+            using var db = Db();
+            var origEntity = LoadEFEntity(entity.Id, db);
+            if (origEntity != null)
+                return;
 
-                db.EFEntities.Add(new EFEntity
-                {
-                    Id = entity.Id,
-                    OwnerId = entity.nullableOwnerId,
-                    ParentId = entity.nullableParentId,
-                    IsInherited = entity.IsInherited
-                });
-                try
-                {
-                    db.SaveChanges();
-                }
-                catch (DbUpdateException)
-                {
-                    // entity already exists, that's ok
-                }
+            db.EFEntities.Add(new EFEntity
+            {
+                Id = entity.Id,
+                OwnerId = entity.nullableOwnerId,
+                ParentId = entity.nullableParentId,
+                IsInherited = entity.IsInherited
+            });
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateException)
+            {
+                // entity already exists, that's ok
             }
         }
         /// <summary>
@@ -184,19 +174,17 @@ namespace SenseNet.Security.EFCSecurityStore
             {
                 try
                 {
-                    using (var db = Db())
-                    {
-                        var oldEntity = LoadEFEntity(entity.Id, db);
-                        if (oldEntity == null)
-                            throw new EntityNotFoundException("Cannot update entity because it does not exist: " + entity.Id);
+                    using var db = Db();
+                    var oldEntity = LoadEFEntity(entity.Id, db);
+                    if (oldEntity == null)
+                        throw new EntityNotFoundException("Cannot update entity because it does not exist: " + entity.Id);
 
-                        oldEntity.OwnerId = entity.nullableOwnerId;
-                        oldEntity.ParentId = entity.nullableParentId;
-                        oldEntity.IsInherited = entity.IsInherited;
+                    oldEntity.OwnerId = entity.nullableOwnerId;
+                    oldEntity.ParentId = entity.nullableParentId;
+                    oldEntity.IsInherited = entity.IsInherited;
 
-                        db.SaveChanges();
-                        return;
-                    }
+                    db.SaveChanges();
+                    return;
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
@@ -226,24 +214,22 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public void DeleteSecurityEntity(int entityId)
         {
-            using (var db = Db())
+            using var db = Db();
+            var oldEntity = db.EFEntities.FirstOrDefault(x => x.Id == entityId);
+            if (oldEntity == null)
+                return;
+            db.EFEntities.Remove(oldEntity);
+            try
             {
-                var oldEntity = db.EFEntities.FirstOrDefault(x => x.Id == entityId);
-                if (oldEntity == null)
-                    return;
-                db.EFEntities.Remove(oldEntity);
-                try
-                {
-                    db.SaveChanges();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    // if someone else has already deleted this entity, do not throw an exception
-                }
-                catch (Exception ex)
-                {
-                    throw new SecurityStructureException("Cannot delete entity because of a database error: " + entityId, ex);
-                }
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // if someone else has already deleted this entity, do not throw an exception
+            }
+            catch (Exception ex)
+            {
+                throw new SecurityStructureException("Cannot delete entity because of a database error: " + entityId, ex);
             }
         }
         /// <summary>
@@ -252,21 +238,19 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public void MoveSecurityEntity(int sourceId, int targetId) // always called with SetSecurityHolder method
         {
-            using (var db = Db())
-            {
-                var source = LoadEFEntity(sourceId, db);
-                if (source == null)
-                    throw new EntityNotFoundException(
-                        "Cannot execute the move operation because source does not exist: " + sourceId);
-                var target = LoadEFEntity(targetId, db);
-                if (target == null)
-                    throw new EntityNotFoundException(
-                        "Cannot execute the move operation because target does not exist: " + targetId);
+            using var db = Db();
+            var source = LoadEFEntity(sourceId, db);
+            if (source == null)
+                throw new EntityNotFoundException(
+                    "Cannot execute the move operation because source does not exist: " + sourceId);
+            var target = LoadEFEntity(targetId, db);
+            if (target == null)
+                throw new EntityNotFoundException(
+                    "Cannot execute the move operation because target does not exist: " + targetId);
 
-                source.ParentId = target.Id;
+            source.ParentId = target.Id;
 
-                db.SaveChanges();
-            }
+            db.SaveChanges();
         }
 
         /// <summary>
@@ -274,21 +258,19 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public IEnumerable<StoredAce> LoadAllPermissionEntries()
         {
-            using (var db = Db())
-            {
-                return db.EFEntries
-                    .ToArray()  // entity framework does not know the ulong because it is dumb :(
-                    .Select(a => new StoredAce
-                    {
-                        EntityId = a.EFEntityId,
-                        EntryType = (EntryType)a.EntryType,
-                        IdentityId = a.IdentityId,
-                        LocalOnly = a.LocalOnly,
-                        AllowBits = a.AllowBits.ToUInt64(),
-                        DenyBits = a.DenyBits.ToUInt64()
-                    })
-                    .ToArray();
-            }
+            using var db = Db();
+            return db.EFEntries
+                .ToArray()  // entity framework does not know the ulong because it is dumb :(
+                .Select(a => new StoredAce
+                {
+                    EntityId = a.EFEntityId,
+                    EntryType = (EntryType)a.EntryType,
+                    IdentityId = a.IdentityId,
+                    LocalOnly = a.LocalOnly,
+                    AllowBits = a.AllowBits.ToUInt64(),
+                    DenyBits = a.DenyBits.ToUInt64()
+                })
+                .ToArray();
         }
         /// <summary>
         /// Loads an ACL-chain. Caller provides the parent chain of an entity.
@@ -297,22 +279,20 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public IEnumerable<StoredAce> LoadPermissionEntries(IEnumerable<int> entityIds)
         {
-            using (var db = Db())
-            {
-                return db.EFEntries
-                    .Where(x => entityIds.Contains(x.EFEntityId))
-                    .ToArray()  // entity framework does not know the ulong because it is dumb :(
-                    .Select(a => new StoredAce
-                    {
-                        EntityId = a.EFEntityId,
-                        EntryType = (EntryType)a.EntryType,
-                        IdentityId = a.IdentityId,
-                        LocalOnly = a.LocalOnly,
-                        AllowBits = a.AllowBits.ToUInt64(),
-                        DenyBits = a.DenyBits.ToUInt64()
-                    })
-                    .ToArray();
-            }
+            using var db = Db();
+            return db.EFEntries
+                .Where(x => entityIds.Contains(x.EFEntityId))
+                .ToArray()  // entity framework does not know the ulong because it is dumb :(
+                .Select(a => new StoredAce
+                {
+                    EntityId = a.EFEntityId,
+                    EntryType = (EntryType)a.EntryType,
+                    IdentityId = a.IdentityId,
+                    LocalOnly = a.LocalOnly,
+                    AllowBits = a.AllowBits.ToUInt64(),
+                    DenyBits = a.DenyBits.ToUInt64()
+                })
+                .ToArray();
         }
         /// <summary>
         /// Inserts or updates one or more StoredACEs.
@@ -322,9 +302,8 @@ namespace SenseNet.Security.EFCSecurityStore
         {
             try
             {
-                using (var db = Db())
-                    // ReSharper disable once PossibleMultipleEnumeration
-                    db.WritePermissionEntries(aces);
+                using var db = Db();
+                db.WritePermissionEntries(aces);
             }
             catch (SqlException ex)
             {
@@ -344,16 +323,16 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
-            using (var db = Db())
-                db.RemovePermissionEntries(aces);
+            using var db = Db();
+            db.RemovePermissionEntries(aces);
         }
         /// <summary>
         /// Deletes all ACEs related to the given entity id.
         /// </summary>
         public void RemovePermissionEntriesByEntity(int entityId)
         {
-            using (var db = Db())
-                db.RemovePermissionEntriesByEntity(entityId);
+            using var db = Db();
+            db.RemovePermissionEntriesByEntity(entityId);
         }
         /// <summary>
         /// Deletes all ACEs related to any of the entities in a subtree defined by the provided root id, then 
@@ -361,8 +340,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public void DeleteEntitiesAndEntries(int entityId)
         {
-            using (var db = Db())
-                db.DeleteEntitiesAndEntries(entityId);
+            using var db = Db();
+            db.DeleteEntitiesAndEntries(entityId);
         }
 
         //===================================================================== SecurityActivity
@@ -373,11 +352,9 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public int GetLastSecurityActivityId(DateTime startedTime)
         {
-            using (var db = Db())
-            {
-                var lastMsg = db.EFMessages.OrderByDescending(e => e.Id).FirstOrDefault();
-                return lastMsg?.Id ?? 0;
-            }
+            using var db = Db();
+            var lastMsg = db.EFMessages.OrderByDescending(e => e.Id).FirstOrDefault();
+            return lastMsg?.Id ?? 0;
         }
 
         /// <summary>
@@ -391,10 +368,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// <returns>Zero or more id of unprocessed elements supplemented with the last stored activity id.</returns>
         public int[] GetUnprocessedActivityIds()
         {
-            using (var db = Db())
-            {
-                return db.GetUnprocessedActivityIds();
-            }
+            using var db = Db();
+            return db.GetUnprocessedActivityIds();
         }
         /// <summary>
         /// Loads a SecurityActivity fragment within the specified limits.
@@ -459,16 +434,14 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public SecurityActivity LoadSecurityActivity(int id)
         {
-            using (var db = Db())
-            {
-                var item = db.EFMessages.FirstOrDefault(x => x.Id == id);
-                if (item == null)
-                    return null;
+            using var db = Db();
+            var item = db.EFMessages.FirstOrDefault(x => x.Id == id);
+            if (item == null)
+                return null;
 
-                var activity = SecurityActivity.DeserializeActivity(item.Body);
-                activity.Id = item.Id;
-                return activity;
-            }
+            var activity = SecurityActivity.DeserializeActivity(item.Body);
+            activity.Id = item.Id;
+            return activity;
         }
         /// <summary>
         /// Stores the full data of the passed activity.
@@ -501,8 +474,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public void CleanupSecurityActivities(int timeLimitInMinutes)
         {
-            using (var db = Db())
-                db.CleanupSecurityActivities(timeLimitInMinutes);
+            using var db = Db();
+            db.CleanupSecurityActivities(timeLimitInMinutes);
         }
 
         /// <summary>
@@ -539,16 +512,16 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)
         {
-            using (var db = Db())
-                db.RefreshSecurityActivityExecutionLock(securityActivity.Id);
+            using var db = Db();
+            db.RefreshSecurityActivityExecutionLock(securityActivity.Id);
         }
         /// <summary>
         /// Releases the lock and prevents locking that activity again by setting its state to Executed.
         /// </summary>
         public void ReleaseSecurityActivityExecutionLock(SecurityActivity securityActivity)
         {
-            using (var db = Db())
-                db.ReleaseSecurityActivityExecutionLock(securityActivity.Id);
+            using var db = Db();
+            db.ReleaseSecurityActivityExecutionLock(securityActivity.Id);
         }
 
         //===================================================================== Tools
@@ -657,8 +630,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public void DeleteIdentityAndRelatedEntries(int identityId)
         {
-            using (var db = Db())
-                db.DeleteIdentity(identityId);
+            using var db = Db();
+            db.DeleteIdentity(identityId);
         }
 
         /// <summary>
@@ -666,8 +639,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public void DeleteIdentitiesAndRelatedEntries(IEnumerable<int> ids)
         {
-            using (var db = Db())
-                db.DeleteIdentities(ids);
+            using var db = Db();
+            db.DeleteIdentities(ids);
         }
 
         /// <summary>
@@ -686,22 +659,20 @@ namespace SenseNet.Security.EFCSecurityStore
             var userArray = userMembers as int[] ?? userMembers.ToArray();
 
             var allNewMembers = groupArray.Union(userArray);
-            using (var db = Db())
-            {
-                var origMemberIds = db.EFMemberships
-                    .Where(m => m.GroupId == groupId && allNewMembers.Contains(m.MemberId))
-                    .Select(m => m.MemberId)
-                    .ToArray();
-                var newGroupIds = groupArray.Except(origMemberIds).ToArray();
-                var newUserIds = userArray.Except(origMemberIds).ToArray();
-                var newGroups = newGroupIds.Select(g => new EFMembership { GroupId = groupId, MemberId = g, IsUser = false });
-                var newUsers = newUserIds.Select(g => new EFMembership { GroupId = groupId, MemberId = g, IsUser = true });
+            using var db = Db();
+            var origMemberIds = db.EFMemberships
+                .Where(m => m.GroupId == groupId && allNewMembers.Contains(m.MemberId))
+                .Select(m => m.MemberId)
+                .ToArray();
+            var newGroupIds = groupArray.Except(origMemberIds).ToArray();
+            var newUserIds = userArray.Except(origMemberIds).ToArray();
+            var newGroups = newGroupIds.Select(g => new EFMembership { GroupId = groupId, MemberId = g, IsUser = false });
+            var newUsers = newUserIds.Select(g => new EFMembership { GroupId = groupId, MemberId = g, IsUser = true });
 
-                db.EFMemberships.AddRange(newGroups);
-                db.EFMemberships.AddRange(newUsers);
+            db.EFMemberships.AddRange(newGroups);
+            db.EFMemberships.AddRange(newUsers);
 
-                db.SaveChanges();
-            }
+            db.SaveChanges();
         }
 
         /// <summary>
@@ -714,8 +685,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// Contains the ids of groups that will be removed. Can be null or an empty list too.</param>
         public void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
-            using (var db = Db())
-                db.RemoveMembers(groupId, userMembers ?? new int[0], groupMembers ?? new int[0]);
+            using var db = Db();
+            db.RemoveMembers(groupId, userMembers ?? new int[0], groupMembers ?? new int[0]);
         }
 
 
@@ -726,8 +697,8 @@ namespace SenseNet.Security.EFCSecurityStore
         /// </summary>
         public IEnumerable<long> GetMembershipForConsistencyCheck()
         {
-            using (var db = Db())
-                return db.EFMemberships.AsEnumerable().Select(m => (Convert.ToInt64(m.GroupId) << 32) + m.MemberId).ToArray();
+            using var db = Db();
+            return db.EFMemberships.AsEnumerable().Select(m => (Convert.ToInt64(m.GroupId) << 32) + m.MemberId).ToArray();
         }
     }
 }
