@@ -17,9 +17,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public CreateSecurityEntityActivity(int entityId, int parentEntityId, int ownerId)
         {
-            this.EntityId = entityId;
-            this.ParentEntityId = parentEntityId;
-            this.OwnerId = ownerId;
+            EntityId = entityId;
+            ParentEntityId = parentEntityId;
+            OwnerId = ownerId;
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.CreateSecurityEntity(context, this.EntityId, this.ParentEntityId, this.OwnerId);
+            DataHandler.CreateSecurityEntity(context, EntityId, ParentEntityId, OwnerId);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            SecurityEntity.CreateEntity(context, this.EntityId, this.ParentEntityId, this.OwnerId);
+            SecurityEntity.CreateEntity(context, EntityId, ParentEntityId, OwnerId);
         }
 
         internal override bool MustWaitFor(SecurityActivity olderActivity)
@@ -46,14 +46,14 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             // There aren't any valid scenarios if the olderActivity is ModifySecurityEntityOwnerActivity or SetAclActivity
 
             if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
-                return createSecurityEntityActivity.EntityId == this.ParentEntityId;
+                return createSecurityEntityActivity.EntityId == ParentEntityId;
 
             if (olderActivity is DeleteSecurityEntityActivity deleteSecurityEntityActivity)
-                return deleteSecurityEntityActivity.EntityId == this.EntityId
-                    || DependencyTools.IsInTree(this.Context, this.ParentEntityId, deleteSecurityEntityActivity.EntityId);
+                return deleteSecurityEntityActivity.EntityId == EntityId
+                    || DependencyTools.IsInTree(Context, ParentEntityId, deleteSecurityEntityActivity.EntityId);
 
             if (olderActivity is MoveSecurityEntityActivity moveSecurityEntityActivity)
-                return moveSecurityEntityActivity.SourceId == this.EntityId || moveSecurityEntityActivity.TargetId == this.EntityId;
+                return moveSecurityEntityActivity.SourceId == EntityId || moveSecurityEntityActivity.TargetId == EntityId;
 
             return false;
         }

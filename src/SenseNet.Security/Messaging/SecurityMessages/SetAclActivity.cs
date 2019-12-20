@@ -128,13 +128,13 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             // There aren't any valid scenarios if the olderActivity is ModifySecurityEntityOwnerActivity or MoveSecurityEntityActivity
 
             if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
-                return this.AllEntityIds.Contains(createSecurityEntityActivity.EntityId);
+                return AllEntityIds.Contains(createSecurityEntityActivity.EntityId);
 
             if (olderActivity is DeleteSecurityEntityActivity deleteSecurityEntityActivity)
-                return DependencyTools.AnyIsInTree(this.Context, this.AllEntityIds, deleteSecurityEntityActivity.EntityId);
+                return DependencyTools.AnyIsInTree(Context, AllEntityIds, deleteSecurityEntityActivity.EntityId);
 
             if (olderActivity is SetAclActivity setAclActivity)
-                return setAclActivity.AllEntityIds.Intersect(this.AllEntityIds).Any();
+                return setAclActivity.AllEntityIds.Intersect(AllEntityIds).Any();
 
             return false;
         }

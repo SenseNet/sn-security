@@ -35,11 +35,11 @@ namespace SenseNet.Security
         {
             return new AceInfo
             {
-                IdentityId = this.IdentityId,
-                EntryType = this.EntryType,
-                LocalOnly = this.LocalOnly,
-                AllowBits = this.AllowBits,
-                DenyBits = this.DenyBits
+                IdentityId = IdentityId,
+                EntryType = EntryType,
+                LocalOnly = LocalOnly,
+                AllowBits = AllowBits,
+                DenyBits = DenyBits
             };
         }
 

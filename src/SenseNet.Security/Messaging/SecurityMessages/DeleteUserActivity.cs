@@ -31,7 +31,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.DeleteUser(context, this.UserId);
+            context.Cache.DeleteUser(context, UserId);
         }
     }
 }

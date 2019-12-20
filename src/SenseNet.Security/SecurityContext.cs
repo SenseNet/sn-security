@@ -479,7 +479,7 @@ namespace SenseNet.Security
         }
         internal int GetOwnerId(int entityId)
         {
-            var entity = this.GetSecurityEntity(entityId, true);            
+            var entity = GetSecurityEntity(entityId, true);            
 
             return entity.OwnerId;
         }

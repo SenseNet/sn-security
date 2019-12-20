@@ -553,7 +553,7 @@ namespace SenseNet.Security.Tests
 
             public override string ToString()
             {
-                return DumpMembership(this.Membership);
+                return DumpMembership(Membership);
             }
 
             //-------------------------------------------------------------------------------------

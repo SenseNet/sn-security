@@ -151,7 +151,7 @@ namespace SenseNet.Security
         /// <summary>
         /// True if this entity has explicit entries.
         /// </summary>
-        public bool HasExplicitAcl => this.Acl != null;
+        public bool HasExplicitAcl => Acl != null;
 
         internal AclInfo GetFirstAcl()
         {

@@ -260,7 +260,7 @@ namespace SenseNet.Security
         /// </summary>
         internal IEnumerable<int> GetDynamicGroups(int entityId)
         {
-            return this.CurrentUser.GetDynamicGroups(entityId);
+            return CurrentUser.GetDynamicGroups(entityId);
         }
 
         /*********************** Built-in system user for general context **********************/

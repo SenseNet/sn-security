@@ -63,7 +63,7 @@ namespace SenseNet.Security
         /// </summary>
         public AclInfo(int entityId)
         {
-            this.EntityId = entityId;
+            EntityId = entityId;
             Entries = new List<AceInfo>();
         }
 
@@ -110,7 +110,7 @@ namespace SenseNet.Security
             return new AccessControlList
             {
                 EntityId = requestedEntityId,
-                Inherits = this.EntityId != requestedEntityId || this.Inherits,
+                Inherits = EntityId != requestedEntityId || Inherits,
                 Entries = aces.Values.Concat(localOnlyAces.Values).OrderBy(x => x.IdentityId).ThenBy(x => x.LocalOnly).ToArray()
             };
         }
@@ -166,7 +166,7 @@ namespace SenseNet.Security
         /// <summary> Used for getting permission. </summary>
         internal void AggregateLocalOnlyValues(List<int> identities, ref ulong allow, ref ulong deny)
         {
-            foreach (var permSet in this.Entries)
+            foreach (var permSet in Entries)
             {
                 if (!permSet.LocalOnly)
                     continue;
@@ -179,7 +179,7 @@ namespace SenseNet.Security
         /// <summary> Used for getting permission. </summary>
         internal void AggregateEffectiveValues(List<int> identities, ref ulong allow, ref ulong deny)
         {
-            foreach (var permSet in this.Entries)
+            foreach (var permSet in Entries)
             {
                 if (permSet.LocalOnly)
                     continue;
@@ -192,7 +192,7 @@ namespace SenseNet.Security
         /// <summary> Used for getting permission in a permission query. </summary>
         internal void AggregateLocalOnlyValues(List<int> identities, EntryType entryType, ref ulong allow, ref ulong deny)
         {
-            foreach (var permSet in this.Entries.Where(e => e.EntryType == entryType))
+            foreach (var permSet in Entries.Where(e => e.EntryType == entryType))
             {
                 if (!permSet.LocalOnly)
                     continue;
@@ -205,7 +205,7 @@ namespace SenseNet.Security
         /// <summary> Used for getting permission in a permission query. </summary>
         internal void AggregateEffectiveValues(List<int> identities, EntryType entryType, ref ulong allow, ref ulong deny)
         {
-            foreach (var permSet in this.Entries.Where(e => e.EntryType == entryType))
+            foreach (var permSet in Entries.Where(e => e.EntryType == entryType))
             {
                 if (permSet.LocalOnly)
                     continue;
@@ -219,7 +219,7 @@ namespace SenseNet.Security
         /// <summary> Used for getting effective entries. </summary>
         internal void AggregateLevelOnlyValues(List<AceInfo> aces, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            foreach (var ace in this.Entries)
+            foreach (var ace in Entries)
             {
                 if (!ace.LocalOnly)
                     continue;
@@ -237,7 +237,7 @@ namespace SenseNet.Security
         /// <summary> Used for getting effective entries. </summary>
         internal void AggregateEffectiveValues(List<AceInfo> aces, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            foreach (var ace in this.Entries)
+            foreach (var ace in Entries)
             {
                 if (ace.LocalOnly)
                     continue;
@@ -266,10 +266,10 @@ namespace SenseNet.Security
         internal AclInfo Copy(EntryType? entryType = null)
         {
             var entries = entryType == null
-                ? this.Entries.Select(x => x.Copy()).ToList()
-                : this.Entries.Where(x => x.EntryType == entryType.Value).Select(x => x.Copy()).ToList();
+                ? Entries.Select(x => x.Copy()).ToList()
+                : Entries.Where(x => x.EntryType == entryType.Value).Select(x => x.Copy()).ToList();
 
-            return new AclInfo(this.EntityId) { Entries = entries };
+            return new AclInfo(EntityId) { Entries = entries };
         }
 
         /// <summary>

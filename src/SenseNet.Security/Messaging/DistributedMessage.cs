@@ -27,7 +27,7 @@ namespace SenseNet.Security.Messaging
 
         internal DistributedMessage(MessageSender sender)
         {
-            this.Sender = sender;
+            Sender = sender;
         }
 
         [NonSerialized]

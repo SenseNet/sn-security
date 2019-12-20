@@ -15,7 +15,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public DeleteGroupActivity(int groupId)
         {
-            this.GroupId = groupId;
+            GroupId = groupId;
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.DeleteSecurityGroup(context, this.GroupId);
+            context.Cache.DeleteSecurityGroup(context, GroupId);
         }
     }
 }

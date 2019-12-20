@@ -60,12 +60,12 @@ namespace SenseNet.Security
         {
             return new StoredAce
             {
-                EntityId = this.EntityId,
-                EntryType = this.EntryType,
-                IdentityId = this.IdentityId,
-                LocalOnly = this.LocalOnly,
-                AllowBits = this.AllowBits,
-                DenyBits = this.DenyBits
+                EntityId = EntityId,
+                EntryType = EntryType,
+                IdentityId = IdentityId,
+                LocalOnly = LocalOnly,
+                AllowBits = AllowBits,
+                DenyBits = DenyBits
             };
         }
     }

@@ -35,7 +35,7 @@ namespace SenseNet.Security
         private readonly SecurityContext _securityContext;
         internal PermissionEvaluator(SecurityContext securityContext)
         {
-            this._securityContext = securityContext;
+            _securityContext = securityContext;
         }
 
         internal void Initialize()

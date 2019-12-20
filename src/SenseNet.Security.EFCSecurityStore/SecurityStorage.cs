@@ -84,11 +84,11 @@ DELETE FROM EFMessages
         /// <summary>Only for re-istallation and tests.</summary>
         internal void CleanupDatabase()
         {
-            this.Database.ExecuteSqlRaw(CleanupDatabaseScript);
+            Database.ExecuteSqlRaw(CleanupDatabaseScript);
         }
         internal void ExecuteTestScript(string sql)
         {
-            this.Database.ExecuteSqlRaw(sql);
+            Database.ExecuteSqlRaw(sql);
         }
 
         internal int GetEstimatedEntityCount()
@@ -109,7 +109,7 @@ DELETE FROM EFMessages
         {
             var createDbScript = LoadResourceScript(ResourceInstallDb);
 
-            this.Database.ExecuteSqlRaw(createDbScript);
+            Database.ExecuteSqlRaw(createDbScript);
         }
 
         /// <summary>Only for tests</summary>
@@ -117,7 +117,7 @@ DELETE FROM EFMessages
         /// <summary>Only for tests</summary>
         internal void _cleanupMembership()
         {
-            this.Database.ExecuteSqlRaw(CleanupMembershipScript);
+            Database.ExecuteSqlRaw(CleanupMembershipScript);
         }
 
 
@@ -166,8 +166,6 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
         private const string LoadAffectedEntityIdsByEntriesAndBreaksScript = @"SELECT DISTINCT Id AS Value FROM (SELECT DISTINCT EFEntityId Id FROM [EFEntries] UNION ALL SELECT Id FROM [EFEntities] WHERE IsInherited = 0) AS x";
         internal IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks()
         {
-            //var x = this.Database.SqlQuery<int>(LOADAFFECTEDENTITYIDSBYENTRIESANDBREAKSSCRIPT).ToArray();
-            //return x;
             var result = EfcIntSet
                 .FromSqlRaw(LoadAffectedEntityIdsByEntriesAndBreaksScript)
                 .Select(x => x.Value)
@@ -202,7 +200,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
                 sb.AppendLine("COMMIT TRANSACTION");
             }
 
-            this.Database.ExecuteSqlRaw(sb.ToString());
+            Database.ExecuteSqlRaw(sb.ToString());
         }
 
         private const string InsertPermissionEntriesScript = @"INSERT INTO EFEntries SELECT {0}, {1}, {2}, {3}, {4}, {5}";
@@ -230,14 +228,14 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
             sb.AppendLine();
             sb.AppendLine("COMMIT TRANSACTION");
 
-            this.Database.ExecuteSqlRaw(sb.ToString());
+            Database.ExecuteSqlRaw(sb.ToString());
         }
 
 
         private const string RemovePermissionEntriesByEntityScript = @"DELETE FROM EFEntries WHERE EFEntityId = @EntityId";
         internal void RemovePermissionEntriesByEntity(int entityId)
         {
-            this.Database.ExecuteSqlRaw(RemovePermissionEntriesByEntityScript, new SqlParameter("@EntityId", entityId));
+            Database.ExecuteSqlRaw(RemovePermissionEntriesByEntityScript, new SqlParameter("@EntityId", entityId));
         }
 
         private const string DeleteEntitiesAndEntriesScript = @"DECLARE @EntityIdTable TABLE (EntityId int)
@@ -260,13 +258,13 @@ DELETE E1 FROM EFEntities E1 INNER JOIN @EntityIdTable E2 ON E2.EntityId = E1.Id
         {
             // This script collects all entity ids in a subtree (including the provided root),
             // deletes all security entries related to them, then deletes all entities.
-            this.Database.ExecuteSqlRaw(DeleteEntitiesAndEntriesScript, new SqlParameter("@EntityId", entityId));
+            Database.ExecuteSqlRaw(DeleteEntitiesAndEntriesScript, new SqlParameter("@EntityId", entityId));
         }
 
         private const string CleanupSecurityActivitiesScript = @"DELETE FROM EFMessages WHERE SavedAt < DATEADD(minute, -@TimeLimit, GETUTCDATE()) AND ExecutionState = 'Done'";
         internal void CleanupSecurityActivities(int timeLimitInMinutes)
         {
-            this.Database.ExecuteSqlRaw(CleanupSecurityActivitiesScript, new SqlParameter("@TimeLimit", timeLimitInMinutes));
+            Database.ExecuteSqlRaw(CleanupSecurityActivitiesScript, new SqlParameter("@TimeLimit", timeLimitInMinutes));
         }
 
         // ReSharper disable once ConvertToConstant.Local
@@ -305,7 +303,7 @@ ELSE
         private static readonly string _refreshSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";
         public void RefreshSecurityActivityExecutionLock(int securityActivityId)
         {
-            this.Database
+            Database
                 .ExecuteSqlRaw(
                     _refreshSecurityActivityExecutionLockScript,
                     new SqlParameter("@ActivityId", securityActivityId));
@@ -315,7 +313,7 @@ ELSE
         private static readonly string _releaseSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET ExecutionState = '" + ExecutionState.Done + @"' WHERE Id = @ActivityId";
         public void ReleaseSecurityActivityExecutionLock(int securityActivityId)
         {
-            this.Database
+            Database
                 .ExecuteSqlRaw(
                     _releaseSecurityActivityExecutionLockScript,
                     new SqlParameter("@ActivityId", securityActivityId));
@@ -325,7 +323,7 @@ ELSE
 DELETE FROM EFEntries WHERE IdentityId = @IdentityId";
         internal void DeleteIdentity(int identityId)
         {
-            this.Database.ExecuteSqlRaw(DeleteIdentityScript, new SqlParameter("@IdentityId", identityId));
+            Database.ExecuteSqlRaw(DeleteIdentityScript, new SqlParameter("@IdentityId", identityId));
         }
 
         private const string DeleteIdentitiesScript = @"
@@ -351,14 +349,14 @@ COMMIT TRANSACTION";
                 Value = string.Format(IdListXmlTemplate, string.Join(string.Empty, ids.Select(identityId => string.Format(IdListItemXmlTemplate, identityId))))
             };
 
-            this.Database.ExecuteSqlRaw(DeleteIdentitiesScript, param);
+            Database.ExecuteSqlRaw(DeleteIdentitiesScript, param);
         }
 
         private const string RemoveMembersScript = @"DELETE FROM EFMemberships WHERE GroupId = @GroupId AND MemberId IN ({0})";
         internal void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
             var sql = string.Format(RemoveMembersScript, string.Join(", ", groupMembers.Union(userMembers)));
-            this.Database.ExecuteSqlRaw(sql, new SqlParameter("@GroupId", groupId));
+            Database.ExecuteSqlRaw(sql, new SqlParameter("@GroupId", groupId));
         }
 
 

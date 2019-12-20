@@ -19,24 +19,24 @@ namespace SenseNet.Security.Messaging
         public SecurityActivityLoader(int from, int to, bool executingUnprocessedActivities)
         {
             _gapLoader = false;
-            this._from = from;
-            this._to = to;
-            this._executingUnprocessedActivities = executingUnprocessedActivities;
-            this._pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
+            _from = from;
+            _to = to;
+            _executingUnprocessedActivities = executingUnprocessedActivities;
+            _pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
         }
         // ReSharper disable once UnusedParameter.Local
         public SecurityActivityLoader(int[] gaps, bool executingUnprocessedActivities)
         {
-            this._gapLoader = true;
-            this._gaps = gaps;
-            this._pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
+            _gapLoader = true;
+            _gaps = gaps;
+            _pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
         }
 
         public IEnumerator<SecurityActivity> GetEnumerator()
         {
             if (_gapLoader)
-                return new GapLoader(this._gaps, this._pageSize, this._executingUnprocessedActivities);
-            return new SectionLoader(this._from, this._to, this._pageSize, this._executingUnprocessedActivities);
+                return new GapLoader(_gaps, _pageSize, _executingUnprocessedActivities);
+            return new SectionLoader(_from, _to, _pageSize, _executingUnprocessedActivities);
         }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
@@ -57,17 +57,17 @@ namespace SenseNet.Security.Messaging
 
             public SectionLoader(int from, int to, int pageSize, bool executingUnprocessedActivities)
             {
-                this._from = from;
-                this._to = to;
-                this._pageSize = pageSize;
-                this._executingUnprocessedActivities = executingUnprocessedActivities;
+                _from = from;
+                _to = to;
+                _pageSize = pageSize;
+                _executingUnprocessedActivities = executingUnprocessedActivities;
 
-                this._buffer = new SecurityActivity[pageSize];
-                this._loadedPageSize = this._buffer.Length;
-                this._pointer = this._buffer.Length - 1;
+                _buffer = new SecurityActivity[pageSize];
+                _loadedPageSize = _buffer.Length;
+                _pointer = _buffer.Length - 1;
             }
 
-            public SecurityActivity Current => this._buffer[this._pointer];
+            public SecurityActivity Current => _buffer[_pointer];
 
             object System.Collections.IEnumerator.Current => Current;
 
@@ -82,16 +82,16 @@ namespace SenseNet.Security.Messaging
 
             public bool MoveNext()
             {
-                if (++this._pointer >= this._loadedPageSize)
+                if (++_pointer >= _loadedPageSize)
                 {
-                    if (this._isLastPage)
+                    if (_isLastPage)
                         return false;
 
-                    LoadNextPage(this._buffer, out this._isLastPage, out this._loadedPageSize);
-                    if (this._isLastPage && this._loadedPageSize == 0)
+                    LoadNextPage(_buffer, out _isLastPage, out _loadedPageSize);
+                    if (_isLastPage && _loadedPageSize == 0)
                         return false;
 
-                    this._pointer = 0;
+                    _pointer = 0;
                 }
                 return true;
             }
@@ -141,7 +141,7 @@ namespace SenseNet.Security.Messaging
                 _executingUnprocessedActivities = executingUnprocessedActivities;
             }
 
-            public SecurityActivity Current => this._buffer[this._bufferIndex];
+            public SecurityActivity Current => _buffer[_bufferIndex];
 
             object System.Collections.IEnumerator.Current => Current;
 
@@ -156,27 +156,27 @@ namespace SenseNet.Security.Messaging
 
             public bool MoveNext()
             {
-                this._bufferIndex++;
-                if (this._bufferIndex >= this._buffer.Count)
+                _bufferIndex++;
+                if (_bufferIndex >= _buffer.Count)
                 {
                     LoadNextBuffer();
-                    if (this._buffer.Count == 0 && this._gapIndex >= this._gaps.Length)
+                    if (_buffer.Count == 0 && _gapIndex >= _gaps.Length)
                         return false;
-                    this._bufferIndex = 0;
+                    _bufferIndex = 0;
                 }
                 return true;
             }
             private void LoadNextBuffer()
             {
-                this._buffer.Clear();
+                _buffer.Clear();
                 while (true)
                 {
-                    if (this._gapIndex >= this._gaps.Length)
+                    if (_gapIndex >= _gaps.Length)
                         break;
-                    var gapPage = this._gaps.Skip(_gapIndex).Take(_pageSize).ToArray();
-                    this._buffer.AddRange(LoadGaps(gapPage));
-                    this._gapIndex += _pageSize;
-                    if (this._buffer.Count >= this._pageSize)
+                    var gapPage = _gaps.Skip(_gapIndex).Take(_pageSize).ToArray();
+                    _buffer.AddRange(LoadGaps(gapPage));
+                    _gapIndex += _pageSize;
+                    if (_buffer.Count >= _pageSize)
                         break;
                 }
             }

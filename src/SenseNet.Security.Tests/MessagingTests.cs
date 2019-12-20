@@ -197,7 +197,7 @@ namespace SenseNet.Security.Tests
             protected override void Store(SecurityContext context) { }
             protected override void Apply(SecurityContext context)
             {
-                SnLog.WriteInformation("Applied: #" + this.Id);
+                SnLog.WriteInformation("Applied: #" + Id);
             }
 
             internal override bool MustWaitFor(SecurityActivity olderActivity)

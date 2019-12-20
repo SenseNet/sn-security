@@ -25,7 +25,7 @@ namespace SenseNet.Security.Messaging
         /// <summary>
         /// Computed property. The value is true if this message is sent from this computer.
         /// </summary>
-        public bool IsMe => this.InstanceID == _current.InstanceID;
+        public bool IsMe => InstanceID == _current.InstanceID;
 
         private static readonly MessageSender _current = new MessageSender { InstanceID = Guid.NewGuid().ToString() };
 

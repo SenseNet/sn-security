@@ -45,7 +45,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected SecurityActivity()
         {
-            TypeName = this.GetType().Name;
+            TypeName = GetType().Name;
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                 _executionException = e;
 
                 // we log this here, because if the activity is not waited for later than the exception would not be logged
-                SnTrace.Security.WriteError("Error during security activity execution. SA{0} {1}", this.Id, e);
+                SnTrace.Security.WriteError("Error during security activity execution. SA{0} {1}", Id, e);
             }
             finally
             {
@@ -118,8 +118,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         private void Distribute(SecurityContext context)
         {
             DistributedMessage msg = this;
-            if (this.BodySize > Configuration.Messaging.DistributableSecurityActivityMaxSize)
-                msg = new BigActivityMessage { DatabaseId = this.Id };
+            if (BodySize > Configuration.Messaging.DistributableSecurityActivityMaxSize)
+                msg = new BigActivityMessage { DatabaseId = Id };
             context.MessageProvider.SendMessage(msg);
         }
 
@@ -157,7 +157,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             {
                 if (!_finishSignal.WaitOne(Configuration.Messaging.SecuritActivityTimeoutInSeconds * 1000, false))
                 {
-                    var message = $"SecurityActivity is not finishing on a timely manner (#{this.Id})";
+                    var message = $"SecurityActivity is not finishing on a timely manner (#{Id})";
                     throw new SecurityActivityTimeoutException(message);
                 }
             }
@@ -330,16 +330,16 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         internal void WaitFor(SecurityActivity olderActivity)
         {
             // this method must called from thread safe block.
-            if (this.WaitingFor.All(x => x.Id != olderActivity.Id))
-                this.WaitingFor.Add(olderActivity);
-            if (olderActivity.WaitingForMe.All(x => x.Id != this.Id))
+            if (WaitingFor.All(x => x.Id != olderActivity.Id))
+                WaitingFor.Add(olderActivity);
+            if (olderActivity.WaitingForMe.All(x => x.Id != Id))
                 olderActivity.WaitingForMe.Add(this);
         }
 
         internal void FinishWaiting(SecurityActivity olderActivity)
         {
             // this method must called from thread safe block.
-            RemoveDependency(this.WaitingFor, olderActivity);
+            RemoveDependency(WaitingFor, olderActivity);
             RemoveDependency(olderActivity.WaitingForMe, this);
         }
         private static void RemoveDependency(List<SecurityActivity> dependencyList, SecurityActivity activity)

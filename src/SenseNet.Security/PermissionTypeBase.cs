@@ -53,9 +53,9 @@ namespace SenseNet.Security
         /// <param name="index">Set of values: 0 &lt;= i &lt; 64 (bit count of ulong).</param>
         protected PermissionTypeBase(string name, int index)
         {
-            this.Index = index;
-            this.Name = name;
-            this.Mask = 1ul << index;
+            Index = index;
+            Name = name;
+            Mask = 1ul << index;
             _permissionArray[index] = this;
             _permissionDict[Name] = this;
             Denies = new List<PermissionTypeBase>();

@@ -15,7 +15,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public DeleteSecurityEntityActivity(int entityId)
         {
-            this.EntityId = entityId;
+            EntityId = entityId;
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.DeleteSecurityEntity(context, this.EntityId);
+            DataHandler.DeleteSecurityEntity(context, EntityId);
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            SecurityEntity.DeleteEntity(context, this.EntityId);
+            SecurityEntity.DeleteEntity(context, EntityId);
         }
 
         internal override bool MustWaitFor(SecurityActivity olderActivity)
@@ -41,24 +41,24 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
             {
-                return createSecurityEntityActivity.EntityId == this.EntityId
-                       || DependencyTools.IsInTree(this.Context, createSecurityEntityActivity.ParentEntityId, this.EntityId);
+                return createSecurityEntityActivity.EntityId == EntityId
+                       || DependencyTools.IsInTree(Context, createSecurityEntityActivity.ParentEntityId, EntityId);
             }
 
             if (olderActivity is DeleteSecurityEntityActivity deleteSecurityEntityActivity)
             {
-                return DependencyTools.HasAncestorRelation(this.Context, this.EntityId, deleteSecurityEntityActivity.EntityId);
+                return DependencyTools.HasAncestorRelation(Context, EntityId, deleteSecurityEntityActivity.EntityId);
             }
 
             if (olderActivity is ModifySecurityEntityOwnerActivity modifySecurityEntityOwnerActivity)
             {
-                return DependencyTools.IsInTree(this.Context, modifySecurityEntityOwnerActivity.EntityId, this.EntityId);
+                return DependencyTools.IsInTree(Context, modifySecurityEntityOwnerActivity.EntityId, EntityId);
             }
 
             if (olderActivity is MoveSecurityEntityActivity moveSecurityEntityActivity)
             {
-                var ctx = this.Context;
-                var entities = SecurityEntity.PeekEntities(ctx, this.EntityId, moveSecurityEntityActivity.SourceId, moveSecurityEntityActivity.TargetId);
+                var ctx = Context;
+                var entities = SecurityEntity.PeekEntities(ctx, EntityId, moveSecurityEntityActivity.SourceId, moveSecurityEntityActivity.TargetId);
 
                 var deleteTarget = entities[0];
                 var moveSource = entities[1];
@@ -66,12 +66,12 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
                 if (DependencyTools.HasAncestorRelation(ctx, moveSource, deleteTarget))
                     return true;
-                if (DependencyTools.IsInTree(ctx, moveTarget, this.EntityId))
+                if (DependencyTools.IsInTree(ctx, moveTarget, EntityId))
                     return true;
             }
 
             if (olderActivity is SetAclActivity setAclActivity)
-                return DependencyTools.AnyIsInTree(this.Context, setAclActivity.AllEntityIds, this.EntityId);
+                return DependencyTools.AnyIsInTree(Context, setAclActivity.AllEntityIds, EntityId);
 
             return false;
         }

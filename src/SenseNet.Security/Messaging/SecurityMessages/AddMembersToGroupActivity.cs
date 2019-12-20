@@ -44,7 +44,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.AddMembers(this.GroupId, this.GroupMembers, this.UserMembers, this.ParentGroups);
+            context.Cache.AddMembers(GroupId, GroupMembers, UserMembers, ParentGroups);
         }
     }
 }
