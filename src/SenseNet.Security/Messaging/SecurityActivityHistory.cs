@@ -20,7 +20,7 @@ namespace SenseNet.Security.Messaging
         /// <summary>
         /// It is empty or contains a message about any error in connection with the SecurityActivityHistory feature.
         /// </summary>
-        public string Message => _unfinished < 1 ? null : "RECENT ARRAY TOO SHORT. Cannot registrate full activity lifecycle. Unfinished items: " + _unfinished;
+        public string Message => _unfinished < 1 ? null : "RECENT ARRAY TOO SHORT. Cannot register the full activity lifecycle. Unfinished items: " + _unfinished;
 
         /// <summary>
         /// Length of the Recent

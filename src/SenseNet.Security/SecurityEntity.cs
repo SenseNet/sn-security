@@ -39,7 +39,7 @@ namespace SenseNet.Security
         public override string ToString()
         {
             return
-                $"Id: {Id}, parent: {Parent?.Id ?? 0}, owner: {OwnerId}, {(IsInherited ? "inherited" : "BREAKED")}";
+                $"Id: {Id}, parent: {Parent?.Id ?? 0}, owner: {OwnerId}, {(IsInherited ? "inherited" : "BREAK")}";
         }
 
         /// <summary>

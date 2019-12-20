@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
 // ReSharper disable JoinDeclarationAndInitializer
+// ReSharper disable StringLiteralTypo
 
 namespace SenseNet.Security.Tests
 {
