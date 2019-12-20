@@ -52,7 +52,7 @@ namespace SenseNet.Security.Tests
             const string expected = @"U1:[G1,G3]U2:[G1]U3:[G2,G3]U4:[G2,G4]U5:[G5]";
             Assert.AreEqual(expected, s.Replace(Environment.NewLine, "").Replace(" ", ""));
 
-            //---- preload
+            //---- pre-load
             var id1 = Id("E1");
             var id3 = Id("E3");
             var id5 = Id("E5");
@@ -75,7 +75,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(id50, entityTable[Id("E52")].GetFirstAclId());
             Assert.AreEqual(id50, entityTable[Id("E53")].GetFirstAclId());
 
-            //---- check acls in the evaluator
+            //---- check ACLs in the evaluator
             var allacls = Tools.CollectAllAcls(_context.Security);
             Assert.AreEqual(4, allacls.Count);
             var acl1 = GetAcl(allacls, id1);

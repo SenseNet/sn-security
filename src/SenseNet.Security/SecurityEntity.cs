@@ -356,7 +356,7 @@ namespace SenseNet.Security
 
             if (entity.Acl == null)
             {
-                // creating an empty breaked acl
+                // creating an empty broken acl
                 entity.SetAclSafe(new AclInfo(entityId));
             }
         }
@@ -591,7 +591,7 @@ namespace SenseNet.Security
             var origAcl = entity.Acl;
             if (origAcl != null)
             {
-                // merge acls
+                // merge ACLs
                 foreach (var newAce in aclInfo.Entries)
                 {
                     var origAce = origAcl.Entries.FirstOrDefault(x => x.EntryType == newAce.EntryType && x.IdentityId == newAce.IdentityId && x.LocalOnly == newAce.LocalOnly);

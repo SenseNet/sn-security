@@ -555,7 +555,7 @@ namespace SenseNet.Security.Tests
             var entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
 
-            //# calling the security component for restoring breaked permission inheritance
+            //# calling the security component for restoring broken permission inheritance
             CurrentContext.Security.UnbreakInheritance(new TestEntity { Id = ids[1], ParentId = ids[0] });
 
             // inspection
@@ -584,7 +584,7 @@ namespace SenseNet.Security.Tests
             var entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
 
-            //# calling the security component for restoring breaked permission inheritance
+            //# calling the security component for restoring broken permission inheritance
             CurrentContext.Security.UnbreakInheritance(ids[1]);
 
             // inspection

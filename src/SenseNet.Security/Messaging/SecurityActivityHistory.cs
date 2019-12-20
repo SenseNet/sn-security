@@ -211,7 +211,7 @@ namespace SenseNet.Security.Messaging
         public int QueueLength => Queue?.Length ?? 0;
 
         /// <summary>
-        /// Ids of th Arrived but not parallelized activities.
+        /// Ids of th Arrived but not parallel activities.
         /// </summary>
         public int[] Queue { get; set; }
     }
@@ -312,7 +312,7 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         public string TypeName { get; set; }
         /// <summary>
-        /// True if the activity was received from aanother computer.
+        /// True if the activity was received from another computer.
         /// </summary>
         public bool FromReceiver { get; set; }
         /// <summary>

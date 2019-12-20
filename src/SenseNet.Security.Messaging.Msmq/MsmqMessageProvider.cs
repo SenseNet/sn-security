@@ -97,7 +97,7 @@ namespace SenseNet.Security.Messaging.Msmq
                 Formatter = _formatter
             };
 
-            // try to send message to all queues. we enter read lock, since another thread could paralelly repair any of the queues
+            // try to send message to all queues. we enter read lock, since another thread could parallel repair any of the queues
             bool success;
             _senderLock.EnterReadLock();
             try
@@ -196,7 +196,7 @@ namespace SenseNet.Security.Messaging.Msmq
                 }
                 catch (ThreadAbortException tex)
                 {
-                    // suppress threadabortexception on shutdown
+                    // suppress ThreadAbortException on shutdown
                     if (Shutdown)
                         return;
 

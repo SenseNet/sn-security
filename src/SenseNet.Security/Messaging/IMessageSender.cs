@@ -17,7 +17,7 @@
         // ReSharper disable once UnusedMemberInSuper.Global
         string InstanceID { get; }
         /// <summary>
-        /// Returs true if the message was sent from the current appdomain.
+        /// Returns true if the message was sent from the current appdomain.
         /// </summary>
         bool IsMe { get; }
     }

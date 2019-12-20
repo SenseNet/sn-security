@@ -23,12 +23,12 @@ namespace SenseNet.Security
                     if (!entity.HasExplicitAcl || entity.Id == entityId && !includeRoot)
                         continue;
 
-                    // if breaked, adding existing parent-s effective identities because all identities are related.
+                    // if broken, adding existing parent-s effective identities because all identities are related.
                     var localBits = new PermissionBitMask();
                     if (!entity.IsInherited && entity.Parent != null && (includeRoot || entity.Parent.Id != entityId))
                         CollectPermissionsFromLocalAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities, EntryType.Normal), localBits);
 
-                    // adding explicite identities
+                    // adding explicit identities
                     CollectPermissionsFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), PermissionLevel.AllowedOrDenied, counters, localBits);
                 }
 
@@ -59,11 +59,11 @@ namespace SenseNet.Security
                     if (!entity.HasExplicitAcl)
                         continue;
 
-                    // if breaked, adding existing parent-s effective identities because all identities are related.
+                    // if broken, adding existing parent-s effective identities because all identities are related.
                     if (!entity.IsInherited && entity.Parent != null)
                         CollectIdentitiesFromAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, null, EntryType.Normal), level, identities);
 
-                    // adding explicite identities
+                    // adding explicit identities
                     CollectIdentitiesFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, null, EntryType.Normal), level, identities);
                 }
             }
@@ -113,12 +113,12 @@ namespace SenseNet.Security
                     if (!isEnabled(entity.Id))
                         continue;
 
-                    // if breaked, adding existing parent-s effective identities because all identities are related.
+                    // if broken, adding existing parent-s effective identities because all identities are related.
                     var localBits = new PermissionBitMask();
                     if (!entity.IsInherited && entity.Parent != null)
                         CollectPermissionsFromLocalAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities, EntryType.Normal), localBits);
 
-                    // adding explicite identities
+                    // adding explicit identities
                     CollectPermissionsFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), level, counters, localBits);
                 }
 
@@ -150,7 +150,7 @@ namespace SenseNet.Security
                 localBits.AllowBits &= ~ace.AllowBits;
                 localBits.DenyBits &= ~ace.DenyBits ;
             }
-            // Finally play the rest bits (all breaked bits are switched in that is not used in any explicit entry)
+            // Finally play the rest bits (all broken bits are switched in that is not used in any explicit entry)
             SetPermissionsCountersByPermissionLevel(counters, level, localBits.AllowBits, localBits.DenyBits);
         }
         private static void SetPermissionsCountersByPermissionLevel(int[] counters, PermissionLevel level, ulong allowBits, ulong denyBits)
@@ -214,7 +214,7 @@ namespace SenseNet.Security
                         }
                     }
 
-                    // adding explicite identities
+                    // adding explicit identities
                     if (!added)
                         if (HasBitsByExpliciteAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), level, mask))
                             entityIds.Add(entity.Id);
@@ -282,11 +282,11 @@ namespace SenseNet.Security
                     if (!entity.HasExplicitAcl)
                         continue;
 
-                    // if breaked, adding existing parent-s effective identities because all identities are related.
+                    // if broken, adding existing parent-s effective identities because all identities are related.
                     if (!entity.IsInherited && entity.Parent != null)
                         CollectIdentitiesFromAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, null, EntryType.Normal), level, mask, identities);
 
-                    // adding explicite identities
+                    // adding explicit identities
                     CollectIdentitiesFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, null, EntryType.Normal), level, mask, identities);
                 }
                 return identities;

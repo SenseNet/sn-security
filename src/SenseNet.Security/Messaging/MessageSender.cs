@@ -13,7 +13,7 @@ namespace SenseNet.Security.Messaging
         private MessageSender() { }
 
         /// <summary>
-        /// Gets an id to identify computers. This is an invariant value that comes tipically
+        /// Gets an id to identify computers. This is an invariant value that comes typically
         /// from the ReceiverName property of the initialized IMessageProvider implementation instance.
         /// </summary>
         public string ComputerID => _computerId;

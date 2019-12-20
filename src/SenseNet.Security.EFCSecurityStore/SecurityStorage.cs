@@ -81,7 +81,7 @@ DELETE FROM EFMemberships
 DELETE FROM EFEntities
 DELETE FROM EFMessages
 ";
-        /// <summary>Only for re-istallation and tests.</summary>
+        /// <summary>Only for re-installation and tests.</summary>
         internal void CleanupDatabase()
         {
             Database.ExecuteSqlRaw(CleanupDatabaseScript);

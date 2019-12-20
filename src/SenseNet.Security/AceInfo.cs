@@ -11,7 +11,7 @@ namespace SenseNet.Security
     public class AceInfo
     {
         /// <summary>
-        /// Cateory of the entry.
+        /// Category of the entry.
         /// </summary>
         public EntryType EntryType { get; set; }
         /// <summary>

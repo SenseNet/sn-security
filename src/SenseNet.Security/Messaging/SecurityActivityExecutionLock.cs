@@ -23,7 +23,7 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         /// <param name="activity">Activity that is locked.</param>
         /// <param name="fullExecutionEnabled">If true, all activity operation must be executed:
-        /// storing, distributing, applying in the memory. Otherwise only the memor operations are allowed.</param>
+        /// storing, distributing, applying in the memory. Otherwise only the memory operations are allowed.</param>
         public SecurityActivityExecutionLock(SecurityActivity activity, bool fullExecutionEnabled)
         {
             _activity = activity;

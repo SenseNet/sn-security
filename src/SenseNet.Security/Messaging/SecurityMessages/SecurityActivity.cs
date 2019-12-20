@@ -54,7 +54,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <param name="context">Current SecurityContext</param>
         /// <param name="waitForComplete">If the value is true (default),
         /// the current thread waits for the full execution on this computer.
-        /// Otherwise the method returns immediatelly.</param>
+        /// Otherwise the method returns immediately.</param>
         public void Execute(SecurityContext context, bool waitForComplete = true)
         {
             _context = context;
@@ -124,12 +124,12 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         }
 
         /// <summary>
-        /// Cusomization point for the activity data persistence.
+        /// Customization point for the activity data persistence.
         /// </summary>
         /// <param name="context">Current SecurityContext to use any security related thing.</param>
         protected abstract void Store(SecurityContext context);
         /// <summary>
-        /// Cusomization point for the memory operations based on the activity data.
+        /// Customization point for the memory operations based on the activity data.
         /// </summary>
         /// <param name="context">Current SecurityContext to use any security related thing.</param>
         protected abstract void Apply(SecurityContext context);

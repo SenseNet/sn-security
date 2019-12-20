@@ -194,7 +194,7 @@ namespace SenseNet.Security
             foreach (var group in Groups.Values)
                 group.UserMemberIds.Remove(userId);
 
-            // delete Aces & emtpy Acls
+            // delete ACEs & empty ACLs
             SecurityEntity.RemoveIdentityRelatedAces(context, userId);
         }
 
@@ -218,7 +218,7 @@ namespace SenseNet.Security
                 Flattener.DeleteGroup(group, allUsers, allParents, Groups, Membership);
             }
 
-            // delete Aces & emtpy Acls
+            // delete ACEs & empty ACLs
             SecurityEntity.RemoveIdentityRelatedAces(context, groupId);
         }
 
@@ -251,7 +251,7 @@ namespace SenseNet.Security
                         grp.UserMemberIds.Remove(identityId);
                 }
 
-                // delete Aces & emtpy Acls
+                // delete Aces & empty ACLs
                 SecurityEntity.RemoveIdentityRelatedAces(context, identityId);
             }
         }
@@ -364,7 +364,7 @@ namespace SenseNet.Security
         {
             internal static void AddUserToGroup(int userId, SecurityGroup parentGroup, Dictionary<int, List<int>> usersTable)
             {
-                // collect all relevant groupid from the parent axis
+                // collect all relevant groupId from the parent axis
                 var allParentGroupIds = GetAllParentGroupIdsInclusive(parentGroup);
 
                 // ensure user
@@ -374,7 +374,7 @@ namespace SenseNet.Security
                     usersTable.Add(userId, user);
                 }
 
-                // complete the user (distincted groupid list) with the relevant groups (allParengtGroupIds)
+                // complete the user (distinct groupId list) with the relevant groups (allParentGroupIds)
                 foreach (var parentGroupId in allParentGroupIds)
                     if (!user.Contains(parentGroupId))
                         user.Add(parentGroupId);

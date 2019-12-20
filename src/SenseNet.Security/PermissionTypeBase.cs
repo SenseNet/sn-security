@@ -100,9 +100,9 @@ namespace SenseNet.Security
         /// <summary>
         /// Returns with the aggregated bitmask of the passed permission type set.
         /// </summary>
-        /// <param name="permissionTypes">Empty parameter means all the parmission types.
+        /// <param name="permissionTypes">Empty parameter means all the permission types.
         /// Permission type order is irrelevant.</param>
-        /// <returns>Aggregated bimask.</returns>
+        /// <returns>Aggregated bitmask.</returns>
         public static ulong GetPermissionMask(IEnumerable<PermissionTypeBase> permissionTypes = null)
         {
             var permTypes = permissionTypes ?? _permissionArray;
@@ -128,7 +128,7 @@ namespace SenseNet.Security
             return new PermissionBitMask { DenyBits = pt.Mask };
         }
         /// <summary>
-        /// Returns a value that has combined bitmasks of the parameters.
+        /// Returns a value that has combined bit-masks of the parameters.
         /// </summary>
         public static PermissionBitMask operator |(PermissionTypeBase pt1, PermissionTypeBase pt2)
         {

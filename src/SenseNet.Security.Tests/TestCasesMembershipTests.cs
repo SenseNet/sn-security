@@ -1096,7 +1096,7 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_Flattening()
         {
-            // make two disjunct structure
+            // make two disjunctive structure
             const int groupId1 = 101;
             const int groupId2 = 102;
             const int groupId3 = 103;
@@ -1141,9 +1141,9 @@ namespace SenseNet.Security.Tests
                 // Test description:
                 // U1 and U2 are in the G2, G3.
                 // There is a group: G4.
-                // In repository (see the SecurityTreeForTests.vsd) the second level nodes belong to a group: E2 - G1, E3 - G2, E4 - G3. For example these are the workspaces.
-                // Every workspace's first node is secret (E5, E8, E11) so these are breaked but they have open permission for a group: G4.
-                // Let the rule for dymanic group setting is the following:
+                // In repository (see the SecurityTreeForTests.vsd) the second level nodes belong to a group: E2 - G1, E3 - G2, E4 - G3. For example these are the work-spaces.
+                // Every work-space's first node is secret (E5, E8, E11) so these are broken but they have open permission for a group: G4.
+                // Let the rule for dynamic group setting is the following:
                 //     if the U1 user gets the secret node, she is in the G4 group if she has open permission for the parent workspace.
 
                 CleanupMemberships();
@@ -1162,11 +1162,11 @@ namespace SenseNet.Security.Tests
                 TestUser.User1.SetDynamicGroups(null);
                 Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E5"), PermissionType.See));
 
-                //# User hasn read permission on E3 so she is in the G4 group
+                //# User has read permission on E3 so she is in the G4 group
                 TestUser.User1.SetDynamicGroups(new[] { Id("G4") });
                 Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E8"), PermissionType.See));
 
-                //# User hasn read permission on E4 so she is in the G4 group
+                //# User has read permission on E4 so she is in the G4 group
                 TestUser.User1.SetDynamicGroups(new[] { Id("G4") });
                 Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E11"), PermissionType.See));
             }

@@ -313,7 +313,7 @@ namespace SenseNet.Security.Tests
         }
         internal static void CheckIntegrity(string testName, SecurityContext context, IEnumerable<StoredSecurityEntity> entities, IEnumerable<SecurityGroup> groups)
         {
-            //TODO: REWRITE WHOLE CONSISTENY CHECK
+            //TODO: REWRITE WHOLE CONSISTENCY CHECK
         }
 
         internal static Dictionary<int, AclInfo> CollectAllAcls(SecurityContext ctx)

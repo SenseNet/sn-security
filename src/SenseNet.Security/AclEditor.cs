@@ -265,7 +265,7 @@ namespace SenseNet.Security
         }
 
         /// <summary>
-        /// Copies effective permissions to explicite access control entries.
+        /// Copies effective permissions to explicit access control entries.
         /// </summary>
         /// <param name="entityId">The requested entity.</param>
         /// <param name="entryTypes">Array of <see cref="EntryType"/>. Only items of these types will be copied
@@ -284,7 +284,7 @@ namespace SenseNet.Security
             return this;
         }
         /// <summary>
-        /// Removes inherited effective permissions from the explicite setting collection.
+        /// Removes inherited effective permissions from the explicit setting collection.
         /// </summary>
         internal AclEditor NormalizeExplicitePermissions(int entityId, EntryType[] entryTypes)
         {
@@ -292,7 +292,7 @@ namespace SenseNet.Security
             if (firstAcl == null)
                 return this; // there is no settings.
             if (entityId != firstAcl.EntityId)
-                return this; // there is no explicite settings.
+                return this; // there is no explicit settings.
 
             var evaluator = this.Context.Evaluator;
 

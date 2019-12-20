@@ -131,7 +131,7 @@ namespace SenseNet.Security
                 var entity = SecurityEntity.GetEntitySafe(_securityContext, entityId, true);
                 var firstAcl = SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true);
 
-                //======== #1: startbits: getpermbits
+                //======== #1: start bits: get permission bits
                 //==>
 
                 var allow = 0ul;
@@ -183,7 +183,7 @@ namespace SenseNet.Security
                     }
                     else
                     {
-                        // if breaked, need to recalculate allow and deny bits too.
+                        // if broken, need to recalculate allow and deny bits too.
                         allow = 0ul;
                         deny = 0ul;
                         var hasLocalOnly = false;

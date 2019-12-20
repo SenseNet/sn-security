@@ -80,7 +80,7 @@ namespace SenseNet.Security.Messaging
     public class MessageReceivedEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets or sets the received mesage.
+        /// Gets or sets the received message.
         /// </summary>
         public IDistributedMessage Message { get; set; }
         /// <summary>
@@ -94,7 +94,7 @@ namespace SenseNet.Security.Messaging
     public class ExceptionEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets or sets the catched exception.
+        /// Gets or sets the caught exception.
         /// </summary>
         public Exception Exception { get; set; }
         /// <summary>

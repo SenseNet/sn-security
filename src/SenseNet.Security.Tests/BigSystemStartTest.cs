@@ -201,7 +201,7 @@ namespace SenseNet.Security.Tests
         //    Assert.Inconclusive("Loading times: {0}, {1}, {2}", time1, time4, _log);
 
 
-        //    // Loading times: 00:00:10.2905993, 00:02:35.7031781, 00:02:11.6167352 // #1: main lists with explicite capacity
+        //    // Loading times: 00:00:10.2905993, 00:02:35.7031781, 00:02:11.6167352 // #1: main lists with explicit capacity
         //    // Loading times: 00:00:10.2637016, 00:02:33.3550854, 00:02:07.6887293 // #2: dictionary instead of concurrent dictionary
         //    //                                                                            + less dictionary lookups in the building relationships
         //    // Loading times: 00:00:10.2887780, 00:02:33.5082941, 00:02:03.8172389

@@ -82,7 +82,7 @@ namespace SenseNet.Security
         {
             General = null;
 
-            // The messageprovider provider must receive ongoing activities at this time.
+            // The message provider must receive ongoing activities at this time.
             StartedAt = DateTime.UtcNow;
 
             var uncompleted = DataHandler.LoadCompletionState(configuration.SecurityDataProvider, out var lastActivityIdFromDb);
@@ -165,7 +165,7 @@ namespace SenseNet.Security
         /// This method is used by the security component when an entity seems to be missing because of
         /// concurrency reasons. The host application must provide the correct entity information here 
         /// otherwise <see cref="EntityNotFoundException"/> may occur in some scenarios under heavy load 
-        /// in load balanced multithreaded environments.
+        /// in load balanced multi-threaded environments.
         /// </summary>
         /// <param name="entityId">Id of the missing entity.</param>
         /// <param name="parentId">Id of the missing entity's parent or 0.</param>

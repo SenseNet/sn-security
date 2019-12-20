@@ -362,7 +362,7 @@ namespace SenseNet.Security.Tests.Concurrency
             {
                 _stopped = false;
 
-                // build the deep test enity tree
+                // build the deep test entity tree
                 DeleteBuildSubtree();
 
                 var sw = Stopwatch.StartNew();

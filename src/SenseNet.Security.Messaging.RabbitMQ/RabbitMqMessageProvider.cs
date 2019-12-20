@@ -50,7 +50,7 @@ namespace SenseNet.Security.Messaging.RabbitMQ
                 MessageExchange = exchange;
         }
 
-        //=================================================================================== Shared recources
+        //=================================================================================== Shared resources
 
         private IConnection Connection { get; set; }
         private IModel ReceiverChannel { get; set; }

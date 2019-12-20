@@ -1261,8 +1261,8 @@ namespace SenseNet.Security.Tests
 
             //Break on E32
             //Expected:
-            //  children acls: E35, E36
-            //  not children acls: E33, E34
+            //  children ACLs: E35, E36
+            //  not children ACLs: E33, E34
 
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");       // 0x01        // 0x01
             SetAcl("+E12|Normal|+G2:+___________++_");                                 //   0x0C      //   0x0C

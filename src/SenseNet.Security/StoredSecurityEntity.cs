@@ -1,7 +1,7 @@
 ﻿namespace SenseNet.Security
 {
     /// <summary>
-    /// Represents persistable information about a SecurityEntity instance.
+    /// Represents information about a SecurityEntity instance to persist.
     /// </summary>
     public class StoredSecurityEntity
     {
@@ -24,7 +24,7 @@
         /// <summary>
         /// True if this entity has any explicit entry.
         /// </summary>
-        public bool HasExplicitEntry { get; set; } // used only in the compensation method (reloading in securitycontext)
+        public bool HasExplicitEntry { get; set; } // used only in the compensation method (reloading in security context)
 
         /// <summary>
         /// Nullable representation of the ParentId. Null if there is no parent.

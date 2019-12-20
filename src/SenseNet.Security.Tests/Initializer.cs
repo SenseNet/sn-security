@@ -16,7 +16,7 @@ namespace SenseNet.Security.Tests
                     ConfigurationManager.ConnectionStrings["EF6SecurityStorage"].ConnectionString)
                 .InstallDatabase();
 
-            var _ = PermissionType.See; // preloads the type
+            var _ = PermissionType.See; // pre-loads the type
         }
     }
 }

@@ -10,8 +10,8 @@ using SenseNet.Diagnostics;
 namespace SenseNet.Security.Messaging
 {
     /// <summary>
-    /// A built-in message provider implementation that is able to put masseges into
-    /// a pipeline and process them simultaniously on a configurable number of threads.
+    /// A built-in message provider implementation that is able to put messages into
+    /// a pipeline and process them simultaneously on a configurable number of threads.
     /// </summary>
     public abstract class MessageProviderBase : IMessageProvider
     {
