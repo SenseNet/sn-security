@@ -519,14 +519,14 @@ namespace SenseNet.Security
         }
 
         internal static void ApplyAclEditing(SecurityContext ctx, AclInfo[] aclsToSet,
-            IEnumerable<int> breaks, IEnumerable<int> unbreaks,
-            List<StoredAce> entriesToRemove, List<int> emptyAcls) //UNDONE:REFACTOR
+            IEnumerable<int> breaks, IEnumerable<int> undoBreaks,
+            List<StoredAce> entriesToRemove, List<int> emptyAclList)
         {
             EnterWriteLock();
             try
             {
                 var breakIdArray = breaks as int[] ?? breaks.ToArray();
-                var undoBreakIdArray = unbreaks as int[] ?? unbreaks.ToArray();
+                var undoBreakIdArray = undoBreaks as int[] ?? undoBreaks.ToArray();
                 using (var op = SnTrace.Security.StartOperation("ApplyAcl started."))
                 {
                     foreach (var aclInfo in aclsToSet)
@@ -538,7 +538,7 @@ namespace SenseNet.Security
 
                     RemoveEntriesSafe(ctx, entriesToRemove);
 
-                    var aclsToRemove = emptyAcls.Where(x => x != default && ctx.Cache.Entities[x].IsInherited).ToArray();
+                    var aclsToRemove = emptyAclList.Where(x => x != default && ctx.Cache.Entities[x].IsInherited).ToArray();
                     SecurityEntity.RemoveAclsSafe(ctx, aclsToRemove);
 
                     op.Successful = true;
@@ -547,7 +547,7 @@ namespace SenseNet.Security
                 if (SnTrace.Security.Enabled)
                     SnTrace.Security.Write("ApplyAcl finished. SetAcl: {0}, Break: {1}, Unbreak: {2}, Remove: {3}, Empty: {4}",
                         aclsToSet.Length > 0 ? aclsToSet.Length + " (" + aclsToSet[0] + ")" : "0",
-                        breakIdArray.Length, undoBreakIdArray.Length, entriesToRemove.Count, emptyAcls.Count);
+                        breakIdArray.Length, undoBreakIdArray.Length, entriesToRemove.Count, emptyAclList.Count);
             }
             finally
             {

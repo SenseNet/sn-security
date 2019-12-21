@@ -448,9 +448,9 @@ namespace SenseNet.Security.Tests.Concurrency
     {
         private int _sleepInMilliseconds;
 
-        public TestWaitActivity(int sleepInMillisconds) //UNDONE:REFACTOR
+        public TestWaitActivity(int sleepInMilliseconds)
         {
-            _sleepInMilliseconds = sleepInMillisconds;
+            _sleepInMilliseconds = sleepInMilliseconds;
         }
 
         protected override void Store(SecurityContext context)
