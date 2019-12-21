@@ -44,8 +44,8 @@ namespace SenseNet.Security.Configuration
         }
         public static int CommunicationMonitorRunningPeriodInSeconds { get; internal set; }
 
-        public static int SecuritActivityLifetimeInMinutes { get; internal set; } //UNDONE: TYPO
-        public static int SecuritActivityTimeoutInSeconds { get; internal set; } //UNDONE: TYPO
+        public static int SecuritActivityLifetimeInMinutes { get; internal set; } //TODO:~ TYPO
+        public static int SecuritActivityTimeoutInSeconds { get; internal set; } //TODO:~ TYPO
 
         internal static readonly int SecurityActivityExecutionLockRefreshPeriodInSeconds = 10;
         internal static readonly int SecurityActivityExecutionLockTimeoutInSeconds = 25;

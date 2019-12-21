@@ -245,7 +245,7 @@ namespace SenseNet.Security
         /// <param name="categoriesToNormalize">Unnecessary explicit entries
         /// that match these categories will be removed.</param>
         /// <returns>A reference to this instance for calling more operations.</returns>
-        public AclEditor UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize) //UNDONE: TYPO
+        public AclEditor UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize) //TODO:~ TYPO
         {
             _breaks.Remove(entityId);
             if (!_unbreaks.Contains(entityId))
