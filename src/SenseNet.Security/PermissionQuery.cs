@@ -216,7 +216,7 @@ namespace SenseNet.Security
 
                     // adding explicit identities
                     if (!added)
-                        if (HasBitsByExpliciteAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), level, mask))
+                        if (HasBitsByExplicitAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), level, mask))
                             entityIds.Add(entity.Id);
                 }
 
@@ -241,7 +241,7 @@ namespace SenseNet.Security
             }
             return HasBits(permBits, level, mask);
         }
-        private static bool HasBitsByExpliciteAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
+        private static bool HasBitsByExplicitAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
         {
             var permBits = new PermissionBitMask();
             foreach (var ace in aces)

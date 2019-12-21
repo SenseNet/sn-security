@@ -67,7 +67,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("-E3|Normal|-G3:_________________________________________________+-+-+-+-+-+-+-+", Tools.ReplaceIds(acl.ToString()));
         }
         [TestMethod]
-        public void Acl_Get_BreakedEmpty()
+        public void Acl_Get_BreakedEmpty() //UNDONE:REFACTOR
         {
             EnsureRepository();
 
@@ -459,7 +459,7 @@ namespace SenseNet.Security.Tests
             }
         }
         [TestMethod]
-        public void Eval_GetSubtreePermission_BreakAllowLocalonly()
+        public void Eval_GetSubtreePermission_BreakAllowLocalonly() //UNDONE:REFACTOR
         {
             EnsureRepository();
 
@@ -958,10 +958,10 @@ namespace SenseNet.Security.Tests
             var db = CurrentContext.Security.DataProvider;
 
             Assert.AreEqual("_________________________________________________+-+-+-+-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default));
-            var dbentries1 = db.LoadPermissionEntries(new[] { Id("E1") }).ToArray();
-            var dbentries2 = db.LoadPermissionEntries(new[] { Id("E2") }).ToArray();
-            Assert.AreEqual(1, dbentries1.Length);
-            Assert.AreEqual(1, dbentries2.Length);
+            var dbEntries1 = db.LoadPermissionEntries(new[] { Id("E1") }).ToArray();
+            var dbEntries2 = db.LoadPermissionEntries(new[] { Id("E2") }).ToArray();
+            Assert.AreEqual(1, dbEntries1.Length);
+            Assert.AreEqual(1, dbEntries2.Length);
 
             //# clear all permissions (inherited won't be cleared)
             var ed = CurrentContext.Security.CreateAclEditor();
@@ -969,10 +969,10 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             Assert.AreEqual("________________________________________________________-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), u1, default));
-            dbentries1 = db.LoadPermissionEntries(new[] { Id("E1") }).ToArray();
-            dbentries2 = db.LoadPermissionEntries(new[] { Id("E2") }).ToArray();
-            Assert.AreEqual(1, dbentries1.Length);
-            Assert.AreEqual(0, dbentries2.Length);
+            dbEntries1 = db.LoadPermissionEntries(new[] { Id("E1") }).ToArray();
+            dbEntries2 = db.LoadPermissionEntries(new[] { Id("E2") }).ToArray();
+            Assert.AreEqual(1, dbEntries1.Length);
+            Assert.AreEqual(0, dbEntries2.Length);
         }
         [TestMethod]
         public void AclEditor_EmptyEntriesRemovedFromMemory()
@@ -1004,7 +1004,7 @@ namespace SenseNet.Security.Tests
             Assert.IsNull(acl2);
         }
         [TestMethod]
-        public void AclEditor_BreakedEmptyAclIsNotDeletedFromMemory()
+        public void AclEditor_BreakedEmptyAclIsNotDeletedFromMemory() //UNDONE:REFACTOR
         {
             EnsureRepository();
 
@@ -1350,7 +1350,7 @@ namespace SenseNet.Security.Tests
 
         }
         [TestMethod]
-        public void AclEditor_Break_OnBreaked()
+        public void AclEditor_Break_OnBreaked() //UNDONE:REFACTOR
         {
             EnsureRepository();
 
@@ -1395,7 +1395,7 @@ namespace SenseNet.Security.Tests
             }
         }
         [TestMethod]
-        public void AclEditor_Unbreak_WithNormalize()
+        public void AclEditor_Unbreak_WithNormalize() //UNDONE:REFACTOR
         {
             EnsureRepository();
 
@@ -1430,7 +1430,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("E5|Normal|+G2:___________________________________________________++++++++++___", Tools.ReplaceIds(aces[0].ToString()));
         }
         [TestMethod]
-        public void AclEditor_Unbreak_WithoutNormalize()
+        public void AclEditor_Unbreak_WithoutNormalize() //UNDONE:REFACTOR
         {
             EnsureRepository();
 
@@ -1455,7 +1455,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("E5|Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(aces[1].ToString()));
         }
         [TestMethod]
-        public void AclEditor_Unbreak_OnUnbreaked()
+        public void AclEditor_Unbreak_OnUnbreaked() //UNDONE:REFACTOR
         {
             EnsureRepository();
 
@@ -1485,7 +1485,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("E2|Normal|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(aces[0].ToString()));
         }
         [TestMethod]
-        public void AclEditor_Unbreak_WithNormalize_AcesAndHolderIds()
+        public void AclEditor_Unbreak_WithNormalize_AcesAndHolderIds() //UNDONE:REFACTOR
         {
             EnsureRepository();
 
@@ -1525,9 +1525,9 @@ namespace SenseNet.Security.Tests
 
             var ed = CurrentContext.Security.CreateAclEditor();
 
-            ed.NormalizeExplicitePermissions(Id("E1"), new[] { EntryType.Normal });
-            ed.NormalizeExplicitePermissions(Id("E2"), new[] { EntryType.Normal });
-            ed.NormalizeExplicitePermissions(Id("E5"), new[] { EntryType.Normal });
+            ed.NormalizeExplicitPermissions(Id("E1"), new[] { EntryType.Normal });
+            ed.NormalizeExplicitPermissions(Id("E2"), new[] { EntryType.Normal });
+            ed.NormalizeExplicitPermissions(Id("E5"), new[] { EntryType.Normal });
         }
 
 
@@ -1572,7 +1572,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("E14|Normal|+G2:_________________________________________________+-_________++++", Tools.ReplaceIds(aces[1].ToString()));
         }
         [TestMethod]
-        public void AclEditor_NormalizeExplicitePermissions1()
+        public void AclEditor_NormalizeExplicitePermissions1() //UNDONE:REFACTOR
         {
             EnsureRepository();
 
@@ -1580,7 +1580,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+-__________++_");
             SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:-__________++++");
 
-            CurrentContext.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E5"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().NormalizeExplicitPermissions(Id("E5"), new[] { EntryType.Normal }).Apply();
 
             Assert.AreEqual("+E5|Normal|+G2:_________________________________________________-__________+___", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1591,7 +1591,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("E5|Normal|+G2:_________________________________________________-__________+___", Tools.ReplaceIds(aces[0].ToString()));
         }
         [TestMethod]
-        public void AclEditor_NormalizeExplicitePermissions2()
+        public void AclEditor_NormalizeExplicitePermissions2() //UNDONE:REFACTOR
         {
             EnsureRepository();
 
@@ -1600,7 +1600,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:___________++++");
             SetAcl("+E14|Normal|+G1:+++++++++++++++,Normal|+G2:+-_________++++");
 
-            CurrentContext.Security.CreateAclEditor().NormalizeExplicitePermissions(Id("E14"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().NormalizeExplicitPermissions(Id("E14"), new[] { EntryType.Normal }).Apply();
 
             Assert.IsNull(CurrentContext.Security.GetAclInfo(Id("E14")));
 
@@ -1710,7 +1710,7 @@ namespace SenseNet.Security.Tests
 
 
         [TestMethod]
-        public void AccessControlList_NoExplicitEntry_ParentBreaked()
+        public void AccessControlList_NoExplicitEntry_ParentBreaked() //UNDONE:REFACTOR
         {
             EnsureRepository();
 

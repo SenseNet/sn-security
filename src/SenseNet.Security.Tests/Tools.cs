@@ -272,16 +272,16 @@ namespace SenseNet.Security.Tests
 
             var aclInfo = new AclInfo(entityId) { Entries = src.Split(',').Select(CreateAce).ToList() };
 
-            var breaked = false;
-            var unbreaked = false;
+            var @break = false;
+            var undoBreak = false;
             if (entity.IsInherited && !isInherited)
-                breaked = true;
+                @break = true;
             if (!entity.IsInherited && isInherited)
-                unbreaked = true;
+                undoBreak = true;
             context.SetAcls(
                 new[] { aclInfo },
-                breaked ? new List<int> { entityId } : new List<int>(),
-                unbreaked ? new List<int> { entityId } : new List<int>()
+                @break ? new List<int> { entityId } : new List<int>(),
+                undoBreak ? new List<int> { entityId } : new List<int>()
                 );
         }
         private static AceInfo CreateAce(string src)

@@ -28,7 +28,7 @@ namespace SenseNet.Security.Tests.TestPortal
         internal static void StartTheSystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider, TextWriter traceChannel = null)
         {
             // Timestamp of the starting.
-            var startingThesystem = DateTime.UtcNow;
+            var startingTheSystem = DateTime.UtcNow;
             // Call SecurityContext starter method.
             TestSecurityContext.StartTheSystem(new SecurityConfiguration
             {
@@ -37,7 +37,7 @@ namespace SenseNet.Security.Tests.TestPortal
                 CommunicationMonitorRunningPeriodInSeconds = 31
             });
             // Staring message system. Messages before 'startingTheSystem' will be ignored.
-            messageProvider.Start(startingThesystem);
+            messageProvider.Start(startingTheSystem);
         }
 
         private static IMessageProvider ResolveMessageProvider()

@@ -41,8 +41,8 @@ namespace SenseNet.Security.Messaging
             // initiate processing threads
             for (var i = 0; i < Configuration.Messaging.MessageProcessorThreadCount; i++)
             {
-                var thstart = new ParameterizedThreadStart(CheckProcessableMessages);
-                var thread = new Thread(thstart) { Name = i.ToString() };
+                var thStart = new ParameterizedThreadStart(CheckProcessableMessages);
+                var thread = new Thread(thStart) { Name = i.ToString() };
                 thread.Start();
             }
         }

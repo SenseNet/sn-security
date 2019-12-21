@@ -234,7 +234,7 @@ namespace SenseNet.Security
                 _unbreaks.Add(entityId);
 
             if (normalize)
-                NormalizeExplicitePermissions(entityId, new[] { EntryType.Normal });
+                NormalizeExplicitPermissions(entityId, new[] { EntryType.Normal });
 
             return this;
         }
@@ -245,13 +245,13 @@ namespace SenseNet.Security
         /// <param name="categoriesToNormalize">Unnecessary explicit entries
         /// that match these categories will be removed.</param>
         /// <returns>A reference to this instance for calling more operations.</returns>
-        public AclEditor UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize)
+        public AclEditor UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize) //UNDONE: TYPO
         {
             _breaks.Remove(entityId);
             if (!_unbreaks.Contains(entityId))
                 _unbreaks.Add(entityId);
             if (categoriesToNormalize != null && categoriesToNormalize.Length > 0)
-                NormalizeExplicitePermissions(entityId, categoriesToNormalize);
+                NormalizeExplicitPermissions(entityId, categoriesToNormalize);
             return this;
         }
 
@@ -286,7 +286,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Removes inherited effective permissions from the explicit setting collection.
         /// </summary>
-        internal AclEditor NormalizeExplicitePermissions(int entityId, EntryType[] entryTypes)
+        internal AclEditor NormalizeExplicitPermissions(int entityId, EntryType[] entryTypes)
         {
             var firstAcl = SecurityEntity.GetFirstAcl(this.Context, entityId, false);
             if (firstAcl == null)

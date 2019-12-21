@@ -15,7 +15,7 @@ namespace SenseNet.Security.Tests
         public TestContext TestContext { get; set; }
 
         [TestCleanup]
-        public void Finishtest()
+        public void Finishtest() //UNDONE:REFACTOR
         {
             Tools.CheckIntegrity(TestContext.TestName, _context.Security);
         }
@@ -76,12 +76,12 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(id50, entityTable[Id("E53")].GetFirstAclId());
 
             //---- check ACLs in the evaluator
-            var allacls = Tools.CollectAllAcls(_context.Security);
-            Assert.AreEqual(4, allacls.Count);
-            var acl1 = GetAcl(allacls, id1);
-            var acl3 = GetAcl(allacls, id3);
-            var acl5 = GetAcl(allacls, id5);
-            var acl50 = GetAcl(allacls, id50);
+            var allAcls = Tools.CollectAllAcls(_context.Security);
+            Assert.AreEqual(4, allAcls.Count);
+            var acl1 = GetAcl(allAcls, id1);
+            var acl3 = GetAcl(allAcls, id3);
+            var acl5 = GetAcl(allAcls, id5);
+            var acl50 = GetAcl(allAcls, id50);
             Assert.IsNull(acl1.Parent);
             Assert.IsNotNull(acl3.Parent);
             Assert.IsNotNull(acl5.Parent);

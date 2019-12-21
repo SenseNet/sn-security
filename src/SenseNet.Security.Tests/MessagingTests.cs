@@ -17,7 +17,7 @@ namespace SenseNet.Security.Tests
         public TestContext TestContext { get; set; }
 
         [TestCleanup]
-        public void Finishtest()
+        public void Finishtest() //UNDONE:REFACTOR
         {
             Tools.CheckIntegrity(TestContext.TestName, _context.Security);
         }
@@ -66,7 +66,7 @@ namespace SenseNet.Security.Tests
                 smallActivityId, largeActivityId);
 
             var testLogger = (TestLogger) SnLog.Instance;
-            var actual = string.Join(", ", testLogger.Informations);
+            var actual = string.Join(", ", testLogger.InformationEvents);
             Assert.AreEqual(expected, actual);
         }
 
@@ -210,7 +210,7 @@ namespace SenseNet.Security.Tests
 
         private class TestLogger : IEventLogger
         {
-            public readonly List<string> Informations = new List<string>();
+            public readonly List<string> InformationEvents = new List<string>();
 
             public void Write(object message, ICollection<string> categories, int priority, int eventId, TraceEventType severity, string title,
                 IDictionary<string, object> properties)
@@ -219,7 +219,7 @@ namespace SenseNet.Security.Tests
                 switch (severity)
                 {
                     case TraceEventType.Information:
-                        Informations.Add(message.ToString());
+                        InformationEvents.Add(message.ToString());
                         break;
                     default:
                         throw new NotSupportedException();

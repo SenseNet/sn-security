@@ -17,7 +17,7 @@
         /// <summary>
         /// Combines the two parameters with bitwise | operation and returns with a new value.
         /// </summary>
-        public static PermissionBitMask operator |(PermissionBitMask pmask1, PermissionBitMask pmask2)
+        public static PermissionBitMask operator |(PermissionBitMask pmask1, PermissionBitMask pmask2) //UNDONE:REFACTOR
         {
             return new PermissionBitMask { AllowBits = pmask1.AllowBits | pmask2.AllowBits, DenyBits = pmask1.DenyBits | pmask2.DenyBits };
         }

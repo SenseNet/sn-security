@@ -392,9 +392,9 @@ namespace SenseNet.Security
                         usersTable.Add(userId, user);
                     }
 
-                    foreach (var parengtGroupId in allParentGroupIds)
-                        if (!user.Contains(parengtGroupId))
-                            user.Add(parengtGroupId);
+                    foreach (var parentGroupId in allParentGroupIds)
+                        if (!user.Contains(parentGroupId))
+                            user.Add(parentGroupId);
                 }
             }
 

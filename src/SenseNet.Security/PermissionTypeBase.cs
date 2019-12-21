@@ -132,9 +132,9 @@ namespace SenseNet.Security
         /// </summary>
         public static PermissionBitMask operator |(PermissionTypeBase pt1, PermissionTypeBase pt2)
         {
-            var pmask1 = new PermissionBitMask { AllowBits = pt1.Mask };
-            var pmask2 = new PermissionBitMask { AllowBits = pt2.Mask };
-            return new PermissionBitMask { AllowBits = pmask1.AllowBits | pmask2.AllowBits, DenyBits = pmask1.DenyBits | pmask2.DenyBits };
+            var pMask1 = new PermissionBitMask { AllowBits = pt1.Mask };
+            var pMask2 = new PermissionBitMask { AllowBits = pt2.Mask };
+            return new PermissionBitMask { AllowBits = pMask1.AllowBits | pMask2.AllowBits, DenyBits = pMask1.DenyBits | pMask2.DenyBits };
         }
     }
 }

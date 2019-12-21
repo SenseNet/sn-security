@@ -418,7 +418,7 @@ namespace SenseNet.Security.Tests.Concurrency
             Trace.WriteLine("SECDEL> Start check thread id " + id);
             var ctx = new SecurityContextForConcurrencyTests(TestUser.User1);
             var eid = Id("E99");
-            var catched = false;
+            var caught = false;
             var count = 0;
 
             while (!_stopped)
@@ -435,22 +435,22 @@ namespace SenseNet.Security.Tests.Concurrency
                 {
                     // the entity was deleted in the meantime
                     _stopped = true;
-                    catched = true;
+                    caught = true;
                 }
             }
 
-            Trace.WriteLine("SECDEL> End check thread id " + id + ". Catched: " + catched + ". Count: " + count);
+            Trace.WriteLine("SECDEL> End check thread id " + id + ". Catched: " + caught + ". Count: " + count);
         }
     }
 
     [Serializable]
     internal class TestWaitActivity : Messaging.SecurityMessages.SecurityActivity
     {
-        private int _sleepInMillisconds;
+        private int _sleepInMilliseconds;
 
-        public TestWaitActivity(int sleepInMillisconds)
+        public TestWaitActivity(int sleepInMillisconds) //UNDONE:REFACTOR
         {
-            _sleepInMillisconds = sleepInMillisconds;
+            _sleepInMilliseconds = sleepInMillisconds;
         }
 
         protected override void Store(SecurityContext context)
@@ -461,7 +461,7 @@ namespace SenseNet.Security.Tests.Concurrency
         protected override void Apply(SecurityContext context)
         {
             // sleep
-            Thread.Sleep(_sleepInMillisconds);
+            Thread.Sleep(_sleepInMilliseconds);
         }
 
         internal override bool MustWaitFor(Messaging.SecurityMessages.SecurityActivity olderActivity)

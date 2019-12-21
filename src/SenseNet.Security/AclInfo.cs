@@ -67,7 +67,7 @@ namespace SenseNet.Security
             Entries = new List<AceInfo>();
         }
 
-        internal AccessControlList ToAccessContolList(int requestedEntityId, EntryType entryType)
+        internal AccessControlList ToAccessControlList(int requestedEntityId, EntryType entryType)
         {
             var aces = new Dictionary<int, AccessControlEntry>();
             var localOnlyAces = new Dictionary<int, AccessControlEntry>();
