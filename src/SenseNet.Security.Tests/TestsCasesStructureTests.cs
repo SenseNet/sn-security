@@ -556,7 +556,7 @@ namespace SenseNet.Security.Tests
             Assert.IsFalse(entity.IsInherited);
 
             //# calling the security component for restoring broken permission inheritance
-            CurrentContext.Security.UnbreakInheritance(new TestEntity { Id = ids[1], ParentId = ids[0] });
+            CurrentContext.Security.UndoBreakInheritance(new TestEntity { Id = ids[1], ParentId = ids[0] });
 
             // inspection
             dbEntity = GetStoredSecurityEntity(ids[0]);
@@ -585,7 +585,7 @@ namespace SenseNet.Security.Tests
             Assert.IsFalse(entity.IsInherited);
 
             //# calling the security component for restoring broken permission inheritance
-            CurrentContext.Security.UnbreakInheritance(ids[1]);
+            CurrentContext.Security.UndoBreakInheritance(ids[1]);
 
             // inspection
             dbEntity = GetStoredSecurityEntity(ids[0]);
@@ -609,9 +609,9 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.BreakInheritance(ids[1]);
 
             //#
-            CurrentContext.Security.UnbreakInheritance(ids[1]);
+            CurrentContext.Security.UndoBreakInheritance(ids[1]);
             //# valid but ineffective
-            CurrentContext.Security.UnbreakInheritance(ids[1]);
+            CurrentContext.Security.UndoBreakInheritance(ids[1]);
 
             // inspection
             var dbEntity = GetStoredSecurityEntity(ids[0]);
@@ -632,13 +632,13 @@ namespace SenseNet.Security.Tests
         [ExpectedException(typeof(EntityNotFoundException))]
         public void Structure_UndoBreakInheritance_Invalid()
         {
-            CurrentContext.Security.UnbreakInheritance(default(int));
+            CurrentContext.Security.UndoBreakInheritance(default(int));
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
         public void Structure_UndoBreakInheritance_Missing()
         {
-            CurrentContext.Security.UnbreakInheritance(int.MaxValue);
+            CurrentContext.Security.UndoBreakInheritance(int.MaxValue);
         }
 
 

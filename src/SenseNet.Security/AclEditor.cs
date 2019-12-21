@@ -33,7 +33,7 @@ namespace SenseNet.Security
         /// Id set of the entities where inheritance was restored.
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        protected List<int> _unbreaks = new List<int>();
+        protected List<int> _unbreaks = new List<int>(); //TODO:~ TYPO
 
         /// <summary>
         /// Gets the current SecurityContext
@@ -226,7 +226,7 @@ namespace SenseNet.Security
         /// <param name="normalize">If true (default is false), the unnecessary explicit entries will be removed.
         /// WARNING: Only the Normal category will be copied.</param>
         /// <returns>A reference to this instance for calling more operations.</returns>
-        [Obsolete("Use the UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize) method instead")]
+        [Obsolete("Use the UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize) method instead")] //TODO:~ TYPO
         public AclEditor UnbreakInheritance(int entityId, bool normalize = false)
         {
             _breaks.Remove(entityId);

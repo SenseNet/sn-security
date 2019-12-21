@@ -248,7 +248,7 @@ namespace SenseNet.Security
             return acl;
         }
         // for tests
-        internal void SetAcls(IEnumerable<AclInfo> acls, List<int> breaks, List<int> unbreaks)
+        internal void SetAcls(IEnumerable<AclInfo> acls, List<int> breaks, List<int> undoBreaks)
         {
             if (acls == null)
                 throw new ArgumentNullException(nameof(acls));
@@ -256,7 +256,7 @@ namespace SenseNet.Security
             if (!acls.Any())
                 return;
             // ReSharper disable once PossibleMultipleEnumeration
-            var activity = new SetAclActivity(acls, breaks, unbreaks);
+            var activity = new SetAclActivity(acls, breaks, undoBreaks);
             activity.Execute(this);
         }
 

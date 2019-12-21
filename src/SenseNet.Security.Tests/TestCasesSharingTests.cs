@@ -220,7 +220,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("Sharing|+G1:_______________________________________________________________+", Tools.ReplaceIds(entries8[2].ToString()));
         }
         [TestMethod]
-        public void Sharing_Acl_BreakAll_Unbreak_NormalizeOne()
+        public void Sharing_Acl_BreakAll_UndoBreak_NormalizeOne()
         {
             EnsureRepository();
             var ctx = CurrentContext.Security;

@@ -99,7 +99,7 @@ namespace SenseNet.Security.Tests.TestPortal
             var categories = convertToExplicit ? new[] { EntryType.Normal } : new EntryType[0];
             AclEditor.Create(this).BreakInheritance(entityId, categories).Apply();
         }
-        public void UnbreakInheritance(int entityId, bool normalize = false)
+        public void UndoBreakInheritance(int entityId, bool normalize = false)
         {
             var categories = normalize ? new[] {EntryType.Normal} : new EntryType[0];
             AclEditor.Create(this).UnbreakInheritance(entityId, categories).Apply();
@@ -135,7 +135,7 @@ namespace SenseNet.Security.Tests.TestPortal
             var categories = convertToExplicit ? new[] { EntryType.Normal } : new EntryType[0];
             AclEditor.Create(this).BreakInheritance(entity.Id, categories).Apply();
         }
-        public void UnbreakInheritance(TestEntity entity, bool normalize = false)
+        public void UndoBreakInheritance(TestEntity entity, bool normalize = false)
         {
             var categories = normalize ? new[] { EntryType.Normal } : new EntryType[0];
             AclEditor.Create(this).UnbreakInheritance(entity.Id, categories).Apply();

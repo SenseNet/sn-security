@@ -141,7 +141,7 @@ namespace SenseNet.Security
             context.DataProvider.UpdateSecurityEntity(entity);
         }
 
-        public static void UnbreakInheritance(SecurityContext context, int entityId)
+        public static void UnbreakInheritance(SecurityContext context, int entityId) //TODO:~ TYPO
         {
             var entity = context.DataProvider.LoadStoredSecurityEntity(entityId);
             if (entity == null)
