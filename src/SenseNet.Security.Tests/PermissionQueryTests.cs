@@ -22,7 +22,7 @@ namespace SenseNet.Security.Tests
         }
 
         [TestCleanup]
-        public void Finishtest() //UNDONE:REFACTOR
+        public void FinishTest()
         {
             Tools.CheckIntegrity(TestContext.TestName, CurrentContext.Security);
         }
@@ -93,7 +93,7 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void PermissionQuery_GetRelatedEntities_AboveBreakedNoExplicit() //UNDONE:REFACTOR
+        public void PermissionQuery_GetRelatedEntities_AboveBrokenNoExplicit()
         {
             var perms = new[] { PermissionType.Custom01 };
             var result = CurrentContext.Security.GetRelatedEntities(Id("E33"), PermissionLevel.AllowedOrDenied, true, Id("U1"), perms);
@@ -151,7 +151,7 @@ namespace SenseNet.Security.Tests
         };
 
         [TestMethod]
-        public void PermissionQuery_GetAllowedUsers_Prerequisits() //UNDONE:REFACTOR
+        public void PermissionQuery_GetAllowedUsers_Prerequisites()
         {
             var u10 = new TestUser { Id = Id("U10"), Name = "U10" };
             var u11 = new TestUser { Id = Id("U11"), Name = "U11" };

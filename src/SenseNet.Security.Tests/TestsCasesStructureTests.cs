@@ -394,7 +394,7 @@ namespace SenseNet.Security.Tests
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
-        public void Structure_ModifyigEntity_missing() //UNDONE:REFACTOR
+        public void Structure_ModifyingEntity_missing()
         {
             var entity = new TestEntity { Id = Id("E101"), OwnerId = TestUser.User1.Id, Parent = null };
             CurrentContext.Security.ModifyEntity(entity);
@@ -508,7 +508,7 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(entity.IsInherited);
         }
         [TestMethod]
-        public void Structure_BreakInheritance_Breaked() //UNDONE:REFACTOR
+        public void Structure_BreakInheritance_Broken()
         {
             CreateStructureForInheritanceTests(out var ids);
 
@@ -545,7 +545,7 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void Structure_High_UnbreakInheritance() //UNDONE:REFACTOR
+        public void Structure_High_UndoBreakInheritance()
         {
             CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
@@ -574,7 +574,7 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(entity.IsInherited);
         }
         [TestMethod]
-        public void Structure_Low_UnbreakInheritance() //UNDONE:REFACTOR
+        public void Structure_Low_UndoBreakInheritance()
         {
             CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
@@ -603,7 +603,7 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(entity.IsInherited);
         }
         [TestMethod]
-        public void Structure_UnbreakInheritance_Unbreaked() //UNDONE:REFACTOR
+        public void Structure_UndoBreakInheritance_Twice()
         {
             CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
@@ -630,13 +630,13 @@ namespace SenseNet.Security.Tests
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
-        public void Structure_UnbreakInheritance_Invalid() //UNDONE:REFACTOR
+        public void Structure_UndoBreakInheritance_Invalid()
         {
             CurrentContext.Security.UnbreakInheritance(default(int));
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
-        public void Structure_UnbreakInheritance_Missing() //UNDONE:REFACTOR
+        public void Structure_UndoBreakInheritance_Missing()
         {
             CurrentContext.Security.UnbreakInheritance(int.MaxValue);
         }

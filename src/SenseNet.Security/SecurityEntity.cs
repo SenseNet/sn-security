@@ -361,32 +361,32 @@ namespace SenseNet.Security
             }
         }
 
-        internal static void UnbreakInheritance(SecurityContext ctx, IEnumerable<int> entityIds) //UNDONE:REFACTOR
+        internal static void UndoBreakInheritance(SecurityContext ctx, IEnumerable<int> entityIds) //UNDONE:REFACTOR
         {
             EnterWriteLock();
             try
             {
                 foreach (var entityId in entityIds)
-                    UnbreakInheritanceSafe(ctx, entityId);
+                    UndoBreakInheritanceSafe(ctx, entityId);
             }
             finally
             {
                 ExitWriteLock();
             }
         }
-        internal static void UnbreakInheritance(SecurityContext ctx, int entityId) //UNDONE:REFACTOR
+        internal static void UndoBreakInheritance(SecurityContext ctx, int entityId) //UNDONE:REFACTOR
         {
             EnterWriteLock();
             try
             {
-                UnbreakInheritanceSafe(ctx, entityId);
+                UndoBreakInheritanceSafe(ctx, entityId);
             }
             finally
             {
                 ExitWriteLock();
             }
         }
-        internal static void UnbreakInheritanceSafe(SecurityContext ctx, int entityId) //UNDONE:REFACTOR
+        internal static void UndoBreakInheritanceSafe(SecurityContext ctx, int entityId) //UNDONE:REFACTOR
         {
             var entity = GetEntitySafe(ctx, entityId, false);
             if (entity == null)
@@ -534,7 +534,7 @@ namespace SenseNet.Security
                     foreach (var entityId in breakIdArray)
                         BreakInheritanceSafe(ctx, entityId);
                     foreach (var entityId in undoBreakIdArray)
-                        UnbreakInheritanceSafe(ctx, entityId);
+                        UndoBreakInheritanceSafe(ctx, entityId);
 
                     RemoveEntriesSafe(ctx, entriesToRemove);
 

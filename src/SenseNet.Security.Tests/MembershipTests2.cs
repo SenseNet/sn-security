@@ -128,7 +128,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(InitialMembership, DumpMembership(context.Security));
         }
         [TestCleanup]
-        public void Finishtest() //UNDONE:REFACTOR
+        public void FinishTest()
         {
             Tools.CheckIntegrity(TestContext.TestName, context.Security);
         }
@@ -176,7 +176,7 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void Membership2_AddExistingUserToMorethanOneGroup() //UNDONE:REFACTOR
+        public void Membership2_AddExistingUserToMoreThanOneGroup()
         {
             var ctx = context.Security;
 
@@ -191,7 +191,7 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void Membership2_AddNewUserToMorethanOneGroup() //UNDONE:REFACTOR
+        public void Membership2_AddNewUserToMoreThanOneGroup()
         {
             var ctx = context.Security;
 
@@ -206,7 +206,7 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void Membership2_RemoveUserFromMorethanOneGroup() //UNDONE:REFACTOR
+        public void Membership2_RemoveUserFromMoreThanOneGroup()
         {
             var ctx = context.Security;
             ctx.AddUserToSecurityGroups(U1, new[] { G4, G7, G10, G20, G22 });

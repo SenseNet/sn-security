@@ -15,7 +15,7 @@ namespace SenseNet.Security.Tests
         public TestContext TestContext { get; set; }
 
         [TestCleanup]
-        public void Finishtest() //UNDONE:REFACTOR
+        public void FinishTest()
         {
             Tools.CheckIntegrity(TestContext.TestName, _context.Security);
         }
