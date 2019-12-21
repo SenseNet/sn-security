@@ -361,7 +361,7 @@ namespace SenseNet.Security
             }
         }
 
-        internal static void UndoBreakInheritance(SecurityContext ctx, IEnumerable<int> entityIds) //UNDONE:REFACTOR
+        internal static void UndoBreakInheritance(SecurityContext ctx, IEnumerable<int> entityIds)
         {
             EnterWriteLock();
             try
@@ -374,7 +374,7 @@ namespace SenseNet.Security
                 ExitWriteLock();
             }
         }
-        internal static void UndoBreakInheritance(SecurityContext ctx, int entityId) //UNDONE:REFACTOR
+        internal static void UndoBreakInheritance(SecurityContext ctx, int entityId)
         {
             EnterWriteLock();
             try
@@ -386,7 +386,7 @@ namespace SenseNet.Security
                 ExitWriteLock();
             }
         }
-        internal static void UndoBreakInheritanceSafe(SecurityContext ctx, int entityId) //UNDONE:REFACTOR
+        internal static void UndoBreakInheritanceSafe(SecurityContext ctx, int entityId)
         {
             var entity = GetEntitySafe(ctx, entityId, false);
             if (entity == null)
