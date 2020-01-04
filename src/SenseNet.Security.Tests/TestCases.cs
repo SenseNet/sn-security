@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using SenseNet.Security.Tests.TestPortal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Messaging;
@@ -9,9 +8,7 @@ namespace SenseNet.Security.Tests
     [TestClass]
     public abstract partial class TestCases
     {
-        // ReSharper disable once InconsistentNaming
-        private Context __context;
-        protected Context CurrentContext => __context;
+        protected Context CurrentContext { get; private set; }
 
         protected abstract ISecurityDataProvider GetDataProvider();
         protected abstract void CleanupMemberships();
@@ -23,7 +20,7 @@ namespace SenseNet.Security.Tests
             dataProvider.DeleteEverything();
             SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             Context.StartTheSystem(dataProvider, new DefaultMessageProvider());
-            __context = new Context(TestUser.User1);
+            CurrentContext = new Context(TestUser.User1);
         }
 
         /* ======================================================================= Tools */
@@ -143,18 +140,17 @@ namespace SenseNet.Security.Tests
                 }
             }
         }
-        private TestEntity CreateEntity(string name, string parentName, TestUser owner)
+        private void CreateEntity(string name, string parentName, TestUser owner)
         {
             var entity = new TestEntity
             {
                 Id = Id(name),
                 Name = name,
-                OwnerId = owner?.Id ?? default(int),
-                Parent = parentName == null ? null : _repository[Id(parentName)],
+                OwnerId = owner?.Id ?? default,
+                Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
             CurrentContext.Security.CreateSecurityEntity(entity);
-            return entity;
         }
 
         private TestEntity GetRepositoryEntity(int id)

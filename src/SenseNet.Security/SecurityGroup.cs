@@ -7,7 +7,7 @@ namespace SenseNet.Security
     /// <summary>
     /// Represents a group node int the in-memory membership graph.
     /// </summary>
-    [DebuggerDisplay("{ToString()}")]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class SecurityGroup
     {
         /// <summary>
@@ -43,9 +43,9 @@ namespace SenseNet.Security
         /// </summary>
         public override string ToString()
         {
-            var userStr = string.Join(",", this.UserMemberIds.Select(x => "U" + x));
-            var groupStr = string.Join(",", this.Groups.Select(x => "G" + x.Id));
-            var parentsStr = string.Join(",", this.ParentGroups.Select(x => "G" + x.Id));
+            var userStr = string.Join(",", UserMemberIds.Select(x => "U" + x));
+            var groupStr = string.Join(",", Groups.Select(x => "G" + x.Id));
+            var parentsStr = string.Join(",", ParentGroups.Select(x => "G" + x.Id));
             return "G" + Id + ":" + userStr + ", " + groupStr + "(" + parentsStr + ")";
         }
     }

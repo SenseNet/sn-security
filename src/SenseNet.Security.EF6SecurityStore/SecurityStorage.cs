@@ -27,12 +27,16 @@ namespace SenseNet.Security.EF6SecurityStore
         {
             // necessary for switching OFF automatic database migration
             Database.SetInitializer<SecurityStorage>(null);
-            this.Database.CommandTimeout = commandTimeout;
+            Database.CommandTimeout = commandTimeout;
         }
 
+        // ReSharper disable once InconsistentNaming
         public DbSet<EFEntity> EFEntities { get; set; }
+        // ReSharper disable once InconsistentNaming
         public DbSet<EFEntry> EFEntries { get; set; }
+        // ReSharper disable once InconsistentNaming
         public DbSet<EFMembership> EFMemberships { get; set; }
+        // ReSharper disable once InconsistentNaming
         public DbSet<EFMessage> EFMessages { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -61,50 +65,50 @@ namespace SenseNet.Security.EF6SecurityStore
         /*========================================================================= Direct SQL queries */
 
         /// <summary>Only for tests</summary>
-        private const string CLEANUPDATABASESCRIPT = @"
+        private const string CleanupDatabaseScript = @"
 DELETE FROM EFEntries
 DELETE FROM EFMemberships
 DELETE FROM EFEntities
 DELETE FROM EFMessages
 ";
-        /// <summary>Only for re-istallation and tests.</summary>
+        /// <summary>Only for re-installation and tests.</summary>
         internal void CleanupDatabase()
         {
-            this.Database.ExecuteSqlCommand(CLEANUPDATABASESCRIPT);
+            Database.ExecuteSqlCommand(CleanupDatabaseScript);
         }
         internal void ExecuteTestScript(string sql)
         {
-            this.Database.ExecuteSqlCommand(sql);
+            Database.ExecuteSqlCommand(sql);
         }
 
         internal int GetEstimatedEntityCount()
         {
-            return this.Database.SqlQuery<int>("SELECT COUNT(1) FROM EFEntities").Single();
+            return Database.SqlQuery<int>("SELECT COUNT(1) FROM EFEntities").Single();
         }
 
         internal IEnumerable<T> ExecuteTestScript<T>(string sql)
         {
-            return this.Database.SqlQuery<T>(sql).ToArray();
+            return Database.SqlQuery<T>(sql).ToArray();
         }
 
         /// <summary>
         /// Name of the SQL script resource file that contains all the table and constraint creation commands.
         /// </summary>
-        private const string RESOURCE_INSTALLDB = "SenseNet.Security.EF6SecurityStore.Scripts.Install_Schema_4.0.sql";
+        private const string ResourceInstallDb = "SenseNet.Security.EF6SecurityStore.Scripts.Install_Schema_4.0.sql";
 
         internal void InstallDatabase()
         {
-            var createDbScript = LoadResourceScript(RESOURCE_INSTALLDB);
+            var createDbScript = LoadResourceScript(ResourceInstallDb);
 
-            this.Database.ExecuteSqlCommand(createDbScript);
+            Database.ExecuteSqlCommand(createDbScript);
         }
 
         /// <summary>Only for tests</summary>
-        private const string CLEANUPMEMBERSHIPSCRIPT = @"DELETE FROM EFMemberships";
+        private const string CleanupMembershipScript = @"DELETE FROM EFMemberships";
         /// <summary>Only for tests</summary>
         internal void _cleanupMembership()
         {
-            this.Database.ExecuteSqlCommand(CLEANUPMEMBERSHIPSCRIPT);
+            Database.ExecuteSqlCommand(CleanupMembershipScript);
         }
 
 
@@ -119,31 +123,31 @@ ORDER BY Id
 ";
         internal int[] GetUnprocessedActivityIds()
         {
-            var x = this.Database.SqlQuery<int>(SelectUnprocessedActivityIds).ToArray();
+            var x = Database.SqlQuery<int>(SelectUnprocessedActivityIds).ToArray();
             return x;
         }
 
 
-        private const string LoadStoredSecurityEntityById_Script = @"
+        private const string LoadStoredSecurityEntityByIdScript = @"
 SELECT TOP 1 E.Id, E.OwnerId nullableOwnerId, E.ParentId nullableParentId, E.IsInherited, convert(bit, case when E2.EFEntityId is null then 0 else 1 end) as HasExplicitEntry 
 FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.Id = @EntityId";
         internal StoredSecurityEntity LoadStoredSecurityEntityById(int entityId)
         {
-            var x = this.Database.SqlQuery<StoredSecurityEntity>(LoadStoredSecurityEntityById_Script
+            var x = Database.SqlQuery<StoredSecurityEntity>(LoadStoredSecurityEntityByIdScript
                 , new SqlParameter("@EntityId", entityId)).FirstOrDefault();
             return x;
         }
 
 
-        private const string LOADAFFECTEDENTITYIDSBYENTRIESANDBREAKSSCRIPT = @"SELECT DISTINCT Id FROM (SELECT DISTINCT EFEntityId Id FROM [EFEntries] UNION ALL SELECT Id FROM [EFEntities] WHERE IsInherited = 0) AS x";
+        private const string LoadAffectedEntityIdsByEntriesAndBreaksScript = @"SELECT DISTINCT Id FROM (SELECT DISTINCT EFEntityId Id FROM [EFEntries] UNION ALL SELECT Id FROM [EFEntities] WHERE IsInherited = 0) AS x";
         internal IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks()
         {
-            var x = this.Database.SqlQuery<int>(LOADAFFECTEDENTITYIDSBYENTRIESANDBREAKSSCRIPT).ToArray();
+            var x = Database.SqlQuery<int>(LoadAffectedEntityIdsByEntriesAndBreaksScript).ToArray();
             return x;
         }
 
 
-        private const string REMOVEPERMISSIONENTRIESSCRIPT = @"DELETE FROM EFEntries WHERE EFEntityId = {0} AND EntryType = {1} AND IdentityId = {2} AND LocalOnly = {3}";
+        private const string RemovePermissionEntriesScript = @"DELETE FROM EFEntries WHERE EFEntityId = {0} AND EntryType = {1} AND IdentityId = {2} AND LocalOnly = {3}";
         internal void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
             var storedAces = aces as StoredAce[] ?? aces.ToArray();
@@ -161,7 +165,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
             }
 
             foreach (var ace in storedAces)
-                sb.AppendFormat(REMOVEPERMISSIONENTRIESSCRIPT, ace.EntityId, (int)ace.EntryType, ace.IdentityId, ace.LocalOnly ? 1 : 0).AppendLine();
+                sb.AppendFormat(RemovePermissionEntriesScript, ace.EntityId, (int)ace.EntryType, ace.IdentityId, ace.LocalOnly ? 1 : 0).AppendLine();
 
             if (count > 1)
             {
@@ -169,10 +173,10 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
                 sb.AppendLine("COMMIT TRANSACTION");
             }
 
-            this.Database.ExecuteSqlCommand(sb.ToString());
+            Database.ExecuteSqlCommand(sb.ToString());
         }
 
-        private const string INSERTPERMISSIONENTRIESSCRIPT = @"INSERT INTO EFEntries SELECT {0}, {1}, {2}, {3}, {4}, {5}";
+        private const string InsertPermissionEntriesScript = @"INSERT INTO EFEntries SELECT {0}, {1}, {2}, {3}, {4}, {5}";
         internal void WritePermissionEntries(IEnumerable<StoredAce> aces)
         {
             var storedAces = aces as StoredAce[] ?? aces.ToArray();
@@ -187,27 +191,27 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
             sb.AppendLine();
 
             foreach (var ace in storedAces)
-                sb.AppendFormat(REMOVEPERMISSIONENTRIESSCRIPT, ace.EntityId, (int)ace.EntryType, ace.IdentityId, ace.LocalOnly ? 1 : 0).AppendLine();
+                sb.AppendFormat(RemovePermissionEntriesScript, ace.EntityId, (int)ace.EntryType, ace.IdentityId, ace.LocalOnly ? 1 : 0).AppendLine();
             sb.AppendLine();
             foreach (var ace in storedAces)
-                sb.AppendFormat(INSERTPERMISSIONENTRIESSCRIPT, ace.EntityId, (int)ace.EntryType, ace.IdentityId, ace.LocalOnly ? 1 : 0
+                sb.AppendFormat(InsertPermissionEntriesScript, ace.EntityId, (int)ace.EntryType, ace.IdentityId, ace.LocalOnly ? 1 : 0
                     , ace.AllowBits.ToInt64()
                     , ace.DenyBits.ToInt64()).AppendLine();
 
             sb.AppendLine();
             sb.AppendLine("COMMIT TRANSACTION");
 
-            this.Database.ExecuteSqlCommand(sb.ToString());
+            Database.ExecuteSqlCommand(sb.ToString());
         }
 
 
-        private const string RemovePermissionEntriesByEntity_Script = @"DELETE FROM EFEntries WHERE EFEntityId = @EntityId";
+        private const string RemovePermissionEntriesByEntityScript = @"DELETE FROM EFEntries WHERE EFEntityId = @EntityId";
         internal void RemovePermissionEntriesByEntity(int entityId)
         {
-            this.Database.ExecuteSqlCommand(RemovePermissionEntriesByEntity_Script, new SqlParameter("@EntityId", entityId));
+            Database.ExecuteSqlCommand(RemovePermissionEntriesByEntityScript, new SqlParameter("@EntityId", entityId));
         }
 
-        private const string DELETE_ENTITIESANDENTRIESSCRIPT = @"DECLARE @EntityIdTable TABLE (EntityId int)
+        private const string DeleteEntitiesAndEntriesScript = @"DECLARE @EntityIdTable TABLE (EntityId int)
 ;WITH EntityCTE as (
 SELECT Id, ParentId
 FROM EFEntities
@@ -227,16 +231,17 @@ DELETE E1 FROM EFEntities E1 INNER JOIN @EntityIdTable E2 ON E2.EntityId = E1.Id
         {
             // This script collects all entity ids in a subtree (including the provided root),
             // deletes all security entries related to them, then deletes all entities.
-            this.Database.ExecuteSqlCommand(DELETE_ENTITIESANDENTRIESSCRIPT, new SqlParameter("@EntityId", entityId));
+            Database.ExecuteSqlCommand(DeleteEntitiesAndEntriesScript, new SqlParameter("@EntityId", entityId));
         }
 
         private const string CleanupSecurityActivitiesScript = @"DELETE FROM EFMessages WHERE SavedAt < DATEADD(minute, -@TimeLimit, GETUTCDATE()) AND ExecutionState = 'Done'";
         internal void CleanupSecurityActivities(int timeLimitInMinutes)
         {
-            this.Database.ExecuteSqlCommand(CleanupSecurityActivitiesScript, new SqlParameter("@TimeLimit", timeLimitInMinutes));
+            Database.ExecuteSqlCommand(CleanupSecurityActivitiesScript, new SqlParameter("@TimeLimit", timeLimitInMinutes));
         }
 
-        private static readonly string AcquireSecurityActivityExecutionLock_Script = @"UPDATE EFMessages
+        // ReSharper disable once ConvertToConstant.Local
+        private static readonly string _acquireSecurityActivityExecutionLockScript = @"UPDATE EFMessages
 	SET ExecutionState = '" + ExecutionState.Executing + @"', LockedBy = @LockedBy, LockedAt = GETUTCDATE()
 	WHERE Id = @ActivityId AND ((ExecutionState = '" + ExecutionState.Wait + @"') OR (ExecutionState = '" + ExecutionState.Executing + @"' AND LockedAt < DATEADD(second, -@TimeLimit, GETUTCDATE())))
 IF (@@rowcount > 0)
@@ -246,41 +251,43 @@ ELSE
 ";
         public string AcquireSecurityActivityExecutionLock(int securityActivityId, string lockedBy, int timeoutInSeconds)
         {
-            var result = this.Database
+            var result = Database
                 .SqlQuery<string>(
-                    AcquireSecurityActivityExecutionLock_Script,
+                    _acquireSecurityActivityExecutionLockScript,
                     new SqlParameter("@ActivityId", securityActivityId),
                     new SqlParameter("@LockedBy", lockedBy ?? ""),
                     new SqlParameter("@TimeLimit", timeoutInSeconds)).Single();
             return result;
         }
 
-        private static readonly string RefreshSecurityActivityExecutionLock_Script = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";
+        // ReSharper disable once ConvertToConstant.Local
+        private static readonly string _refreshSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";
         public void RefreshSecurityActivityExecutionLock(int securityActivityId)
         {
-            this.Database
+            Database
                 .ExecuteSqlCommand(
-                    RefreshSecurityActivityExecutionLock_Script,
+                    _refreshSecurityActivityExecutionLockScript,
                     new SqlParameter("@ActivityId", securityActivityId));
         }
 
-        private static readonly string ReleaseSecurityActivityExecutionLock_Script = @"UPDATE EFMessages SET ExecutionState = '" + ExecutionState.Done + @"' WHERE Id = @ActivityId";
+        // ReSharper disable once ConvertToConstant.Local
+        private static readonly string _releaseSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET ExecutionState = '" + ExecutionState.Done + @"' WHERE Id = @ActivityId";
         public void ReleaseSecurityActivityExecutionLock(int securityActivityId)
         {
-            this.Database
+            Database
                 .ExecuteSqlCommand(
-                    ReleaseSecurityActivityExecutionLock_Script,
+                    _releaseSecurityActivityExecutionLockScript,
                     new SqlParameter("@ActivityId", securityActivityId));
         }
 
-        private const string DeleteIdentity_Script = @"DELETE FROM EFMemberships WHERE GroupId = @IdentityId OR MemberId = @IdentityId
+        private const string DeleteIdentityScript = @"DELETE FROM EFMemberships WHERE GroupId = @IdentityId OR MemberId = @IdentityId
 DELETE FROM EFEntries WHERE IdentityId = @IdentityId";
         internal void DeleteIdentity(int identityId)
         {
-            this.Database.ExecuteSqlCommand(DeleteIdentity_Script, new SqlParameter("@IdentityId", identityId));
+            Database.ExecuteSqlCommand(DeleteIdentityScript, new SqlParameter("@IdentityId", identityId));
         }
 
-        private const string DeleteIdentities_Script = @"
+        private const string DeleteIdentitiesScript = @"
 SET XACT_ABORT ON;
 BEGIN TRANSACTION
 
@@ -300,22 +307,22 @@ COMMIT TRANSACTION";
             // construct an xml from the given id list for the sql command to make an id list on the SQL Server side
             var param = new SqlParameter("@IdentityList", SqlDbType.Xml)
             {
-                Value = string.Format(IDLIST_XMLTEMPLATE, string.Join(string.Empty, ids.Select(identityId => string.Format(IDLISTITEM_XMLTEMPLATE, identityId))))
+                Value = string.Format(IdListXmlTemplate, string.Join(string.Empty, ids.Select(identityId => string.Format(IdListItemXmlTemplate, identityId))))
             };
 
-            this.Database.ExecuteSqlCommand(DeleteIdentities_Script, param);
+            Database.ExecuteSqlCommand(DeleteIdentitiesScript, param);
         }
 
-        private const string RemoveMembers_Script = @"DELETE FROM EFMemberships WHERE GroupId = @GroupId AND MemberId IN ({0})";
+        private const string RemoveMembersScript = @"DELETE FROM EFMemberships WHERE GroupId = @GroupId AND MemberId IN ({0})";
         internal void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
-            var sql = string.Format(RemoveMembers_Script, string.Join(", ", groupMembers.Union(userMembers)));
-            this.Database.ExecuteSqlCommand(sql, new SqlParameter("@GroupId", groupId));
+            var sql = string.Format(RemoveMembersScript, string.Join(", ", groupMembers.Union(userMembers)));
+            Database.ExecuteSqlCommand(sql, new SqlParameter("@GroupId", groupId));
         }
 
 
-        private const string IDLIST_XMLTEMPLATE = @"<Ids>{0}</Ids>";
-        private const string IDLISTITEM_XMLTEMPLATE = @"<Id>{0}</Id>";
+        private const string IdListXmlTemplate = @"<Ids>{0}</Ids>";
+        private const string IdListItemXmlTemplate = @"<Id>{0}</Id>";
 
         private static string LoadResourceScript(string resourceName)
         {

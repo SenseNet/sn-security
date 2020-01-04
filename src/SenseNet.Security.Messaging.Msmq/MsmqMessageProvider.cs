@@ -30,29 +30,29 @@ namespace SenseNet.Security.Messaging.Msmq
         }
         private void BuildQueues()
         {
-            var queuepaths = Configuration.MessageQueueName.Split(';');
-            if (queuepaths.Length < 2)
+            var queuePaths = Configuration.MessageQueueName.Split(';');
+            if (queuePaths.Length < 2)
                 throw new Exception("No queues have been initialized. Please verify you have provided at least 2 queue paths: first for local, the rest for remote queues!");
 
-            _receiveQueue = CreateQueue(queuepaths[0]);
+            _receiveQueue = CreateQueue(queuePaths[0]);
             var receiverThread = new Thread(ReceiveMessages);
             receiverThread.Start();
 
             _sendQueues = new List<MessageQueue>();
             _sendQueuesAvailable = new List<bool>();
-            foreach (var queuepath in queuepaths.Skip(1))
+            foreach (var queuePath in queuePaths.Skip(1))
             {
-                var sendQueue = CreateQueue(queuepath);
+                var sendQueue = CreateQueue(queuePath);
                 _sendQueues.Add(sendQueue);
                 _sendQueuesAvailable.Add(true);
             }
         }
-        private MessageQueue CreateQueue(string queuepath)
+        private static MessageQueue CreateQueue(string queuePath)
         {
-            return new MessageQueue(queuepath) {Formatter = new BinaryMessageFormatter()};
+            return new MessageQueue(queuePath) {Formatter = new BinaryMessageFormatter()};
         }
 
-        private MessageQueue RecoverQueue(MessageQueue queue)
+        private static MessageQueue RecoverQueue(MessageQueue queue)
         {
             // the queue must be closed and the connection cache cleared before we try to reconnect
             queue.Close();
@@ -80,7 +80,7 @@ namespace SenseNet.Security.Messaging.Msmq
             try
             {
                 message.MessageSent = DateTime.UtcNow;
-                Stream messageStream = SerializeMessage(message);
+                var messageStream = SerializeMessage(message);
                 InternalSend(messageStream);
             }
             catch (Exception e)
@@ -97,7 +97,7 @@ namespace SenseNet.Security.Messaging.Msmq
                 Formatter = _formatter
             };
 
-            // try to send message to all queues. we enter read lock, since another thread could paralelly repair any of the queues
+            // try to send message to all queues. we enter read lock, since another thread could parallel repair any of the queues
             bool success;
             _senderLock.EnterReadLock();
             try
@@ -154,7 +154,7 @@ namespace SenseNet.Security.Messaging.Msmq
         }
         private void RepairSendQueues()
         {
-            bool repairHappened = false;
+            var repairHappened = false;
             for (var i = 0; i < _sendQueues.Count; i++)
             {
                 if (!_sendQueuesAvailable[i])
@@ -196,7 +196,7 @@ namespace SenseNet.Security.Messaging.Msmq
                 }
                 catch (ThreadAbortException tex)
                 {
-                    // suppress threadabortexception on shutdown
+                    // suppress ThreadAbortException on shutdown
                     if (Shutdown)
                         return;
 

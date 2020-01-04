@@ -1,6 +1,4 @@
-﻿using System.Configuration;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests;
 

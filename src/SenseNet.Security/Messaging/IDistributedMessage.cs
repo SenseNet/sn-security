@@ -4,7 +4,7 @@ using System.IO;
 namespace SenseNet.Security.Messaging
 {
     /// <summary>
-    /// Base iterface of all message types.
+    /// Base interface of all message types.
     /// </summary>
     public interface IDistributedMessage
     {

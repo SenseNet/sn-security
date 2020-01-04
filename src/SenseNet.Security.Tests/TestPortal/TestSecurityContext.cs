@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SenseNet.Security.Tests.TestPortal
 {
@@ -13,7 +10,7 @@ namespace SenseNet.Security.Tests.TestPortal
         public new static void StartTheSystem(SecurityConfiguration configuration)
         {
             SecurityContext.StartTheSystem(configuration);
-            _generalContext = new TestSecurityContext(SystemUser);
+            General = new TestSecurityContext(SystemUser);
         }
 
         public ISecurityDataProvider GetDataProvider() => DataProvider;
@@ -99,11 +96,13 @@ namespace SenseNet.Security.Tests.TestPortal
         }
         public void BreakInheritance(int entityId, bool convertToExplicit = true)
         {
-            AclEditor.Create(this).BreakInheritance(entityId, convertToExplicit).Apply();
+            var categories = convertToExplicit ? new[] { EntryType.Normal } : new EntryType[0];
+            AclEditor.Create(this).BreakInheritance(entityId, categories).Apply();
         }
-        public void UnbreakInheritance(int entityId, bool normalize = false)
+        public void UndoBreakInheritance(int entityId, bool normalize = false)
         {
-            AclEditor.Create(this).UnbreakInheritance(entityId, normalize).Apply();
+            var categories = normalize ? new[] {EntryType.Normal} : new EntryType[0];
+            AclEditor.Create(this).UnbreakInheritance(entityId, categories).Apply();
         }
         public new bool IsEntityInherited(int entityId)
         {
@@ -133,11 +132,13 @@ namespace SenseNet.Security.Tests.TestPortal
         }
         public void BreakInheritance(TestEntity entity, bool convertToExplicit = true)
         {
-            AclEditor.Create(this).BreakInheritance(entity.Id, convertToExplicit).Apply();
+            var categories = convertToExplicit ? new[] { EntryType.Normal } : new EntryType[0];
+            AclEditor.Create(this).BreakInheritance(entity.Id, categories).Apply();
         }
-        public void UnbreakInheritance(TestEntity entity, bool normalize = false)
+        public void UndoBreakInheritance(TestEntity entity, bool normalize = false)
         {
-            AclEditor.Create(this).UnbreakInheritance(entity.Id, normalize).Apply();
+            var categories = normalize ? new[] { EntryType.Normal } : new EntryType[0];
+            AclEditor.Create(this).UnbreakInheritance(entity.Id, categories).Apply();
         }
         public bool IsEntityInherited(TestEntity entity)
         {
@@ -253,10 +254,6 @@ namespace SenseNet.Security.Tests.TestPortal
         }
 
         /***************** General context for built in system user ***************/
-        private static SecurityContext _generalContext;
-        internal static new SecurityContext General
-        {
-            get { return _generalContext; }
-        }
+        internal new static SecurityContext General { get; private set; }
     }
 }

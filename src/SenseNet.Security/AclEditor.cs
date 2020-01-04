@@ -33,7 +33,7 @@ namespace SenseNet.Security
         /// Id set of the entities where inheritance was restored.
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        protected List<int> _unbreaks = new List<int>();
+        protected List<int> _unbreaks = new List<int>(); //TODO:~ TYPO
 
         /// <summary>
         /// Gets the current SecurityContext
@@ -226,7 +226,7 @@ namespace SenseNet.Security
         /// <param name="normalize">If true (default is false), the unnecessary explicit entries will be removed.
         /// WARNING: Only the Normal category will be copied.</param>
         /// <returns>A reference to this instance for calling more operations.</returns>
-        [Obsolete("Use the UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize) method instead")]
+        [Obsolete("Use the UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize) method instead")] //TODO:~ TYPO
         public AclEditor UnbreakInheritance(int entityId, bool normalize = false)
         {
             _breaks.Remove(entityId);
@@ -234,7 +234,7 @@ namespace SenseNet.Security
                 _unbreaks.Add(entityId);
 
             if (normalize)
-                NormalizeExplicitePermissions(entityId, new[] { EntryType.Normal });
+                NormalizeExplicitPermissions(entityId, new[] { EntryType.Normal });
 
             return this;
         }
@@ -242,15 +242,16 @@ namespace SenseNet.Security
         /// Restores the permission inheritance on the requested entity.
         /// </summary>
         /// <param name="entityId">The requested entity.</param>
-        /// <param name="categoriesToNormalize">If true (default is false), unnecessary explicit entries
-        /// that match the categories will be removed.</param>
+        /// <param name="categoriesToNormalize">Unnecessary explicit entries
+        /// that match these categories will be removed.</param>
         /// <returns>A reference to this instance for calling more operations.</returns>
-        public AclEditor UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize)
+        public AclEditor UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize) //TODO:~ TYPO
         {
             _breaks.Remove(entityId);
             if (!_unbreaks.Contains(entityId))
                 _unbreaks.Add(entityId);
-            NormalizeExplicitePermissions(entityId, categoriesToNormalize);
+            if (categoriesToNormalize != null && categoriesToNormalize.Length > 0)
+                NormalizeExplicitPermissions(entityId, categoriesToNormalize);
             return this;
         }
 
@@ -264,7 +265,7 @@ namespace SenseNet.Security
         }
 
         /// <summary>
-        /// Copies effective permissions to explicite access control entries.
+        /// Copies effective permissions to explicit access control entries.
         /// </summary>
         /// <param name="entityId">The requested entity.</param>
         /// <param name="entryTypes">Array of <see cref="EntryType"/>. Only items of these types will be copied
@@ -283,15 +284,15 @@ namespace SenseNet.Security
             return this;
         }
         /// <summary>
-        /// Removes inherited effective permissions from the explicite setting collection.
+        /// Removes inherited effective permissions from the explicit setting collection.
         /// </summary>
-        internal AclEditor NormalizeExplicitePermissions(int entityId, EntryType[] entryTypes)
+        internal AclEditor NormalizeExplicitPermissions(int entityId, EntryType[] entryTypes)
         {
             var firstAcl = SecurityEntity.GetFirstAcl(this.Context, entityId, false);
             if (firstAcl == null)
                 return this; // there is no settings.
             if (entityId != firstAcl.EntityId)
-                return this; // there is no explicite settings.
+                return this; // there is no explicit settings.
 
             var evaluator = this.Context.Evaluator;
 
@@ -359,7 +360,7 @@ namespace SenseNet.Security
             return aclInfo;
         }
 
-        private IEnumerable<PermissionTypeBase> AggregateAffectedPermissions(PermissionTypeBase[] permissions, AggregationType aggregationType)
+        private static IEnumerable<PermissionTypeBase> AggregateAffectedPermissions(PermissionTypeBase[] permissions, AggregationType aggregationType)
         {
             var aggregation = new Dictionary<int, PermissionTypeBase>();
             if (permissions != null)
@@ -367,7 +368,7 @@ namespace SenseNet.Security
                     AggregateAffectedPermissions(permission, aggregationType, aggregation);
             return aggregation.Values.ToArray();
         }
-        private void AggregateAffectedPermissions(PermissionTypeBase permission, AggregationType aggregationType, Dictionary<int, PermissionTypeBase> aggregation)
+        private static void AggregateAffectedPermissions(PermissionTypeBase permission, AggregationType aggregationType, Dictionary<int, PermissionTypeBase> aggregation)
         {
             if (aggregation.ContainsKey(permission.Index))
                 return;

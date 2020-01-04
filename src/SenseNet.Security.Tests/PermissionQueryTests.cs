@@ -10,21 +10,19 @@ namespace SenseNet.Security.Tests
     [TestClass]
     public class PermissionQueryTests
     {
-        // ReSharper disable once InconsistentNaming
-        private Context __context;
-        private Context CurrentContext => __context;
+        private Context CurrentContext { get; set; }
 
         public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void StartTest()
         {
-            __context = Tools.GetEmptyContext(TestUser.User1);
+            CurrentContext = Tools.GetEmptyContext(TestUser.User1);
             CreatePlayground();
         }
 
         [TestCleanup]
-        public void Finishtest()
+        public void FinishTest()
         {
             Tools.CheckIntegrity(TestContext.TestName, CurrentContext.Security);
         }
@@ -95,7 +93,7 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void PermissionQuery_GetRelatedEntities_AboveBreakedNoExplicit()
+        public void PermissionQuery_GetRelatedEntities_AboveBrokenNoExplicit()
         {
             var perms = new[] { PermissionType.Custom01 };
             var result = CurrentContext.Security.GetRelatedEntities(Id("E33"), PermissionLevel.AllowedOrDenied, true, Id("U1"), perms);
@@ -149,16 +147,16 @@ namespace SenseNet.Security.Tests
             {"P3", PermissionType.Custom03},
             {"P4", PermissionType.Custom04},
             {"P5", PermissionType.Custom05},
-            {"P6", PermissionType.Custom06},
+            {"P6", PermissionType.Custom06}
         };
 
         [TestMethod]
-        public void PermissionQuery_GetAllowedUsers_Prerequisits()
+        public void PermissionQuery_GetAllowedUsers_Prerequisites()
         {
-            var u10 = new TestUser() { Id = Id("U10"), Name = "U10" };
-            var u11 = new TestUser() { Id = Id("U11"), Name = "U11" };
-            var u12 = new TestUser() { Id = Id("U12"), Name = "U12" };
-            var u13 = new TestUser() { Id = Id("U13"), Name = "U13" };
+            var u10 = new TestUser { Id = Id("U10"), Name = "U10" };
+            var u11 = new TestUser { Id = Id("U11"), Name = "U11" };
+            var u12 = new TestUser { Id = Id("U12"), Name = "U12" };
+            var u13 = new TestUser { Id = Id("U13"), Name = "U13" };
             var id10 = u10.Id;
             var id11 = u11.Id;
             var id12 = u12.Id;
@@ -194,7 +192,7 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(HasNormalPermission(id12, Id("E66"), _permissions["P6"]));
             Assert.IsFalse(HasNormalPermission(id13, Id("E66"), _permissions["P6"]));
         }
-        private bool HasNormalPermission(int userId, int entityId, PermissionType permission)
+        private static bool HasNormalPermission(int userId, int entityId, PermissionType permission)
         {
             return new TestSecurityContext(TestUser.User1).Evaluator.GetPermission(userId, entityId, 0, EntryType.Normal,
                 permission) == PermissionValue.Allowed;
@@ -447,15 +445,15 @@ namespace SenseNet.Security.Tests
             {
                 Id = Id(name),
                 Name = name,
-                OwnerId = owner?.Id ?? default(int),
-                Parent = parentName == null ? null : _repository[Id(parentName)],
+                OwnerId = owner?.Id ?? default,
+                Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
             CurrentContext.Security.CreateSecurityEntity(entity);
             return entity;
         }
 
-        private int Id(string name)
+        private static int Id(string name)
         {
             return Tools.GetId(name);
         } 

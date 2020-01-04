@@ -1,10 +1,6 @@
 ﻿using CmdLine;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SenseNet.Security.Tests.Concurrency
 {
@@ -13,7 +9,7 @@ namespace SenseNet.Security.Tests.Concurrency
     {
         public static ProgramArguments Parse()
         {
-            ProgramArguments arguments = null;
+            ProgramArguments arguments;
             try
             {
                 arguments = CommandLine.Parse<ProgramArguments>();

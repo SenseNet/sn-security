@@ -27,15 +27,15 @@ namespace SenseNet.Security.Messaging
 
         internal DistributedMessage(MessageSender sender)
         {
-            this.Sender = sender;
+            Sender = sender;
         }
 
         [NonSerialized]
         private int _bodySize;
         internal int BodySize
         {
-            get { return _bodySize; }
-            set { _bodySize = value; }
+            get => _bodySize;
+            set => _bodySize = value;
         }
     }
 }

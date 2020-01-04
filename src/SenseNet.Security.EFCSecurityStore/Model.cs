@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+// ReSharper disable InconsistentNaming
 
 namespace SenseNet.Security.EFCSecurityStore
 {
@@ -63,12 +63,12 @@ namespace SenseNet.Security.EFCSecurityStore
         {
             return new StoredAce
             {
-                EntityId = this.EFEntityId,
-                EntryType = (EntryType)this.EntryType,
-                IdentityId = this.IdentityId,
-                LocalOnly = this.LocalOnly,
-                AllowBits = this.AllowBits.ToUInt64(),
-                DenyBits = this.DenyBits.ToUInt64()
+                EntityId = EFEntityId,
+                EntryType = (EntryType)EntryType,
+                IdentityId = IdentityId,
+                LocalOnly = LocalOnly,
+                AllowBits = AllowBits.ToUInt64(),
+                DenyBits = DenyBits.ToUInt64()
             };
         }
     }

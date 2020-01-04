@@ -8,15 +8,15 @@ namespace SenseNet.Security.Messaging
     [Serializable]
     public class MessageSender : IMessageSender
     {
-        private static string _computerID;
+        private static string _computerId;
 
         private MessageSender() { }
 
         /// <summary>
-        /// Gets an id to identify computers. This is an invariant value that comes tipically
+        /// Gets an id to identify computers. This is an invariant value that comes typically
         /// from the ReceiverName property of the initialized IMessageProvider implementation instance.
         /// </summary>
-        public string ComputerID => _computerID;
+        public string ComputerID => _computerId;
 
         /// <summary>
         /// Gets an unique identifier that is used during the lifetime of the current AppDomain. This is an invariant value.
@@ -25,13 +25,13 @@ namespace SenseNet.Security.Messaging
         /// <summary>
         /// Computed property. The value is true if this message is sent from this computer.
         /// </summary>
-        public bool IsMe => this.InstanceID == _current.InstanceID;
+        public bool IsMe => InstanceID == _current.InstanceID;
 
         private static readonly MessageSender _current = new MessageSender { InstanceID = Guid.NewGuid().ToString() };
 
-        internal static void Initialize(string computerID)
+        internal static void Initialize(string computerId)
         {
-            _computerID = computerID;
+            _computerId = computerId;
         }
 
         /// <summary>

@@ -20,7 +20,7 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual(id, dbEntity.Id);
             Assert.AreEqual(id, memEntity.Id);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.IsNull(memEntity.Parent);
             Assert.AreEqual(TestUser.User1.Id, dbEntity.OwnerId);
             Assert.AreEqual(TestUser.User1.Id, memEntity.OwnerId);
@@ -33,14 +33,14 @@ namespace SenseNet.Security.Tests
             var id = Id("E101");
 
             //# calling the security component for creating one entity
-            CurrentContext.Security.CreateSecurityEntity(id, default(int), TestUser.User1.Id);
+            CurrentContext.Security.CreateSecurityEntity(id, default, TestUser.User1.Id);
 
             var dbEntity = GetStoredSecurityEntity(id);
             var memEntity = CurrentContext.Security.GetSecurityEntity(id);
 
             Assert.AreEqual(id, dbEntity.Id);
             Assert.AreEqual(id, memEntity.Id);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.IsNull(memEntity.Parent);
             Assert.AreEqual(TestUser.User1.Id, dbEntity.OwnerId);
             Assert.AreEqual(TestUser.User1.Id, memEntity.OwnerId);
@@ -64,14 +64,12 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.CreateSecurityEntity(grandChildEntity);
 
             // inspection
-            SecurityEntity memEntity;
-            StoredSecurityEntity dbEntity;
-            memEntity = CurrentContext.Security.GetSecurityEntity(rootId);
+            var memEntity = CurrentContext.Security.GetSecurityEntity(rootId);
             Assert.AreEqual(0, memEntity.Level);
             Assert.IsNull(memEntity.Parent);
             Assert.AreEqual(TestUser.User1.Id, memEntity.OwnerId);
-            dbEntity = GetStoredSecurityEntity(rootId);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            var dbEntity = GetStoredSecurityEntity(rootId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.AreEqual(TestUser.User1.Id, dbEntity.OwnerId);
 
             memEntity = CurrentContext.Security.GetSecurityEntity(childId);
@@ -100,19 +98,17 @@ namespace SenseNet.Security.Tests
             var grandChildId = Id("E103");
 
             //# calling the security component for creating an entity chain
-            CurrentContext.Security.CreateSecurityEntity(rootId, default(int), TestUser.User1.Id);
+            CurrentContext.Security.CreateSecurityEntity(rootId, default, TestUser.User1.Id);
             CurrentContext.Security.CreateSecurityEntity(childId, rootId, TestUser.User2.Id);
             CurrentContext.Security.CreateSecurityEntity(grandChildId, childId, TestUser.User3.Id);
 
             // inspection
-            SecurityEntity memEntity;
-            StoredSecurityEntity dbEntity;
-            memEntity = CurrentContext.Security.GetSecurityEntity(rootId);
+            var memEntity = CurrentContext.Security.GetSecurityEntity(rootId);
             Assert.AreEqual(0, memEntity.Level);
             Assert.IsNull(memEntity.Parent);
             Assert.AreEqual(TestUser.User1.Id, memEntity.OwnerId);
-            dbEntity = GetStoredSecurityEntity(rootId);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            var dbEntity = GetStoredSecurityEntity(rootId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.AreEqual(TestUser.User1.Id, dbEntity.OwnerId);
 
             memEntity = CurrentContext.Security.GetSecurityEntity(childId);
@@ -158,8 +154,7 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.CreateSecurityEntity(grandChildEntity3);
 
             // checking target object structure in memory
-            SecurityEntity entity;
-            entity = CurrentContext.Security.GetSecurityEntity(rootId);
+            var entity = CurrentContext.Security.GetSecurityEntity(rootId);
             Assert.AreEqual(0, entity.Level);
             entity = CurrentContext.Security.GetSecurityEntity(childId1);
             Assert.AreEqual(1, entity.Level);
@@ -177,7 +172,7 @@ namespace SenseNet.Security.Tests
         public void Structure_CreateSecurityEntity_invalidId()
         {
             //# calling the security component
-            CurrentContext.Security.CreateSecurityEntity(default(int), default(int), default(int));
+            CurrentContext.Security.CreateSecurityEntity(default, default, default);
         }
         [TestMethod]
         public void Structure_CreateSecurityEntity_existing()
@@ -323,7 +318,10 @@ namespace SenseNet.Security.Tests
             };
 
             try { CurrentContext.Security.CreateSecurityEntity(entity); }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             entity.OwnerId = TestUser.User2.Id;
 
@@ -336,18 +334,18 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(TestUser.User2.Id, memEntity.OwnerId);
             var dbEntity = GetStoredSecurityEntity(id);
             Assert.AreEqual(id, dbEntity.Id);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.AreEqual(TestUser.User2.Id, dbEntity.OwnerId);
 
 
             //# calling the security component for clearing the entity's owner
-            entity.OwnerId = default(int);
+            entity.OwnerId = default;
             CurrentContext.Security.ModifyEntity(entity);
 
             memEntity = CurrentContext.Security.GetSecurityEntity(id);
-            Assert.AreEqual(default(int), memEntity.OwnerId);
+            Assert.AreEqual(default, memEntity.OwnerId);
             dbEntity = GetStoredSecurityEntity(id);
-            Assert.AreEqual(default(int), dbEntity.OwnerId);
+            Assert.AreEqual(default, dbEntity.OwnerId);
 
         }
         [TestMethod]
@@ -355,8 +353,11 @@ namespace SenseNet.Security.Tests
         {
             var id = Id("E101");
 
-            try { CurrentContext.Security.CreateSecurityEntity(id, default(int), TestUser.User1.Id); }
-            catch { }
+            try { CurrentContext.Security.CreateSecurityEntity(id, default, TestUser.User1.Id); }
+            catch
+            {
+                // ignored
+            }
 
             //# calling the security component for modifying the entity's owner
             CurrentContext.Security.ModifyEntityOwner(id, TestUser.User2.Id);
@@ -367,33 +368,33 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(TestUser.User2.Id, memEntity.OwnerId);
             var dbEntity = GetStoredSecurityEntity(id);
             Assert.AreEqual(id, dbEntity.Id);
-            Assert.AreEqual(default(int), dbEntity.ParentId);
+            Assert.AreEqual(default, dbEntity.ParentId);
             Assert.AreEqual(TestUser.User2.Id, dbEntity.OwnerId);
 
             //# calling the security component for clearing the entity's owner
-            CurrentContext.Security.ModifyEntityOwner(id, default(int));
+            CurrentContext.Security.ModifyEntityOwner(id, default);
 
             memEntity = CurrentContext.Security.GetSecurityEntity(id);
-            Assert.AreEqual(default(int), memEntity.OwnerId);
+            Assert.AreEqual(default, memEntity.OwnerId);
             dbEntity = GetStoredSecurityEntity(id);
-            Assert.AreEqual(default(int), dbEntity.OwnerId);
+            Assert.AreEqual(default, dbEntity.OwnerId);
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Structure_ModifyEntityOwner_invalidId()
         {
-            CurrentContext.Security.ModifyEntityOwner(default(int), TestUser.User2.Id);
+            CurrentContext.Security.ModifyEntityOwner(default, TestUser.User2.Id);
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Structure_ModifyEntity_invalidId()
         {
-            var entity = new TestEntity { Id = default(int), OwnerId = TestUser.User1.Id, Parent = null };
+            var entity = new TestEntity { Id = default, OwnerId = TestUser.User1.Id, Parent = null };
             CurrentContext.Security.ModifyEntity(entity);
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
-        public void Structure_ModifyigEntity_missing()
+        public void Structure_ModifyingEntity_missing()
         {
             var entity = new TestEntity { Id = Id("E101"), OwnerId = TestUser.User1.Id, Parent = null };
             CurrentContext.Security.ModifyEntity(entity);
@@ -404,8 +405,7 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_MoveEntity()
         {
-            TestEntity root, source, target, child1, child2;
-            CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
+            CreateStructureForMoveTests(out _, out var source, out var target, out var child1, out var child2);
 
             //#
             CurrentContext.Security.MoveEntity(source, target);
@@ -413,8 +413,8 @@ namespace SenseNet.Security.Tests
             // check in database
             var movedDbEntity = GetStoredSecurityEntity(source.Id);
             var targetDbEntity = GetStoredSecurityEntity(target.Id);
-            var child1DbEntity = GetStoredSecurityEntity(child1.Id);
-            var child2DbEntity = GetStoredSecurityEntity(child2.Id);
+            //var child1DbEntity = GetStoredSecurityEntity(child1.Id);
+            //var child2DbEntity = GetStoredSecurityEntity(child2.Id);
             Assert.AreEqual(movedDbEntity.ParentId, targetDbEntity.Id);
 
             // check in memory
@@ -431,26 +431,23 @@ namespace SenseNet.Security.Tests
         [ExpectedException(typeof(ArgumentException))]
         public void Structure_MoveEntity_InvalidSource()
         {
-            TestEntity root, source, target, child1, child2;
-            CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
-            source.Id = default(int);
+            CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
+            source.Id = default;
             CurrentContext.Security.MoveEntity(source, target);
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Structure_MoveEntity_InvalidTarget()
         {
-            TestEntity root, source, target, child1, child2;
-            CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
-            target.Id = default(int);
+            CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
+            target.Id = default;
             CurrentContext.Security.MoveEntity(source, target);
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
         public void Structure_MoveEntity_MissingSource()
         {
-            TestEntity root, source, target, child1, child2;
-            CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
+            CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
             source.Id = Id("E101");
             CurrentContext.Security.MoveEntity(source, target);
         }
@@ -458,8 +455,7 @@ namespace SenseNet.Security.Tests
         [ExpectedException(typeof(EntityNotFoundException))]
         public void Structure_MoveEntity_MissingTarget()
         {
-            TestEntity root, source, target, child1, child2;
-            CreateStructureForMoveTests(out root, out source, out target, out child1, out child2);
+            CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
             target.Id = Id("E101");
             CurrentContext.Security.MoveEntity(source, target);
         }
@@ -468,23 +464,20 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_High_BreakInheritance()
         {
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
 
             //# calling the security component for breaking permission inheritance
             CurrentContext.Security.BreakInheritance(new TestEntity { Id = ids[1], ParentId = ids[0] });
 
             // inspection
-            StoredSecurityEntity dbEntity;
-            dbEntity = GetStoredSecurityEntity(ids[0]);
+            var dbEntity = GetStoredSecurityEntity(ids[0]);
             Assert.IsTrue(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsFalse(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[2]);
             Assert.IsTrue(dbEntity.IsInherited);
 
-            SecurityEntity entity;
-            entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
             Assert.IsTrue(entity.IsInherited);
             entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
@@ -494,23 +487,20 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_Low_BreakInheritance()
         {
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
 
             //# calling the security component for breaking permission inheritance
             CurrentContext.Security.BreakInheritance(ids[1]);
 
             // inspection
-            StoredSecurityEntity dbEntity;
-            dbEntity = GetStoredSecurityEntity(ids[0]);
+            var dbEntity = GetStoredSecurityEntity(ids[0]);
             Assert.IsTrue(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsFalse(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[2]);
             Assert.IsTrue(dbEntity.IsInherited);
 
-            SecurityEntity entity;
-            entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
             Assert.IsTrue(entity.IsInherited);
             entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
@@ -518,26 +508,23 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(entity.IsInherited);
         }
         [TestMethod]
-        public void Structure_BreakInheritance_Breaked()
+        public void Structure_BreakInheritance_Broken()
         {
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
 
             CurrentContext.Security.BreakInheritance(ids[1]);
             // valid but ineffective
             CurrentContext.Security.BreakInheritance(ids[1]);
 
             // inspection
-            StoredSecurityEntity dbEntity;
-            dbEntity = GetStoredSecurityEntity(ids[0]);
+            var dbEntity = GetStoredSecurityEntity(ids[0]);
             Assert.IsTrue(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsFalse(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[2]);
             Assert.IsTrue(dbEntity.IsInherited);
 
-            SecurityEntity entity;
-            entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
             Assert.IsTrue(entity.IsInherited);
             entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
@@ -558,21 +545,18 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void Structure_High_UnbreakInheritance()
+        public void Structure_High_UndoBreakInheritance()
         {
-            StoredSecurityEntity dbEntity;
-            SecurityEntity entity;
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
 
-            dbEntity = GetStoredSecurityEntity(ids[1]);
+            var dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsFalse(dbEntity.IsInherited);
-            entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
 
-            //# calling the security component for restoring breaked permission inheritance
-            CurrentContext.Security.UnbreakInheritance(new TestEntity { Id = ids[1], ParentId = ids[0] });
+            //# calling the security component for restoring broken permission inheritance
+            CurrentContext.Security.UndoBreakInheritance(new TestEntity { Id = ids[1], ParentId = ids[0] });
 
             // inspection
             dbEntity = GetStoredSecurityEntity(ids[0]);
@@ -590,21 +574,18 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(entity.IsInherited);
         }
         [TestMethod]
-        public void Structure_Low_UnbreakInheritance()
+        public void Structure_Low_UndoBreakInheritance()
         {
-            StoredSecurityEntity dbEntity;
-            SecurityEntity entity;
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
 
-            dbEntity = GetStoredSecurityEntity(ids[1]);
+            var dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsFalse(dbEntity.IsInherited);
-            entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsFalse(entity.IsInherited);
 
-            //# calling the security component for restoring breaked permission inheritance
-            CurrentContext.Security.UnbreakInheritance(ids[1]);
+            //# calling the security component for restoring broken permission inheritance
+            CurrentContext.Security.UndoBreakInheritance(ids[1]);
 
             // inspection
             dbEntity = GetStoredSecurityEntity(ids[0]);
@@ -622,28 +603,25 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(entity.IsInherited);
         }
         [TestMethod]
-        public void Structure_UnbreakInheritance_Unbreaked()
+        public void Structure_UndoBreakInheritance_Twice()
         {
-            StoredSecurityEntity dbEntity;
-            SecurityEntity entity;
-            int[] ids;
-            CreateStructureForInheritanceTests(out ids);
+            CreateStructureForInheritanceTests(out var ids);
             CurrentContext.Security.BreakInheritance(ids[1]);
 
             //#
-            CurrentContext.Security.UnbreakInheritance(ids[1]);
+            CurrentContext.Security.UndoBreakInheritance(ids[1]);
             //# valid but ineffective
-            CurrentContext.Security.UnbreakInheritance(ids[1]);
+            CurrentContext.Security.UndoBreakInheritance(ids[1]);
 
             // inspection
-            dbEntity = GetStoredSecurityEntity(ids[0]);
+            var dbEntity = GetStoredSecurityEntity(ids[0]);
             Assert.IsTrue(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsTrue(dbEntity.IsInherited);
             dbEntity = GetStoredSecurityEntity(ids[2]);
             Assert.IsTrue(dbEntity.IsInherited);
 
-            entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
+            var entity = CurrentContext.Security.GetSecurityEntity(ids[0]);
             Assert.IsTrue(entity.IsInherited);
             entity = CurrentContext.Security.GetSecurityEntity(ids[1]);
             Assert.IsTrue(entity.IsInherited);
@@ -652,15 +630,15 @@ namespace SenseNet.Security.Tests
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
-        public void Structure_UnbreakInheritance_Invalid()
+        public void Structure_UndoBreakInheritance_Invalid()
         {
-            CurrentContext.Security.UnbreakInheritance(default(int));
+            CurrentContext.Security.UndoBreakInheritance(default(int));
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
-        public void Structure_UnbreakInheritance_Missing()
+        public void Structure_UndoBreakInheritance_Missing()
         {
-            CurrentContext.Security.UnbreakInheritance(int.MaxValue);
+            CurrentContext.Security.UndoBreakInheritance(int.MaxValue);
         }
 
 
@@ -669,9 +647,11 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_Initial()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
-            var expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21" +
+                                    "{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44" +
+                                    "E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -680,11 +660,13 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_CreateUnderLeaf()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.CreateSecurityEntity(Id("E54"), Id("E53"), 1);
 
-            var expected = "{E1{E2{E5{E14{E50{E51{E52}E53{E54}}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53{E54}}}E15}E6{E16E17}E7{E18E19}}E3" +
+                                    "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E3" +
+                                    "3E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -693,11 +675,13 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_CreateUnderNotLeaf()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.CreateSecurityEntity(Id("E54"), Id("E50"), 1);
 
-            var expected = "{E1{E2{E5{E14{E50{E51{E52}E53E54}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string  expected = "{E1{E2{E5{E14{E50{E51{E52}E53E54}}E15}E6{E16E17}E7{E18E19}}E3" +
+                                     "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{" +
+                                     "E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -705,11 +689,13 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_DeleteTheLastOne()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.DeleteEntity(Id("E52"));
 
-            var expected = "{E1{E2{E5{E14{E50{E51E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14{E50{E51E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21" +
+                                    "{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E4" +
+                                    "3{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -718,11 +704,13 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_DeleteNotLast()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.DeleteEntity(Id("E25"));
 
-            var expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E6{E16E17}E7{E18E19}}E3{E8" +
+                                    "{E20E21{E22E23E24E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34" +
+                                    "{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -731,11 +719,13 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_MoveUnderLeaf()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.MoveEntity(Id("E50"), Id("E15"));
 
-            var expected = "{E1{E2{E5{E14E15{E50{E51{E52}E53}}}E6{E16E17}E7{E18E19}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14E15{E50{E51{E52}E53}}}E6{E16E17}E7{E18E19}}E3" +
+                                    "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E" +
+                                    "31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -744,11 +734,13 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_MoveUnderNotLeaf()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.MoveEntity(Id("E50"), Id("E2"));
 
-            var expected = "{E1{E2{E5{E14E15}E6{E16E17}E7{E18E19}E50{E51{E52}E53}}E3{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14E15}E6{E16E17}E7{E18E19}E50{E51{E52}E53}}E3" +
+                                    "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30" +
+                                    "{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -757,11 +749,13 @@ namespace SenseNet.Security.Tests
         public void Structure_MemParentChildren_MoveSiblingToSibling()
         {
             var ctx = CurrentContext.Security;
-            var repo = Tools.CreateRepository(ctx);
+            var _ = Tools.CreateRepository(ctx);
 
             ctx.MoveEntity(Id("E6"), Id("E3"));
 
-            var expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E7{E18E19}}E3{E6{E16E17}E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
+            const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E7{E18E19}}E3{E6{E16E17}E8" +
+                                    "{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33" +
+                                    "E34{E40E43{E44E45E46E47E48E49}}}E32{E35{E41{E42}}E36{E37{E38E39}}}}}E13}}}";
             var actual = Tools.EntityIdStructureToString(ctx);
 
             Assert.AreEqual(expected, actual);
@@ -779,9 +773,9 @@ namespace SenseNet.Security.Tests
 
             try
             {
-                var entity = CurrentContext.Security.GetSecurityEntity(17, false);
+                var entity = CurrentContext.Security.GetSecurityEntity(17);
                 Assert.IsNull(entity);
-                entity = CurrentContext.Security.GetSecurityEntity(42, false);
+                entity = CurrentContext.Security.GetSecurityEntity(42);
                 Assert.IsNotNull(entity);
                 Assert.AreEqual(17, entity.OwnerId);
             }
@@ -828,7 +822,10 @@ namespace SenseNet.Security.Tests
                 CurrentContext.Security.CreateSecurityEntity(childEntity);
                 CurrentContext.Security.CreateSecurityEntity(grandChildEntity);
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             chain = new[] { rootEntity.Id, childEntity.Id, grandChildEntity.Id };
         }

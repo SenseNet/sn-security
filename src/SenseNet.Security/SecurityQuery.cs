@@ -24,7 +24,7 @@ namespace SenseNet.Security
     /// </summary>
     public class SecurityQuery
     {
-        private enum Axis { All, ParentChain, Subtree };
+        private enum Axis { All, ParentChain, Subtree }
 
         /* ============================================================ Static part */
 
@@ -109,7 +109,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Returns all entries in the predefined axis (All, ParentChain, Subtree) of the specified entity.
         /// The collection is empty if the entity was not found.
-        /// Note that the output entries do not refers their owher entities and there is no inexpensive way 
+        /// Note that the output entries do not refers their owner entities and there is no inexpensive way 
         /// to recover them.
         /// This operation is thread safe. The thread safety uses system resources, so to minimize these,
         /// it's strongly recommended processing as fast as possible.
@@ -127,7 +127,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Returns permission changes in the predefined axis (All, ParentChain, Subtree) of the specified entity.
         /// A permission is changed when the parent permission and local permission are not equal.
-        /// The collection can be prefiltered with a relatedIdentity parameter.
+        /// The collection can be pre-filtered with a relatedIdentity parameter.
         /// This operation is thread safe. The thread safety uses system resources, so to minimize these,
         /// it's strongly recommended processing as fast as possible.
         /// </summary>
@@ -203,7 +203,7 @@ namespace SenseNet.Security
             }
         }
 
-        private IEnumerable<SecurityEntity> GetEntitiesFromParentChain(SecurityEntity entity, BreakOptions handleBreaks)
+        private static IEnumerable<SecurityEntity> GetEntitiesFromParentChain(SecurityEntity entity, BreakOptions handleBreaks)
         {
             if ((handleBreaks & BreakOptions.StopAtParentBreak) != 0)
             {
@@ -221,7 +221,7 @@ namespace SenseNet.Security
             }
         }
 
-        private IEnumerable<SecurityEntity> GetEntitiesFromSubtree(SecurityEntity root, BreakOptions handleBreaks)
+        private static IEnumerable<SecurityEntity> GetEntitiesFromSubtree(SecurityEntity root, BreakOptions handleBreaks)
         {
             return root == null
                 ? Enumerable.Empty<SecurityEntity>()

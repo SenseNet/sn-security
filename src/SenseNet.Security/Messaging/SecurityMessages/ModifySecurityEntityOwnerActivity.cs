@@ -16,8 +16,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public ModifySecurityEntityOwnerActivity(int entityId, int ownerId)
         {
-            this.EntityId = entityId;
-            this.OwnerId = ownerId;
+            EntityId = entityId;
+            OwnerId = ownerId;
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.ModifySecurityEntityOwner(context, this.EntityId, this.OwnerId);
+            DataHandler.ModifySecurityEntityOwner(context, EntityId, OwnerId);
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            SecurityEntity.ModifyEntityOwner(context, this.EntityId, this.OwnerId);
+            SecurityEntity.ModifyEntityOwner(context, EntityId, OwnerId);
         }
 
         internal override bool MustWaitFor(SecurityActivity olderActivity)
@@ -43,10 +43,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             // There aren't any valid scenarios if the olderActivity is DeleteSecurityEntityActivity, MoveSecurityEntityActivity or SetAclActivity
 
-            var createSecurityEntityActivity = olderActivity as CreateSecurityEntityActivity;
-            if (createSecurityEntityActivity != null)
+            if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
             {
-                return createSecurityEntityActivity.EntityId == this.EntityId;
+                return createSecurityEntityActivity.EntityId == EntityId;
             }
 
             var modifySecurityEntityOwnerActivity = olderActivity as ModifySecurityEntityOwnerActivity;

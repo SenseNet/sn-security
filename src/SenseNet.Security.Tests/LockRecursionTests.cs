@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Data;
 using SenseNet.Security.Messaging;
@@ -16,7 +12,7 @@ namespace SenseNet.Security.Tests
     {
         internal class LockRecursionUser : ISecurityUser
         {
-            private Func<int, IEnumerable<int>> _extenderMethod;
+            private readonly Func<int, IEnumerable<int>> _extenderMethod;
             public int Id { get; }
 
             public LockRecursionUser(int id, Func<int, IEnumerable<int>> extenderMethod)
@@ -35,23 +31,22 @@ namespace SenseNet.Security.Tests
         {
             SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             MemoryDataProvider.LastActivityId = 0;
-            Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), new DefaultMessageProvider(), null);
+            Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), new DefaultMessageProvider());
             var context = new Context(currentUser);
             CreatePlayground(context);
             return context;
         }
-        private Context GetContext(LockRecursionUser currentUser)
+        private static Context GetContext(LockRecursionUser currentUser)
         {
             SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             MemoryDataProvider.LastActivityId = 0;
             return new Context(currentUser);
         }
 
-        private Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
+        private readonly Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
 
         private void CreatePlayground(Context context)
         {
-            TestEntity e;
             var u1 = TestUser.User1;
 
             CreateEntity(context, "E1", null, u1);
@@ -223,14 +218,14 @@ namespace SenseNet.Security.Tests
             {
                 Id = Id(name),
                 Name = name,
-                OwnerId = owner == null ? default(int) : owner.Id,
-                Parent = parentName == null ? null : _repository[Id(parentName)],
+                OwnerId = owner?.Id ?? default,
+                Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
             context.Security.CreateSecurityEntity(entity);
         }
 
-        private int Id(string name)
+        private static int Id(string name)
         {
             return Tools.GetId(name);
         }
@@ -239,11 +234,7 @@ namespace SenseNet.Security.Tests
         //[TestMethod]
         public void LockRecursion_NoExtension()
         {
-            var user = new LockRecursionUser(Id("E1"), entityId =>
-            {
-                // There is no extension.
-                return new int[0];
-            });
+            var user = new LockRecursionUser(Id("E1"), entityId => new int[0]);
 
             var context = GetContextAndStartTheSystem(user);
             context.Security.HasPermission(Id("E1"), PermissionType.Open);
@@ -256,7 +247,7 @@ namespace SenseNet.Security.Tests
             {
                 // Simulate permission check in the getter of the PortalContext.ContextNode 
                 var elevatedContext = GetContext(new LockRecursionUser(-1, e => new int[0]));
-                var aces = elevatedContext.Security.GetEffectiveEntries(Id("E1"), new[] {Id("U1")});
+                var _ = elevatedContext.Security.GetEffectiveEntries(Id("E1"), new[] {Id("U1")});
                 return new int[0];
             });
 

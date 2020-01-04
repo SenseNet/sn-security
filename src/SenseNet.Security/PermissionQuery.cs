@@ -20,15 +20,15 @@ namespace SenseNet.Security
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
-                    if (!entity.HasExplicitAcl || (entity.Id == entityId && !includeRoot))
+                    if (!entity.HasExplicitAcl || entity.Id == entityId && !includeRoot)
                         continue;
 
-                    // if breaked, adding existing parent-s effective identities because all identities are related.
+                    // if broken, adding existing parent-s effective identities because all identities are related.
                     var localBits = new PermissionBitMask();
                     if (!entity.IsInherited && entity.Parent != null && (includeRoot || entity.Parent.Id != entityId))
                         CollectPermissionsFromLocalAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities, EntryType.Normal), localBits);
 
-                    // adding explicite identities
+                    // adding explicit identities
                     CollectPermissionsFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), PermissionLevel.AllowedOrDenied, counters, localBits);
                 }
 
@@ -59,11 +59,11 @@ namespace SenseNet.Security
                     if (!entity.HasExplicitAcl)
                         continue;
 
-                    // if breaked, adding existing parent-s effective identities because all identities are related.
+                    // if broken, adding existing parent-s effective identities because all identities are related.
                     if (!entity.IsInherited && entity.Parent != null)
                         CollectIdentitiesFromAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, null, EntryType.Normal), level, identities);
 
-                    // adding explicite identities
+                    // adding explicit identities
                     CollectIdentitiesFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, null, EntryType.Normal), level, identities);
                 }
             }
@@ -113,12 +113,12 @@ namespace SenseNet.Security
                     if (!isEnabled(entity.Id))
                         continue;
 
-                    // if breaked, adding existing parent-s effective identities because all identities are related.
+                    // if broken, adding existing parent-s effective identities because all identities are related.
                     var localBits = new PermissionBitMask();
                     if (!entity.IsInherited && entity.Parent != null)
                         CollectPermissionsFromLocalAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, identities, EntryType.Normal), localBits);
 
-                    // adding explicite identities
+                    // adding explicit identities
                     CollectPermissionsFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), level, counters, localBits);
                 }
 
@@ -150,11 +150,12 @@ namespace SenseNet.Security
                 localBits.AllowBits &= ~ace.AllowBits;
                 localBits.DenyBits &= ~ace.DenyBits ;
             }
-            // Finally play the rest bits (all breaked bits are switched in that is not used in any explicit entry)
+            // Finally play the rest bits (all broken bits are switched in that is not used in any explicit entry)
             SetPermissionsCountersByPermissionLevel(counters, level, localBits.AllowBits, localBits.DenyBits);
         }
         private static void SetPermissionsCountersByPermissionLevel(int[] counters, PermissionLevel level, ulong allowBits, ulong denyBits)
         {
+            // ReSharper disable once SwitchStatementMissingSomeCases
             switch (level)
             {
                 case PermissionLevel.Allowed:
@@ -167,8 +168,6 @@ namespace SenseNet.Security
                     IncrementCounters(allowBits, counters);
                     IncrementCounters(denyBits, counters);
                     break;
-                default:
-                    break;
             }
         }
         private static void IncrementCounters(ulong bits, int[] counters)
@@ -179,7 +178,7 @@ namespace SenseNet.Security
             {
                 if ((b & mask) > 0)
                     counters[pt.Index]++;
-                mask = mask << 1;
+                mask <<= 1;
             }
         }
 
@@ -215,9 +214,9 @@ namespace SenseNet.Security
                         }
                     }
 
-                    // adding explicite identities
+                    // adding explicit identities
                     if (!added)
-                        if (HasBitsByExpliciteAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), level, mask))
+                        if (HasBitsByExplicitAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, identities, EntryType.Normal), level, mask))
                             entityIds.Add(entity.Id);
                 }
 
@@ -242,7 +241,7 @@ namespace SenseNet.Security
             }
             return HasBits(permBits, level, mask);
         }
-        private static bool HasBitsByExpliciteAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
+        private static bool HasBitsByExplicitAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
         {
             var permBits = new PermissionBitMask();
             foreach (var ace in aces)
@@ -283,11 +282,11 @@ namespace SenseNet.Security
                     if (!entity.HasExplicitAcl)
                         continue;
 
-                    // if breaked, adding existing parent-s effective identities because all identities are related.
+                    // if broken, adding existing parent-s effective identities because all identities are related.
                     if (!entity.IsInherited && entity.Parent != null)
                         CollectIdentitiesFromAces(context.Evaluator.GetEffectiveEntriesSafe(entity.Parent.Id, null, EntryType.Normal), level, mask, identities);
 
-                    // adding explicite identities
+                    // adding explicit identities
                     CollectIdentitiesFromAces(context.Evaluator.GetExplicitEntriesSafe(entity.Id, null, EntryType.Normal), level, mask, identities);
                 }
                 return identities;
@@ -366,8 +365,7 @@ namespace SenseNet.Security
             var groups = new List<SecurityGroup>();
             foreach (var identity in identities.Distinct())
             {
-                SecurityGroup group;
-                if (context.Cache.Groups.TryGetValue(identity, out group))
+                if (context.Cache.Groups.TryGetValue(identity, out var group))
                 {
                     if (!groups.Contains(group))
                         groups.Add(group);
@@ -394,8 +392,7 @@ namespace SenseNet.Security
 
         public static IEnumerable<int> GetParentGroups(SecurityContext context, int identityId, bool directOnly)
         {
-            SecurityGroup group;
-            if (context.Cache.Groups.TryGetValue(identityId, out group))
+            if (context.Cache.Groups.TryGetValue(identityId, out var group))
                 return directOnly ? GetDirectOnlyParentGroups(group) : GetAllParentGroups(context, group);
             return directOnly ? GetDirectOnlyParentGroups(context, identityId) : GetAllParentGroups(context, identityId);
         }
@@ -405,8 +402,7 @@ namespace SenseNet.Security
         }
         private static IEnumerable<int> GetAllParentGroups(SecurityContext context, int userId)
         {
-            List<int> groupIds;
-            if (context.Cache.Membership.TryGetValue(userId, out groupIds))
+            if (context.Cache.Membership.TryGetValue(userId, out var groupIds))
                 return groupIds;
             return new int[0];
         }

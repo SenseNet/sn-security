@@ -1,10 +1,4 @@
-﻿using SenseNet.Security;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace SenseNet.Security.Tests.TestPortal
+﻿namespace SenseNet.Security.Tests.TestPortal
 {
     public class TestEntity
     {
@@ -15,8 +9,8 @@ namespace SenseNet.Security.Tests.TestPortal
         private TestEntity _parent;
         public TestEntity Parent
         {
-            get { return _parent; }
-            set { _parent = value; ParentId = value == null ? default(int) : value.Id; }
+            get => _parent;
+            set { _parent = value; ParentId = value?.Id ?? default; }
         }
 
         //========================================================================================

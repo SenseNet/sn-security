@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
-using SenseNet.Security;
+﻿using System.Diagnostics;
+// ReSharper disable UnusedMember.Global
 
 namespace SenseNet.Security.Tests.TestPortal
 {
@@ -29,7 +25,7 @@ namespace SenseNet.Security.Tests.TestPortal
         /// <summary>Index = 7</summary>
         public static readonly PermissionType Publish = new PermissionType("Publish", 7);
         /// <summary>Index = 8</summary>
-        public static readonly PermissionType ForceCheckin = new PermissionType("ForceCheckin", 8);
+        public static readonly PermissionType ForceCheckIn = new PermissionType("ForceCheckIn", 8);
         /// <summary>Index = 9</summary>
         public static readonly PermissionType AddNew = new PermissionType("AddNew", 9);
         /// <summary>Index = 10</summary>

@@ -24,7 +24,7 @@ namespace SenseNet.Security
             var sb = new StringBuilder(msg ?? "Access denied.");
             if (path != null)
                 sb.Append(" Path: ").Append(path);
-            if (entityId != default(int))
+            if (entityId != default)
                 sb.Append(" EntityId: ").Append(entityId);
             if (user != null)
                 sb.Append(" UserId: ").Append(user.Id);

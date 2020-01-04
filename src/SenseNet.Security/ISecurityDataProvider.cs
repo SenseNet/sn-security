@@ -11,6 +11,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Control data for building a connection to the database server.
         /// </summary>
+        // ReSharper disable once UnusedMemberInSuper.Global
         string ConnectionString { get; set; }
 
         /// <summary>
@@ -26,17 +27,18 @@ namespace SenseNet.Security
         /// <summary>
         /// Creates the database schema and other components (tables, etc.). It requires an existing database.
         /// </summary>
+        // ReSharper disable once UnusedMemberInSuper.Global
         void InstallDatabase();
 
-        /******************************************* structure preloaders */
+        /******************************************* structure pre-loaders */
 
         /// <summary>
-        /// Preloader method for retrieving all stored SecurityEntity. Called during system start.
+        /// Pre-loader method for retrieving all stored SecurityEntity. Called during system start.
         /// </summary>
         IEnumerable<StoredSecurityEntity> LoadSecurityEntities();
         /// <summary>
         /// Loads the set of security holder entity ids.
-        /// This is a distincted int list of entities in entries plus entities that are not inherited (IsInherited = false).
+        /// This is a distinct int list of entities in entries plus entities that are not inherited (IsInherited = false).
         /// </summary>
         IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks();
         /// <summary>
@@ -73,7 +75,7 @@ namespace SenseNet.Security
         /******************************************* membership storage */
 
         /// <summary>
-        /// Preloader method for retrieving all stored SecurityGroups. Called during system start.
+        /// Pre-loader method for retrieving all stored SecurityGroups. Called during system start.
         /// </summary>
         IEnumerable<SecurityGroup> LoadAllGroups();
 
@@ -190,7 +192,7 @@ namespace SenseNet.Security
         /// than the given fragment size ("count"), the largest id could not reach.
         /// Activities in the result array are sorted by id.
         /// Value of the IsUnprocessedActivity property of every loaded object
-        /// vill be the value of the given "executingUnprocessedActivities" parameter.
+        /// will be the value of the given "executingUnprocessedActivities" parameter.
         /// </summary>
         /// <param name="from">Least expected id.</param>
         /// <param name="to">Largest allowed id.</param>
@@ -202,7 +204,7 @@ namespace SenseNet.Security
         /// Loads a SecurityActivity fragment by the individual id array.
         /// Activities in the result array are sorted by id.
         /// Value of the IsUnprocessedActivity property of every loaded object
-        /// vill be the value of the given "executingUnprocessedActivities" parameter.
+        /// will be the value of the given "executingUnprocessedActivities" parameter.
         /// </summary>
         /// <param name="gaps">Individual id array</param>
         /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>

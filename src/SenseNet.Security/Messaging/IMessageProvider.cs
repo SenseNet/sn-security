@@ -36,6 +36,7 @@ namespace SenseNet.Security.Messaging
         /// <summary>
         /// Stops sending and receiving messages.
         /// </summary>
+        // ReSharper disable once UnusedMemberInSuper.Global
         void Stop();
         /// <summary>
         /// Clears all messages that are not sent (if there are).
@@ -79,7 +80,7 @@ namespace SenseNet.Security.Messaging
     public class MessageReceivedEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets or sets the received mesage.
+        /// Gets or sets the received message.
         /// </summary>
         public IDistributedMessage Message { get; set; }
         /// <summary>
@@ -93,7 +94,7 @@ namespace SenseNet.Security.Messaging
     public class ExceptionEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets or sets the catched exception.
+        /// Gets or sets the caught exception.
         /// </summary>
         public Exception Exception { get; set; }
         /// <summary>

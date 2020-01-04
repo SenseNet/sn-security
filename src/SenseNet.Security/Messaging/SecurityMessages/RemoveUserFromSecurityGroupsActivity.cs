@@ -26,7 +26,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.RemoveUserFromGroups(context, this.UserId, this.ParentGroups);
+            DataHandler.RemoveUserFromGroups(context, UserId, ParentGroups);
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.RemoveUserFromGroups(this.UserId, this.ParentGroups);
+            context.Cache.RemoveUserFromGroups(UserId, ParentGroups);
         }
     }
 }

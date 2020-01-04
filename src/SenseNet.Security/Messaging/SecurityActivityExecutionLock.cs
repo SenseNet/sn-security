@@ -23,7 +23,7 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         /// <param name="activity">Activity that is locked.</param>
         /// <param name="fullExecutionEnabled">If true, all activity operation must be executed:
-        /// storing, distributing, applying in the memory. Otherwise only the memor operations are allowed.</param>
+        /// storing, distributing, applying in the memory. Otherwise only the memory operations are allowed.</param>
         public SecurityActivityExecutionLock(SecurityActivity activity, bool fullExecutionEnabled)
         {
             _activity = activity;
@@ -36,9 +36,9 @@ namespace SenseNet.Security.Messaging
             _timer.Disposed += Refresh;
         }
 
-        private void Refresh(object Sender, EventArgs args)
+        private void Refresh(object sender, EventArgs args)
         {
-            DataHandler.RefreshSecurityActivityExecutionLock(this._activity);
+            DataHandler.RefreshSecurityActivityExecutionLock(_activity);
         }
         private void Release()
         {
@@ -46,21 +46,21 @@ namespace SenseNet.Security.Messaging
             _timer.Stop();
             _timer.Elapsed -= Refresh;
             _timer.Disposed -= Refresh;
-            DataHandler.ReleaseSecurityActivityExecutionLock(this._activity, this.FullExecutionEnabled);
+            DataHandler.ReleaseSecurityActivityExecutionLock(_activity, FullExecutionEnabled);
         }
 
-        private bool disposed;
+        private bool _disposed;
         /// <summary>
         /// Releases the lock.
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
         private void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (!_disposed)
             {
                 if (disposing)
                 {
@@ -68,7 +68,7 @@ namespace SenseNet.Security.Messaging
                     Release();
                 }
             }
-            disposed = true;
+            _disposed = true;
         }
     }
 }

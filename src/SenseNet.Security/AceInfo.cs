@@ -6,12 +6,12 @@ namespace SenseNet.Security
     /// <summary>
     /// Represents in-memory information about an access control entry.
     /// </summary>
-    [DebuggerDisplay("{ToString()}")]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     [Serializable]
     public class AceInfo
     {
         /// <summary>
-        /// Cateory of the entry.
+        /// Category of the entry.
         /// </summary>
         public EntryType EntryType { get; set; }
         /// <summary>
@@ -35,11 +35,11 @@ namespace SenseNet.Security
         {
             return new AceInfo
             {
-                IdentityId = this.IdentityId,
-                EntryType = this.EntryType,
-                LocalOnly = this.LocalOnly,
-                AllowBits = this.AllowBits,
-                DenyBits = this.DenyBits
+                IdentityId = IdentityId,
+                EntryType = EntryType,
+                LocalOnly = LocalOnly,
+                AllowBits = AllowBits,
+                DenyBits = DenyBits
             };
         }
 

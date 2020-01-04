@@ -20,7 +20,7 @@ namespace SenseNet.Security.Messaging
         /// <summary>
         /// It is empty or contains a message about any error in connection with the SecurityActivityHistory feature.
         /// </summary>
-        public string Message => _unfinished < 1 ? null : "RECENT ARRAY TOO SHORT. Cannot registrate full activity lifecycle. Unfinished items: " + _unfinished;
+        public string Message => _unfinished < 1 ? null : "RECENT ARRAY TOO SHORT. Cannot register the full activity lifecycle. Unfinished items: " + _unfinished;
 
         /// <summary>
         /// Length of the Recent
@@ -108,10 +108,9 @@ namespace SenseNet.Security.Messaging
         {
             lock (_lock)
             {
-                // avoiding duplication
-                foreach (var item in _history)
-                    if (item != null && item.Id == activity.Id)
-                        return;
+                // avoid duplication
+                if (_history.Any(item => item != null && item.Id == activity.Id))
+                    return;
 
                 var retired = _history[_position];
                 _history[_position] = new SecurityActivityHistoryItem
@@ -212,7 +211,7 @@ namespace SenseNet.Security.Messaging
         public int QueueLength => Queue?.Length ?? 0;
 
         /// <summary>
-        /// Ids of th Arrived but not parallelized activities.
+        /// Ids of th Arrived but not parallel activities.
         /// </summary>
         public int[] Queue { get; set; }
     }
@@ -313,7 +312,7 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         public string TypeName { get; set; }
         /// <summary>
-        /// True if the activity was received from aanother computer.
+        /// True if the activity was received from another computer.
         /// </summary>
         public bool FromReceiver { get; set; }
         /// <summary>

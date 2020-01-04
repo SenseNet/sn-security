@@ -34,12 +34,12 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("Normal|-G1:_____________________________________________________________+__", Tools.ReplaceIds(entries[1].ToString()));
 
             // ACTION 3 root, Normal only
-            entries = ctx.GetAcl(Id("E1"), EntryType.Normal).Entries
+            entries = ctx.GetAcl(Id("E1")).Entries
                 .OrderBy(x => x.LocalOnly).ThenBy(x => x.EntryType).ToList();
             Assert.AreEqual("Normal|+G1:_______________________________________________________________+", Tools.ReplaceIds(entries[0].ToString()));
 
             // ACTION 4 child, Normal only
-            entries = ctx.GetAcl(Id("E2"), EntryType.Normal).Entries
+            entries = ctx.GetAcl(Id("E2")).Entries
                 .OrderBy(x => x.LocalOnly).ThenBy(x => x.EntryType).ToList();
             Assert.AreEqual("Normal|+G1:______________________________________________________________++", Tools.ReplaceIds(entries[0].ToString()));
             Assert.AreEqual("Normal|-G1:_____________________________________________________________+__", Tools.ReplaceIds(entries[1].ToString()));
@@ -71,7 +71,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("Normal|+G1:____________________________________________________________++++", Tools.ReplaceIds(entry.ToString()));
 
             // ACTION 2: Normal only
-            entry = ctx.GetAcl(Id("E5"), EntryType.Normal).Entries.First();
+            entry = ctx.GetAcl(Id("E5")).Entries.First();
             Assert.AreEqual("Normal|+G1:____________________________________________________________++++", Tools.ReplaceIds(entry.ToString()));
 
             // ACTION 3: Sharing only
@@ -92,14 +92,13 @@ namespace SenseNet.Security.Tests
             // Two level down: The sharing permits less than on parent.
             SetAcl("+E5|Sharing|+U1:_____________+++++"); // Open
 
-            PermissionValue see, open, save, run;
             var ctx = CurrentContext.Security;
 
             var entityId = Id("E1"); // Root
-            see = ctx.GetPermission(entityId, PermissionType.See);
-            open = ctx.GetPermission(entityId, PermissionType.Open);
-            save = ctx.GetPermission(entityId, PermissionType.Save);
-            run = ctx.GetPermission(entityId, PermissionType.RunApplication);
+            var see = ctx.GetPermission(entityId, PermissionType.See);
+            var open = ctx.GetPermission(entityId, PermissionType.Open);
+            var save = ctx.GetPermission(entityId, PermissionType.Save);
+            var run = ctx.GetPermission(entityId, PermissionType.RunApplication);
             Assert.AreEqual(PermissionValue.Allowed, see);
             Assert.AreEqual(PermissionValue.Undefined, open);
             Assert.AreEqual(PermissionValue.Undefined, save);
@@ -169,8 +168,8 @@ namespace SenseNet.Security.Tests
 
             // ACTION
             var ed = ctx.CreateAclEditor();
-            ed.BreakInheritance(Id("E5"));
-            ed.BreakInheritance(Id("E8"));
+            ed.BreakInheritance(Id("E5"), new[] { EntryType.Normal });
+            ed.BreakInheritance(Id("E8"), new[] { EntryType.Normal });
             ed.Apply();
 
             // ASSERT
@@ -221,7 +220,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("Sharing|+G1:_______________________________________________________________+", Tools.ReplaceIds(entries8[2].ToString()));
         }
         [TestMethod]
-        public void Sharing_Acl_BreakAll_Unbreak_NormalizeOne()
+        public void Sharing_Acl_BreakAll_UndoBreak_NormalizeOne()
         {
             EnsureRepository();
             var ctx = CurrentContext.Security;

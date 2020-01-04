@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Runtime.Remoting.Contexts;
-using SenseNet.Security;
 using SenseNet.Security.Messaging;
-using SenseNet.Security.Messaging.SecurityMessages;
 using System.Diagnostics;
 using System.IO;
 using SenseNet.Diagnostics;
@@ -35,24 +28,24 @@ namespace SenseNet.Security.Tests.TestPortal
         internal static void StartTheSystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider, TextWriter traceChannel = null)
         {
             // Timestamp of the starting.
-            var startingThesystem = DateTime.UtcNow;
+            var startingTheSystem = DateTime.UtcNow;
             // Call SecurityContext starter method.
             TestSecurityContext.StartTheSystem(new SecurityConfiguration
             {
                 SecurityDataProvider = securityDataProvider,
                 MessageProvider = messageProvider,
-                CommunicationMonitorRunningPeriodInSeconds = 31,
+                CommunicationMonitorRunningPeriodInSeconds = 31
             });
-            // Staring message system. Messages before 'startingThesystem' will be ignored.
-            messageProvider.Start(startingThesystem);
+            // Staring message system. Messages before 'startingTheSystem' will be ignored.
+            messageProvider.Start(startingTheSystem);
         }
 
         private static IMessageProvider ResolveMessageProvider()
         {
-            IMessageProvider messageProvider = null;
+            IMessageProvider messageProvider;
             try
             {
-                Type channelAdapterType = GetMessageProviderType();
+                var channelAdapterType = GetMessageProviderType();
                 messageProvider = (IMessageProvider)Activator.CreateInstance(channelAdapterType);
             }
             catch (Exception e) //logged, rethrown
@@ -64,7 +57,7 @@ namespace SenseNet.Security.Tests.TestPortal
         }
         private static Type GetMessageProviderType()
         {
-            string channelProviderTypeName = Configuration.Messaging.MessageProvider;
+            var channelProviderTypeName = Configuration.Messaging.MessageProvider;
             if (string.IsNullOrEmpty(channelProviderTypeName))
                 return typeof(DefaultMessageProvider);
 

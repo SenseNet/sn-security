@@ -1,14 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SenseNet.Security.EF6SecurityStore;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Tests.TestPortal;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using SenseNet.Security.Data;
 
 namespace SenseNet.Security.Tests
@@ -31,14 +28,14 @@ namespace SenseNet.Security.Tests
                 new { eLevel = 3, eWidth=10 },
                 new { eLevel = 4, eWidth=10 },
                 new { eLevel = 5, eWidth=10 },
-                new { eLevel = 6, eWidth=10 },
+                new { eLevel = 6, eWidth=10 }
             };
             var results = new LoadingTimeTestResult[testCases.Length];
             var i = 0;
             foreach (var testCase in testCases)
                 results[i++] = TestLoadingBigStructure(testCase.eLevel, testCase.eWidth);
 
-            var context = new Context(TestUser.User1);
+            var _ = new Context(TestUser.User1);
         }
         private static LoadingTimeTestResult TestLoadingBigStructure(int entityMaxLevel, int entityLevelWidth)
         {
@@ -65,8 +62,8 @@ namespace SenseNet.Security.Tests
             };
         }
 
-        [DebuggerDisplay("{ToString()}")]
-        class LoadingTimeTestResult
+        [DebuggerDisplay("{" + nameof(ToString) + "()}")]
+        private class LoadingTimeTestResult
         {
             public int Entities;
             public int Users;
@@ -77,8 +74,8 @@ namespace SenseNet.Security.Tests
 
             public override string ToString()
             {
-                return String.Format("Entities: {0}, Users: {1}, Groups: {2}, Members: {3}, Aces: {4} LoadingTime: {5}",
-                    Entities, Users, Groups, Members, Aces, LoadingTime);
+                return $"Entities: {Entities}, Users: {Users}, Groups: {Groups}, " +
+                       $"Members: {Members}, Aces: {Aces} LoadingTime: {LoadingTime}";
             }
         }
 
@@ -93,7 +90,7 @@ namespace SenseNet.Security.Tests
             var storage = new Dictionary<int, StoredSecurityEntity>();
 
             var root = CreateEntity_Big(null, 9999999, storage);
-            for (int level = 1; level < 2; level++)
+            for (var level = 1; level < 2; level++)
                 CreateTestEntities_Big(0, root, storage);
 
             return storage;
@@ -102,7 +99,7 @@ namespace SenseNet.Security.Tests
         {
             if (currentLevel >= _maxLevel)
                 return;
-            for (int i = 0; i < _levelWidth; i++)
+            for (var i = 0; i < _levelWidth; i++)
             {
                 var entity = CreateEntity_Big(root, root.OwnerId, storage);
                 CreateTestEntities_Big(currentLevel + 1, entity, storage);
@@ -113,9 +110,9 @@ namespace SenseNet.Security.Tests
             var entity = new StoredSecurityEntity
             {
                 Id = _id++,
-                ParentId = parentEntity == null ? default(int) : parentEntity.Id,
+                ParentId = parentEntity?.Id ?? default,
                 IsInherited = true,
-                OwnerId = ownerId,
+                OwnerId = ownerId
             };
             storage[entity.Id] = entity;
 
@@ -124,10 +121,9 @@ namespace SenseNet.Security.Tests
 
         public static Dictionary<int, SecurityGroup> CreateTestGroups()
         {
-            SecurityGroup g;
             var storage = new Dictionary<int, SecurityGroup>();
 
-            g = new SecurityGroup(Id("G1")) { UserMemberIds = new List<int> { Id("U1"), Id("U2") } }; storage.Add(g.Id, g);
+            var g = new SecurityGroup(Id("G1")) { UserMemberIds = new List<int> { Id("U1"), Id("U2") } }; storage.Add(g.Id, g);
             g = new SecurityGroup(Id("G2")) { UserMemberIds = new List<int> { Id("U3"), Id("U4") } }; storage.Add(g.Id, g);
             g = new SecurityGroup(Id("G3")) { UserMemberIds = new List<int> { Id("U1"), Id("U3") } }; storage.Add(g.Id, g);
             g = new SecurityGroup(Id("G4")) { UserMemberIds = new List<int> { Id("U4") } }; storage.Add(g.Id, g);
@@ -137,16 +133,15 @@ namespace SenseNet.Security.Tests
         }
         public static List<StoredAce> CreateTestAces()
         {
-            var storage = new List<StoredAce>();
-
-            storage.Add(new StoredAce { EntityId = Id("E1"), IdentityId = Id("G1"), LocalOnly = false, AllowBits = 0x0EF, DenyBits = 0x000 });
-            storage.Add(new StoredAce { EntityId = Id("E1"), IdentityId = Id("U1"), LocalOnly = false, AllowBits = 0x0EE, DenyBits = 0x001 });
-            storage.Add(new StoredAce { EntityId = Id("E3"), IdentityId = Id("G2"), LocalOnly = false, AllowBits = 0x0ED, DenyBits = 0x002 });
-            storage.Add(new StoredAce { EntityId = Id("E5"), IdentityId = Id("G2"), LocalOnly = false, AllowBits = 0x0EC, DenyBits = 0x003 });
-            storage.Add(new StoredAce { EntityId = Id("E5"), IdentityId = Id("U2"), LocalOnly = false, AllowBits = 0x0EB, DenyBits = 0x004 });
-            storage.Add(new StoredAce { EntityId = Id("E50"), IdentityId = Id("G3"), LocalOnly = false, AllowBits = 0x0EA, DenyBits = 0x005 });
-
-            return storage;
+            return new List<StoredAce>
+            {
+                new StoredAce { EntityId = Id("E1"), IdentityId = Id("G1"), LocalOnly = false, AllowBits = 0x0EF, DenyBits = 0x000 },
+                new StoredAce { EntityId = Id("E1"), IdentityId = Id("U1"), LocalOnly = false, AllowBits = 0x0EE, DenyBits = 0x001 },
+                new StoredAce { EntityId = Id("E3"), IdentityId = Id("G2"), LocalOnly = false, AllowBits = 0x0ED, DenyBits = 0x002 },
+                new StoredAce { EntityId = Id("E5"), IdentityId = Id("G2"), LocalOnly = false, AllowBits = 0x0EC, DenyBits = 0x003 },
+                new StoredAce { EntityId = Id("E5"), IdentityId = Id("U2"), LocalOnly = false, AllowBits = 0x0EB, DenyBits = 0x004 },
+                new StoredAce { EntityId = Id("E50"), IdentityId = Id("G3"), LocalOnly = false, AllowBits = 0x0EA, DenyBits = 0x005 }
+            };
         }
 
         private static int Id(string name)
@@ -206,7 +201,7 @@ namespace SenseNet.Security.Tests
         //    Assert.Inconclusive("Loading times: {0}, {1}, {2}", time1, time4, _log);
 
 
-        //    // Loading times: 00:00:10.2905993, 00:02:35.7031781, 00:02:11.6167352 // #1: main lists with explicite capacity
+        //    // Loading times: 00:00:10.2905993, 00:02:35.7031781, 00:02:11.6167352 // #1: main lists with explicit capacity
         //    // Loading times: 00:00:10.2637016, 00:02:33.3550854, 00:02:07.6887293 // #2: dictionary instead of concurrent dictionary
         //    //                                                                            + less dictionary lookups in the building relationships
         //    // Loading times: 00:00:10.2887780, 00:02:33.5082941, 00:02:03.8172389
@@ -217,7 +212,7 @@ namespace SenseNet.Security.Tests
         //    // Loading times: 00:00:09.5691147, 00:00:19.1797264, Load: 00:00:12.7218657, Rel: 00:00:02.9009923, Copy: 00:00:03.5535364
         //}
 
-        static StringBuilder _log = new StringBuilder();
+        private static readonly StringBuilder _log = new StringBuilder();
 
         public static IDictionary<int, SecurityEntity> LoadSecurityEntities_1(ISecurityDataProvider dataProvider)
         {
@@ -236,16 +231,16 @@ namespace SenseNet.Security.Tests
                 entities.AddOrUpdate(entity.Id, entity, (key, val) => val);
 
                 // memorize relations
-                if (storedEntity.ParentId != default(int))
+                if (storedEntity.ParentId != default)
                     //entity.Parent = entities[storedEntity.ParentId];
                     relations.Add(new Tuple<int, int>(storedEntity.Id, storedEntity.ParentId));
             }
 
             // set parent/child relationship
-            foreach (var rel in relations)
+            foreach (var (id, parentId) in relations)
             {
-                entities[rel.Item1].Parent = entities[rel.Item2];
-                entities[rel.Item2].AddChild(entities[rel.Item1]);
+                entities[id].Parent = entities[parentId];
+                entities[parentId].AddChild(entities[id]);
             }
 
             return entities;
@@ -269,7 +264,7 @@ namespace SenseNet.Security.Tests
                 entities.Add(entity.Id, entity);
 
                 // memorize relations
-                if (storedEntity.ParentId != default(int))
+                if (storedEntity.ParentId != default)
                     //entity.Parent = entities[storedEntity.ParentId];
                     relations.Add(new Tuple<SecurityEntity, int>(entity, storedEntity.ParentId));
             }
@@ -278,11 +273,11 @@ namespace SenseNet.Security.Tests
             timer = Stopwatch.StartNew();
 
             // set parent/child relationship
-            foreach (var rel in relations)
+            foreach (var (securityEntity, parentId) in relations)
             {
-                var parentEntity = entities[rel.Item2];
-                rel.Item1.Parent = parentEntity;
-                parentEntity.AddChild(rel.Item1);
+                var parentEntity = entities[parentId];
+                securityEntity.Parent = parentEntity;
+                parentEntity.AddChild(securityEntity);
             }
             _log.Append("Rel:").Append(timer.Elapsed).Append(", ");
             timer.Stop();
@@ -315,7 +310,7 @@ namespace SenseNet.Security.Tests
                 entities.Add(entity.Id, entity);
 
                 // memorize relations
-                if (storedEntity.ParentId != default(int))
+                if (storedEntity.ParentId != default)
                     //entity.Parent = entities[storedEntity.ParentId];
                     relations.Add(new Tuple<SecurityEntity, int>(entity, storedEntity.ParentId));
             }
@@ -324,11 +319,11 @@ namespace SenseNet.Security.Tests
             timer = Stopwatch.StartNew();
 
             // set parent/child relationship
-            foreach (var rel in relations)
+            foreach (var (securityEntity, parentId) in relations)
             {
-                var parentEntity = entities[rel.Item2];
-                rel.Item1.Parent = parentEntity;
-                parentEntity.AddChild_Unsafe(rel.Item1);
+                var parentEntity = entities[parentId];
+                securityEntity.Parent = parentEntity;
+                parentEntity.AddChild_Unsafe(securityEntity);
             }
             _log.Append("Rel:").Append(timer.Elapsed).Append(", ");
             timer.Stop();

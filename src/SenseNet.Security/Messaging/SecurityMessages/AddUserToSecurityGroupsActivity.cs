@@ -28,7 +28,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.AddUserToGroups(context, this.UserId, this.ParentGroups);
+            DataHandler.AddUserToGroups(context, UserId, ParentGroups);
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.AddUserToGroups(this.UserId, this.ParentGroups);
+            context.Cache.AddUserToGroups(UserId, ParentGroups);
         }
     }
 }

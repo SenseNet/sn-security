@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -34,7 +35,7 @@ namespace SenseNet.Security
         private readonly SecurityContext _securityContext;
         internal PermissionEvaluator(SecurityContext securityContext)
         {
-            this._securityContext = securityContext;
+            _securityContext = securityContext;
         }
 
         internal void Initialize()
@@ -73,6 +74,7 @@ namespace SenseNet.Security
         {
             return GetPermissionSafe(userId, entityId, ownerId, null, permissions);
         }
+        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         internal PermissionValue GetPermissionSafe(int userId, int entityId, int ownerId, EntryType? entryType, params PermissionTypeBase[] permissions)
         {
             if (userId == Configuration.Identities.SystemUserId)
@@ -129,7 +131,7 @@ namespace SenseNet.Security
                 var entity = SecurityEntity.GetEntitySafe(_securityContext, entityId, true);
                 var firstAcl = SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true);
 
-                //======== #1: startbits: getpermbits
+                //======== #1: start bits: get permission bits
                 //==>
 
                 var allow = 0ul;
@@ -173,6 +175,7 @@ namespace SenseNet.Security
                     if (descendantEntity.IsInherited)
                     {
                         // if inherited, only denied bits play
+                        // ReSharper disable once LoopCanBeConvertedToQuery
                         foreach (var ace in relevantAces)
                             deny |= ace.DenyBits;
                         if ((deny & mask) != 0uL)
@@ -180,7 +183,7 @@ namespace SenseNet.Security
                     }
                     else
                     {
-                        // if breaked, need to recalculate allow and deny bits too.
+                        // if broken, need to recalculate allow and deny bits too.
                         allow = 0ul;
                         deny = 0ul;
                         var hasLocalOnly = false;
@@ -263,7 +266,7 @@ namespace SenseNet.Security
         {
             return GetExplicitEntriesSafe(entityId, SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true), relatedIdentities, entryType);
         }
-        private List<AceInfo> GetExplicitEntriesSafe(int entityId, AclInfo acl, IEnumerable<int> relatedIdentities, EntryType? entryType)
+        private static List<AceInfo> GetExplicitEntriesSafe(int entityId, AclInfo acl, IEnumerable<int> relatedIdentities, EntryType? entryType)
         {
             IEnumerable<AceInfo> aces = null;
 
@@ -298,8 +301,7 @@ namespace SenseNet.Security
         }
         private void CollectIdentities(int userId, int ownerId, int entityId, List<int> collection)
         {
-            List<int> flattenedGroups;
-            if (_securityContext.Cache.Membership.TryGetValue(userId, out flattenedGroups))
+            if (_securityContext.Cache.Membership.TryGetValue(userId, out var flattenedGroups))
                 collection.AddRange(flattenedGroups);
 
             if (userId != Configuration.Identities.VisitorUserId)
@@ -330,7 +332,7 @@ namespace SenseNet.Security
             return flattened;
         }
 
-        [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+        [ExcludeFromCodeCoverage]
         internal string _traceEffectivePermissionValues(int entityId, int userId, int ownerId)
         {
             var values = new char[PermissionTypeBase.PermissionCount];
@@ -349,7 +351,7 @@ namespace SenseNet.Security
             }
             return new string(values);
         }
-        [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+        [ExcludeFromCodeCoverage]
         internal string _traceMembership()
         {
             var sb = new StringBuilder();

@@ -16,8 +16,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public MoveSecurityEntityActivity(int sourceId, int targetId)
         {
-            this.SourceId = sourceId;
-            this.TargetId = targetId;
+            SourceId = sourceId;
+            TargetId = targetId;
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.MoveSecurityEntity(context, this.SourceId, this.TargetId);
+            DataHandler.MoveSecurityEntity(context, SourceId, TargetId);
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            SecurityEntity.MoveEntity(context, this.SourceId, this.TargetId);
+            SecurityEntity.MoveEntity(context, SourceId, TargetId);
         }
 
         internal override bool MustWaitFor(SecurityActivity olderActivity)
@@ -43,15 +43,13 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             // There aren't any valid scenarios if the olderActivity is ModifySecurityEntityOwnerActivity or SetAclActivity
 
-            var createSecurityEntityActivity = olderActivity as CreateSecurityEntityActivity;
-            if (createSecurityEntityActivity != null)
-                return (this.SourceId == createSecurityEntityActivity.EntityId) || (this.TargetId == createSecurityEntityActivity.EntityId);
+            if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
+                return SourceId == createSecurityEntityActivity.EntityId || TargetId == createSecurityEntityActivity.EntityId;
 
-            var deleteSecurityEntityActivity = olderActivity as DeleteSecurityEntityActivity;
-            if (deleteSecurityEntityActivity != null)
+            if (olderActivity is DeleteSecurityEntityActivity deleteSecurityEntityActivity)
             {
-                var ctx = this.Context;
-                var entities = SecurityEntity.PeekEntities(ctx, deleteSecurityEntityActivity.EntityId, this.SourceId, this.TargetId);
+                var ctx = Context;
+                var entities = SecurityEntity.PeekEntities(ctx, deleteSecurityEntityActivity.EntityId, SourceId, TargetId);
 
                 var deleteTarget = entities[0];
                 var moveSource = entities[1];
@@ -62,11 +60,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                 if (DependencyTools.HasAncestorRelation(ctx, moveTarget, deleteTarget))
                     return true;
             }
-            var moveSecurityEntityActivity = olderActivity as MoveSecurityEntityActivity;
-            if (moveSecurityEntityActivity != null)
+
+            if (olderActivity is MoveSecurityEntityActivity moveSecurityEntityActivity)
             {
-                var ctx = this.Context;
-                var entities = SecurityEntity.PeekEntities(ctx, this.SourceId, this.TargetId, moveSecurityEntityActivity.SourceId, moveSecurityEntityActivity.TargetId);
+                var ctx = Context;
+                var entities = SecurityEntity.PeekEntities(ctx, SourceId, TargetId, moveSecurityEntityActivity.SourceId, moveSecurityEntityActivity.TargetId);
                 var move1Source = entities[0];
                 var move1Target = entities[1];
                 var move2Source = entities[2];
@@ -76,9 +74,10 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                     DependencyTools.HasAncestorRelation(ctx, move1Source, move2Source) ||
                     DependencyTools.HasAncestorRelation(ctx, move1Source, move2Target) ||
                     DependencyTools.HasAncestorRelation(ctx, move1Target, move2Source) ||
-                    DependencyTools.HasAncestorRelation(ctx, move1Target, move2Target)
-                    )
+                    DependencyTools.HasAncestorRelation(ctx, move1Target, move2Target))
+                {
                     return true;
+                }
             }
             return false;
         }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SenseNet.Security.Data;
 using SenseNet.Security.Tests.TestPortal;
 
 namespace SenseNet.Security.Tests
@@ -13,7 +12,7 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_StoreSimpleGroup()
         {
-            var groupId = 101;
+            const int groupId = 101;
             //var group = new TestGroup { Id = groupId, };
             //group.SetGroupMembers(new TestGroup[0]);
             //group.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 });
@@ -25,7 +24,7 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId);
             Assert.AreEqual(groupId, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
@@ -34,8 +33,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_StoreTwoGroups()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 });
@@ -56,22 +55,22 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
         }
         [TestMethod]
         public void Membership_StoreGroupCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -90,19 +89,19 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User5.Id));
         }
 
@@ -110,8 +109,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_DeleteRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -130,15 +129,15 @@ namespace SenseNet.Security.Tests
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
         }
         [TestMethod]
         public void Membership_DeleteMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -155,7 +154,7 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
@@ -165,8 +164,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_DeleteMemberGroupById()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -185,7 +184,7 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
@@ -195,9 +194,9 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_DeleteGroupFromCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -219,13 +218,13 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
@@ -245,7 +244,7 @@ namespace SenseNet.Security.Tests
         {
 
             //# deleting an invalid group
-            CurrentContext.Security.DeleteSecurityGroup(default(int));
+            CurrentContext.Security.DeleteSecurityGroup(default);
 
         }
 
@@ -253,8 +252,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_AddUserToRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -271,20 +270,20 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
         }
         [TestMethod]
         public void Membership_AddUserToMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -301,21 +300,21 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
         }
         [TestMethod]
         public void Membership_AddUserToGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -337,28 +336,28 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(3, loaded.UserMemberIds.Count());
+            Assert.AreEqual(3, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User6.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User5.Id));
         }
 
         [TestMethod]
         public void Membership_RemoveUserFromRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -375,20 +374,20 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
         }
         [TestMethod]
         public void Membership_RemoveUserFromMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1, TestUser.User2 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -405,21 +404,21 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
         }
         [TestMethod]
         public void Membership_RemoveUserFromGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -440,18 +439,18 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(2, loaded.UserMemberIds.Count());
+            Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User5.Id));
         }
 
@@ -459,8 +458,8 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Membership_AddGroupToRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -468,7 +467,7 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group1);
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
 
-            var groupId3 = 103;
+            const int groupId3 = 103;
             var group3 = new TestGroup { Id = groupId3 };
             group3.SetUserMembers(new ISecurityUser[] { TestUser.User3 }); group3.SetGroupMembers(new TestGroup[0]); group3.SetGroupsWhereThisIsMember(new TestGroup[0]);
             AddOrModifySecurityGroup(CurrentContext.Security, group3);
@@ -483,24 +482,24 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
         }
         [TestMethod]
         public void Membership_AddGroupToMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -508,7 +507,7 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group1);
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
 
-            var groupId3 = 103;
+            const int groupId3 = 103;
             var group3 = new TestGroup { Id = groupId3 };
             group3.SetUserMembers(new ISecurityUser[] { TestUser.User3 }); group3.SetGroupMembers(new TestGroup[0]); group3.SetGroupsWhereThisIsMember(new TestGroup[0]);
             AddOrModifySecurityGroup(CurrentContext.Security, group3);
@@ -523,25 +522,25 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
         }
         [TestMethod]
         public void Membership_AddGroupToGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -558,8 +557,8 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
             AddOrModifySecurityGroup(CurrentContext.Security, group3);
 
-            var groupId4 = 104;
-            var group4 = new TestGroup { Id = groupId4, };
+            const int groupId4 = 104;
+            var group4 = new TestGroup { Id = groupId4 };
             group4.SetUserMembers(new ISecurityUser[] { TestUser.User4 });
             group4.SetGroupMembers(new TestGroup[0]);
             group4.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -575,31 +574,31 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId4);
             Assert.AreEqual(groupId4, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
         }
 
         [TestMethod]
         public void Membership_RemoveGroupFromRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -620,25 +619,25 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
         }
         [TestMethod]
         public void Membership_RemoveGroupFromMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -659,26 +658,26 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
         }
         [TestMethod]
         public void Membership_RemoveGroupFromGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -705,30 +704,30 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId4);
             Assert.AreEqual(groupId4, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
         }
 
         [TestMethod]
         public void Membership_AddGroupChainToRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -736,8 +735,8 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group1);
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
 
-            var groupId3 = 103;
-            var groupId4 = 104;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
             var group3 = new TestGroup { Id = groupId3 };
             var group4 = new TestGroup { Id = groupId4 };
             group3.SetUserMembers(new ISecurityUser[] { TestUser.User3 }); group3.SetGroupMembers(new[] { group4 }); group3.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -755,29 +754,29 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId4);
             Assert.AreEqual(groupId4, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
         }
         [TestMethod]
         public void Membership_AddGroupChainToMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             group1.SetUserMembers(new ISecurityUser[] { TestUser.User1 }); group1.SetGroupMembers(new[] { group2 }); group1.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -785,8 +784,8 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group1);
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
 
-            var groupId3 = 103;
-            var groupId4 = 104;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
             var group3 = new TestGroup { Id = groupId3 };
             var group4 = new TestGroup { Id = groupId4 };
             group3.SetUserMembers(new ISecurityUser[] { TestUser.User3 }); group3.SetGroupMembers(new[] { group4 }); group3.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -804,30 +803,30 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId4);
             Assert.AreEqual(groupId4, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
         }
         [TestMethod]
         public void Membership_AddGroupChainToGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -839,8 +838,8 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
             AddOrModifySecurityGroup(CurrentContext.Security, group3);
 
-            var groupId4 = 104;
-            var groupId5 = 105;
+            const int groupId4 = 104;
+            const int groupId5 = 105;
             var group4 = new TestGroup { Id = groupId4 };
             var group5 = new TestGroup { Id = groupId5 };
             group4.SetUserMembers(new ISecurityUser[] { TestUser.User4 }); group4.SetGroupMembers(new[] { group5 }); group4.SetGroupsWhereThisIsMember(new TestGroup[0]);
@@ -858,37 +857,37 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId4);
             Assert.AreEqual(groupId4, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId5);
             Assert.AreEqual(groupId5, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User5.Id));
         }
 
         [TestMethod]
         public void Membership_RemoveGroupChainFromRootGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -912,31 +911,31 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId4);
             Assert.AreEqual(groupId4, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
         }
         [TestMethod]
         public void Membership_RemoveGroupChainFromMemberGroup()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -960,32 +959,32 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId4);
             Assert.AreEqual(groupId4, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
         }
         [TestMethod]
         public void Membership_RemoveGroupChainFromGroupInCircle()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
-            var groupId5 = 105;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
+            const int groupId5 = 105;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -1017,27 +1016,27 @@ namespace SenseNet.Security.Tests
 
             var loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId1);
             Assert.AreEqual(groupId1, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId2);
             Assert.AreEqual(groupId2, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId3);
             Assert.AreEqual(groupId3, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId4);
             Assert.AreEqual(groupId4, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
             loaded = DataHandler.GetSecurityGroup(CurrentContext.Security, groupId5);
             Assert.AreEqual(groupId5, loaded.Id);
-            Assert.AreEqual(1, loaded.UserMemberIds.Count());
+            Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User5.Id));
         }
 
@@ -1063,13 +1062,13 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual("U1:G1|U3:G3,G4,G5|U4:G3,G4,G5|U5:G3,G4,G5", DumpMembership(CurrentContext.Security));
         }
-        private Context Prepare_GroupThatContainsCircle_Test()
+        private void Prepare_GroupThatContainsCircle_Test()
         {
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
-            var groupId5 = 105;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
+            const int groupId5 = 105;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -1091,20 +1090,18 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group3);
             AddOrModifySecurityGroup(CurrentContext.Security, group4);
             AddOrModifySecurityGroup(CurrentContext.Security, group5);
-
-            return CurrentContext;
         }
 
 
         [TestMethod]
         public void Membership_Flattening()
         {
-            // make two disjunct structure
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
-            var groupId5 = 105;
+            // make two disjunctive structure
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
+            const int groupId5 = 105;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -1144,9 +1141,9 @@ namespace SenseNet.Security.Tests
                 // Test description:
                 // U1 and U2 are in the G2, G3.
                 // There is a group: G4.
-                // In repository (see the SecurityTreeForTests.vsd) the second level nodes belong to a group: E2 - G1, E3 - G2, E4 - G3. For example these are the workspaces.
-                // Every workspace's first node is secret (E5, E8, E11) so these are breaked but they have open permission for a group: G4.
-                // Let the rule for dymanic group setting is the following:
+                // In repository (see the SecurityTreeForTests.vsd) the second level nodes belong to a group: E2 - G1, E3 - G2, E4 - G3. For example these are the work-spaces.
+                // Every work-space's first node is secret (E5, E8, E11) so these are broken but they have open permission for a group: G4.
+                // Let the rule for dynamic group setting is the following:
                 //     if the U1 user gets the secret node, she is in the G4 group if she has open permission for the parent workspace.
 
                 CleanupMemberships();
@@ -1165,11 +1162,11 @@ namespace SenseNet.Security.Tests
                 TestUser.User1.SetDynamicGroups(null);
                 Assert.IsFalse(CurrentContext.Security.HasPermission(Id("E5"), PermissionType.See));
 
-                //# User hasn read permission on E3 so she is in the G4 group
+                //# User has read permission on E3 so she is in the G4 group
                 TestUser.User1.SetDynamicGroups(new[] { Id("G4") });
                 Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E8"), PermissionType.See));
 
-                //# User hasn read permission on E4 so she is in the G4 group
+                //# User has read permission on E4 so she is in the G4 group
                 TestUser.User1.SetDynamicGroups(new[] { Id("G4") });
                 Assert.IsTrue(CurrentContext.Security.HasPermission(Id("E11"), PermissionType.See));
             }
@@ -1185,11 +1182,11 @@ namespace SenseNet.Security.Tests
 
             // #1: Create the identity structure: G1(U1,G2), G2(U2, G3), G3(U3, G1), G4(U4, G5), G5(U5)
 
-            var groupId1 = 101;
-            var groupId2 = 102;
-            var groupId3 = 103;
-            var groupId4 = 104;
-            var groupId5 = 105;
+            const int groupId1 = 101;
+            const int groupId2 = 102;
+            const int groupId3 = 103;
+            const int groupId4 = 104;
+            const int groupId5 = 105;
             var group1 = new TestGroup { Id = groupId1 };
             var group2 = new TestGroup { Id = groupId2 };
             var group3 = new TestGroup { Id = groupId3 };
@@ -1219,11 +1216,11 @@ namespace SenseNet.Security.Tests
             ctx.CreateSecurityEntity(entityId, 0, int.MaxValue);
 
             var ed = ctx.CreateAclEditor();
-            ed.Allow(entityId, group1.Id, false, new[] { PermissionType.Open, PermissionType.Custom01 });
-            ed.Allow(entityId, group2.Id, false, new[] { PermissionType.Open, PermissionType.Custom02 });
-            ed.Allow(entityId, group3.Id, false, new[] { PermissionType.Open, PermissionType.Custom03 });
-            ed.Allow(entityId, group4.Id, false, new[] { PermissionType.Open, PermissionType.Custom04 });
-            ed.Allow(entityId, group5.Id, false, new[] { PermissionType.Open, PermissionType.Custom05 });
+            ed.Allow(entityId, group1.Id, false, PermissionType.Open, PermissionType.Custom01);
+            ed.Allow(entityId, group2.Id, false, PermissionType.Open, PermissionType.Custom02);
+            ed.Allow(entityId, group3.Id, false, PermissionType.Open, PermissionType.Custom03);
+            ed.Allow(entityId, group4.Id, false, PermissionType.Open, PermissionType.Custom04);
+            ed.Allow(entityId, group5.Id, false, PermissionType.Open, PermissionType.Custom05);
             ed.Apply();
 
             // #3: Validate the initial conditions: User4 has only Open and Custom04
@@ -1268,13 +1265,13 @@ namespace SenseNet.Security.Tests
         public static string DumpMembership(Dictionary<int, List<int>> membership)
         {
             if (membership.Count == 0)
-                return String.Empty;
+                return string.Empty;
 
             var sb = new StringBuilder();
             foreach (var userId in membership.Keys.OrderBy(s => s))
             {
                 sb.Append(GetUserName(userId)).Append(":");
-                sb.Append(String.Join(",", membership[userId].OrderBy(s => s).Select(GetGroupName)));
+                sb.Append(string.Join(",", membership[userId].OrderBy(s => s).Select(GetGroupName)));
                 sb.Append("|");
             }
             sb.Length--;
@@ -1282,11 +1279,11 @@ namespace SenseNet.Security.Tests
         }
         private static string GetUserName(int userId)
         {
-            return "U" + (userId % 100);
+            return "U" + userId % 100;
         }
         private static string GetGroupName(int groupId)
         {
-            return "G" + (groupId % 100);
+            return "G" + groupId % 100;
         }
 
     }

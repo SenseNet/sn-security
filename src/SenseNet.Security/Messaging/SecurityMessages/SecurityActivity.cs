@@ -45,7 +45,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected SecurityActivity()
         {
-            TypeName = this.GetType().Name;
+            TypeName = GetType().Name;
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <param name="context">Current SecurityContext</param>
         /// <param name="waitForComplete">If the value is true (default),
         /// the current thread waits for the full execution on this computer.
-        /// Otherwise the method returns immediatelly.</param>
+        /// Otherwise the method returns immediately.</param>
         public void Execute(SecurityContext context, bool waitForComplete = true)
         {
             _context = context;
@@ -90,7 +90,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                 _executionException = e;
 
                 // we log this here, because if the activity is not waited for later than the exception would not be logged
-                SnTrace.Security.WriteError("Error during security activity execution. SA{0} {1}", this.Id, e);
+                SnTrace.Security.WriteError("Error during security activity execution. SA{0} {1}", Id, e);
             }
             finally
             {
@@ -118,18 +118,18 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         private void Distribute(SecurityContext context)
         {
             DistributedMessage msg = this;
-            if (this.BodySize > Configuration.Messaging.DistributableSecurityActivityMaxSize)
-                msg = new BigActivityMessage { DatabaseId = this.Id };
+            if (BodySize > Configuration.Messaging.DistributableSecurityActivityMaxSize)
+                msg = new BigActivityMessage { DatabaseId = Id };
             context.MessageProvider.SendMessage(msg);
         }
 
         /// <summary>
-        /// Cusomization point for the activity data persistence.
+        /// Customization point for the activity data persistence.
         /// </summary>
         /// <param name="context">Current SecurityContext to use any security related thing.</param>
         protected abstract void Store(SecurityContext context);
         /// <summary>
-        /// Cusomization point for the memory operations based on the activity data.
+        /// Customization point for the memory operations based on the activity data.
         /// </summary>
         /// <param name="context">Current SecurityContext to use any security related thing.</param>
         protected abstract void Apply(SecurityContext context);
@@ -157,7 +157,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             {
                 if (!_finishSignal.WaitOne(Configuration.Messaging.SecuritActivityTimeoutInSeconds * 1000, false))
                 {
-                    var message = $"SecurityActivity is not finishing on a timely manner (#{this.Id})";
+                    var message = $"SecurityActivity is not finishing on a timely manner (#{Id})";
                     throw new SecurityActivityTimeoutException(message);
                 }
             }
@@ -165,7 +165,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
         [NonSerialized]
         private SecurityActivity _attachedActivity;
-        internal SecurityActivity AttachedActivity { get { return _attachedActivity; } private set { _attachedActivity = value; } }
+        internal SecurityActivity AttachedActivity
+        {
+            get => _attachedActivity;
+            private set => _attachedActivity = value;
+        }
 
         /// <summary>
         /// When an activity gets executed and needs to be finalized, all activity objects that have
@@ -264,13 +268,10 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                 return ctx.IsEntityInTree(descendant, ancestorId);
             }
 
-            internal static bool AnyIsInTree(SecurityContext ctx, IEnumerable<int> descendatIds, int ancestorId)
+            internal static bool AnyIsInTree(SecurityContext ctx, IEnumerable<int> descendantIds, int ancestorId)
             {
-                var entities = SecurityEntity.PeekEntities(ctx, descendatIds.ToArray());
-                foreach (var entity in entities)
-                    if (ctx.IsEntityInTree(entity, ancestorId))
-                        return true;
-                return false;
+                var entities = SecurityEntity.PeekEntities(ctx, descendantIds.ToArray());
+                return entities.Any(entity => ctx.IsEntityInTree(entity, ancestorId));
             }
         }
 
@@ -294,8 +295,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public bool FromReceiver
         {
-            get { return _fromReceiver; }
-            set { _fromReceiver = value; }
+            get => _fromReceiver;
+            set => _fromReceiver = value;
         }
 
         [NonSerialized]
@@ -305,8 +306,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public bool FromDatabase
         {
-            get { return _fromDatabase; }
-            set { _fromDatabase = value; }
+            get => _fromDatabase;
+            set => _fromDatabase = value;
         }
 
         [NonSerialized]
@@ -316,31 +317,29 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public bool IsUnprocessedActivity
         {
-            get { return _isUnprocessedActivity; }
-            set { _isUnprocessedActivity = value; }
+            get => _isUnprocessedActivity;
+            set => _isUnprocessedActivity = value;
         }
 
-        [NonSerialized]
-        private List<SecurityActivity> _waitingFor = new List<SecurityActivity>();
-        internal List<SecurityActivity> WaitingFor => _waitingFor;
+        [field: NonSerialized]
+        internal List<SecurityActivity> WaitingFor { get; private set; } = new List<SecurityActivity>();
 
-        [NonSerialized]
-        private List<SecurityActivity> _waitingForMe = new List<SecurityActivity>();
-        internal List<SecurityActivity> WaitingForMe => _waitingForMe;
+        [field: NonSerialized]
+        internal List<SecurityActivity> WaitingForMe { get; private set; } = new List<SecurityActivity>();
 
         internal void WaitFor(SecurityActivity olderActivity)
         {
             // this method must called from thread safe block.
-            if (this.WaitingFor.All(x => x.Id != olderActivity.Id))
-                this.WaitingFor.Add(olderActivity);
-            if (olderActivity.WaitingForMe.All(x => x.Id != this.Id))
+            if (WaitingFor.All(x => x.Id != olderActivity.Id))
+                WaitingFor.Add(olderActivity);
+            if (olderActivity.WaitingForMe.All(x => x.Id != Id))
                 olderActivity.WaitingForMe.Add(this);
         }
 
         internal void FinishWaiting(SecurityActivity olderActivity)
         {
             // this method must called from thread safe block.
-            RemoveDependency(this.WaitingFor, olderActivity);
+            RemoveDependency(WaitingFor, olderActivity);
             RemoveDependency(olderActivity.WaitingForMe, this);
         }
         private static void RemoveDependency(List<SecurityActivity> dependencyList, SecurityActivity activity)
@@ -355,8 +354,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         public void OnDeserialization(object sender)
         {
-            _waitingFor = new List<SecurityActivity>();
-            _waitingForMe = new List<SecurityActivity>();
+            WaitingFor = new List<SecurityActivity>();
+            WaitingForMe = new List<SecurityActivity>();
         }
     }
 }

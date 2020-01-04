@@ -1,10 +1,10 @@
-﻿using System;
-using System.Configuration;
+﻿using System.Configuration;
 
 namespace SenseNet.Security.Messaging.Msmq
 {
     internal static class Configuration
     {
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string MessageQueueNameKey = "SecurityMsmqChannelQueueName";
         private static string _messageQueueName;
         public static string MessageQueueName
@@ -14,13 +14,14 @@ namespace SenseNet.Security.Messaging.Msmq
                 if (_messageQueueName == null)
                 {
                     _messageQueueName = ConfigurationManager.AppSettings[MessageQueueNameKey];
-                    if (String.IsNullOrEmpty(_messageQueueName))
-                        _messageQueueName = String.Empty;
+                    if (string.IsNullOrEmpty(_messageQueueName))
+                        _messageQueueName = string.Empty;
                 }
                 return _messageQueueName;
             }
         }
 
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string MessageRetentionTimeKey = "MessageRetentionTime";
         private static int? _messageRetentionTime;
         /// <summary>
@@ -32,9 +33,8 @@ namespace SenseNet.Security.Messaging.Msmq
             {
                 if (_messageRetentionTime == null)
                 {
-                    int value;
                     var setting = ConfigurationManager.AppSettings[MessageRetentionTimeKey];
-                    if (String.IsNullOrEmpty(setting) || !Int32.TryParse(setting, out value))
+                    if (string.IsNullOrEmpty(setting) || !int.TryParse(setting, out var value))
                         value = 10;
                     if (value < 2)
                         value = 2;
@@ -44,6 +44,7 @@ namespace SenseNet.Security.Messaging.Msmq
             }
         }
         
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string MsmqReconnectDelayKey = "MsmqReconnectDelay";
         private static int? _msmqReconnectDelay;
         /// <summary>
@@ -55,9 +56,8 @@ namespace SenseNet.Security.Messaging.Msmq
             {
                 if (!_msmqReconnectDelay.HasValue)
                 {
-                    int value;
                     var setting = ConfigurationManager.AppSettings[MsmqReconnectDelayKey];
-                    if (String.IsNullOrEmpty(setting) || !Int32.TryParse(setting, out value))
+                    if (string.IsNullOrEmpty(setting) || !int.TryParse(setting, out var value))
                         value = 30;
                     _msmqReconnectDelay = value * 1000;
                 }

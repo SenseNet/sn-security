@@ -10,7 +10,7 @@ namespace SenseNet.Security
     /// for building a rich user interface. All changes should be made through the AclEditor class.
     /// </summary>
     [Serializable]
-    [DebuggerDisplay("{ToString()}")]
+    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class AccessControlList
     {
         /// <summary>Id of the related entity.</summary>
@@ -19,7 +19,7 @@ namespace SenseNet.Security
         /// <summary>Determines whether the entity inherits any permission values from its ancestors.</summary>
         public bool Inherits { get; set; }
 
-        /// <summary>Set of AccessControlEnties</summary>
+        /// <summary>Set of AccessControlEntries</summary>
         public IEnumerable<AccessControlEntry> Entries { get; set; }
 
         /// <summary>Converts the value of this instance to a System.String.</summary>

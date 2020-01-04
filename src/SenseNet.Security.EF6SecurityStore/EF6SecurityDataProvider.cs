@@ -94,7 +94,7 @@ namespace SenseNet.Security.EF6SecurityStore
         }
 
         /// <summary>
-        /// Preloader method for retrieving all stored SecurityEntity. Called during system start.
+        /// Pre-loader method for retrieving all stored SecurityEntity. Called during system start.
         /// </summary>
         public IEnumerable<StoredSecurityEntity> LoadSecurityEntities()
         {
@@ -111,7 +111,7 @@ namespace SenseNet.Security.EF6SecurityStore
         }
         /// <summary>
         /// Loads the set of security holder entity ids.
-        /// This is a distincted int list of entities in entries plus entities that are not inherited (IsInherited = false).
+        /// This is a distinct int list of entities in entries plus entities that are not inherited (IsInherited = false).
         /// </summary>
         public IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks()
         {
@@ -390,7 +390,7 @@ namespace SenseNet.Security.EF6SecurityStore
         /// than the given fragment size ("count"), the largest id could not reach.
         /// Activities in the result array are sorted by id.
         /// Value of the IsUnprocessedActivity property of every loaded object
-        /// vill be the value of the given "executingUnprocessedActivities" parameter.
+        /// will be the value of the given "executingUnprocessedActivities" parameter.
         /// </summary>
         /// <param name="from">Least expected id.</param>
         /// <param name="to">Largest allowed id.</param>
@@ -418,7 +418,7 @@ namespace SenseNet.Security.EF6SecurityStore
         /// Loads a SecurityActivity fragment by the individual id array.
         /// Activities in the result array are sorted by id.
         /// Value of the IsUnprocessedActivity property of every loaded object
-        /// vill be the value of the given "executingUnprocessedActivities" parameter.
+        /// will be the value of the given "executingUnprocessedActivities" parameter.
         /// </summary>
         /// <param name="gaps">Individual id array</param>
         /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
@@ -536,7 +536,8 @@ namespace SenseNet.Security.EF6SecurityStore
 
         //===================================================================== Tools
 
-        private EFEntity LoadEFEntity(int entityId, SecurityStorage db)
+        // ReSharper disable once InconsistentNaming
+        private static EFEntity LoadEFEntity(int entityId, SecurityStorage db)
         {
             return db.EFEntities.FirstOrDefault(x => x.Id == entityId);
         }
@@ -555,6 +556,7 @@ namespace SenseNet.Security.EF6SecurityStore
             using (var db = Db())
             {
                 entityIds = db.EFEntries.Where(x => x.IdentityId == groupId).Select(x => x.EFEntityId).Distinct().ToArray();
+                // ReSharper disable once LoopCanBeConvertedToQuery
                 foreach (var relatedEntityId in entityIds)
                 {
                     var aces = db.EFEntries.Where(x => x.EFEntityId == relatedEntityId).ToArray();
@@ -570,7 +572,7 @@ namespace SenseNet.Security.EF6SecurityStore
         /******************************************* membership storage */
 
         /// <summary>
-        /// Preloader method for retrieving all stored SecurityGroups. Called during system start.
+        /// Pre-loader method for retrieving all stored SecurityGroups. Called during system start.
         /// </summary>
         public IEnumerable<SecurityGroup> LoadAllGroups()
         {
@@ -594,7 +596,7 @@ namespace SenseNet.Security.EF6SecurityStore
             }
             return groups.Values;
         }
-        private SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
+        private static SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
         {
             if (groups.TryGetValue(groupId, out var group))
                 return group;

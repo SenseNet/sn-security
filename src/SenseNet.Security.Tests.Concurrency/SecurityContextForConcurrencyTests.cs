@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿// ReSharper disable once CheckNamespace
 namespace SenseNet.Security.Tests.TestPortal
 {
     public class SecurityContextForConcurrencyTests : SecurityContext
     {
         public SecurityContextForConcurrencyTests(ISecurityUser currentUser) : base(currentUser) { }
 
-        public static new void StartTheSystem(SecurityConfiguration configuration)
+        public new static void StartTheSystem(SecurityConfiguration configuration)
         {
             SecurityContext.StartTheSystem(configuration);
-            _generalContext = new SecurityContextForConcurrencyTests(SystemUser);
+            General = new SecurityContextForConcurrencyTests(SystemUser);
         }
 
         /*********************** Low level evaluator API **********************/
@@ -33,10 +28,6 @@ namespace SenseNet.Security.Tests.TestPortal
         }
 
         /***************** General context for built in system user ***************/
-        private static SecurityContextForConcurrencyTests _generalContext;
-        internal static new SecurityContextForConcurrencyTests General
-        {
-            get { return _generalContext; }
-        }
+        internal new static SecurityContextForConcurrencyTests General { get; private set; }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using SenseNet.Diagnostics;
-using SenseNet.Security.Messaging;
+﻿using SenseNet.Security.Messaging;
 
 namespace SenseNet.Security
 {
@@ -35,9 +33,9 @@ namespace SenseNet.Security
         public int? CommunicationMonitorRunningPeriodInSeconds { get; set; }
 
         /// <summary>Time span before executed activities are cleared from the database. Default: 42</summary>
-        public int? SecuritActivityLifetimeInMinutes { get; set; }
+        public int? SecuritActivityLifetimeInMinutes { get; set; } //TODO:~ TYPO
 
         /// <summary>Default: 120</summary>
-        public int? SecuritActivityTimeoutInSeconds { get; set; }
+        public int? SecuritActivityTimeoutInSeconds { get; set; } //TODO:~ TYPO
     }
 }

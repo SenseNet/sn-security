@@ -27,7 +27,7 @@ namespace SenseNet.Security
         /*==============================================================================*/
 
         /// <summary> 0 based index. Max value is the bit count of long.</summary>
-        public int Index { get; private set; }
+        public int Index { get; }
         /// <summary>Case sensitive unique name.</summary>
         public string Name { get; }
         /// <summary>
@@ -53,9 +53,9 @@ namespace SenseNet.Security
         /// <param name="index">Set of values: 0 &lt;= i &lt; 64 (bit count of ulong).</param>
         protected PermissionTypeBase(string name, int index)
         {
-            this.Index = index;
-            this.Name = name;
-            this.Mask = 1ul << index;
+            Index = index;
+            Name = name;
+            Mask = 1ul << index;
             _permissionArray[index] = this;
             _permissionDict[Name] = this;
             Denies = new List<PermissionTypeBase>();
@@ -94,22 +94,20 @@ namespace SenseNet.Security
         /// <exception cref="KeyNotFoundException">KeyNotFoundException</exception>
         public static PermissionTypeBase GetPermissionTypeByName(string name)
         {
-            PermissionTypeBase result;
-            if (_permissionDict.TryGetValue(name, out result))
-                return result;
-            return null;
+            return _permissionDict.TryGetValue(name, out var result) ? result : null;
         }
 
         /// <summary>
         /// Returns with the aggregated bitmask of the passed permission type set.
         /// </summary>
-        /// <param name="permissionTypes">Empty parameter means all the parmission types.
+        /// <param name="permissionTypes">Empty parameter means all the permission types.
         /// Permission type order is irrelevant.</param>
-        /// <returns>Aggregated bimask.</returns>
+        /// <returns>Aggregated bitmask.</returns>
         public static ulong GetPermissionMask(IEnumerable<PermissionTypeBase> permissionTypes = null)
         {
             var permTypes = permissionTypes ?? _permissionArray;
             var mask = 0ul;
+            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var permissionType in permTypes)
                 mask |= permissionType.Mask;
             return mask;
@@ -130,13 +128,13 @@ namespace SenseNet.Security
             return new PermissionBitMask { DenyBits = pt.Mask };
         }
         /// <summary>
-        /// Returns a value that has combined bitmasks of the parameters.
+        /// Returns a value that has combined bit-masks of the parameters.
         /// </summary>
         public static PermissionBitMask operator |(PermissionTypeBase pt1, PermissionTypeBase pt2)
         {
-            var pmask1 = new PermissionBitMask { AllowBits = pt1.Mask };
-            var pmask2 = new PermissionBitMask { AllowBits = pt2.Mask };
-            return new PermissionBitMask { AllowBits = pmask1.AllowBits | pmask2.AllowBits, DenyBits = pmask1.DenyBits | pmask2.DenyBits };
+            var pMask1 = new PermissionBitMask { AllowBits = pt1.Mask };
+            var pMask2 = new PermissionBitMask { AllowBits = pt2.Mask };
+            return new PermissionBitMask { AllowBits = pMask1.AllowBits | pMask2.AllowBits, DenyBits = pMask1.DenyBits | pMask2.DenyBits };
         }
     }
 }

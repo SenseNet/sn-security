@@ -12,7 +12,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     {
         private readonly IEnumerable<AclInfo> _acls;
         private readonly List<int> _breaks;
-        private readonly List<int> _unbreaks;
+        private readonly List<int> _undoBreaks;
         private readonly List<StoredAce> _entries = new List<StoredAce>();
         private readonly List<StoredAce> _entriesToRemove = new List<StoredAce>();
         private readonly List<int> _emptyAcls = new List<int>();
@@ -20,11 +20,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Initializes a new instance of the SetAclActivity.
         /// </summary>
-        public SetAclActivity(IEnumerable<AclInfo> acls, List<int> breaks, List<int> unbreaks)
+        public SetAclActivity(IEnumerable<AclInfo> acls, List<int> breaks, List<int> unbreaks) //TODO:~ TYPO
         {
             _acls = acls;
             _breaks = breaks;
-            _unbreaks = unbreaks;
+            _undoBreaks = unbreaks;
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             foreach (var entityId in _breaks)
                 DataHandler.BreakInheritance(context, entityId);
 
-            foreach (var entityId in _unbreaks)
+            foreach (var entityId in _undoBreaks)
                 DataHandler.UnbreakInheritance(context, entityId);
         }
 
@@ -98,10 +98,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         protected override void Apply(SecurityContext context)
         {
             var relevantAcls = _acls?.Where(x => !_emptyAcls.Contains(x.EntityId)).ToArray() ?? new AclInfo[0];
-            SecurityEntity.ApplyAclEditing(context, relevantAcls, _breaks, _unbreaks, _entriesToRemove, _emptyAcls);
+            SecurityEntity.ApplyAclEditing(context, relevantAcls, _breaks, _undoBreaks, _entriesToRemove, _emptyAcls);
         }
 
         [NonSerialized]
+        // ReSharper disable once InconsistentNaming
         private List<int> __allEntityIds;
         internal List<int> AllEntityIds => __allEntityIds ?? (__allEntityIds = CollectEntityIds());
 
@@ -111,8 +112,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             if (_breaks != null)
                 allIds.AddRange(_breaks);
-            if (_unbreaks != null)
-                allIds.AddRange(_unbreaks);
+            if (_undoBreaks != null)
+                allIds.AddRange(_undoBreaks);
             if (_acls != null)
                 allIds.AddRange(_acls.Select(a => a.EntityId));
             
@@ -126,17 +127,14 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             // There aren't any valid scenarios if the olderActivity is ModifySecurityEntityOwnerActivity or MoveSecurityEntityActivity
 
-            var createSecurityEntityActivity = olderActivity as CreateSecurityEntityActivity;
-            if (createSecurityEntityActivity != null)
-                return this.AllEntityIds.Contains(createSecurityEntityActivity.EntityId);
+            if (olderActivity is CreateSecurityEntityActivity createSecurityEntityActivity)
+                return AllEntityIds.Contains(createSecurityEntityActivity.EntityId);
 
-            var deleteSecurityEntityActivity = olderActivity as DeleteSecurityEntityActivity;
-            if (deleteSecurityEntityActivity != null)
-                return DependencyTools.AnyIsInTree(this.Context, this.AllEntityIds, deleteSecurityEntityActivity.EntityId);
+            if (olderActivity is DeleteSecurityEntityActivity deleteSecurityEntityActivity)
+                return DependencyTools.AnyIsInTree(Context, AllEntityIds, deleteSecurityEntityActivity.EntityId);
 
-            var setAclActivity = olderActivity as SetAclActivity;
-            if (setAclActivity != null)
-                return setAclActivity.AllEntityIds.Intersect(this.AllEntityIds).Any();
+            if (olderActivity is SetAclActivity setAclActivity)
+                return setAclActivity.AllEntityIds.Intersect(AllEntityIds).Any();
 
             return false;
         }

@@ -29,16 +29,16 @@ namespace SenseNet.Security
                 entities.Add(entity.Id, entity);
 
                 // memorize relations
-                if (storedEntity.ParentId != default(int))
+                if (storedEntity.ParentId != default)
                     relations.Add(new Tuple<SecurityEntity, int>(entity, storedEntity.ParentId));
             }
 
             // set parent/child relationship
-            foreach (var rel in relations)
+            foreach (var (securityEntity, parentId) in relations)
             {
-                var parentEntity = entities[rel.Item2];
-                rel.Item1.Parent = parentEntity;
-                parentEntity.AddChild_Unsafe(rel.Item1);
+                var parentEntity = entities[parentId];
+                securityEntity.Parent = parentEntity;
+                parentEntity.AddChild_Unsafe(securityEntity);
             }
 
             return new ConcurrentDictionary<int, SecurityEntity>(entities);
@@ -55,8 +55,7 @@ namespace SenseNet.Security
 
             foreach (var storedAce in dataProvider.LoadAllAces())
             {
-                AclInfo acl;
-                if (!acls.TryGetValue(storedAce.EntityId, out acl))
+                if (!acls.TryGetValue(storedAce.EntityId, out var acl))
                 {
                     acl = new AclInfo(storedAce.EntityId);
                     acls.Add(acl.EntityId, acl);
@@ -82,10 +81,10 @@ namespace SenseNet.Security
         }
         private static void CreateSecurityEntity(SecurityContext context, int entityId, int parentEntityId, int ownerId, bool safe)
         {
-            if (entityId == default(int))
+            if (entityId == default)
                 throw new ArgumentException("entityId cannot be default(int)");
 
-            if (parentEntityId != default(int))
+            if (parentEntityId != default)
             {
                 // load or create parent
                 var parent = safe
@@ -142,7 +141,7 @@ namespace SenseNet.Security
             context.DataProvider.UpdateSecurityEntity(entity);
         }
 
-        public static void UnbreakInheritance(SecurityContext context, int entityId)
+        public static void UnbreakInheritance(SecurityContext context, int entityId) //TODO:~ TYPO
         {
             var entity = context.DataProvider.LoadStoredSecurityEntity(entityId);
             if (entity == null)
@@ -259,8 +258,7 @@ namespace SenseNet.Security
 
         internal static void SaveActivity(SecurityActivity activity)
         {
-            int bodySize;
-            var id = activity.Context.DataProvider.SaveSecurityActivity(activity, out bodySize);
+            var id = activity.Context.DataProvider.SaveSecurityActivity(activity, out var bodySize);
             activity.BodySize = bodySize;
             activity.Id = id;
         }

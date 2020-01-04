@@ -1,7 +1,7 @@
 ﻿namespace SenseNet.Security
 {
     /// <summary>
-    /// Represents persistable information about a SecurityEntity instance.
+    /// Represents information about a SecurityEntity instance to persist.
     /// </summary>
     public class StoredSecurityEntity
     {
@@ -24,32 +24,34 @@
         /// <summary>
         /// True if this entity has any explicit entry.
         /// </summary>
-        public bool HasExplicitEntry { get; set; } // used only in the compensation method (reloading in securitycontext)
+        public bool HasExplicitEntry { get; set; } // used only in the compensation method (reloading in security context)
 
         /// <summary>
         /// Nullable representation of the ParentId. Null if there is no parent.
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public int? nullableParentId
         {
-            get { return FromGuid(ParentId); }
-            set { ParentId = ToGuid(value); }
+            get => FromGuid(ParentId);
+            set => ParentId = ToGuid(value);
         }
         /// <summary>
         /// Nullable representation of the OwnerId. Null if there is no owner.
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public int? nullableOwnerId
         {
-            get { return FromGuid(OwnerId); }
-            set { OwnerId = ToGuid(value); }
+            get => FromGuid(OwnerId);
+            set => OwnerId = ToGuid(value);
         }
 
-        private int? FromGuid(int value)
+        private static int? FromGuid(int value)
         {
-            return value == default(int) ? null : (int?)value;
+            return value == default ? null : (int?)value;
         }
-        private int ToGuid(int? value)
+        private static int ToGuid(int? value)
         {
-            return value ?? default(int);
+            return value ?? default;
         }
     }
 }

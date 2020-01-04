@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics;
 using System.IO;
-using SenseNet.Security;
 using SenseNet.Security.Data;
-using SenseNet.Security.EF6SecurityStore;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Tests.TestPortal;
 
@@ -44,13 +40,13 @@ namespace SenseNet.Security.Tests
         }
         internal static string ReplaceIds(string src)
         {
-            int p = src.IndexOf('(');
+            var p = src.IndexOf('(');
             while (p >= 0)
             {
                 var p1 = src.IndexOf(')', p);
                 var s = src.Substring(p + 1, p1 - p - 1);
                 var id = int.Parse(s);
-                var name = Tools.IdToName(id);
+                var name = IdToName(id);
                 src = string.Concat(src.Substring(0, p), name, src.Substring(p1 + 1));
                 p = src.IndexOf('(');
             }
@@ -60,9 +56,9 @@ namespace SenseNet.Security.Tests
         internal static void ParsePermissions(string src, out ulong allowBits, out ulong denyBits)
         {
             //+_____-____++++
-            var mask = 1ul;
+            const ulong mask = 1ul;
             allowBits = denyBits = 0;
-            for (int i = src.Length - 1; i >= 0; i--)
+            for (var i = src.Length - 1; i >= 0; i--)
             {
                 var c = src[i];
                 if (c == '+')
@@ -81,10 +77,10 @@ namespace SenseNet.Security.Tests
         {
             var result = new List<PermissionTypeBase>();
             var index = 0;
-            for (int i = src.Length - 1; i >= 0; i--)
+            for (var i = src.Length - 1; i >= 0; i--)
             {
                 if (src[i] != '_')
-                    result.Add(PermissionType.GetPermissionTypeByIndex(index));
+                    result.Add(PermissionTypeBase.GetPermissionTypeByIndex(index));
                 index++;
             }
             return result.ToArray();
@@ -104,121 +100,120 @@ namespace SenseNet.Security.Tests
 
         internal static Dictionary<int, TestEntity> CreateRepository(TestSecurityContext context)
         {
-            TestEntity e;
             var u1 = TestUser.User1;
             var repository = new Dictionary<int, TestEntity>();
 
-            e = CreateEntity(repository, context, "E1", null, u1);
+            CreateEntity(repository, context, "E1", null, u1);
             {
-                e = CreateEntity(repository, context, "E2", "E1", u1);
+                CreateEntity(repository, context, "E2", "E1", u1);
                 {
-                    e = CreateEntity(repository, context, "E5", "E2", u1);
+                    CreateEntity(repository, context, "E5", "E2", u1);
                     {
-                        e = CreateEntity(repository, context, "E14", "E5", u1);
+                        CreateEntity(repository, context, "E14", "E5", u1);
                         {
-                            e = CreateEntity(repository, context, "E50", "E14", u1);
+                            CreateEntity(repository, context, "E50", "E14", u1);
                             {
-                                e = CreateEntity(repository, context, "E51", "E50", u1);
+                                CreateEntity(repository, context, "E51", "E50", u1);
                                 {
-                                    e = CreateEntity(repository, context, "E52", "E51", u1);
+                                    CreateEntity(repository, context, "E52", "E51", u1);
                                 }
-                                e = CreateEntity(repository, context, "E53", "E50", u1);
+                                CreateEntity(repository, context, "E53", "E50", u1);
                             }
                         }
-                        e = CreateEntity(repository, context, "E15", "E5", u1);
+                        CreateEntity(repository, context, "E15", "E5", u1);
                     }
-                    e = CreateEntity(repository, context, "E6", "E2", u1);
+                    CreateEntity(repository, context, "E6", "E2", u1);
                     {
-                        e = CreateEntity(repository, context, "E16", "E6", u1);
-                        e = CreateEntity(repository, context, "E17", "E6", u1);
+                        CreateEntity(repository, context, "E16", "E6", u1);
+                        CreateEntity(repository, context, "E17", "E6", u1);
                     }
-                    e = CreateEntity(repository, context, "E7", "E2", u1);
+                    CreateEntity(repository, context, "E7", "E2", u1);
                     {
-                        e = CreateEntity(repository, context, "E18", "E7", u1);
-                        e = CreateEntity(repository, context, "E19", "E7", u1);
+                        CreateEntity(repository, context, "E18", "E7", u1);
+                        CreateEntity(repository, context, "E19", "E7", u1);
                     }
                 }
-                e = CreateEntity(repository, context, "E3", "E1", u1);
+                CreateEntity(repository, context, "E3", "E1", u1);
                 {
-                    e = CreateEntity(repository, context, "E8", "E3", u1);
+                    CreateEntity(repository, context, "E8", "E3", u1);
                     {
-                        e = CreateEntity(repository, context, "E20", "E8", u1);
-                        e = CreateEntity(repository, context, "E21", "E8", u1);
+                        CreateEntity(repository, context, "E20", "E8", u1);
+                        CreateEntity(repository, context, "E21", "E8", u1);
                         {
-                            e = CreateEntity(repository, context, "E22", "E21", u1);
-                            e = CreateEntity(repository, context, "E23", "E21", u1);
-                            e = CreateEntity(repository, context, "E24", "E21", u1);
-                            e = CreateEntity(repository, context, "E25", "E21", u1);
-                            e = CreateEntity(repository, context, "E26", "E21", u1);
-                            e = CreateEntity(repository, context, "E27", "E21", u1);
-                            e = CreateEntity(repository, context, "E28", "E21", u1);
-                            e = CreateEntity(repository, context, "E29", "E21", u1);
+                            CreateEntity(repository, context, "E22", "E21", u1);
+                            CreateEntity(repository, context, "E23", "E21", u1);
+                            CreateEntity(repository, context, "E24", "E21", u1);
+                            CreateEntity(repository, context, "E25", "E21", u1);
+                            CreateEntity(repository, context, "E26", "E21", u1);
+                            CreateEntity(repository, context, "E27", "E21", u1);
+                            CreateEntity(repository, context, "E28", "E21", u1);
+                            CreateEntity(repository, context, "E29", "E21", u1);
                         }
                     }
-                    e = CreateEntity(repository, context, "E9", "E3", u1);
-                    e = CreateEntity(repository, context, "E10", "E3", u1);
+                    CreateEntity(repository, context, "E9", "E3", u1);
+                    CreateEntity(repository, context, "E10", "E3", u1);
                 }
-                e = CreateEntity(repository, context, "E4", "E1", u1);
+                CreateEntity(repository, context, "E4", "E1", u1);
                 {
-                    e = CreateEntity(repository, context, "E11", "E4", u1);
-                    e = CreateEntity(repository, context, "E12", "E4", u1);
+                    CreateEntity(repository, context, "E11", "E4", u1);
+                    CreateEntity(repository, context, "E12", "E4", u1);
                     {
-                        e = CreateEntity(repository, context, "E30", "E12", u1);
+                        CreateEntity(repository, context, "E30", "E12", u1);
                         {
-                            e = CreateEntity(repository, context, "E31", "E30", u1);
+                            CreateEntity(repository, context, "E31", "E30", u1);
                             {
-                                e = CreateEntity(repository, context, "E33", "E31", u1);
-                                e = CreateEntity(repository, context, "E34", "E31", u1);
+                                CreateEntity(repository, context, "E33", "E31", u1);
+                                CreateEntity(repository, context, "E34", "E31", u1);
                                 {
-                                    e = CreateEntity(repository, context, "E40", "E34", u1);
-                                    e = CreateEntity(repository, context, "E43", "E34", u1);
+                                    CreateEntity(repository, context, "E40", "E34", u1);
+                                    CreateEntity(repository, context, "E43", "E34", u1);
                                     {
-                                        e = CreateEntity(repository, context, "E44", "E43", u1);
-                                        e = CreateEntity(repository, context, "E45", "E43", u1);
-                                        e = CreateEntity(repository, context, "E46", "E43", u1);
-                                        e = CreateEntity(repository, context, "E47", "E43", u1);
-                                        e = CreateEntity(repository, context, "E48", "E43", u1);
-                                        e = CreateEntity(repository, context, "E49", "E43", u1);
+                                        CreateEntity(repository, context, "E44", "E43", u1);
+                                        CreateEntity(repository, context, "E45", "E43", u1);
+                                        CreateEntity(repository, context, "E46", "E43", u1);
+                                        CreateEntity(repository, context, "E47", "E43", u1);
+                                        CreateEntity(repository, context, "E48", "E43", u1);
+                                        CreateEntity(repository, context, "E49", "E43", u1);
                                     }
                                 }
                             }
-                            e = CreateEntity(repository, context, "E32", "E30", u1);
+                            CreateEntity(repository, context, "E32", "E30", u1);
                             {
-                                e = CreateEntity(repository, context, "E35", "E32", u1);
+                                CreateEntity(repository, context, "E35", "E32", u1);
                                 {
-                                    e = CreateEntity(repository, context, "E41", "E35", u1);
+                                    CreateEntity(repository, context, "E41", "E35", u1);
                                     {
-                                        e = CreateEntity(repository, context, "E42", "E41", u1);
+                                        CreateEntity(repository, context, "E42", "E41", u1);
                                     }
                                 }
-                                e = CreateEntity(repository, context, "E36", "E32", u1);
+                                CreateEntity(repository, context, "E36", "E32", u1);
                                 {
-                                    e = CreateEntity(repository, context, "E37", "E36", u1);
+                                    CreateEntity(repository, context, "E37", "E36", u1);
                                     {
-                                        e = CreateEntity(repository, context, "E38", "E37", u1);
-                                        e = CreateEntity(repository, context, "E39", "E37", u1);
+                                        CreateEntity(repository, context, "E38", "E37", u1);
+                                        CreateEntity(repository, context, "E39", "E37", u1);
                                     }
                                 }
                             }
                         }
                     }
-                    e = CreateEntity(repository, context, "E13", "E4", u1);
+                    CreateEntity(repository, context, "E13", "E4", u1);
                 }
             }
             return repository;
         }
-        private static TestEntity CreateEntity(Dictionary<int, TestEntity> repository, TestSecurityContext context, string name, string parentName, TestUser owner)
+        private static void CreateEntity(Dictionary<int, TestEntity> repository, TestSecurityContext context,
+            string name, string parentName, TestUser owner)
         {
             var entity = new TestEntity
             {
                 Id = GetId(name),
                 Name = name,
-                OwnerId = owner == null ? default(int) : owner.Id,
-                Parent = parentName == null ? null : repository[GetId(parentName)],
+                OwnerId = owner?.Id ?? default,
+                Parent = parentName == null ? null : repository[GetId(parentName)]
             };
             repository.Add(entity.Id, entity);
             context.CreateSecurityEntity(entity);
-            return entity;
         }
         internal static string EntityIdStructureToString(SecurityContext ctx)
         {
@@ -275,21 +270,19 @@ namespace SenseNet.Security.Tests
             // "+U1:____++++,+G1:____++++"
             var entity = context.GetSecurityEntity(entityId);
 
-            var aclInfo = new AclInfo(entityId) { Entries = src.Split(',').Select(x => CreateAce(x)).ToList() };
+            var aclInfo = new AclInfo(entityId) { Entries = src.Split(',').Select(CreateAce).ToList() };
 
-            var emptyGuidArray = new List<int>();
-            var breaked = false;
-            var unbreaked = false;
+            var @break = false;
+            var undoBreak = false;
             if (entity.IsInherited && !isInherited)
-                breaked = true;
+                @break = true;
             if (!entity.IsInherited && isInherited)
-                unbreaked = true;
+                undoBreak = true;
             context.SetAcls(
                 new[] { aclInfo },
-                breaked ? new List<int> { entityId } : new List<int>(),
-                unbreaked ? new List<int> { entityId } : new List<int>()
+                @break ? new List<int> { entityId } : new List<int>(),
+                undoBreak ? new List<int> { entityId } : new List<int>()
                 );
-            return;
         }
         private static AceInfo CreateAce(string src)
         {
@@ -301,7 +294,7 @@ namespace SenseNet.Security.Tests
             var localOnly = segments[1][0] != '+';
             var a = segments[1].Substring(1).Split(':');
 
-            Tools.ParsePermissions(a[1], out var allowBits, out var denyBits);
+            ParsePermissions(a[1], out var allowBits, out var denyBits);
             return new AceInfo
             {
                 EntryType = entryType,
@@ -320,8 +313,7 @@ namespace SenseNet.Security.Tests
         }
         internal static void CheckIntegrity(string testName, SecurityContext context, IEnumerable<StoredSecurityEntity> entities, IEnumerable<SecurityGroup> groups)
         {
-            //TODO: REWRITE WHOLE CONSISTENY CHECK
-            return;
+            //TODO: REWRITE WHOLE CONSISTENCY CHECK
         }
 
         internal static Dictionary<int, AclInfo> CollectAllAcls(SecurityContext ctx)
@@ -353,12 +345,14 @@ namespace SenseNet.Security.Tests
         internal static void InitializeInMemoryMembershipTable(string src, List<Membership> table)
         {
             table.Clear();
+            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var groupSrc in src.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 var g = groupSrc.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
                 if (g.Length > 1)
                 {
                     var groupId = GetId(g[0].Trim());
+                    // ReSharper disable once LoopCanBeConvertedToQuery
                     foreach (var memberSrc in g[1].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                         table.Add(new Membership { GroupId = groupId, MemberId = GetId(memberSrc), IsUser = memberSrc[0] == 'U' });
                 }

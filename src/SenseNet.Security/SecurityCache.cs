@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SenseNet.Security
@@ -29,17 +30,16 @@ namespace SenseNet.Security
             var aclTable = DataHandler.LoadAcls(dataProvider, entities);
             BuildAcls(entities, aclTable);
 
-            this.Entities = entities;
-            this.Groups = DataHandler.LoadAllGroups(dataProvider);
-            this.Membership = FlattenUserMembership(this.Groups);
+            Entities = entities;
+            Groups = DataHandler.LoadAllGroups(dataProvider);
+            Membership = FlattenUserMembership(Groups);
         }
 
-        private void BuildAcls(IDictionary<int, SecurityEntity> entities, Dictionary<int, AclInfo> aclTable)
+        private static void BuildAcls(IDictionary<int, SecurityEntity> entities, Dictionary<int, AclInfo> aclTable)
         {
             foreach (var acl in aclTable.Values)
             {
-                SecurityEntity entity;
-                if (entities.TryGetValue(acl.EntityId, out entity))
+                if (entities.TryGetValue(acl.EntityId, out var entity))
                     entity.SetAclSafe(acl);
             }
             foreach (var entity in entities.Values.Where(e => !e.IsInherited && !e.HasExplicitAcl))
@@ -79,8 +79,7 @@ namespace SenseNet.Security
         }
         private static List<int> EnsureUser(int userId, Dictionary<int, List<int>> users)
         {
-            List<int> user;
-            if (!users.TryGetValue(userId, out user))
+            if (!users.TryGetValue(userId, out var user))
             {
                 user = new List<int>();
                 users.Add(userId, user);
@@ -101,12 +100,12 @@ namespace SenseNet.Security
         }
         public void GetFlatteningForConsistencyCheck(out IEnumerable<long> missingInFlattening, out IEnumerable<long> unknownInFlattening)
         {
-            var actual = ConvertFlattenedUserMembershipToControlData(this.Membership).ToArray();
-            var expected = ConvertFlattenedUserMembershipToControlData(FlattenUserMembership(this.Groups)).ToArray();
+            var actual = ConvertFlattenedUserMembershipToControlData(Membership).ToArray();
+            var expected = ConvertFlattenedUserMembershipToControlData(FlattenUserMembership(Groups)).ToArray();
             missingInFlattening = expected.Except(actual).ToArray();
             unknownInFlattening = actual.Except(expected).ToArray();
         }
-        private IEnumerable<long> ConvertFlattenedUserMembershipToControlData(Dictionary<int, List<int>> membership)
+        private static IEnumerable<long> ConvertFlattenedUserMembershipToControlData(Dictionary<int, List<int>> membership)
         {
             var result = new List<long>(membership.Count * 2);
             foreach (var item in membership)
@@ -130,7 +129,7 @@ namespace SenseNet.Security
             {
                 foreach (var userId in userIds)
                 {
-                    Flattener.AddUserToGroup(userId, group, this.Membership);
+                    Flattener.AddUserToGroup(userId, group, Membership);
                     if (!group.UserMemberIds.Contains(userId))
                         group.UserMemberIds.Add(userId);
                 }
@@ -140,7 +139,7 @@ namespace SenseNet.Security
                 foreach (var childGroupId in groupIds)
                 {
                     var childGroup = EnsureGroup(childGroupId);
-                    Flattener.AddGroupToGroup(childGroup, group, this.Membership);
+                    Flattener.AddGroupToGroup(childGroup, group, Membership);
                     AddRelation(group.Groups, childGroup);
                     AddRelation(childGroup.ParentGroups, group);
                 }
@@ -150,7 +149,7 @@ namespace SenseNet.Security
                 foreach (var parentGroupId in parentGroupIds)
                 {
                     var parentGroup = EnsureGroup(parentGroupId);
-                    Flattener.AddGroupToGroup(group, parentGroup, this.Membership);
+                    Flattener.AddGroupToGroup(group, parentGroup, Membership);
                     AddRelation(group.ParentGroups, parentGroup);
                     AddRelation(parentGroup.Groups, group);
                 }
@@ -158,15 +157,14 @@ namespace SenseNet.Security
         }
         private SecurityGroup EnsureGroup(int groupId)
         {
-            SecurityGroup group;
-            if (!this.Groups.TryGetValue(groupId, out group))
+            if (!Groups.TryGetValue(groupId, out var group))
             {
                 group = new SecurityGroup(groupId);
-                this.Groups.Add(groupId, group);
+                Groups.Add(groupId, group);
             }
             return group;
         }
-        private void AddRelation(List<SecurityGroup> container, SecurityGroup item)
+        private static void AddRelation(List<SecurityGroup> container, SecurityGroup item)
         {
             if (container.All(x => x.Id != item.Id))
                 container.Add(item);
@@ -183,28 +181,27 @@ namespace SenseNet.Security
                 var parentGroup = EnsureGroup(parentGroupId);
                 if (!parentGroup.UserMemberIds.Contains(userId))
                     parentGroup.UserMemberIds.Add(userId);
-                Flattener.AddUserToGroup(userId, parentGroup, this.Membership);
+                Flattener.AddUserToGroup(userId, parentGroup, Membership);
             }
         }
 
         internal void DeleteUser(SecurityContext context, int userId)
         {
             // refresh flattening
-            Flattener.DeleteUser(userId, this.Membership);
+            Flattener.DeleteUser(userId, Membership);
 
             // delete from Groups
-            foreach (var group in this.Groups.Values)
+            foreach (var group in Groups.Values)
                 group.UserMemberIds.Remove(userId);
 
-            // delete Aces & emtpy Acls
+            // delete ACEs & empty ACLs
             SecurityEntity.RemoveIdentityRelatedAces(context, userId);
         }
 
         internal void DeleteSecurityGroup(SecurityContext context, int groupId)
         {
             // delete from Groups
-            SecurityGroup group;
-            if (this.Groups.TryGetValue(groupId, out group))
+            if (Groups.TryGetValue(groupId, out var group))
             {
                 // getting support lists
                 var allUsers = Flattener.GetAllUserIds(group);
@@ -215,13 +212,13 @@ namespace SenseNet.Security
                     g.ParentGroups.Remove(group);
                 foreach (var g in group.ParentGroups)
                     g.Groups.Remove(group);
-                this.Groups.Remove(groupId);
+                Groups.Remove(groupId);
 
                 // refresh flattening with support lists
-                Flattener.DeleteGroup(group, allUsers, allParents, this.Groups, this.Membership);
+                Flattener.DeleteGroup(group, allUsers, allParents, Groups, Membership);
             }
 
-            // delete Aces & emtpy Acls
+            // delete ACEs & empty ACLs
             SecurityEntity.RemoveIdentityRelatedAces(context, groupId);
         }
 
@@ -230,8 +227,7 @@ namespace SenseNet.Security
             foreach (var identityId in identityIds)
             {
                 // delete from Groups
-                SecurityGroup group;
-                if (this.Groups.TryGetValue(identityId, out group))
+                if (Groups.TryGetValue(identityId, out var group))
                 {
                     // identityId is a groupId
                     var allUsers = Flattener.GetAllUserIds(group);
@@ -241,29 +237,28 @@ namespace SenseNet.Security
                         g.ParentGroups.Remove(group);
                     foreach (var g in group.ParentGroups)
                         g.Groups.Remove(group);
-                    this.Groups.Remove(identityId);
+                    Groups.Remove(identityId);
 
                     // refresh flattening with support lists
-                    Flattener.DeleteGroup(group, allUsers, allParents, this.Groups, this.Membership);
+                    Flattener.DeleteGroup(group, allUsers, allParents, Groups, Membership);
                 }
                 else
                 {
                     // identityId is a userId or an unknown item
-                    Flattener.DeleteUser(identityId, this.Membership);
+                    Flattener.DeleteUser(identityId, Membership);
 
-                    foreach (var grp in this.Groups.Values)
+                    foreach (var grp in Groups.Values)
                         grp.UserMemberIds.Remove(identityId);
                 }
 
-                // delete Aces & emtpy Acls
+                // delete Aces & empty ACLs
                 SecurityEntity.RemoveIdentityRelatedAces(context, identityId);
             }
         }
 
         internal void RemoveMembers(int groupId, IEnumerable<int> groupIds, IEnumerable<int> userIds, IEnumerable<int> parentGroupIds)
         {
-            SecurityGroup group;
-            if (!this.Groups.TryGetValue(groupId, out group))
+            if (!Groups.TryGetValue(groupId, out var group))
                 return;
 
 
@@ -272,7 +267,7 @@ namespace SenseNet.Security
                 foreach (var userId in userIds)
                 {
                     group.UserMemberIds.Remove(userId);
-                    Flattener.RemoveUserFromGroup(userId, group, this.Membership, this.Groups);
+                    Flattener.RemoveUserFromGroup(userId, group, Membership, Groups);
                 }
             }
 
@@ -293,7 +288,7 @@ namespace SenseNet.Security
                     group.Groups.Remove(memberGroup);
 
                     // refresh flattening
-                    Flattener.DeleteGroup(memberGroup, allUsers, allParents, this.Groups, this.Membership);
+                    Flattener.DeleteGroup(memberGroup, allUsers, allParents, Groups, Membership);
                 }
             }
             if (parentGroupIds != null)
@@ -308,7 +303,7 @@ namespace SenseNet.Security
                     group.ParentGroups.Remove(parentGroup);
 
                     // refresh flattening
-                    Flattener.DeleteGroup(parentGroup, allUsers, allParents, this.Groups, this.Membership);
+                    Flattener.DeleteGroup(parentGroup, allUsers, allParents, Groups, Membership);
                 }
             }
         }
@@ -320,8 +315,7 @@ namespace SenseNet.Security
 
             foreach (var parentGroupId in parentGroupIds)
             {
-                SecurityGroup group;
-                if (this.Groups.TryGetValue(parentGroupId, out group))
+                if (Groups.TryGetValue(parentGroupId, out var group))
                 {
                     var allUsers = Flattener.GetAllUserIds(group);
                     var allParents = Flattener.GetAllParentGroupIdsInclusive(group);
@@ -329,21 +323,20 @@ namespace SenseNet.Security
                     group.UserMemberIds.Remove(userId);
 
                     // refresh flattening
-                    Flattener.DeleteGroup(group, allUsers, allParents, this.Groups, this.Membership);
+                    Flattener.DeleteGroup(group, allUsers, allParents, Groups, Membership);
                 }
             }
         }
 
+        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         internal bool IsInGroup(int memberId, int groupId)
         {
             // if it is a user: first look for the id in the flattened user --> groups collection
-            List<int> flattenedGroups;
-            if (Membership.TryGetValue(memberId, out flattenedGroups))
+            if (Membership.TryGetValue(memberId, out var flattenedGroups))
                 return flattenedGroups.Contains(groupId);
 
             // if it is a group: search in the group graph
-            SecurityGroup group;
-            if (Groups.TryGetValue(memberId, out group))
+            if (Groups.TryGetValue(memberId, out var group))
                 return Flattener.GetAllParentGroupIdsExclusive(group).Contains(groupId);
 
             return false;
@@ -351,10 +344,9 @@ namespace SenseNet.Security
 
         internal int[] GetGroups(int userId)
         {
-            List<int> flattenedGroups;
-            if (Membership.TryGetValue(userId, out flattenedGroups))
-                return flattenedGroups.ToArray();
-            return new int[0];
+            return Membership.TryGetValue(userId, out var flattenedGroups)
+                ? flattenedGroups.ToArray()
+                : new int[0];
         }
 
         internal IEnumerable<int> GetAllUsersInGroup(SecurityGroup group)
@@ -372,18 +364,17 @@ namespace SenseNet.Security
         {
             internal static void AddUserToGroup(int userId, SecurityGroup parentGroup, Dictionary<int, List<int>> usersTable)
             {
-                // collect all relevant groupid from the parent axis
+                // collect all relevant groupId from the parent axis
                 var allParentGroupIds = GetAllParentGroupIdsInclusive(parentGroup);
 
                 // ensure user
-                List<int> user;
-                if (!usersTable.TryGetValue(userId, out user))
+                if (!usersTable.TryGetValue(userId, out var user))
                 {
                     user = new List<int>();
                     usersTable.Add(userId, user);
                 }
 
-                // complete the user (distincted groupid list) with the relevant groups (allParengtGroupIds)
+                // complete the user (distinct groupId list) with the relevant groups (allParentGroupIds)
                 foreach (var parentGroupId in allParentGroupIds)
                     if (!user.Contains(parentGroupId))
                         user.Add(parentGroupId);
@@ -395,16 +386,15 @@ namespace SenseNet.Security
                 var allParentGroupIds = GetAllParentGroupIdsInclusive(parentGroup);
                 foreach (var userId in allUserIds)
                 {
-                    List<int> user;
-                    if (!usersTable.TryGetValue(userId, out user))
+                    if (!usersTable.TryGetValue(userId, out var user))
                     {
                         user = new List<int>();
                         usersTable.Add(userId, user);
                     }
 
-                    foreach (var parengtGroupId in allParentGroupIds)
-                        if (!user.Contains(parengtGroupId))
-                            user.Add(parengtGroupId);
+                    foreach (var parentGroupId in allParentGroupIds)
+                        if (!user.Contains(parentGroupId))
+                            user.Add(parentGroupId);
                 }
             }
 
@@ -429,8 +419,7 @@ namespace SenseNet.Security
             private static void RemoveUserFromGroup(int userId, List<int> allParents, Dictionary<int, List<int>> usersTable, IDictionary<int, SecurityGroup> groupsTable)
             {
                 // get user record (what groups member of?)
-                List<int> user;
-                if (!usersTable.TryGetValue(userId, out user))
+                if (!usersTable.TryGetValue(userId, out var user))
                     return;
 
                 // clone for a support list
@@ -442,8 +431,7 @@ namespace SenseNet.Security
                 // rebuild all existing groups
                 foreach (var groupId in origUser)
                 {
-                    SecurityGroup group;
-                    if (!groupsTable.TryGetValue(groupId, out group))
+                    if (!groupsTable.TryGetValue(groupId, out var group))
                         continue;
 
                     // skip if the group doesn't contain the user explicitly

@@ -24,7 +24,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.DeleteIdentities(context, this.IdentityIds);
+            DataHandler.DeleteIdentities(context, IdentityIds);
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.DeleteIdentities(context, this.IdentityIds);
+            context.Cache.DeleteIdentities(context, IdentityIds);
         }
     }
 }

@@ -131,7 +131,7 @@ namespace SenseNet.Security.Messaging
                 }
             }
             /// <summary>
-            /// MUST BE SYNCHRON
+            /// MUST BE SYNCHRONOUS
             /// GAPS MUST BE ORDERED
             /// </summary>
             internal static void Start(int lastDatabaseId, int lastExecutedId, int[] gaps)
@@ -180,7 +180,7 @@ namespace SenseNet.Security.Messaging
                 if (_lastQueued < lastExecutedId)
                     _lastQueued = lastExecutedId;
 
-                // ensure that the arrival activity queue is not empty at this pont.
+                // ensure that the arrival activity queue is not empty at this point.
                 DependencyManager.ActivityEnqueued();
 
                 if (lastDatabaseId != 0 || lastExecutedId != 0 || gaps.Any())
@@ -314,7 +314,7 @@ namespace SenseNet.Security.Messaging
                 if (_run)
                     return;
                 _run = true;
-                Task.Run(() => ProcessActivities());
+                Task.Run(ProcessActivities);
             }
 
             private static void ProcessActivities()

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Remotion.Linq.Utilities;
 using SenseNet.Security.Tests.TestPortal;
 
 namespace SenseNet.Security.Tests
@@ -31,7 +29,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
 
             // ACTION
-            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId);
+            var result = SecurityQuery.All(ctx).GetEntities(RootEntityId);
 
             // ASSERT
             var ids = GetSortedIds(result);
@@ -46,7 +44,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             const string expected = "2,4,5,10,11,12,15,16,20,22,25,28,32,34,35,36,37,41";
 
-            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId).Where(e => e.Acl != null);
+            var result = SecurityQuery.All(ctx).GetEntities(RootEntityId).Where(e => e.Acl != null);
 
             Assert.AreEqual(expected, GetSortedIdString(result));
         }
@@ -56,7 +54,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             const string expected = "22,34,35,36,37,41";
 
-            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId).Where(e => !e.IsInherited);
+            var result = SecurityQuery.All(ctx).GetEntities(RootEntityId).Where(e => !e.IsInherited);
 
             Assert.AreEqual(expected, GetSortedIdString(result));
         }
@@ -66,7 +64,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             const string expected = "101,102,201,202,203";
 
-            var result = SecurityQuery.All(ctx).GetEntities(_rootEntityId)
+            var result = SecurityQuery.All(ctx).GetEntities(RootEntityId)
                 .Where(e => e.Acl != null)
                 .SelectMany(e => e.Acl.Entries)
                 .Select(e => e.IdentityId)
@@ -79,12 +77,12 @@ namespace SenseNet.Security.Tests
         {
             var ctx = CurrentContext.Security;
 
-            var resultWithFilter = SecurityQuery.All(ctx).GetEntities(_rootEntityId)
+            var resultWithFilter = SecurityQuery.All(ctx).GetEntities(RootEntityId)
                 .Where(e => e.Acl != null)
                 .SelectMany(e => e.Acl.Entries);
 
             // ACTION
-            var result = SecurityQuery.All(ctx).GetEntries(_rootEntityId);
+            var result = SecurityQuery.All(ctx).GetEntries(RootEntityId);
 
             // ASSERT
             var expected = string.Join(" | ", resultWithFilter.Select(x => x.ToString()).OrderBy(x => x));
@@ -588,7 +586,7 @@ namespace SenseNet.Security.Tests
             var identityNames = new[] { "U1", "U2", "U3", "U4", "U8" };
 
             // ---- ALLOWED
-            var expectedAllowedPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3|U4|U8";
+            const string expectedAllowedPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3|U4|U8";
             var allowedPermCountsByIdentities = ResultToString(identityNames
                 .Select(identityName => new
                 {
@@ -611,7 +609,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expectedAllowedPermCounts, allowedPermCountsByIdentities);
 
             // ---- DENIED
-            var expectedDeniedPermCounts = "U1|U2|U3:p32:4|U4|U8";
+            const string expectedDeniedPermCounts = "U1|U2|U3:p32:4|U4|U8";
             var deniedPermCountsByIdentities = ResultToString(identityNames
                 .Select(identityName => new
                 {
@@ -634,7 +632,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expectedDeniedPermCounts, deniedPermCountsByIdentities);
 
             // ALLOWED OR DENIED
-            var expectedAllPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3:p32:4|U4|U8";
+            const string expectedAllPermCounts = "U1:p32:3:p34:4|U2:p32:2|U3:p32:4|U4|U8";
             var allPermCountsByIdentities = ResultToString(identityNames
                 .Select(identityName => new
                 {
@@ -669,7 +667,7 @@ namespace SenseNet.Security.Tests
                 {
                     if ((b & mask) > 0)
                         counters[pt.Index]++;
-                    mask = mask << 1;
+                    mask <<= 1;
                 }
             }
 
@@ -714,7 +712,7 @@ namespace SenseNet.Security.Tests
                 {
                     if ((b & mask) > 0)
                         counters[pt.Index]++;
-                    mask = mask << 1;
+                    mask <<= 1;
                 }
             }
 
@@ -762,7 +760,7 @@ namespace SenseNet.Security.Tests
         }
 
         /* ============================================================================= Tools */
-        private void AddPermissionsForIdentityTests(TestSecurityContext ctx)
+        private static void AddPermissionsForIdentityTests(TestSecurityContext ctx)
         {
             ctx.CreateAclEditor()
                 // additions for easy checking of differences between parent-chain and the subtree
@@ -773,7 +771,7 @@ namespace SenseNet.Security.Tests
                 .Allow(Id("E38"), Id("G7"), true, PermissionType.Custom04)
                 .Apply();
         }
-        private void AddPermissionsForCategorySelectionTests(TestSecurityContext ctx)
+        private static void AddPermissionsForCategorySelectionTests(TestSecurityContext ctx)
         {
             ctx.CreateAclEditor()
                 // additions for easy checking of differences between parent-chain and the subtree
@@ -792,7 +790,7 @@ namespace SenseNet.Security.Tests
                 .Allow(Id("E39"), Id("G9"), false, PermissionType.Custom04)
                 .Apply();
         }
-        private void AddPermissionsForIdentityByPermissionTests(TestSecurityContext ctx)
+        private static void AddPermissionsForIdentityByPermissionTests(TestSecurityContext ctx)
         {
             var p1 = PermissionType.Custom11;
             var p2 = PermissionType.Custom12;
@@ -812,31 +810,30 @@ namespace SenseNet.Security.Tests
                 .Apply();
         }
 
-        private int[] GetSortedIds(IEnumerable<SecurityEntity> entities)
+        private static int[] GetSortedIds(IEnumerable<SecurityEntity> entities)
         {
             return entities.Select(e => e.Id).OrderBy(i => i).ToArray();
         }
-        private string GetSortedIdString(IEnumerable<SecurityEntity> entities)
+        private static string GetSortedIdString(IEnumerable<SecurityEntity> entities)
         {
             return string.Join(",", GetSortedIds(entities).Select(i => i.ToString()).ToArray());
         }
-        private string GetSortedIdString(IEnumerable<int> ids)
+        private static string GetSortedIdString(IEnumerable<int> ids)
         {
             return string.Join(",", ids.OrderBy(i => i).Select(i => i.ToString()).ToArray());
         }
-        private string GetIdString(IEnumerable<int> ids)
+        private static string GetIdString(IEnumerable<int> ids)
         {
             return string.Join(",", ids.Select(i => i.ToString()).ToArray());
         }
 
         #region Helper methods
-        private Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
+        private readonly Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
 
-        private int _rootEntityId = 1;
+        private const int RootEntityId = 1;
 
         private void CreatePlayground()
         {
-            TestEntity e;
             var u1 = TestUser.User1;
 
             CreateEntity("E1", null, u1);
@@ -1008,14 +1005,14 @@ namespace SenseNet.Security.Tests
             {
                 Id = Id(name),
                 Name = name,
-                OwnerId = owner == null ? default(int) : owner.Id,
-                Parent = parentName == null ? null : _repository[Id(parentName)],
+                OwnerId = owner?.Id ?? default,
+                Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
             CurrentContext.Security.CreateSecurityEntity(entity);
         }
 
-        private int Id(string name)
+        private static int Id(string name)
         {
             return Tools.GetId(name);
         }

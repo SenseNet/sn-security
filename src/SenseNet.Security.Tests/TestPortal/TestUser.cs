@@ -1,8 +1,4 @@
-﻿using SenseNet.Security;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace SenseNet.Security.Tests.TestPortal
 {
@@ -31,7 +27,7 @@ namespace SenseNet.Security.Tests.TestPortal
             return _dynamicGroups;                                      // for tests only
         }
 
-        IEnumerable<int> _dynamicGroups;                               // for tests only
+        private IEnumerable<int> _dynamicGroups;                               // for tests only
         internal void SetDynamicGroups(IEnumerable<int> dynamicGroups)  // for tests only
         {
             _dynamicGroups = dynamicGroups;

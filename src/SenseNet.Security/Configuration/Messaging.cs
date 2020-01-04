@@ -4,6 +4,7 @@ namespace SenseNet.Security.Configuration
 {
     internal static class Messaging
     {
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string MessageProviderKey = "SecurityMessageProvider";
         private static string _messageProvider;
 
@@ -22,6 +23,7 @@ namespace SenseNet.Security.Configuration
             }
         }
 
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string DistributableSecurityActivityMaxSizeKey = "DistributableSecurityActivityMaxSize";
         private static int? _distributableSecurityActivityMaxSize;
 
@@ -31,9 +33,8 @@ namespace SenseNet.Security.Configuration
             {
                 if (!_distributableSecurityActivityMaxSize.HasValue)
                 {
-                    int intValue;
                     var value = ConfigurationManager.AppSettings[DistributableSecurityActivityMaxSizeKey];
-                    if (!int.TryParse(value, out intValue))
+                    if (!int.TryParse(value, out var intValue))
                         intValue = 200000;
                     _distributableSecurityActivityMaxSize = intValue;
                 }
@@ -43,12 +44,13 @@ namespace SenseNet.Security.Configuration
         }
         public static int CommunicationMonitorRunningPeriodInSeconds { get; internal set; }
 
-        public static int SecuritActivityLifetimeInMinutes { get; internal set; }
-        public static int SecuritActivityTimeoutInSeconds { get; internal set; }
+        public static int SecuritActivityLifetimeInMinutes { get; internal set; } //TODO:~ TYPO
+        public static int SecuritActivityTimeoutInSeconds { get; internal set; } //TODO:~ TYPO
 
         internal static readonly int SecurityActivityExecutionLockRefreshPeriodInSeconds = 10;
         internal static readonly int SecurityActivityExecutionLockTimeoutInSeconds = 25;
 
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string MessageProcessorThreadCountKey = "MessageProcessorThreadCount";
         private static int? _messageProcessorThreadCount;
         /// <summary>
@@ -69,6 +71,7 @@ namespace SenseNet.Security.Configuration
             }
         }
 
+        // ReSharper disable once ConvertToConstant.Local
         private static readonly string MessageProcessorThreadMaxMessagesKey = "MessageProcessorThreadMaxMessages";
         private static int? _messageProcessorThreadMaxMessages;
         /// <summary>

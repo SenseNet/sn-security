@@ -32,6 +32,7 @@ namespace SenseNet.Security
 
         internal SecurityCache Cache { get; }
 
+        // ReSharper disable once InconsistentNaming
         private PermissionEvaluator __evaluator;
         private readonly object _evaluatorSync = new object();
         internal PermissionEvaluator Evaluator
@@ -79,13 +80,12 @@ namespace SenseNet.Security
         /// </summary>
         protected static void StartTheSystem(SecurityConfiguration configuration)
         {
-            _generalContext = null;
+            General = null;
 
-            // The messageprovider provider must receive ongoing activities at this time.
+            // The message provider must receive ongoing activities at this time.
             StartedAt = DateTime.UtcNow;
 
-            int lastActivityIdFromDb;
-            var uncompleted = DataHandler.LoadCompletionState(configuration.SecurityDataProvider, out lastActivityIdFromDb);
+            var uncompleted = DataHandler.LoadCompletionState(configuration.SecurityDataProvider, out var lastActivityIdFromDb);
 
             _messageProvider = configuration.MessageProvider;
             _messageProvider.MessageReceived += MessageProvider_MessageReceived;
@@ -110,7 +110,7 @@ namespace SenseNet.Security
 
             CommunicationMonitor.Initialize();
 
-            _generalContext = new SecurityContext(SystemUser);
+            General = new SecurityContext(SystemUser);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
 
             _killed = false;
@@ -130,8 +130,7 @@ namespace SenseNet.Security
             SecurityActivity activity = null;
 
             // load from database if it was too big to distribute
-            var bigActivityMessage = message as BigActivityMessage;
-            if (bigActivityMessage != null)
+            if (message is BigActivityMessage bigActivityMessage)
             {
                 activity = DataHandler.LoadBigSecurityActivity(bigActivityMessage.DatabaseId);
                 if (activity == null)
@@ -166,7 +165,7 @@ namespace SenseNet.Security
         /// This method is used by the security component when an entity seems to be missing because of
         /// concurrency reasons. The host application must provide the correct entity information here 
         /// otherwise <see cref="EntityNotFoundException"/> may occur in some scenarios under heavy load 
-        /// in load balanced multithreaded environments.
+        /// in load balanced multi-threaded environments.
         /// </summary>
         /// <param name="entityId">Id of the missing entity.</param>
         /// <param name="parentId">Id of the missing entity's parent or 0.</param>
@@ -249,7 +248,7 @@ namespace SenseNet.Security
             return acl;
         }
         // for tests
-        internal void SetAcls(IEnumerable<AclInfo> acls, List<int> breaks, List<int> unbreaks)
+        internal void SetAcls(IEnumerable<AclInfo> acls, List<int> breaks, List<int> undoBreaks)
         {
             if (acls == null)
                 throw new ArgumentNullException(nameof(acls));
@@ -257,7 +256,7 @@ namespace SenseNet.Security
             if (!acls.Any())
                 return;
             // ReSharper disable once PossibleMultipleEnumeration
-            var activity = new SetAclActivity(acls, breaks, unbreaks);
+            var activity = new SetAclActivity(acls, breaks, undoBreaks);
             activity.Execute(this);
         }
 
@@ -378,7 +377,7 @@ namespace SenseNet.Security
         /// <param name="ownerId">Id of the entity's owner identity.</param>
         protected void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId)
         {
-            if (entityId == default(int))
+            if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
             var activity = new CreateSecurityEntityActivity(entityId, parentEntityId, ownerId);
             activity.Execute(this);
@@ -390,7 +389,7 @@ namespace SenseNet.Security
         /// <param name="ownerId">Id of the entity's owner identity.</param>
         protected void ModifyEntityOwner(int entityId, int ownerId)
         {
-            if (entityId == default(int))
+            if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
             var activity = new ModifySecurityEntityOwnerActivity(entityId, ownerId);
             activity.Execute(this);
@@ -401,7 +400,7 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         protected void DeleteEntity(int entityId)
         {
-            if (entityId == default(int))
+            if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
             var activity = new DeleteSecurityEntityActivity(entityId);
             activity.Execute(this);
@@ -414,9 +413,9 @@ namespace SenseNet.Security
         /// <param name="targetId">Id of the target entity that will contain the source. Cannot be 0.</param>
         protected void MoveEntity(int sourceId, int targetId)
         {
-            if (sourceId == default(int))
+            if (sourceId == default)
                 throw new ArgumentException("Id of the source Entity cannot be " + default(int));
-            if (targetId == default(int))
+            if (targetId == default)
                 throw new ArgumentException("Id of the target Entity cannot be " + default(int));
             var activity = new MoveSecurityEntityActivity(sourceId, targetId);
             activity.Execute(this);
@@ -427,7 +426,7 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         protected bool IsEntityInherited(int entityId)
         {
-            if (entityId == default(int))
+            if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
             var entity = GetSecurityEntity(entityId, true);
             return entity.IsInherited;
@@ -475,12 +474,12 @@ namespace SenseNet.Security
                 var entity = GetSecurityEntity(descendantId);
                 if (entity == null)
                     return false;
-                descendantId = entity.Parent?.Id ?? default(int);
+                descendantId = entity.Parent?.Id ?? default;
             }
         }
         internal int GetOwnerId(int entityId)
         {
-            var entity = this.GetSecurityEntity(entityId, true);            
+            var entity = GetSecurityEntity(entityId, true);            
 
             return entity.OwnerId;
         }
@@ -580,8 +579,7 @@ namespace SenseNet.Security
         }
 
         /***************** General context for built in system user ***************/
-        private static SecurityContext _generalContext;
-        internal static SecurityContext General => _generalContext;
+        internal static SecurityContext General { get; private set; }
 
         /***************** Debug info ***************/
         /// <summary>

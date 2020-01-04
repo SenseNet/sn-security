@@ -19,7 +19,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                     Configuration.Instance.GetConnectionString())
                 .InstallDatabase();
 
-            var x = PermissionType.See; // preload the type
+            var _ = PermissionType.See; // pre-loads the type
         }
     }
 }
