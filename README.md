@@ -50,4 +50,4 @@ if (context.HasPermission(entityId, PermissionType.See))
 ## Integration
 
 For details on integrating it in a 3rd party application please visit the following article:
-- http://wiki.sensenet.com/Security_Component
+- https://github.com/SenseNet/sensenet.github.io/blob/master/_docs/security-component.md
