@@ -1,6 +1,5 @@
 # sensenet Security
 
-[![Join the chat at https://gitter.im/SenseNet/sn-security](https://badges.gitter.im/SenseNet/sn-security.svg)](https://gitter.im/SenseNet/sn-security?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Security core](https://img.shields.io/nuget/v/SenseNet.Security.svg)](https://www.nuget.org/packages/SenseNet.Security)
 [![EF/ data provider](https://img.shields.io/nuget/v/SenseNet.Security.EF6SecurityStore.svg)](https://www.nuget.org/packages/SenseNet.Security.EF6SecurityStore)
 [![MSMQ message provider](https://img.shields.io/nuget/v/SenseNet.Security.Messaging.Msmq.svg)](https://www.nuget.org/packages/SenseNet.Security.Messaging.Msmq)
@@ -51,3 +50,9 @@ if (context.HasPermission(entityId, PermissionType.See))
 
 For details on integrating it in a 3rd party application please visit the following article:
 - https://github.com/SenseNet/sensenet.github.io/blob/master/_docs/security-component.md
+
+# sensenet as a service (SNaaS) - use sensenet from the cloud
+
+For a monthly subscription fee, we store all your content and data, relieving you of all maintenance-related tasks and installation, ensuring easy onboarding, easy updates, and patches.
+
+https://www.sensenet.com/pricing
