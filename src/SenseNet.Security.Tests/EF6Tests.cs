@@ -2,7 +2,9 @@
 using System.Configuration;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SenseNet.Extensions.DependencyInjection;
 using SenseNet.Security.EF6SecurityStore;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
@@ -16,7 +18,7 @@ namespace SenseNet.Security.Tests
     {
         protected override ISecurityDataProvider GetDataProvider()
         {
-            return new EF6SecurityDataProvider(connectionString:
+            return new EF6SecurityDataProvider(0,
                 ConfigurationManager.ConnectionStrings["EF6SecurityStorage"].ConnectionString);
         }
 
@@ -291,5 +293,39 @@ namespace SenseNet.Security.Tests
             CommunicationMonitor.Start();
         }
 
+
+        [TestMethod]
+        public void EF6_Services_Register()
+        {
+            // part 1 ----------------------------------------------------------
+            var services = new ServiceCollection()
+                .AddLogging();
+
+            // WITHOUT configuration
+            services.AddEF6SecurityDataProvider();
+
+            var provider = services.BuildServiceProvider();
+            var sdp = provider.GetRequiredService<ISecurityDataProvider>();
+
+            Assert.IsTrue(sdp is EF6SecurityDataProvider);
+            Assert.AreEqual(null, sdp.ConnectionString);
+
+            // part 2 ----------------------------------------------------------
+            services = new ServiceCollection()
+                .AddLogging();
+
+            // WITH configuration
+            services.AddEF6SecurityDataProvider(options =>
+            {
+                options.ConnectionString = "test123";
+                options.SqlCommandTimeout = 123;
+            });
+
+            provider = services.BuildServiceProvider();
+            sdp = provider.GetRequiredService<ISecurityDataProvider>();
+
+            Assert.IsTrue(sdp is EF6SecurityDataProvider);
+            Assert.AreEqual("test123", sdp.ConnectionString);
+        }
     }
 }

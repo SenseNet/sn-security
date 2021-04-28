@@ -1,5 +1,7 @@
 ﻿using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SenseNet.Extensions.DependencyInjection;
 using SenseNet.Security.Tests;
 
 namespace SenseNet.Security.EFCSecurityStore.Tests
@@ -10,7 +12,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
     {
         protected override ISecurityDataProvider GetDataProvider()
         {
-            return new EFCSecurityDataProvider(connectionString: Configuration.Instance.GetConnectionString());
+            return new EFCSecurityDataProvider(0, Configuration.Instance.GetConnectionString());
         }
 
         protected override void CleanupMemberships()
@@ -24,6 +26,40 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             {
                 dp.RemoveMembers(group.Id, group.UserMemberIds, group.Groups.Select(g => g.Id));
             }
+        }
+
+        [TestMethod]
+        public void EFC_Services_Register()
+        {
+            // part 1 ----------------------------------------------------------
+            var services = new ServiceCollection()
+                .AddLogging();
+
+            // WITHOUT configuration
+            services.AddEFCSecurityDataProvider();
+
+            var provider = services.BuildServiceProvider();
+            var sdp = provider.GetRequiredService<ISecurityDataProvider>();
+
+            Assert.IsTrue(sdp is EFCSecurityDataProvider);
+            Assert.AreEqual(null, sdp.ConnectionString);
+
+            // part 2 ----------------------------------------------------------
+            services = new ServiceCollection()
+                .AddLogging();
+
+            // WITH configuration
+            services.AddEFCSecurityDataProvider(options =>
+            {
+                options.ConnectionString = "test123";
+                options.SqlCommandTimeout = 123;
+            });
+
+            provider = services.BuildServiceProvider();
+            sdp = provider.GetRequiredService<ISecurityDataProvider>();
+
+            Assert.IsTrue(sdp is EFCSecurityDataProvider);
+            Assert.AreEqual("test123", sdp.ConnectionString);
         }
     }
 }

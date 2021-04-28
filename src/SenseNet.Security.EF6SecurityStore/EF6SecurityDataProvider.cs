@@ -6,6 +6,10 @@ using System.Data.Entity.Infrastructure;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using SenseNet.Security.EF6SecurityStore.Configuration;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 // ReSharper disable ArrangeThisQualifier
@@ -18,12 +22,17 @@ namespace SenseNet.Security.EF6SecurityStore
     // ReSharper disable once InconsistentNaming
     public class EF6SecurityDataProvider : ISecurityDataProvider
     {
+        private readonly DataOptions _options;
+        private readonly ILogger<EF6SecurityDataProvider> _logger;
+
         /// <summary>Initializes a new instance of the EF6SecurityDataProvider class.</summary>
-        public EF6SecurityDataProvider() : this(0)
+        [Obsolete("Use the constructor with IOptions and dependency injection instead.")]
+        public EF6SecurityDataProvider() : this(0, null)
         {
         }
         /// <summary>Initializes a new instance of the EF6SecurityDataProvider class.</summary>
-        public EF6SecurityDataProvider(int commandTimeout = 120, string connectionString = null)
+        [Obsolete("Use the constructor with IOptions and dependency injection instead.")]
+        public EF6SecurityDataProvider(int commandTimeout, string connectionString)
         {
             // fallback to configuration
             if (commandTimeout == 0)
@@ -34,8 +43,21 @@ namespace SenseNet.Security.EF6SecurityStore
                 connectionString = ConfigurationManager.ConnectionStrings["SecurityStorage"]?.ConnectionString ??
                                    ConfigurationManager.ConnectionStrings["SnCrMsSql"]?.ConnectionString;
 
-            this.CommandTimeout = commandTimeout;
-            this.ConnectionString = connectionString;
+            _options = new DataOptions
+            {
+                ConnectionString = connectionString,
+                SqlCommandTimeout = commandTimeout
+            };
+            _logger = NullLogger<EF6SecurityDataProvider>.Instance;
+        }
+        /// <summary>Initializes a new instance of the EF6SecurityDataProvider class.</summary>
+        public EF6SecurityDataProvider(IOptions<DataOptions> options, ILogger<EF6SecurityDataProvider> logger)
+        {
+            _options = options?.Value ?? new DataOptions();
+            _logger = logger;
+
+            if (string.IsNullOrEmpty(_options.ConnectionString))
+                _logger.LogError("No connection string was configured for the security database.");
         }
 
         private SecurityStorage Db()
@@ -47,19 +69,23 @@ namespace SenseNet.Security.EF6SecurityStore
 
         //===================================================================== interface implementation
 
-        private int CommandTimeout { get; }
+        private int CommandTimeout => _options.SqlCommandTimeout;
 
         /// <summary>
         /// Control data for building a connection to the database server.
         /// </summary>
-        public string ConnectionString { get; set; }
+        public string ConnectionString
+        {
+            get => _options.ConnectionString;
+            set => _options.ConnectionString = value;
+        }
 
         /// <summary>
         /// Creator method. Returns a brand new ISecurityDataProvider instance.
         /// </summary>
         public ISecurityDataProvider CreateNew()
         {
-            return new EF6SecurityDataProvider(this.CommandTimeout, this.ConnectionString);
+            return new EF6SecurityDataProvider(Options.Create(_options), _logger);
         }
         /// <summary>
         /// Empties the entire database (clears all records from all tables).
