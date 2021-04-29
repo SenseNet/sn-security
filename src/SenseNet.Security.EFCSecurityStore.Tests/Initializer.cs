@@ -15,8 +15,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                 .Build();
 
             // install db directly
-            new EFCSecurityDataProvider(connectionString:
-                    Configuration.Instance.GetConnectionString())
+            new EFCSecurityDataProvider(0, Configuration.Instance.GetConnectionString())
                 .InstallDatabase();
 
             var _ = PermissionType.See; // pre-loads the type

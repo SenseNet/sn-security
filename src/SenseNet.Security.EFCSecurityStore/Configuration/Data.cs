@@ -17,4 +17,20 @@ namespace SenseNet.Security.EFCSecurityStore.Configuration
         public static int SecurityDatabaseCommandTimeoutInSeconds { get; set; } = GetInt(SecuritySectionName,
             "SecurityDatabaseCommandTimeoutInSeconds", SqlCommandTimeout);
     }
+
+    /// <summary>
+    /// Security data options.
+    /// </summary>
+    public class DataOptions
+    {
+        /// <summary>
+        /// Security database command timeout in seconds. Default: 120.
+        /// </summary>
+        public int SqlCommandTimeout { get; set; } = 120;
+
+        /// <summary>
+        /// Sql database connection string.
+        /// </summary>
+        public string ConnectionString { get; set; }
+    }
 }

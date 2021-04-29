@@ -12,7 +12,7 @@ namespace SenseNet.Security.Tests
         public static void InitializeAllTests(TestContext context)
         {
             // install db directly
-            new EF6SecurityDataProvider(connectionString:
+            new EF6SecurityDataProvider(0, 
                     ConfigurationManager.ConnectionStrings["EF6SecurityStorage"].ConnectionString)
                 .InstallDatabase();
 
