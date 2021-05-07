@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>4.1.1</Version>
+    <Version>4.1.2</Version>
     <Description>A powerful .Net component for managing permission entries in content repositories.</Description>
     <Company>Sense/Net Inc.</Company>
     <Copyright>Copyright © Sense/Net Inc.</Copyright>
