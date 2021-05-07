@@ -16,10 +16,11 @@ namespace SenseNet.Security.Data
         private static readonly object MessageLock = new object();
         private static readonly object AcesLock = new object();
 
-        internal static DatabaseStorage Storage { get; private set; }
+        internal DatabaseStorage Storage { get; private set; }
 
         private MemoryDataProvider()
         {
+            Storage = DatabaseStorage.CreateEmpty();
         }
 
         /// <inheritdoc />
@@ -37,7 +38,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public virtual ISecurityDataProvider CreateNew()
         {
-            return new MemoryDataProvider();
+            return new MemoryDataProvider(Storage);
         }
         /// <inheritdoc />
         public void DeleteEverything()

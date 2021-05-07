@@ -87,7 +87,7 @@ namespace SenseNet.Security.Tests
         public MemoryDataProviderAccessor(MemoryDataProvider provider) : base(provider) { }
 
         private DatabaseStorage _storage;
-        internal DatabaseStorage Storage => _storage ?? (_storage = GetStaticFieldOrProperty<DatabaseStorage>("Storage"));
+        internal DatabaseStorage Storage => _storage ?? (_storage = GetFieldOrProperty<DatabaseStorage>("Storage"));
     }
 
     public class AclEditorAccessor : Accessor

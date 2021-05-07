@@ -324,10 +324,11 @@ namespace SenseNet.Security.Tests
 
         //============================================================================================================
 
-        public static void InitializeInMemoryMembershipStorage(string src)
+        public static void InitializeInMemoryMembershipStorage(Context ctx, string src)
         {
+            var memoryDataProvider = (MemoryDataProvider) ctx.Security.DataProvider;
             // "G1:U1,G2,G3|G2:U2,G4,G5|G3:U3|G4:U4|G5:U5"
-            var table = MemoryDataProvider.Storage.Memberships;
+            var table = memoryDataProvider.Storage.Memberships;
             InitializeInMemoryMembershipTable(src, table);
         }
         public static List<Membership> CreateInMemoryMembershipTable(Dictionary<int, SecurityGroup> groups)
