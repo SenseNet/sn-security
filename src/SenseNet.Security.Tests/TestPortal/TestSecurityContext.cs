@@ -102,7 +102,7 @@ namespace SenseNet.Security.Tests.TestPortal
         public void UndoBreakInheritance(int entityId, bool normalize = false)
         {
             var categories = normalize ? new[] {EntryType.Normal} : new EntryType[0];
-            AclEditor.Create(this).UnbreakInheritance(entityId, categories).Apply();
+            AclEditor.Create(this).UnBreakInheritance(entityId, categories).Apply();
         }
         public new bool IsEntityInherited(int entityId)
         {
@@ -138,7 +138,7 @@ namespace SenseNet.Security.Tests.TestPortal
         public void UndoBreakInheritance(TestEntity entity, bool normalize = false)
         {
             var categories = normalize ? new[] { EntryType.Normal } : new EntryType[0];
-            AclEditor.Create(this).UnbreakInheritance(entity.Id, categories).Apply();
+            AclEditor.Create(this).UnBreakInheritance(entity.Id, categories).Apply();
         }
         public bool IsEntityInherited(TestEntity entity)
         {

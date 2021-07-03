@@ -1,4 +1,5 @@
-﻿using SenseNet.Security.Messaging;
+﻿using System;
+using SenseNet.Security.Messaging;
 
 namespace SenseNet.Security
 {
@@ -32,10 +33,22 @@ namespace SenseNet.Security
         /// <summary>Default: 30</summary>
         public int? CommunicationMonitorRunningPeriodInSeconds { get; set; }
 
+        [Obsolete("Use the overload with correct name.", true)]
+        public int? SecuritActivityLifetimeInMinutes
+        {
+            get => SecurityActivityLifetimeInMinutes;
+            set => SecurityActivityLifetimeInMinutes = value;
+        }
         /// <summary>Time span before executed activities are cleared from the database. Default: 42</summary>
-        public int? SecuritActivityLifetimeInMinutes { get; set; } //TODO:~ TYPO
+        public int? SecurityActivityLifetimeInMinutes { get; set; }
 
+        [Obsolete("Use the overload with correct name.", true)]
+        public int? SecuritActivityTimeoutInSeconds
+        {
+            get => SecurityActivityTimeoutInSeconds;
+            set => SecurityActivityTimeoutInSeconds = value;
+        }
         /// <summary>Default: 120</summary>
-        public int? SecuritActivityTimeoutInSeconds { get; set; } //TODO:~ TYPO
+        public int? SecurityActivityTimeoutInSeconds { get; set; }
     }
 }

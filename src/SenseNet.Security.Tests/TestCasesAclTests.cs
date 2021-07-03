@@ -1416,7 +1416,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("-E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-+++++++++++++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
             //#
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
 
 
             var sec = CurrentContext.Security;
@@ -1439,7 +1439,7 @@ namespace SenseNet.Security.Tests
 
             CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
 
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), new EntryType[0]).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E5"), new EntryType[0]).Apply();
 
             Assert.AreEqual("+E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1474,7 +1474,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("E2|Normal|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(aces[0].ToString()));
 
 
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E2"), new EntryType[0]).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E2"), new EntryType[0]).Apply();
 
 
             Assert.AreEqual("+E2|Normal|+G2:_________________________________________________+___________++_", Tools.ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E2")).ToString()));
@@ -1504,7 +1504,7 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual(e5Id, sec.GetSecurityEntity(e5Id).GetFirstAclId());
 
-            CurrentContext.Security.CreateAclEditor().UnbreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
 
             Assert.AreEqual(e2Id, sec.GetSecurityEntity(e5Id).GetFirstAclId());
 

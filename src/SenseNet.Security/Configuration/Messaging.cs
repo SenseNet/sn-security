@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 
 namespace SenseNet.Security.Configuration
 {
@@ -44,8 +45,21 @@ namespace SenseNet.Security.Configuration
         }
         public static int CommunicationMonitorRunningPeriodInSeconds { get; internal set; }
 
-        public static int SecuritActivityLifetimeInMinutes { get; internal set; } //TODO:~ TYPO
-        public static int SecuritActivityTimeoutInSeconds { get; internal set; } //TODO:~ TYPO
+        [Obsolete("Use the overload with correct name.", true)]
+        public static int SecuritActivityLifetimeInMinutes
+        {
+            get => SecurityActivityLifetimeInMinutes;
+            set => SecurityActivityLifetimeInMinutes = value;
+        }
+        public static int SecurityActivityLifetimeInMinutes { get; internal set; }
+
+        [Obsolete("Use the overload with correct name.", true)]
+        public static int SecuritActivityTimeoutInSeconds
+        {
+            get => SecurityActivityTimeoutInSeconds;
+            set => SecurityActivityTimeoutInSeconds = value;
+        }
+        public static int SecurityActivityTimeoutInSeconds { get; internal set; }
 
         internal static readonly int SecurityActivityExecutionLockRefreshPeriodInSeconds = 10;
         internal static readonly int SecurityActivityExecutionLockTimeoutInSeconds = 25;

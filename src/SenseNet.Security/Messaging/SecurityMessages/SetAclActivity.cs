@@ -20,11 +20,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Initializes a new instance of the SetAclActivity.
         /// </summary>
-        public SetAclActivity(IEnumerable<AclInfo> acls, List<int> breaks, List<int> unbreaks) //TODO:~ TYPO
+        public SetAclActivity(IEnumerable<AclInfo> acls, List<int> breaks, List<int> unBreaks)
         {
             _acls = acls;
             _breaks = breaks;
-            _undoBreaks = unbreaks;
+            _undoBreaks = unBreaks;
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                 DataHandler.BreakInheritance(context, entityId);
 
             foreach (var entityId in _undoBreaks)
-                DataHandler.UnbreakInheritance(context, entityId);
+                DataHandler.UnBreakInheritance(context, entityId);
         }
 
         /// <summary>

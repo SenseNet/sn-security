@@ -155,7 +155,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             }
             else
             {
-                if (!_finishSignal.WaitOne(Configuration.Messaging.SecuritActivityTimeoutInSeconds * 1000, false))
+                if (!_finishSignal.WaitOne(Configuration.Messaging.SecurityActivityTimeoutInSeconds * 1000, false))
                 {
                     var message = $"SecurityActivity is not finishing on a timely manner (#{Id})";
                     throw new SecurityActivityTimeoutException(message);

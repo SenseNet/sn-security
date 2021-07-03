@@ -96,8 +96,8 @@ namespace SenseNet.Security
             Configuration.Identities.OwnerGroupId = configuration.OwnerGroupId ?? 9;
 
             Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds = configuration.CommunicationMonitorRunningPeriodInSeconds ?? 30;
-            Configuration.Messaging.SecuritActivityLifetimeInMinutes = configuration.SecuritActivityLifetimeInMinutes ?? 42;
-            Configuration.Messaging.SecuritActivityTimeoutInSeconds = configuration.SecuritActivityTimeoutInSeconds ?? 120;
+            Configuration.Messaging.SecurityActivityLifetimeInMinutes = configuration.SecurityActivityLifetimeInMinutes ?? 42;
+            Configuration.Messaging.SecurityActivityTimeoutInSeconds = configuration.SecurityActivityTimeoutInSeconds ?? 120;
 
             _securityDataProviderPrototype = configuration.SecurityDataProvider;
             PermissionTypeBase.InferForcedRelations();

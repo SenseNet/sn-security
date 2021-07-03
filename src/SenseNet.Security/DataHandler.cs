@@ -141,11 +141,16 @@ namespace SenseNet.Security
             context.DataProvider.UpdateSecurityEntity(entity);
         }
 
-        public static void UnbreakInheritance(SecurityContext context, int entityId) //TODO:~ TYPO
+        [Obsolete("Use the overload with correct name.", true)]
+        public static void UnbreakInheritance(SecurityContext context, int entityId)
+        {
+            UnBreakInheritance(context, entityId);
+        }
+        public static void UnBreakInheritance(SecurityContext context, int entityId)
         {
             var entity = context.DataProvider.LoadStoredSecurityEntity(entityId);
             if (entity == null)
-                throw new EntityNotFoundException("Cannot unbreak inheritance because the entity does not exist: " + entityId);
+                throw new EntityNotFoundException("Cannot undo break inheritance because the entity does not exist: " + entityId);
             entity.IsInherited = true;
             context.DataProvider.UpdateSecurityEntity(entity);
         }
@@ -285,7 +290,7 @@ namespace SenseNet.Security
 
         internal static void CleanupSecurityActivities()
         {
-            SecurityContext.General.DataProvider.CleanupSecurityActivities(Configuration.Messaging.SecuritActivityLifetimeInMinutes);
+            SecurityContext.General.DataProvider.CleanupSecurityActivities(Configuration.Messaging.SecurityActivityLifetimeInMinutes);
         }
 
 
