@@ -24,7 +24,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            SecuritySystem.Instance.DataHandler.DeleteIdentities(context, IdentityIds);
+            context.SecuritySystem.DataHandler.DeleteIdentities(context, IdentityIds);
         }
 
         /// <summary>

@@ -13,7 +13,7 @@ namespace SenseNet.Security
     /// </summary>
     public partial class SecurityContext
     {
-        private SecuritySystem _securitySystem;
+        public SecuritySystem SecuritySystem { get; }
 
         /// <summary>
         /// Gets the associated user instance.
@@ -26,9 +26,9 @@ namespace SenseNet.Security
         /// <summary>
         /// Gets the configured IMessageProvider instance
         /// </summary>
-        public IMessageProvider MessageProvider => _securitySystem.MessageProvider; //UNDONE: obsolete
+        public IMessageProvider MessageProvider => SecuritySystem.MessageProvider; //UNDONE: obsolete
 
-        internal SecurityCache Cache => _securitySystem.Cache;
+        internal SecurityCache Cache => SecuritySystem.Cache;
 
         // ReSharper disable once InconsistentNaming
         private PermissionEvaluator __evaluator;
@@ -63,8 +63,8 @@ namespace SenseNet.Security
         public SecurityContext(ISecurityUser currentUser, SecuritySystem securitySystem)
         {
             CurrentUser = currentUser;
-            _securitySystem = securitySystem ?? SecuritySystem.Instance;
-            DataProvider = _securitySystem.SecurityDataProvider.CreateNew();
+            SecuritySystem = securitySystem ?? SecuritySystem.Instance;
+            DataProvider = SecuritySystem.SecurityDataProvider.CreateNew();
         }
 
         /// <summary>

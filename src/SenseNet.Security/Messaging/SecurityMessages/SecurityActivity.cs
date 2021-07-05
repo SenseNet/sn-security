@@ -58,7 +58,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         public void Execute(SecurityContext context, bool waitForComplete = true)
         {
             _context = context;
-            SecuritySystem.Instance.SecurityActivityQueue.ExecuteActivity(this);
+            context.SecuritySystem.SecurityActivityQueue.ExecuteActivity(this);
 
             if(waitForComplete)
                 WaitForComplete();
@@ -74,7 +74,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         {
             try
             {
-                using (var execLock = SecuritySystem.Instance.DataHandler.AcquireSecurityActivityExecutionLock(this))
+                using (var execLock = _context.SecuritySystem.DataHandler.AcquireSecurityActivityExecutionLock(this))
                 {
                     if (execLock.FullExecutionEnabled)
                     {
