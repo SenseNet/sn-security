@@ -82,14 +82,15 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.WritePermissionEntries(context, _entries);
-            DataHandler.RemovePermissionEntries(context, _entriesToRemove);
+            var dataHandler = SecuritySystem.Instance.DataHandler;
+            dataHandler.WritePermissionEntries(context, _entries);
+            dataHandler.RemovePermissionEntries(context, _entriesToRemove);
 
             foreach (var entityId in _breaks)
-                DataHandler.BreakInheritance(context, entityId);
+                dataHandler.BreakInheritance(context, entityId);
 
             foreach (var entityId in _undoBreaks)
-                DataHandler.UnBreakInheritance(context, entityId);
+                dataHandler.UnBreakInheritance(context, entityId);
         }
 
         /// <summary>

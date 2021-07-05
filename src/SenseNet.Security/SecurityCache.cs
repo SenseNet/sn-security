@@ -28,12 +28,14 @@ namespace SenseNet.Security
         }
         internal void Load(ISecurityDataProvider dataProvider)
         {
-            var entities = DataHandler.LoadSecurityEntities(dataProvider);
-            var aclTable = DataHandler.LoadAcls(dataProvider, entities);
+            var dataHandler = SecuritySystem.Instance.DataHandler;
+
+            var entities = dataHandler.LoadSecurityEntities(dataProvider);
+            var aclTable = dataHandler.LoadAcls(dataProvider, entities);
             BuildAcls(entities, aclTable);
 
             Entities = entities;
-            Groups = DataHandler.LoadAllGroups(dataProvider);
+            Groups = dataHandler.LoadAllGroups(dataProvider);
             Membership = FlattenUserMembership(Groups);
         }
 

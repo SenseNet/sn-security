@@ -31,7 +31,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.RemoveMembers(context, GroupId, UserMembers, GroupMembers, ParentGroups);
+            SecuritySystem.Instance.DataHandler.RemoveMembers(context, GroupId, UserMembers, GroupMembers, ParentGroups);
         }
 
         /// <summary>

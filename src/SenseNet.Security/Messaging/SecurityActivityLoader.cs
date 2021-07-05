@@ -117,7 +117,7 @@ namespace SenseNet.Security.Messaging
             {
                 using (var op = SnTrace.SecurityQueue.StartOperation("SAQ: Loading segment: from: {0}, to: {1}, count: {2}.", from, to, count))
                 {
-                    var segment = DataHandler.LoadSecurityActivities(from, to, count, _executingUnprocessedActivities);
+                    var segment = SecuritySystem.Instance.DataHandler.LoadSecurityActivities(from, to, count, _executingUnprocessedActivities);
                     op.Successful = true;
                     return segment;
                 }
@@ -183,7 +183,7 @@ namespace SenseNet.Security.Messaging
             private IEnumerable<SecurityActivity> LoadGaps(int[] gaps)
             {
                 SnTrace.SecurityQueue.Write("SAQ: Loading gaps (count: {0}): [{1}]", gaps.Length, string.Join(", ", gaps));
-                return DataHandler.LoadSecurityActivities(gaps, _executingUnprocessedActivities);
+                return SecuritySystem.Instance.DataHandler.LoadSecurityActivities(gaps, _executingUnprocessedActivities);
             }
 
         }

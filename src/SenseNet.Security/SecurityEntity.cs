@@ -201,8 +201,10 @@ namespace SenseNet.Security
 
             if (entity == null)
             {
+                var dataHandler = SecuritySystem.Instance.DataHandler;
+
                 // compensation: try to load the entity and its aces from the db
-                var storedEntity = DataHandler.GetStoredSecurityEntity(ctx.DataProvider, entityId);
+                var storedEntity = dataHandler.GetStoredSecurityEntity(ctx.DataProvider, entityId);
                 if (storedEntity != null)
                 {
                     entity = CreateEntitySafe(ctx, entityId, storedEntity.ParentId, storedEntity.OwnerId, storedEntity.IsInherited, storedEntity.HasExplicitEntry);
@@ -218,7 +220,7 @@ namespace SenseNet.Security
                 {
                     if (ctx.GetMissingEntity(entityId, out var parentId, out var ownerId))
                     {
-                        DataHandler.CreateSecurityEntitySafe(ctx, entityId, parentId, ownerId);
+                        dataHandler.CreateSecurityEntitySafe(ctx, entityId, parentId, ownerId);
                         entity = CreateEntitySafe(ctx, entityId, parentId, ownerId);
                     }
                 }

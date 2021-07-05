@@ -23,7 +23,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.DeleteSecurityEntity(context, EntityId);
+            SecuritySystem.Instance.DataHandler.DeleteSecurityEntity(context, EntityId);
         }
 
         /// <summary>

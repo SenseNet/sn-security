@@ -25,7 +25,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.ModifySecurityEntityOwner(context, EntityId, OwnerId);
+            SecuritySystem.Instance.DataHandler.ModifySecurityEntityOwner(context, EntityId, OwnerId);
         }
 
         /// <summary>

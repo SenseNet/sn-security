@@ -16,6 +16,8 @@ namespace SenseNet.Security.Tests
     [TestClass]
     public class EF6Tests : TestCases
     {
+        private DataHandler DataHandler => SecuritySystem.Instance.DataHandler;
+
         protected override ISecurityDataProvider GetDataProvider()
         {
             return new EF6SecurityDataProvider(0,

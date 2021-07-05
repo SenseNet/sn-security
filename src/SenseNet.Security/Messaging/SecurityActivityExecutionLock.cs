@@ -38,7 +38,7 @@ namespace SenseNet.Security.Messaging
 
         private void Refresh(object sender, EventArgs args)
         {
-            DataHandler.RefreshSecurityActivityExecutionLock(_activity);
+            SecuritySystem.Instance.DataHandler.RefreshSecurityActivityExecutionLock(_activity);
         }
         private void Release()
         {
@@ -46,7 +46,7 @@ namespace SenseNet.Security.Messaging
             _timer.Stop();
             _timer.Elapsed -= Refresh;
             _timer.Disposed -= Refresh;
-            DataHandler.ReleaseSecurityActivityExecutionLock(_activity, FullExecutionEnabled);
+            SecuritySystem.Instance.DataHandler.ReleaseSecurityActivityExecutionLock(_activity, FullExecutionEnabled);
         }
 
         private bool _disposed;

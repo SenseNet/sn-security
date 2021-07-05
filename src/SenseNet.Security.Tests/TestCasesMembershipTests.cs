@@ -9,6 +9,8 @@ namespace SenseNet.Security.Tests
 {
     public abstract partial class TestCases
     {
+        private DataHandler DataHandler => SecuritySystem.Instance.DataHandler;
+
         [TestMethod]
         public void Membership_StoreSimpleGroup()
         {

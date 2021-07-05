@@ -222,7 +222,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
                 var _ = new SecurityContext(TestUser.User2);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
-                DataHandler.SaveActivity(activity);
+                SecuritySystem.Instance.DataHandler.SaveActivity(activity);
 
                 var method = typeof(SecurityContext).GetMethod("MessageProvider_MessageReceived", BindingFlags.Static | BindingFlags.NonPublic);
                 if (method == null)
@@ -246,7 +246,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
                 var _ = new SecurityContext(TestUser.User2);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
-                DataHandler.SaveActivity(activity);
+                SecuritySystem.Instance.DataHandler.SaveActivity(activity);
 
                 count++;
             }

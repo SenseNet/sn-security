@@ -37,7 +37,7 @@ namespace SenseNet.Security.Messaging
             try
             {
                 SecuritySystem.Instance.SecurityActivityQueue.HealthCheck();
-                DataHandler.CleanupSecurityActivities();
+                SecuritySystem.Instance.DataHandler.CleanupSecurityActivities();
             }
             catch (Exception ex) //logged
             {

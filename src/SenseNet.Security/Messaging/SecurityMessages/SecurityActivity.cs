@@ -74,7 +74,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         {
             try
             {
-                using (var execLock = DataHandler.AcquireSecurityActivityExecutionLock(this))
+                using (var execLock = SecuritySystem.Instance.DataHandler.AcquireSecurityActivityExecutionLock(this))
                 {
                     if (execLock.FullExecutionEnabled)
                     {

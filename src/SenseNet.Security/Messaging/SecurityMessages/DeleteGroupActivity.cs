@@ -23,7 +23,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.DeleteSecurityGroup(context, GroupId);
+            SecuritySystem.Instance.DataHandler.DeleteSecurityGroup(context, GroupId);
         }
 
         /// <summary>
