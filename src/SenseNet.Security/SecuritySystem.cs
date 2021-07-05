@@ -44,8 +44,8 @@ namespace SenseNet.Security
         {
             var ss = new SecuritySystem(configuration.SecurityDataProvider, configuration.MessageProvider,
                 configuration);
-            ss.Start();
             Instance = ss;
+            ss.Start();
         }
 
 
@@ -53,6 +53,7 @@ namespace SenseNet.Security
         public ISecurityDataProvider SecurityDataProvider { get; }
         public IMessageProvider MessageProvider { get; }
         internal SecurityCache Cache { get; private set; }
+        internal CommunicationMonitor CommunicationMonitor { get; private set; }
 
         private readonly SecurityConfiguration _configuration;
         private bool _killed;
@@ -103,7 +104,7 @@ namespace SenseNet.Security
                 op.Successful = true;
             }
 
-            CommunicationMonitor.Initialize();
+            CommunicationMonitor = new CommunicationMonitor();
 
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);

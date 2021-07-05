@@ -4,11 +4,11 @@ using SenseNet.Diagnostics;
 
 namespace SenseNet.Security.Messaging
 {
-    internal static class CommunicationMonitor
+    internal class CommunicationMonitor
     {
-        private static System.Timers.Timer _timer;
+        private System.Timers.Timer _timer;
 
-        internal static void Initialize()
+        internal CommunicationMonitor()
         {
             var interval = Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds * 1000.0;
 
@@ -17,17 +17,17 @@ namespace SenseNet.Security.Messaging
             _timer.Disposed += Timer_Disposed;
         }
 
-        private static void Timer_Disposed(object sender, EventArgs e)
+        private void Timer_Disposed(object sender, EventArgs e)
         {
             _timer.Elapsed -= Timer_Elapsed;
             _timer.Disposed -= Timer_Disposed;
         }
-        private static void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             Timer_Elapsed();
         }
         // for testing purposes we need a parameterless method because ElapsedEventArgs has only internal constructor
-        private static void Timer_Elapsed()
+        private void Timer_Elapsed()
         {
             if (Debugger.IsAttached)
                 return;
@@ -49,16 +49,16 @@ namespace SenseNet.Security.Messaging
             }
         }
 
-        internal static void Start()
+        internal void Start()
         {
             _timer.Enabled = true;
         }
-        internal static void Stop()
+        internal void Stop()
         {
             _timer.Enabled = false;
         }
 
-        public static void Shutdown()
+        public void Shutdown()
         {
             _timer?.Dispose();
         }

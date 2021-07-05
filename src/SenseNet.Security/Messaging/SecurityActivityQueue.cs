@@ -56,14 +56,14 @@ namespace SenseNet.Security.Messaging
 
         internal static void Startup(CompletionState uncompleted, int lastActivityIdFromDb)
         {
-            CommunicationMonitor.Stop();
+            SecuritySystem.Instance.CommunicationMonitor.Stop();
 
             Serializer.Reset();
             DependencyManager.Reset();
             TerminationHistory.Reset(uncompleted.LastActivityId, uncompleted.Gaps);
             Serializer.Start(lastActivityIdFromDb, uncompleted.LastActivityId, uncompleted.Gaps);
 
-            CommunicationMonitor.Start();
+            SecuritySystem.Instance.CommunicationMonitor.Start();
         }
 
         internal static void Shutdown()

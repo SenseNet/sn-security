@@ -234,7 +234,7 @@ namespace SenseNet.Security.Tests
         public void EF6_LoadActivities_SmartGapResolution()
         {
             var sb = new StringBuilder();
-            CommunicationMonitor.Stop();
+            SecuritySystem.Instance.CommunicationMonitor.Stop();
             var sCtx = CurrentContext.Security;
             var user1Id = TestUser.User1.Id;
             var rootEntityId = Id("E01");
@@ -290,7 +290,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(0, cs3.Gaps.Length);
             Assert.AreEqual(cs2.LastActivityId, cs3.LastActivityId);
 
-            CommunicationMonitor.Start();
+            SecuritySystem.Instance.CommunicationMonitor.Start();
         }
 
 
