@@ -82,7 +82,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            var dataHandler = SecuritySystem.Instance.DataHandler;
+            var dataHandler = context.SecuritySystem.DataHandler;
             dataHandler.WritePermissionEntries(context, _entries);
             dataHandler.RemovePermissionEntries(context, _entriesToRemove);
 
