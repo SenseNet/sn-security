@@ -97,12 +97,12 @@ namespace SenseNet.Security.Tests.TestPortal
         public void BreakInheritance(int entityId, bool convertToExplicit = true)
         {
             var categories = convertToExplicit ? new[] { EntryType.Normal } : new EntryType[0];
-            AclEditor.Create(this).BreakInheritance(entityId, categories).Apply();
+            new AclEditor(this).BreakInheritance(entityId, categories).Apply();
         }
         public void UndoBreakInheritance(int entityId, bool normalize = false)
         {
             var categories = normalize ? new[] {EntryType.Normal} : new EntryType[0];
-            AclEditor.Create(this).UnBreakInheritance(entityId, categories).Apply();
+            new AclEditor(this).UnBreakInheritance(entityId, categories).Apply();
         }
         public new bool IsEntityInherited(int entityId)
         {
@@ -133,12 +133,12 @@ namespace SenseNet.Security.Tests.TestPortal
         public void BreakInheritance(TestEntity entity, bool convertToExplicit = true)
         {
             var categories = convertToExplicit ? new[] { EntryType.Normal } : new EntryType[0];
-            AclEditor.Create(this).BreakInheritance(entity.Id, categories).Apply();
+            new AclEditor(this).BreakInheritance(entity.Id, categories).Apply();
         }
         public void UndoBreakInheritance(TestEntity entity, bool normalize = false)
         {
             var categories = normalize ? new[] { EntryType.Normal } : new EntryType[0];
-            AclEditor.Create(this).UnBreakInheritance(entity.Id, categories).Apply();
+            new AclEditor(this).UnBreakInheritance(entity.Id, categories).Apply();
         }
         public bool IsEntityInherited(TestEntity entity)
         {

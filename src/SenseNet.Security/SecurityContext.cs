@@ -101,7 +101,7 @@ namespace SenseNet.Security
         /// </summary>
         protected AclEditor CreateAclEditor(EntryType entryType = EntryType.Normal)
         {
-            return AclEditor.Create(this, entryType);
+            return new AclEditor(this, entryType);
         }
         /// <summary>
         /// Returns the AccessControlList of the passed entity to help building a rich GUI for modifications.

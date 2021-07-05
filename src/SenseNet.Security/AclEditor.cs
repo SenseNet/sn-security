@@ -40,14 +40,14 @@ namespace SenseNet.Security
         /// </summary>
         public SecurityContext Context { get; }
 
-        /// <summary>
-        /// Shortcut of the constructor.
-        /// Returns with a new instance of the AclEditor with a SecurityContext as the current context.
-        /// </summary>
-        public static AclEditor Create(SecurityContext context, EntryType entryType = EntryType.Normal)
-        {
-            return new AclEditor(context, entryType);
-        }
+        ///// <summary>
+        ///// Shortcut of the constructor.
+        ///// Returns with a new instance of the AclEditor with a SecurityContext as the current context.
+        ///// </summary>
+        //public static AclEditor Create(SecurityContext context, EntryType entryType = EntryType.Normal)
+        //{
+        //    return new AclEditor(context, entryType);
+        //}
 
         /// <summary>
         /// Initializes a new instance of the AclEditor with a SecurityContext as the current context.
