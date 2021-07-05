@@ -73,7 +73,7 @@ namespace SenseNet.Security
         public SecuritySystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider,
             SecurityConfiguration configuration)
         {
-            DataHandler = new DataHandler();
+            DataHandler = new DataHandler(this);
             SecurityDataProvider = securityDataProvider;
             MessageProvider = messageProvider;
             _configuration = configuration;
@@ -103,17 +103,17 @@ namespace SenseNet.Security
 
             using (var op = SnTrace.Security.StartOperation("Security initial loading."))
             {
-                var cache = new SecurityCache(SecurityDataProvider);
+                var cache = new SecurityCache(this);
                 cache.Initialize();
                 Cache = cache;
                 op.Successful = true;
             }
 
-            CommunicationMonitor = new CommunicationMonitor();
+            CommunicationMonitor = new CommunicationMonitor(this);
 
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
 
-            SecurityActivityQueue = new SecurityActivityQueue();
+            SecurityActivityQueue = new SecurityActivityQueue(this);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
 
             _killed = false;

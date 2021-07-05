@@ -14,13 +14,15 @@ namespace SenseNet.Security.Messaging
     {
         internal static int SecurityActivityLoadingBufferSize = 200;
 
+        private SecuritySystem _securitySystem;
         private readonly Serializer _serializer;
         private readonly DependencyManager _dependencyManager;
         private TerminationHistory _terminationHistory;
         private readonly Executor _executor;
 
-        public SecurityActivityQueue()
+        public SecurityActivityQueue(SecuritySystem securitySystem)
         {
+            _securitySystem = securitySystem;
             _serializer = new Serializer(this);
             _executor = new Executor();
             _dependencyManager = new DependencyManager(_serializer, _executor);
@@ -56,7 +58,7 @@ namespace SenseNet.Security.Messaging
             }
 
             var lastId = TerminationHistory.GetLastTerminatedId();
-            var lastDbId = SecuritySystem.Instance.DataHandler.GetLastSecurityActivityId(SecuritySystem.Instance.StartedAt);
+            var lastDbId = _securitySystem.DataHandler.GetLastSecurityActivityId(_securitySystem.StartedAt);
             if (lastId < lastDbId)
             {
                 SnTrace.SecurityQueue.Write("SAQ: Health checker is processing activities from {0} to {1}", lastId + 1, lastDbId);
@@ -71,14 +73,14 @@ namespace SenseNet.Security.Messaging
 
         internal void Startup(CompletionState uncompleted, int lastActivityIdFromDb)
         {
-            SecuritySystem.Instance.CommunicationMonitor.Stop();
+            _securitySystem.CommunicationMonitor.Stop();
 
             _serializer.Reset();
             _dependencyManager.Reset();
             TerminationHistory.Reset(uncompleted.LastActivityId, uncompleted.Gaps);
             _serializer.Start(lastActivityIdFromDb, uncompleted.LastActivityId, uncompleted.Gaps);
 
-            SecuritySystem.Instance.CommunicationMonitor.Start();
+            _securitySystem.CommunicationMonitor.Start();
         }
 
         internal void Shutdown()
@@ -105,7 +107,7 @@ namespace SenseNet.Security.Messaging
         public void ExecuteActivity(SecurityActivity activity)
         {
             if (!activity.FromDatabase && !activity.FromReceiver)
-                SecuritySystem.Instance.DataHandler.SaveActivity(activity);
+                _securitySystem.DataHandler.SaveActivity(activity);
 
             _serializer.EnqueueActivity(activity);
         }

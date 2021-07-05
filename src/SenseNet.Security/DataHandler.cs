@@ -9,6 +9,13 @@ namespace SenseNet.Security
 {
     internal class DataHandler
     {
+        private SecuritySystem _securitySystem;
+
+        public DataHandler(SecuritySystem securitySystem)
+        {
+            _securitySystem = securitySystem;
+        }
+
         public IDictionary<int, SecurityEntity> LoadSecurityEntities(ISecurityDataProvider dataProvider)
         {
             var count = dataProvider.GetEstimatedEntityCount();
@@ -270,27 +277,27 @@ namespace SenseNet.Security
 
         internal int GetLastSecurityActivityId(DateTime startedTime)
         {
-            return SecuritySystem.Instance.GeneralSecurityContext.DataProvider.GetLastSecurityActivityId(startedTime);
+            return _securitySystem.SecurityDataProvider.GetLastSecurityActivityId(startedTime);
         }
 
         internal IEnumerable<SecurityActivity> LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities)
         {
-            return SecuritySystem.Instance.GeneralSecurityContext.DataProvider.LoadSecurityActivities(from, to, count, executingUnprocessedActivities);
+            return _securitySystem.SecurityDataProvider.LoadSecurityActivities(from, to, count, executingUnprocessedActivities);
         }
 
         internal IEnumerable<SecurityActivity> LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities)
         {
-            return SecuritySystem.Instance.GeneralSecurityContext.DataProvider.LoadSecurityActivities(gaps, executingUnprocessedActivities);
+            return _securitySystem.SecurityDataProvider.LoadSecurityActivities(gaps, executingUnprocessedActivities);
         }
 
         internal SecurityActivity LoadBigSecurityActivity(int id)
         {
-            return SecuritySystem.Instance.GeneralSecurityContext.DataProvider.LoadSecurityActivity(id);
+            return _securitySystem.SecurityDataProvider.LoadSecurityActivity(id);
         }
 
         internal void CleanupSecurityActivities()
         {
-            SecuritySystem.Instance.GeneralSecurityContext.DataProvider.CleanupSecurityActivities(Configuration.Messaging.SecurityActivityLifetimeInMinutes);
+            _securitySystem.SecurityDataProvider.CleanupSecurityActivities(Configuration.Messaging.SecurityActivityLifetimeInMinutes);
         }
 
 

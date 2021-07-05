@@ -6,10 +6,13 @@ namespace SenseNet.Security.Messaging
 {
     internal class CommunicationMonitor
     {
+        private SecuritySystem _securitySystem;
         private System.Timers.Timer _timer;
 
-        internal CommunicationMonitor()
+        internal CommunicationMonitor(SecuritySystem securitySystem)
         {
+            _securitySystem = securitySystem;
+
             var interval = Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds * 1000.0;
 
             _timer = new System.Timers.Timer(interval) {Enabled = false};
@@ -36,8 +39,8 @@ namespace SenseNet.Security.Messaging
             _timer.Enabled = false;
             try
             {
-                SecuritySystem.Instance.SecurityActivityQueue.HealthCheck();
-                SecuritySystem.Instance.DataHandler.CleanupSecurityActivities();
+                _securitySystem.SecurityActivityQueue.HealthCheck();
+                _securitySystem.DataHandler.CleanupSecurityActivities();
             }
             catch (Exception ex) //logged
             {
