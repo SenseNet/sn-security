@@ -72,7 +72,7 @@ namespace SenseNet.Security.Messaging
 
                 result = new SecurityActivityHistory
                 {
-                    State = SecurityActivityQueue.GetCurrentState(),
+                    State = SecuritySystem.Instance.SecurityActivityQueue.GetCurrentState(),
                     Recent = list.ToArray()
                 };
             }
@@ -91,7 +91,7 @@ namespace SenseNet.Security.Messaging
 
                 result = new SecurityActivityHistory
                 {
-                    State = SecurityActivityQueue.GetCurrentState(),
+                    State = SecuritySystem.Instance.SecurityActivityQueue.GetCurrentState(),
                     Recent = new SecurityActivityHistoryItem[0]
                 };
             }
@@ -259,7 +259,7 @@ namespace SenseNet.Security.Messaging
 
         internal static CompletionState GetCurrent()
         {
-            return SecurityActivityQueue.GetCurrentCompletionState();
+            return SecuritySystem.Instance.SecurityActivityQueue.GetCurrentCompletionState();
         }
 
         /// <summary>

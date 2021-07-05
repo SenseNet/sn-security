@@ -36,7 +36,7 @@ namespace SenseNet.Security.Messaging
             _timer.Enabled = false;
             try
             {
-                SecurityActivityQueue.HealthCheck();
+                SecuritySystem.Instance.SecurityActivityQueue.HealthCheck();
                 DataHandler.CleanupSecurityActivities();
             }
             catch (Exception ex) //logged

@@ -88,7 +88,7 @@ namespace SenseNet.Security.Tests
 
         internal static Context GetEmptyContext(TestUser currentUser)
         {
-            SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
+            SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             MemoryDataProvider.LastActivityId = 0;
             return GetEmptyContext(currentUser, new MemoryDataProvider(DatabaseStorage.CreateEmpty()));
         }

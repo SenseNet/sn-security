@@ -32,7 +32,7 @@ namespace SenseNet.Security.Tests
             Db().Database.ExecuteSqlCommand("DELETE FROM [EFMemberships]");
         }
 
-
+        private SecurityActivityQueue SecurityActivityQueue => SecuritySystem.Instance.SecurityActivityQueue;
 
         [TestMethod]
         public void EF6_LoadActivities_AtStart_DataHandlerLevel()

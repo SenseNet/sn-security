@@ -54,6 +54,7 @@ namespace SenseNet.Security
         public IMessageProvider MessageProvider { get; }
         internal SecurityCache Cache { get; private set; }
         internal CommunicationMonitor CommunicationMonitor { get; private set; }
+        internal SecurityActivityQueue SecurityActivityQueue { get; private set; }
 
         private readonly SecurityConfiguration _configuration;
         private bool _killed;
@@ -109,6 +110,8 @@ namespace SenseNet.Security
             CommunicationMonitor = new CommunicationMonitor();
 
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
+
+            SecurityActivityQueue = new SecurityActivityQueue();
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
 
             _killed = false;
