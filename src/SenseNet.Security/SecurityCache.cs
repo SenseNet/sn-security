@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SenseNet.Security
@@ -14,11 +13,14 @@ namespace SenseNet.Security
         internal IDictionary<int, SecurityGroup> Groups { get; private set; }     // GroupId  --> Group
         internal Dictionary<int, List<int>> Membership { get; private set; }      // UserId   --> list of ContainerIds
 
-        internal static SecurityCache Initialize(ISecurityDataProvider dataProvider)
+        private ISecurityDataProvider _dataProvider;
+        public SecurityCache(ISecurityDataProvider dataProvider)
         {
-            var cache = new SecurityCache();
-            cache.Load(dataProvider);
-            return cache;
+            _dataProvider = dataProvider;
+        }
+        internal void Initialize()
+        {
+            Load(_dataProvider);
         }
         internal void Reset(ISecurityDataProvider dataProvider)
         {
@@ -35,7 +37,7 @@ namespace SenseNet.Security
             Membership = FlattenUserMembership(Groups);
         }
 
-        private static void BuildAcls(IDictionary<int, SecurityEntity> entities, Dictionary<int, AclInfo> aclTable)
+        private void BuildAcls(IDictionary<int, SecurityEntity> entities, Dictionary<int, AclInfo> aclTable)
         {
             foreach (var acl in aclTable.Values)
             {
@@ -48,7 +50,7 @@ namespace SenseNet.Security
             }
         }
 
-        internal static Dictionary<int, List<int>> FlattenUserMembership(IDictionary<int, SecurityGroup> groups)
+        internal Dictionary<int, List<int>> FlattenUserMembership(IDictionary<int, SecurityGroup> groups)
         {
             var allUsers = new Dictionary<int, List<int>>();
             foreach (var group in groups.Values)
@@ -65,7 +67,7 @@ namespace SenseNet.Security
             }
             return allUsers;
         }
-        private static void FlattenGroupMembership(SecurityGroup group, List<SecurityGroup> flattenedGroups)
+        private void FlattenGroupMembership(SecurityGroup group, List<SecurityGroup> flattenedGroups)
         {
             // avoid infinite loop because of circular references
             if (flattenedGroups.Contains(group))
@@ -77,7 +79,7 @@ namespace SenseNet.Security
             foreach (var parentGroup in group.ParentGroups)
                 FlattenGroupMembership(parentGroup, flattenedGroups);
         }
-        private static List<int> EnsureUser(int userId, Dictionary<int, List<int>> users)
+        private List<int> EnsureUser(int userId, Dictionary<int, List<int>> users)
         {
             if (!users.TryGetValue(userId, out var user))
             {
@@ -105,7 +107,7 @@ namespace SenseNet.Security
             missingInFlattening = expected.Except(actual).ToArray();
             unknownInFlattening = actual.Except(expected).ToArray();
         }
-        private static IEnumerable<long> ConvertFlattenedUserMembershipToControlData(Dictionary<int, List<int>> membership)
+        private IEnumerable<long> ConvertFlattenedUserMembershipToControlData(Dictionary<int, List<int>> membership)
         {
             var result = new List<long>(membership.Count * 2);
             foreach (var item in membership)
@@ -164,7 +166,7 @@ namespace SenseNet.Security
             }
             return group;
         }
-        private static void AddRelation(List<SecurityGroup> container, SecurityGroup item)
+        private void AddRelation(List<SecurityGroup> container, SecurityGroup item)
         {
             if (container.All(x => x.Id != item.Id))
                 container.Add(item);
@@ -328,7 +330,6 @@ namespace SenseNet.Security
             }
         }
 
-        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         internal bool IsInGroup(int memberId, int groupId)
         {
             // if it is a user: first look for the id in the flattened user --> groups collection
@@ -360,9 +361,11 @@ namespace SenseNet.Security
 
         /*=================================================================================== Flattener */
 
-        private static class Flattener
+        private FlattenerClass Flattener = new FlattenerClass();
+
+        private class FlattenerClass
         {
-            internal static void AddUserToGroup(int userId, SecurityGroup parentGroup, Dictionary<int, List<int>> usersTable)
+            internal void AddUserToGroup(int userId, SecurityGroup parentGroup, Dictionary<int, List<int>> usersTable)
             {
                 // collect all relevant groupId from the parent axis
                 var allParentGroupIds = GetAllParentGroupIdsInclusive(parentGroup);
@@ -380,7 +383,7 @@ namespace SenseNet.Security
                         user.Add(parentGroupId);
             }
 
-            internal static void AddGroupToGroup(SecurityGroup group, SecurityGroup parentGroup, Dictionary<int, List<int>> usersTable)
+            internal void AddGroupToGroup(SecurityGroup group, SecurityGroup parentGroup, Dictionary<int, List<int>> usersTable)
             {
                 var allUserIds = GetAllUserIds(group);
                 var allParentGroupIds = GetAllParentGroupIdsInclusive(parentGroup);
@@ -398,25 +401,25 @@ namespace SenseNet.Security
                 }
             }
 
-            internal static void DeleteUser(int userId, Dictionary<int, List<int>> usersTable)
+            internal void DeleteUser(int userId, Dictionary<int, List<int>> usersTable)
             {
                 usersTable.Remove(userId);
             }
 
-            internal static void RemoveUserFromGroup(int userId, SecurityGroup parentGroup, Dictionary<int, List<int>> usersTable, IDictionary<int, SecurityGroup> groupsTable)
+            internal void RemoveUserFromGroup(int userId, SecurityGroup parentGroup, Dictionary<int, List<int>> usersTable, IDictionary<int, SecurityGroup> groupsTable)
             {
                 var allParents = GetAllParentGroupIdsInclusive(parentGroup);
                 RemoveUserFromGroup(userId, allParents, usersTable, groupsTable);
             }
 
             // ReSharper disable once UnusedParameter.Local
-            internal static void DeleteGroup(SecurityGroup deletedGroup, List<int> allUsers, List<int> allParents, IDictionary<int, SecurityGroup> groupsTable, Dictionary<int, List<int>> usersTable)
+            internal void DeleteGroup(SecurityGroup deletedGroup, List<int> allUsers, List<int> allParents, IDictionary<int, SecurityGroup> groupsTable, Dictionary<int, List<int>> usersTable)
             {
                 foreach (var userId in allUsers)
                     RemoveUserFromGroup(userId, allParents, usersTable, groupsTable);
             }
 
-            private static void RemoveUserFromGroup(int userId, List<int> allParents, Dictionary<int, List<int>> usersTable, IDictionary<int, SecurityGroup> groupsTable)
+            private void RemoveUserFromGroup(int userId, List<int> allParents, Dictionary<int, List<int>> usersTable, IDictionary<int, SecurityGroup> groupsTable)
             {
                 // get user record (what groups member of?)
                 if (!usersTable.TryGetValue(userId, out var user))
@@ -453,13 +456,13 @@ namespace SenseNet.Security
             /// <summary>
             /// Gathers all the parent groups of a group. The initial group WILL be in the list.
             /// </summary>
-            internal static List<int> GetAllParentGroupIdsInclusive(SecurityGroup group)
+            internal List<int> GetAllParentGroupIdsInclusive(SecurityGroup group)
             {
                 var allParentGroups = new List<SecurityGroup>();
                 CollectAllParentGroupsInclusive(group, allParentGroups);
                 return allParentGroups.Select(x => x.Id).ToList();
             }
-            private static void CollectAllParentGroupsInclusive(SecurityGroup group, List<SecurityGroup> allParentGroups)
+            private void CollectAllParentGroupsInclusive(SecurityGroup group, List<SecurityGroup> allParentGroups)
             {
                 // avoid infinite loop because of circular reference
                 if (allParentGroups.Contains(group))
@@ -479,13 +482,13 @@ namespace SenseNet.Security
             /// Gathers all the parent groups of a group. The initial group 
             /// will be in the list ONLY if there is a circle in the graph.
             /// </summary>
-            internal static List<int> GetAllParentGroupIdsExclusive(SecurityGroup group)
+            internal List<int> GetAllParentGroupIdsExclusive(SecurityGroup group)
             {
                 var allParentGroups = new List<SecurityGroup>();
                 CollectAllParentGroupsExclusive(group, allParentGroups);
                 return allParentGroups.Select(x => x.Id).ToList();
             }
-            private static void CollectAllParentGroupsExclusive(SecurityGroup group, List<SecurityGroup> allParentGroups)
+            private void CollectAllParentGroupsExclusive(SecurityGroup group, List<SecurityGroup> allParentGroups)
             {
                 // stop if there are no parents
                 if (group.ParentGroups == null)
@@ -499,7 +502,7 @@ namespace SenseNet.Security
                 }
             }
 
-            internal static List<int> GetAllUserIds(SecurityGroup group)
+            internal List<int> GetAllUserIds(SecurityGroup group)
             {
                 var allChildGroups = new List<SecurityGroup>();
                 CollectAllChildGroups(group, allChildGroups);
@@ -511,7 +514,7 @@ namespace SenseNet.Security
                             userIds.Add(u);
                 return userIds;
             }
-            private static void CollectAllChildGroups(SecurityGroup group, List<SecurityGroup> allChildGroups)
+            private void CollectAllChildGroups(SecurityGroup group, List<SecurityGroup> allChildGroups)
             {
                 // avoid infinite loop because of circular reference
                 if (allChildGroups.Contains(group))

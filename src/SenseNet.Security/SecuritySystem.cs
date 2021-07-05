@@ -100,7 +100,9 @@ namespace SenseNet.Security
 
             using (var op = SnTrace.Security.StartOperation("Security initial loading."))
             {
-                Cache = SecurityCache.Initialize(SecurityDataProvider);
+                var cache = new SecurityCache(SecurityDataProvider);
+                cache.Initialize();
+                Cache = cache;
                 op.Successful = true;
             }
 
