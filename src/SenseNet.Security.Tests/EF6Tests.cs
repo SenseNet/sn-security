@@ -110,7 +110,7 @@ namespace SenseNet.Security.Tests
 
             // test0: initial state
             var expectedCs = new CompletionState { LastActivityId = lastId };
-            var uncompleted = DataHandler.LoadCompletionState(SecurityContext.General.DataProvider, out var lastActivityIdFromDb);
+            var uncompleted = DataHandler.LoadCompletionState(SecuritySystem.Instance.GeneralSecurityContext.DataProvider, out var lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs0 = SecurityActivityQueue.GetCurrentState().Termination;
             Assert.AreEqual(expectedCs.ToString(), cs0.ToString());
@@ -127,7 +127,7 @@ namespace SenseNet.Security.Tests
                 ");
 
             var expectedIsFromDb1 = string.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId });
-            uncompleted = DataHandler.LoadCompletionState(SecurityContext.General.DataProvider, out lastActivityIdFromDb);
+            uncompleted = DataHandler.LoadCompletionState(SecuritySystem.Instance.GeneralSecurityContext.DataProvider, out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs1 = SecurityActivityQueue.GetCurrentState().Termination;
             var idsFromDb1 = string.Join(", ", Db().GetUnprocessedActivityIds());
@@ -145,7 +145,7 @@ namespace SenseNet.Security.Tests
                 ");
 
             var expectedIsFromDb2 = string.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId, lastId });
-            uncompleted = DataHandler.LoadCompletionState(SecurityContext.General.DataProvider, out lastActivityIdFromDb);
+            uncompleted = DataHandler.LoadCompletionState(SecuritySystem.Instance.GeneralSecurityContext.DataProvider, out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs2 = SecurityActivityQueue.GetCurrentState().Termination;
             var idsFromDb2 = string.Join(", ", Db().GetUnprocessedActivityIds());
@@ -255,7 +255,7 @@ namespace SenseNet.Security.Tests
             Db().ExecuteTestScript("UPDATE EFMessages set ExecutionState = 'Wait', LockedBy = null, LockedAt = null");
 
             sb.Clear();
-            var uncompleted = DataHandler.LoadCompletionState(SecurityContext.General.DataProvider, out var lastActivityIdFromDb);
+            var uncompleted = DataHandler.LoadCompletionState(SecuritySystem.Instance.GeneralSecurityContext.DataProvider, out var lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
 
             var cs1 = SecurityActivityQueue.GetCurrentCompletionState();

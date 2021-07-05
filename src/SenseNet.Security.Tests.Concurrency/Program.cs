@@ -293,7 +293,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
                 //---------------------- work
 
-                var ctx = SecurityContext.General;
+                var ctx = SecuritySystem.Instance.GeneralSecurityContext;
                 var entities = ctx.Cache.Entities;
                 var source = entities[3];
                 var target0 = entities[1];
@@ -313,7 +313,7 @@ namespace SenseNet.Security.Tests.Concurrency
             var name = "Reader-" + id;
             var count = 0;
 
-                var ctx = SecurityContext.General;
+                var ctx = SecuritySystem.Instance.GeneralSecurityContext;
                 var entities = ctx.Cache.Entities;
 
             while (!_stopped)

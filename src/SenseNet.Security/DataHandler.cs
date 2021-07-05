@@ -270,27 +270,27 @@ namespace SenseNet.Security
 
         internal static int GetLastSecurityActivityId(DateTime startedTime)
         {
-            return SecurityContext.General.DataProvider.GetLastSecurityActivityId(startedTime);
+            return SecuritySystem.Instance.GeneralSecurityContext.DataProvider.GetLastSecurityActivityId(startedTime);
         }
 
         internal static IEnumerable<SecurityActivity> LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities)
         {
-            return SecurityContext.General.DataProvider.LoadSecurityActivities(from, to, count, executingUnprocessedActivities);
+            return SecuritySystem.Instance.GeneralSecurityContext.DataProvider.LoadSecurityActivities(from, to, count, executingUnprocessedActivities);
         }
 
         internal static IEnumerable<SecurityActivity> LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities)
         {
-            return SecurityContext.General.DataProvider.LoadSecurityActivities(gaps, executingUnprocessedActivities);
+            return SecuritySystem.Instance.GeneralSecurityContext.DataProvider.LoadSecurityActivities(gaps, executingUnprocessedActivities);
         }
 
         internal static SecurityActivity LoadBigSecurityActivity(int id)
         {
-            return SecurityContext.General.DataProvider.LoadSecurityActivity(id);
+            return SecuritySystem.Instance.GeneralSecurityContext.DataProvider.LoadSecurityActivity(id);
         }
 
         internal static void CleanupSecurityActivities()
         {
-            SecurityContext.General.DataProvider.CleanupSecurityActivities(Configuration.Messaging.SecurityActivityLifetimeInMinutes);
+            SecuritySystem.Instance.GeneralSecurityContext.DataProvider.CleanupSecurityActivities(Configuration.Messaging.SecurityActivityLifetimeInMinutes);
         }
 
 

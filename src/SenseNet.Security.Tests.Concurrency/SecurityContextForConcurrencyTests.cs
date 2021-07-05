@@ -7,7 +7,7 @@ namespace SenseNet.Security.Tests.TestPortal
 
         public new static void StartTheSystem(SecurityConfiguration configuration)
         {
-            SecurityContext.StartTheSystem(configuration);
+            SecuritySystem.StartTheSystem(configuration);
             General = new SecurityContextForConcurrencyTests(SystemUser);
         }
 

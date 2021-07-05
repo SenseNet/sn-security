@@ -37,7 +37,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Pointer to the current SecurityContext.
         /// </summary>
-        public SecurityContext Context => _context ?? SecurityContext.General;
+        public SecurityContext Context => _context ?? SecuritySystem.Instance.GeneralSecurityContext;
 
         /// <summary>
         /// Initializes the instance.
@@ -102,9 +102,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// WARNING! Do not use this method in your code.
         /// Called by the message receiver.
         /// </summary>
-        public static void Apply(SecurityActivity activity)
+        public static void Apply(SecurityActivity activity) //UNDONE: obsolete
         {
-            activity.Execute(SecurityContext.General, false);
+            activity.Execute(SecuritySystem.Instance.GeneralSecurityContext, false);
         }
 
         /// <summary>

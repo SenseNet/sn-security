@@ -240,8 +240,8 @@ namespace SenseNet.Security.Tests
 
             //---- Start the system
             Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider());
-            var ctxAcc = new PrivateType(typeof(SecurityContext));
-            var killed = (bool)ctxAcc.GetStaticField("_killed");
+            var ctxAcc = new PrivateObject(SecuritySystem.Instance);
+            var killed = (bool)ctxAcc.GetField("_killed");
             Assert.IsFalse(killed);
 
             //---- Start the request
@@ -251,10 +251,10 @@ namespace SenseNet.Security.Tests
             _context.Security.HasPermission(entities.First().Value.Id, PermissionType.Open);
 
             //---- kill the system
-            SecurityContext.Shutdown();
+            SecuritySystem.Instance.Shutdown();
 
             //---- check killed state
-            killed = (bool)ctxAcc.GetStaticField("_killed");
+            killed = (bool)ctxAcc.GetField("_killed");
             Assert.IsTrue(killed);
         }
     }

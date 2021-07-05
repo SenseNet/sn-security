@@ -13,9 +13,7 @@ namespace SenseNet.Security
     /// </summary>
     public partial class SecurityContext
     {
-        private static IMessageProvider _messageProvider;
-        private static ISecurityDataProvider _securityDataProviderPrototype;
-        private static SecurityCache _cacheHolder;
+        private SecuritySystem _securitySystem;
 
         /// <summary>
         /// Gets the associated user instance.
@@ -28,9 +26,9 @@ namespace SenseNet.Security
         /// <summary>
         /// Gets the configured IMessageProvider instance
         /// </summary>
-        public IMessageProvider MessageProvider => _messageProvider;
+        public IMessageProvider MessageProvider => _securitySystem.MessageProvider; //UNDONE: obsolete
 
-        internal SecurityCache Cache { get; }
+        internal SecurityCache Cache => _securitySystem.Cache;
 
         // ReSharper disable once InconsistentNaming
         private PermissionEvaluator __evaluator;
@@ -57,96 +55,16 @@ namespace SenseNet.Security
 
         /***************************** Context **************************/
 
-        internal static DateTime StartedAt { get; private set; }
-
         /// <summary>
         /// Creates a new instance of the SecurityContext using the passed user instance
         /// and pointers to the ISecurityDataProvider, IMessageProvider and SecurityCache global objects.
         /// </summary>
-        public SecurityContext(ISecurityUser currentUser)
+        public SecurityContext(ISecurityUser currentUser) : this(currentUser, null) { }
+        public SecurityContext(ISecurityUser currentUser, SecuritySystem securitySystem)
         {
             CurrentUser = currentUser;
-            DataProvider = _securityDataProviderPrototype.CreateNew();
-            Cache = _cacheHolder;
-        }
-
-        /// <summary>
-        /// Starts the security subsystem using the passed configuration.
-        /// Call this method only once in your application's startup sequence.
-        /// The method prepares and memorizes the main components for 
-        /// creating SecurityContext instances in a fastest possible way.
-        /// The main components are global objects: 
-        /// ISecurityDataProvider instance, IMessageProvider instance and SecurityCache instance.
-        /// </summary>
-        protected static void StartTheSystem(SecurityConfiguration configuration)
-        {
-            General = null;
-
-            // The message provider must receive ongoing activities at this time.
-            StartedAt = DateTime.UtcNow;
-
-            var uncompleted = DataHandler.LoadCompletionState(configuration.SecurityDataProvider, out var lastActivityIdFromDb);
-
-            _messageProvider = configuration.MessageProvider;
-            _messageProvider.MessageReceived += MessageProvider_MessageReceived;
-
-            Configuration.Identities.SystemUserId = configuration.SystemUserId ?? - 1;
-            Configuration.Identities.VisitorUserId = configuration.VisitorUserId ?? 6;
-            Configuration.Identities.EveryoneGroupId = configuration.EveryoneGroupId ?? 8;
-            Configuration.Identities.OwnerGroupId = configuration.OwnerGroupId ?? 9;
-
-            Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds = configuration.CommunicationMonitorRunningPeriodInSeconds ?? 30;
-            Configuration.Messaging.SecurityActivityLifetimeInMinutes = configuration.SecurityActivityLifetimeInMinutes ?? 42;
-            Configuration.Messaging.SecurityActivityTimeoutInSeconds = configuration.SecurityActivityTimeoutInSeconds ?? 120;
-
-            _securityDataProviderPrototype = configuration.SecurityDataProvider;
-            PermissionTypeBase.InferForcedRelations();
-
-            using (var op = SnTrace.Security.StartOperation("Security initial loading."))
-            {
-                _cacheHolder = SecurityCache.Initialize(configuration.SecurityDataProvider);
-                op.Successful = true;
-            }
-
-            CommunicationMonitor.Initialize();
-
-            General = new SecurityContext(SystemUser);
-            SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
-
-            _killed = false;
-        }
-
-        private static void MessageProvider_MessageReceived(object sender, MessageReceivedEventArgs args)
-        {
-            var message = args.Message;
-
-            // debug game
-            if (message is PingMessage)
-            {
-                _messageProvider.SendMessage(new PongMessage());
-                return;
-            }
-
-            SecurityActivity activity = null;
-
-            // load from database if it was too big to distribute
-            if (message is BigActivityMessage bigActivityMessage)
-            {
-                activity = DataHandler.LoadBigSecurityActivity(bigActivityMessage.DatabaseId);
-                if (activity == null)
-                    SnTrace.Security.WriteError("Cannot load body of a BigActivity. Id: {0}", bigActivityMessage.DatabaseId);
-            }
-
-            // trying to interpret
-            if (activity == null)
-                activity = message as SecurityActivity;
-
-            // Apply if everything is good
-            if (activity != null)
-            {
-                activity.FromReceiver = true;
-                SecurityActivity.Apply(activity);
-            }
+            _securitySystem = securitySystem ?? SecuritySystem.Instance;
+            DataProvider = _securitySystem.SecurityDataProvider.CreateNew();
         }
 
         /// <summary>
@@ -174,21 +92,6 @@ namespace SenseNet.Security
         {
             parentId = ownerId = 0;
             return false;
-        }
-
-        private static bool _killed;
-        /// <summary>
-        /// Stops the security subsystem.
-        /// </summary>
-        public static void Shutdown()
-        {
-            if (_killed)
-                return;
-            _killed = true;
-            _messageProvider.ShutDown();
-            _messageProvider.MessageReceived -= MessageProvider_MessageReceived;
-            CommunicationMonitor.Shutdown();
-            SecurityActivityQueue.Shutdown();
         }
 
         /*********************** ACL API **********************/
@@ -577,9 +480,6 @@ namespace SenseNet.Security
         {
             return PermissionQuery.GetParentGroups(this, identityId, directOnly);
         }
-
-        /***************** General context for built in system user ***************/
-        internal static SecurityContext General { get; private set; }
 
         /***************** Debug info ***************/
         /// <summary>
