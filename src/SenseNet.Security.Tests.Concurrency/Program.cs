@@ -86,7 +86,7 @@ namespace SenseNet.Security.Tests.Concurrency
             var ctx = new SecurityContextForConcurrencyTests(TestUser.User2);
             // ReSharper disable once NotAccessedVariable
             var ok = ctx.HasPermission(1, PermissionType.See);
-            AclEditor.Create(ctx)
+            new AclEditor(ctx)
                 .Allow(1, TestUser.User3.Id, false, PermissionType.Custom10)
                 .Allow(2, TestUser.User3.Id, false, PermissionType.Custom10)
                 .Allow(5, TestUser.User3.Id, false, PermissionType.Custom10)
@@ -147,7 +147,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 var perm1 = permTypes[i];
                 var perm2 = permTypes[1 - i];
 
-                AclEditor.Create(ctx)
+                new AclEditor(ctx)
                     .Allow(5, TestUser.User1.Id, false, perm1)
                     .Allow(5, TestUser.User1.Id, false, perm2)
                     .Apply();

@@ -571,8 +571,7 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             AclEditor ed;
-
-            ed = AclEditor.Create(CurrentContext.Security);
+            
             ed = new AclEditor(CurrentContext.Security);
             ed = CurrentContext.Security.CreateAclEditor();
         }
