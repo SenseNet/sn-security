@@ -163,7 +163,7 @@ namespace SenseNet.Security
             if (activity != null)
             {
                 activity.FromReceiver = true;
-                SecurityActivity.Apply(activity);
+                activity.Execute(GeneralSecurityContext, false);
             }
         }
 

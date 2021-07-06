@@ -98,14 +98,6 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             }
         }
 
-        /// <summary>
-        /// WARNING! Do not use this method in your code.
-        /// Called by the message receiver.
-        /// </summary>
-        public static void Apply(SecurityActivity activity) //UNDONE: obsolete
-        {
-            activity.Execute(SecuritySystem.Instance.GeneralSecurityContext, false);
-        }
 
         /// <summary>
         /// Extension point for initializing the activity data before executing any operations.
