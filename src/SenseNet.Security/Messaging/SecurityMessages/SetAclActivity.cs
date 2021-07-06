@@ -99,7 +99,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         protected override void Apply(SecurityContext context)
         {
             var relevantAcls = _acls?.Where(x => !_emptyAcls.Contains(x.EntityId)).ToArray() ?? new AclInfo[0];
-            SecurityEntity.ApplyAclEditing(context, relevantAcls, _breaks, _undoBreaks, _entriesToRemove, _emptyAcls);
+            context.SecuritySystem.EntityManager.ApplyAclEditing(context, relevantAcls, _breaks, _undoBreaks, _entriesToRemove, _emptyAcls);
         }
 
         [NonSerialized]

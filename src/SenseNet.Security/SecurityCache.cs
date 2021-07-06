@@ -14,7 +14,7 @@ namespace SenseNet.Security
         internal Dictionary<int, List<int>> Membership { get; private set; }      // UserId   --> list of ContainerIds
 
         private readonly ISecurityDataProvider _dataProvider;
-        private SecuritySystem _securitySystem;
+        private readonly SecuritySystem _securitySystem;
         public SecurityCache(SecuritySystem securitySystem)
         {
             _dataProvider = securitySystem.SecurityDataProvider;
@@ -201,7 +201,7 @@ namespace SenseNet.Security
                 group.UserMemberIds.Remove(userId);
 
             // delete ACEs & empty ACLs
-            SecurityEntity.RemoveIdentityRelatedAces(context, userId);
+            _securitySystem.EntityManager.RemoveIdentityRelatedAces(context, userId);
         }
 
         internal void DeleteSecurityGroup(SecurityContext context, int groupId)
@@ -225,7 +225,7 @@ namespace SenseNet.Security
             }
 
             // delete ACEs & empty ACLs
-            SecurityEntity.RemoveIdentityRelatedAces(context, groupId);
+            _securitySystem.EntityManager.RemoveIdentityRelatedAces(context, groupId);
         }
 
         internal void DeleteIdentities(SecurityContext context, IEnumerable<int> identityIds)
@@ -258,7 +258,7 @@ namespace SenseNet.Security
                 }
 
                 // delete Aces & empty ACLs
-                SecurityEntity.RemoveIdentityRelatedAces(context, identityId);
+                _securitySystem.EntityManager.RemoveIdentityRelatedAces(context, identityId);
             }
         }
 

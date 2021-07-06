@@ -79,7 +79,7 @@ namespace SenseNet.Security
             SecurityEntity.EnterReadLock();
             try
             {
-                var root = SecurityEntity.GetEntitySafe(_context, entityId, false);
+                var root = _context.SecuritySystem.EntityManager.GetEntitySafe(_context, entityId, false);
 
                 IEnumerable<SecurityEntity> collection;
                 switch (_axis)

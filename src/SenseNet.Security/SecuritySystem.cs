@@ -56,6 +56,7 @@ namespace SenseNet.Security
         internal SecurityCache Cache { get; private set; }
         internal CommunicationMonitor CommunicationMonitor { get; private set; }
         internal SecurityActivityQueue SecurityActivityQueue { get; private set; }
+        internal SecurityEntityManager EntityManager { get; private set; }
 
         private readonly SecurityConfiguration _configuration;
         private bool _killed;
@@ -76,6 +77,7 @@ namespace SenseNet.Security
             DataHandler = new DataHandler(this);
             SecurityDataProvider = securityDataProvider;
             MessageProvider = messageProvider;
+            EntityManager = new SecurityEntityManager();
             _configuration = configuration;
         }
 

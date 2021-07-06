@@ -239,7 +239,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         {
             internal static bool HasAncestorRelation(SecurityContext ctx, int entityId1, int entityId2)
             {
-                var entities = SecurityEntity.PeekEntities(ctx, entityId1, entityId2);
+                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(ctx, entityId1, entityId2);
                 return HasAncestorRelation(ctx, entities[0], entities[1]);
             }
             internal static bool HasAncestorRelation(SecurityContext ctx, SecurityEntity entity1, SecurityEntity entity2)
@@ -252,7 +252,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             internal static bool IsInTree(SecurityContext ctx, int descendantId, int ancestorId)
             {
-                var entities = SecurityEntity.PeekEntities(ctx, descendantId);
+                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(ctx, descendantId);
                 return IsInTree(ctx, entities[0], ancestorId);
             }
             internal static bool IsInTree(SecurityContext ctx, SecurityEntity descendant, int ancestorId)
@@ -262,7 +262,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             internal static bool AnyIsInTree(SecurityContext ctx, IEnumerable<int> descendantIds, int ancestorId)
             {
-                var entities = SecurityEntity.PeekEntities(ctx, descendantIds.ToArray());
+                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(ctx, descendantIds.ToArray());
                 return entities.Any(entity => ctx.IsEntityInTree(entity, ancestorId));
             }
         }

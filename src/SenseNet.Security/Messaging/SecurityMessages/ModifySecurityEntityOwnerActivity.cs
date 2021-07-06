@@ -33,7 +33,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            SecurityEntity.ModifyEntityOwner(context, EntityId, OwnerId);
+            context.SecuritySystem.EntityManager.ModifyEntityOwner(context, EntityId, OwnerId);
         }
 
         internal override bool MustWaitFor(SecurityActivity olderActivity)

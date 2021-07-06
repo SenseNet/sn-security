@@ -33,9 +33,11 @@ namespace SenseNet.Security
     internal class PermissionEvaluator
     {
         private readonly SecurityContext _securityContext;
+        private readonly SecurityEntityManager _entityManager;
         internal PermissionEvaluator(SecurityContext securityContext)
         {
             _securityContext = securityContext;
+            _entityManager = securityContext.SecuritySystem.EntityManager;
         }
 
         internal void Initialize()
@@ -85,7 +87,7 @@ namespace SenseNet.Security
             var allow = 0ul;
             var deny = 0ul;
 
-            var firstAcl = SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true);
+            var firstAcl = _entityManager.GetFirstAclSafe(_securityContext, entityId, true);
 
             if (firstAcl == null)
                 return PermissionValue.Undefined;
@@ -128,8 +130,8 @@ namespace SenseNet.Security
             SecurityEntity.EnterReadLock();
             try
             {
-                var entity = SecurityEntity.GetEntitySafe(_securityContext, entityId, true);
-                var firstAcl = SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true);
+                var entity = _entityManager.GetEntitySafe(_securityContext, entityId, true);
+                var firstAcl = _entityManager.GetFirstAclSafe(_securityContext, entityId, true);
 
                 //======== #1: start bits: get permission bits
                 //==>
@@ -244,7 +246,7 @@ namespace SenseNet.Security
             var aces = new List<AceInfo>();
 
             //==>
-            var firstAcl = SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true);
+            var firstAcl = _entityManager.GetFirstAclSafe(_securityContext, entityId, true);
             if (firstAcl != null)
             {
                 relatedIdentities = relatedIdentities?.ToArray();
@@ -260,11 +262,11 @@ namespace SenseNet.Security
 
         internal List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return GetExplicitEntriesSafe(entityId, SecurityEntity.GetFirstAcl(_securityContext, entityId, true), relatedIdentities, entryType);
+            return GetExplicitEntriesSafe(entityId, _entityManager.GetFirstAcl(_securityContext, entityId, true), relatedIdentities, entryType);
         }
         internal List<AceInfo> GetExplicitEntriesSafe(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return GetExplicitEntriesSafe(entityId, SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true), relatedIdentities, entryType);
+            return GetExplicitEntriesSafe(entityId, _entityManager.GetFirstAclSafe(_securityContext, entityId, true), relatedIdentities, entryType);
         }
         private static List<AceInfo> GetExplicitEntriesSafe(int entityId, AclInfo acl, IEnumerable<int> relatedIdentities, EntryType? entryType)
         {
