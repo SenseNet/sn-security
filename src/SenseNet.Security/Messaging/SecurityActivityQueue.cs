@@ -17,7 +17,7 @@ namespace SenseNet.Security.Messaging
         private readonly SecuritySystem _securitySystem;
         private readonly Serializer _serializer;
         private readonly DependencyManager _dependencyManager;
-        private TerminationHistory _terminationHistory;
+        private readonly TerminationHistory _terminationHistory;
         private readonly Executor _executor;
 
         public SecurityActivityQueue(SecuritySystem securitySystem)
@@ -25,8 +25,8 @@ namespace SenseNet.Security.Messaging
             _securitySystem = securitySystem;
             _serializer = new Serializer(this, securitySystem);
             _executor = new Executor();
-            _dependencyManager = new DependencyManager(_serializer, _executor);
             _terminationHistory = new TerminationHistory();
+            _dependencyManager = new DependencyManager(_serializer, _executor, _terminationHistory);
             _serializer.DependencyManager = _dependencyManager;
             _executor.DependencyManager = _dependencyManager;
         }
@@ -40,7 +40,7 @@ namespace SenseNet.Security.Messaging
             }
             SnTrace.Security.Write("SAQ: Health check triggered.");
 
-            var state = TerminationHistory.GetCurrentState();
+            var state = _terminationHistory.GetCurrentState();
             var gapsLength = state.Gaps.Length;
             if (gapsLength > 0)
             {
@@ -54,10 +54,10 @@ namespace SenseNet.Security.Messaging
                     notLoaded.Remove(activity.Id);
                 }
                 // forget not loaded activities.
-                TerminationHistory.RemoveFromGaps(notLoaded);
+                _terminationHistory.RemoveFromGaps(notLoaded);
             }
 
-            var lastId = TerminationHistory.GetLastTerminatedId();
+            var lastId = _terminationHistory.GetLastTerminatedId();
             var lastDbId = _securitySystem.DataHandler.GetLastSecurityActivityId(_securitySystem.StartedAt);
             if (lastId < lastDbId)
             {
@@ -77,7 +77,7 @@ namespace SenseNet.Security.Messaging
 
             _serializer.Reset();
             _dependencyManager.Reset();
-            TerminationHistory.Reset(uncompleted.LastActivityId, uncompleted.Gaps);
+            _terminationHistory.Reset(uncompleted.LastActivityId, uncompleted.Gaps);
             _serializer.Start(lastActivityIdFromDb, uncompleted.LastActivityId, uncompleted.Gaps);
 
             _securitySystem.CommunicationMonitor.Start();
@@ -87,12 +87,12 @@ namespace SenseNet.Security.Messaging
         {
             _serializer.Reset();
             _dependencyManager.Reset();
-            TerminationHistory.Reset(0);
+            _terminationHistory.Reset(0);
         }
 
         public CompletionState GetCurrentCompletionState()
         {
-            return TerminationHistory.GetCurrentState();
+            return _terminationHistory.GetCurrentState();
         }
         public SecurityActivityQueueState GetCurrentState()
         {
@@ -100,7 +100,7 @@ namespace SenseNet.Security.Messaging
             {
                 Serializer = _serializer.GetCurrentState(),
                 DependencyManager = _dependencyManager.GetCurrentState(),
-                Termination = TerminationHistory.GetCurrentState()
+                Termination = _terminationHistory.GetCurrentState()
             };
         }
 
@@ -117,7 +117,7 @@ namespace SenseNet.Security.Messaging
         {
             _serializer.Reset(state.LastActivityId);
             _dependencyManager.Reset();
-            TerminationHistory.Reset(state.LastActivityId, state.Gaps);
+            _terminationHistory.Reset(state.LastActivityId, state.Gaps);
         }
         internal void __enableExecution()
         {
@@ -313,12 +313,15 @@ namespace SenseNet.Security.Messaging
 
         private class DependencyManager
         {
-            private Serializer _serializer;
-            private Executor _executor;
-            public DependencyManager(Serializer serializer, Executor executor)
+            private readonly Serializer _serializer;
+            private readonly Executor _executor;
+            private readonly TerminationHistory _terminationHistory;
+
+            public DependencyManager(Serializer serializer, Executor executor, TerminationHistory terminationHistory)
             {
                 _serializer = serializer;
                 _executor = executor;
+                _terminationHistory = terminationHistory;
             }
 
             internal void Reset()
@@ -402,7 +405,7 @@ namespace SenseNet.Security.Messaging
                     SecurityActivityHistory.Finish(activity.Id);
 
                     // register activity termination.
-                    TerminationHistory.FinishActivity(activity);
+                    _terminationHistory.FinishActivity(activity);
 
                     // execute all activities that are completely freed.
                     foreach (var dependentItem in activity.WaitingForMe.ToArray())
@@ -447,11 +450,11 @@ namespace SenseNet.Security.Messaging
 
         private class TerminationHistory
         {
-            private static readonly object _gapsLock = new object();
-            private static int _lastId;
-            private static readonly List<int> _gaps = new List<int>();
+            private readonly object _gapsLock = new object();
+            private int _lastId;
+            private readonly List<int> _gaps = new List<int>();
 
-            internal static void Reset(int lastId, IEnumerable<int> gaps = null)
+            internal void Reset(int lastId, IEnumerable<int> gaps = null)
             {
                 lock (_gapsLock)
                 {
@@ -462,7 +465,7 @@ namespace SenseNet.Security.Messaging
                 }
             }
 
-            internal static void FinishActivity(SecurityActivity activity)
+            internal void FinishActivity(SecurityActivity activity)
             {
                 var id = activity.Id;
                 lock (_gapsLock)
@@ -480,18 +483,17 @@ namespace SenseNet.Security.Messaging
                     SnTrace.SecurityQueue.Write("SAQ: State after finishing SA{0}: {1}", id, GetCurrentState());
                 }
             }
-            public static int GetLastTerminatedId()
+            public int GetLastTerminatedId()
             {
                 return _lastId;
             }
-            // ReSharper disable once MemberHidesStaticFromOuterClass
-            public static CompletionState GetCurrentState()
+            public CompletionState GetCurrentState()
             {
                 lock (_gapsLock)
                     return new CompletionState { LastActivityId = _lastId, Gaps = _gaps.ToArray() };
             }
 
-            internal static void RemoveFromGaps(IEnumerable<int> notLoaded)
+            internal void RemoveFromGaps(IEnumerable<int> notLoaded)
             {
                 lock (_gapsLock)
                     foreach (var item in notLoaded)
