@@ -14,7 +14,7 @@ namespace SenseNet.Security.Messaging
     {
         internal static int SecurityActivityLoadingBufferSize = 200;
 
-        private SecuritySystem _securitySystem;
+        private readonly SecuritySystem _securitySystem;
         private readonly Serializer _serializer;
         private readonly DependencyManager _dependencyManager;
         private TerminationHistory _terminationHistory;
@@ -23,7 +23,7 @@ namespace SenseNet.Security.Messaging
         public SecurityActivityQueue(SecuritySystem securitySystem)
         {
             _securitySystem = securitySystem;
-            _serializer = new Serializer(this);
+            _serializer = new Serializer(this, securitySystem);
             _executor = new Executor();
             _dependencyManager = new DependencyManager(_serializer, _executor);
             _terminationHistory = new TerminationHistory();
@@ -47,7 +47,7 @@ namespace SenseNet.Security.Messaging
                 SnTrace.SecurityQueue.Write("SAQ: Health checker is processing {0} gap{1}.", gapsLength, gapsLength > 1 ? "s" : "");
 
                 var notLoaded = state.Gaps.ToList();
-                foreach (var activity in new SecurityActivityLoader(state.Gaps, false))
+                foreach (var activity in new SecurityActivityLoader(state.Gaps, false, _securitySystem))
                 {
                     ExecuteActivity(activity);
                     // memorize executed
@@ -62,7 +62,7 @@ namespace SenseNet.Security.Messaging
             if (lastId < lastDbId)
             {
                 SnTrace.SecurityQueue.Write("SAQ: Health checker is processing activities from {0} to {1}", lastId + 1, lastDbId);
-                foreach (var activity in new SecurityActivityLoader(lastId + 1, lastDbId, false))
+                foreach (var activity in new SecurityActivityLoader(lastId + 1, lastDbId, false, _securitySystem))
                     ExecuteActivity(activity);
             }
         }
@@ -139,9 +139,12 @@ namespace SenseNet.Security.Messaging
             public DependencyManager DependencyManager { get; set; }
 
             private readonly SecurityActivityQueue _securityActivityQueue;
-            public Serializer(SecurityActivityQueue securityActivityQueue)
+            private readonly SecuritySystem _securitySystem;
+
+            public Serializer(SecurityActivityQueue securityActivityQueue, SecuritySystem securitySystem)
             {
                 _securityActivityQueue = securityActivityQueue;
+                _securitySystem = securitySystem;
             }
 
             internal void Reset(int lastQueued = 0)
@@ -177,7 +180,7 @@ namespace SenseNet.Security.Messaging
                 var count = 0;
                 if (gaps.Any())
                 {
-                    var loadedActivities = new SecurityActivityLoader(gaps, true);
+                    var loadedActivities = new SecurityActivityLoader(gaps, true, _securitySystem);
                     foreach (var loadedActivity in loadedActivities)
                     {
                         SnTrace.SecurityQueue.Write("SAQ: Startup: SA{0} enqueued from db.", loadedActivity.Id);
@@ -190,7 +193,7 @@ namespace SenseNet.Security.Messaging
                 }
                 if (lastExecutedId < lastDatabaseId)
                 {
-                    var loadedActivities = new SecurityActivityLoader(lastExecutedId + 1, lastDatabaseId, true);
+                    var loadedActivities = new SecurityActivityLoader(lastExecutedId + 1, lastDatabaseId, true, _securitySystem);
                     foreach (var loadedActivity in loadedActivities)
                     {
                         SnTrace.SecurityQueue.Write("SAQ: Startup: SA{0} enqueued from db.", loadedActivity.Id);
@@ -293,7 +296,7 @@ namespace SenseNet.Security.Messaging
             private IEnumerable<SecurityActivity> LoadActivities(int from, int to)
             {
                 SnTrace.SecurityQueue.Write("SAQ: Loading activities {0} - {1}", from, to);
-                return new SecurityActivityLoader(from, to, false);
+                return new SecurityActivityLoader(from, to, false, _securitySystem);
             }
 
             // ReSharper disable once MemberHidesStaticFromOuterClass
