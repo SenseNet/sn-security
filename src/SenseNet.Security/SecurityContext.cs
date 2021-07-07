@@ -30,28 +30,7 @@ namespace SenseNet.Security
 
         internal SecurityCache Cache => SecuritySystem.Cache;
 
-        // ReSharper disable once InconsistentNaming
-        private PermissionEvaluator __evaluator;
-        private readonly object _evaluatorSync = new object();
-        internal PermissionEvaluator Evaluator
-        {
-            get
-            {
-                if (__evaluator == null)
-                {
-                    lock (_evaluatorSync)
-                    {
-                        if (__evaluator == null)
-                        {
-                            var evaluator = new PermissionEvaluator(this);
-                            evaluator.Initialize();
-                            __evaluator = evaluator;
-                        }
-                    }
-                }
-                return __evaluator;
-            }
-        }
+        internal PermissionEvaluator Evaluator { get; }
 
         /***************************** Context **************************/
 
@@ -65,6 +44,7 @@ namespace SenseNet.Security
             CurrentUser = currentUser;
             SecuritySystem = securitySystem ?? SecuritySystem.Instance;
             DataProvider = SecuritySystem.SecurityDataProvider.CreateNew();
+            Evaluator = new PermissionEvaluator(this);
         }
 
         /// <summary>

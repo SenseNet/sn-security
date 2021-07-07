@@ -36,10 +36,10 @@ namespace SenseNet.Security
         private readonly SecurityEntityManager _entityManager;
         private SecurityCache _cache;
 
-        internal PermissionEvaluator(SecurityContext securityContext, SecurityCache cache)
+        internal PermissionEvaluator(SecurityContext securityContext)
         {
             _securityContext = securityContext;
-            _cache = cache;
+            _cache = securityContext.SecuritySystem.Cache;
             _entityManager = securityContext.SecuritySystem.EntityManager;
         }
 
