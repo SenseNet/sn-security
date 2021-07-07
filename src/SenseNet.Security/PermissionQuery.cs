@@ -11,6 +11,8 @@ namespace SenseNet.Security
     {
         //UNDONE: Get _entityManager via ctor injection
         private static SecurityEntityManager _entityManager => SecuritySystem.Instance.EntityManager;
+        //UNDONE: Get _cache via ctor injection
+        private static SecurityCache _cache => SecuritySystem.Instance.Cache;
 
         public static Dictionary<PermissionTypeBase, int> GetExplicitPermissionsInSubtree(SecurityContext context, int entityId, int[] identities, bool includeRoot)
         {
@@ -19,7 +21,7 @@ namespace SenseNet.Security
             {
                 var counters = new int[PermissionTypeBase.PermissionCount];
 
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -55,7 +57,7 @@ namespace SenseNet.Security
             _entityManager.EnterReadLock();
             try
             {
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -106,7 +108,7 @@ namespace SenseNet.Security
 
                 var identities = new[] { identityId };
 
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -200,7 +202,7 @@ namespace SenseNet.Security
                 var mask = PermissionTypeBase.GetPermissionMask(permissionTypes);
                 var identities = new[] { identityId };
 
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -278,7 +280,7 @@ namespace SenseNet.Security
             {
                 var identities = new List<int>();
                 var mask = PermissionTypeBase.GetPermissionMask(permissionTypes);
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -332,7 +334,7 @@ namespace SenseNet.Security
                 var result = new List<int>();
                 var identities = new[] { identityId };
                 var mask = PermissionTypeBase.GetPermissionMask(permissionTypes);
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var childEntity in root.Children)
                 {
                     var aces = context.Evaluator.GetEffectiveEntriesSafe(childEntity.Id, identities, EntryType.Normal);
@@ -368,7 +370,7 @@ namespace SenseNet.Security
             var groups = new List<SecurityGroup>();
             foreach (var identity in identities.Distinct())
             {
-                if (context.Cache.Groups.TryGetValue(identity, out var group))
+                if (_cache.Groups.TryGetValue(identity, out var group))
                 {
                     if (!groups.Contains(group))
                         groups.Add(group);
@@ -381,7 +383,7 @@ namespace SenseNet.Security
 
             foreach (var group in groups)
             {
-                var allUsersInGroup = context.Cache.GetAllUsersInGroup(group);
+                var allUsersInGroup = _cache.GetAllUsersInGroup(group);
                 foreach (var userId in allUsersInGroup)
                 {
                     if (!flattenedUsers.Contains(userId))
@@ -395,17 +397,17 @@ namespace SenseNet.Security
 
         public static IEnumerable<int> GetParentGroups(SecurityContext context, int identityId, bool directOnly)
         {
-            if (context.Cache.Groups.TryGetValue(identityId, out var group))
+            if (_cache.Groups.TryGetValue(identityId, out var group))
                 return directOnly ? GetDirectOnlyParentGroups(group) : GetAllParentGroups(context, group);
             return directOnly ? GetDirectOnlyParentGroups(context, identityId) : GetAllParentGroups(context, identityId);
         }
         private static IEnumerable<int> GetAllParentGroups(SecurityContext context, SecurityGroup group)
         {
-            return context.Cache.GetAllParentGroupIds(group);
+            return _cache.GetAllParentGroupIds(group);
         }
         private static IEnumerable<int> GetAllParentGroups(SecurityContext context, int userId)
         {
-            if (context.Cache.Membership.TryGetValue(userId, out var groupIds))
+            if (_cache.Membership.TryGetValue(userId, out var groupIds))
                 return groupIds;
             return new int[0];
         }
@@ -417,7 +419,7 @@ namespace SenseNet.Security
         }
         private static IEnumerable<int> GetDirectOnlyParentGroups(SecurityContext context, int userId)
         {
-            return context.Cache.Groups.Values
+            return _cache.Groups.Values
                 .Where(g => g.UserMemberIds.Contains(userId))
                 .Select(g=>g.Id)
                 .ToArray();

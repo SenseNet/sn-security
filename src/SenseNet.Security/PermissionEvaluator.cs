@@ -34,9 +34,12 @@ namespace SenseNet.Security
     {
         private readonly SecurityContext _securityContext;
         private readonly SecurityEntityManager _entityManager;
-        internal PermissionEvaluator(SecurityContext securityContext)
+        private SecurityCache _cache;
+
+        internal PermissionEvaluator(SecurityContext securityContext, SecurityCache cache)
         {
             _securityContext = securityContext;
+            _cache = cache;
             _entityManager = securityContext.SecuritySystem.EntityManager;
         }
 
@@ -303,7 +306,7 @@ namespace SenseNet.Security
         }
         private void CollectIdentities(int userId, int ownerId, int entityId, List<int> collection)
         {
-            if (_securityContext.Cache.Membership.TryGetValue(userId, out var flattenedGroups))
+            if (_cache.Membership.TryGetValue(userId, out var flattenedGroups))
                 collection.AddRange(flattenedGroups);
 
             if (userId != Configuration.Identities.VisitorUserId)
@@ -357,7 +360,7 @@ namespace SenseNet.Security
         internal string _traceMembership()
         {
             var sb = new StringBuilder();
-            foreach (var item in _securityContext.Cache.Membership)
+            foreach (var item in _cache.Membership)
             {
                 sb.Append("(" + item.Key + ")").Append(": [");
                 sb.Append(string.Join(", ", item.Value.Select(g => "(" + g + ")")));
