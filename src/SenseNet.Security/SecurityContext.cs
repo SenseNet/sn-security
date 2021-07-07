@@ -77,23 +77,6 @@ namespace SenseNet.Security
             Cache.Reset(DataProvider);
         }
 
-        /// <summary>
-        /// Collects security-related information about an entity and returns true if the entity with 
-        /// the specified id exists in the host application's database.
-        /// This method is used by the security component when an entity seems to be missing because of
-        /// concurrency reasons. The host application must provide the correct entity information here 
-        /// otherwise <see cref="EntityNotFoundException"/> may occur in some scenarios under heavy load 
-        /// in load balanced multi-threaded environments.
-        /// </summary>
-        /// <param name="entityId">Id of the missing entity.</param>
-        /// <param name="parentId">Id of the missing entity's parent or 0.</param>
-        /// <param name="ownerId">Id of the missing entity's owner or 0.</param>
-        protected internal virtual bool GetMissingEntity(int entityId, out int parentId, out int ownerId)
-        {
-            parentId = ownerId = 0;
-            return false;
-        }
-
         /*********************** ACL API **********************/
         /// <summary>
         /// Creates a new instance of the AclEditor class for modifying access control data.
@@ -340,7 +323,7 @@ namespace SenseNet.Security
         /// that can repair a data integrity error (which may occur in case of a distributed system).
         /// The compensation works on two level:
         /// 1 - loads the entity from the security database to the memory.
-        /// 2 - executes a callback to the host application (<see cref="GetMissingEntity"/>) and saves the entity if it is needed.
+        /// 2 - executes a callback to the host application (<see cref="IMissingEntityHandler"/>) and saves the entity if it is needed.
         /// </summary>
         protected bool IsEntityExist(int entityId)
         {

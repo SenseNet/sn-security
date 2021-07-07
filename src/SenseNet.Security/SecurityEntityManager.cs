@@ -10,8 +10,16 @@ namespace SenseNet.Security
     /// </summary>
     internal class SecurityEntityManager
     {
+        private readonly IMissingEntityHandler _missingEntityHandler;
+
+        public SecurityEntityManager(IMissingEntityHandler missingEntityHandler)
+        {
+            _missingEntityHandler = missingEntityHandler;
+        }
+
         // ReSharper disable once InconsistentNaming
         private readonly ReaderWriterLockSlim __lock = new ReaderWriterLockSlim();
+
         internal void EnterReadLock()
         {
             __lock.EnterReadLock();
@@ -46,7 +54,7 @@ namespace SenseNet.Security
         /// Loads a security entity. If the entity cannot be found in the cache, it loads it
         /// from the database and puts it into the cache. It the entity cannot be loaded
         /// from the db either, a callback is made to the host application using the
-        /// <see cref="SecurityContext.GetMissingEntity"/> method to compensate possible
+        /// <see cref="SecuritySystem.GetMissingEntity"/> method to compensate possible
         /// concurrency errors.
         /// </summary>
         /// <param name="ctx">The context to be used.</param>
@@ -76,7 +84,7 @@ namespace SenseNet.Security
                 }
                 else
                 {
-                    if (ctx.GetMissingEntity(entityId, out var parentId, out var ownerId))
+                    if (_missingEntityHandler.GetMissingEntity(entityId, out var parentId, out var ownerId))
                     {
                         dataHandler.CreateSecurityEntitySafe(ctx, entityId, parentId, ownerId);
                         entity = CreateEntitySafe(ctx, entityId, parentId, ownerId);

@@ -765,9 +765,11 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_ResolveMissingEntity()
         {
-            var ctx = new MissingEntityResolverContext(TestUser.User1);
+            //var ctx = new MissingEntityResolverContext(TestUser.User1);
 
-            CurrentContext.Security = ctx;
+            var ctx = CurrentContext.Security;
+            //CurrentContext.Security = ctx;
+            ctx.SecuritySystem.EntityManager = new SecurityEntityManager(new TestMissingEntityHandler());
 
             //----
 
@@ -830,10 +832,23 @@ namespace SenseNet.Security.Tests
             chain = new[] { rootEntity.Id, childEntity.Id, grandChildEntity.Id };
         }
 
-        private class MissingEntityResolverContext : TestSecurityContext
+        //private class MissingEntityResolverContext : TestSecurityContext
+        //{
+        //    public MissingEntityResolverContext(ISecurityUser user) : base(user) { }
+        //    protected internal override bool GetMissingEntity(int entityId, out int parentId, out int ownerId)
+        //    {
+        //        parentId = 0;
+        //        ownerId = 0;
+        //        if (entityId != 42)
+        //            return false;
+
+        //        ownerId = 17;
+        //        return true;
+        //    }
+        //}
+        private class TestMissingEntityHandler : IMissingEntityHandler
         {
-            public MissingEntityResolverContext(ISecurityUser user) : base(user) { }
-            protected internal override bool GetMissingEntity(int entityId, out int parentId, out int ownerId)
+            public bool GetMissingEntity(int entityId, out int parentId, out int ownerId)
             {
                 parentId = 0;
                 ownerId = 0;

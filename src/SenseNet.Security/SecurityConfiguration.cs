@@ -18,6 +18,8 @@ namespace SenseNet.Security
         /// </summary>
         public ISecurityDataProvider SecurityDataProvider { get; set; }
 
+        public IMissingEntityHandler MissingEntityHandler { get; set; } = new MissingEntityHandler();
+
         /// <summary>Default: -1</summary>
         public int? SystemUserId { get; set; }
 

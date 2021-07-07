@@ -43,7 +43,7 @@ namespace SenseNet.Security
         public static void StartTheSystem(SecurityConfiguration configuration)
         {
             var ss = new SecuritySystem(configuration.SecurityDataProvider, configuration.MessageProvider,
-                configuration);
+                configuration.MissingEntityHandler, configuration);
             Instance = ss;
             ss.Start();
         }
@@ -56,7 +56,8 @@ namespace SenseNet.Security
         internal SecurityCache Cache { get; private set; }
         internal CommunicationMonitor CommunicationMonitor { get; private set; }
         internal SecurityActivityQueue SecurityActivityQueue { get; private set; }
-        internal SecurityEntityManager EntityManager { get; private set; }
+        internal SecurityEntityManager EntityManager { get; set; }
+        internal IMissingEntityHandler MissingEntityHandler { get; set; }
 
         private readonly SecurityConfiguration _configuration;
         private bool _killed;
@@ -72,12 +73,13 @@ namespace SenseNet.Security
 
 
         public SecuritySystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider,
-            SecurityConfiguration configuration)
+            IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration)
         {
             DataHandler = new DataHandler(this);
             SecurityDataProvider = securityDataProvider;
             MessageProvider = messageProvider;
-            EntityManager = new SecurityEntityManager();
+            EntityManager = new SecurityEntityManager(missingEntityHandler);
+            MissingEntityHandler = missingEntityHandler;
             _configuration = configuration;
         }
 
@@ -168,6 +170,5 @@ namespace SenseNet.Security
                 activity.Execute(GeneralSecurityContext, false);
             }
         }
-
     }
 }
