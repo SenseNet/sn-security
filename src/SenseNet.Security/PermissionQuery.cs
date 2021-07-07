@@ -19,7 +19,7 @@ namespace SenseNet.Security
             {
                 var counters = new int[PermissionTypeBase.PermissionCount];
 
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(context, entityId, true);
+                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -55,7 +55,7 @@ namespace SenseNet.Security
             _entityManager.EnterReadLock();
             try
             {
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(context, entityId, true);
+                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -106,7 +106,7 @@ namespace SenseNet.Security
 
                 var identities = new[] { identityId };
 
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(context, entityId, true);
+                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -200,7 +200,7 @@ namespace SenseNet.Security
                 var mask = PermissionTypeBase.GetPermissionMask(permissionTypes);
                 var identities = new[] { identityId };
 
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(context, entityId, true);
+                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -278,7 +278,7 @@ namespace SenseNet.Security
             {
                 var identities = new List<int>();
                 var mask = PermissionTypeBase.GetPermissionMask(permissionTypes);
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(context, entityId, true);
+                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -332,7 +332,7 @@ namespace SenseNet.Security
                 var result = new List<int>();
                 var identities = new[] { identityId };
                 var mask = PermissionTypeBase.GetPermissionMask(permissionTypes);
-                var root = context.SecuritySystem.EntityManager.GetEntitySafe(context, entityId, true);
+                var root = context.SecuritySystem.EntityManager.GetEntitySafe(entityId, true);
                 foreach (var childEntity in root.Children)
                 {
                     var aces = context.Evaluator.GetEffectiveEntriesSafe(childEntity.Id, identities, EntryType.Normal);

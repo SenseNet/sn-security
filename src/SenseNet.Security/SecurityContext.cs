@@ -92,7 +92,7 @@ namespace SenseNet.Security
         /// </summary>
         protected AccessControlList GetAcl(int entityId, EntryType entryType = EntryType.Normal)
         {
-            return SecuritySystem.EntityManager.GetAccessControlList(this, entityId, entryType);
+            return SecuritySystem.EntityManager.GetAccessControlList(entityId, entryType);
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace SenseNet.Security
         // for tests
         internal AclInfo GetAclInfo(int finalEntityId, bool throwOnError = false)
         {
-            var entity = SecuritySystem.EntityManager.GetEntity(this, finalEntityId, throwOnError);
+            var entity = SecuritySystem.EntityManager.GetEntity(finalEntityId, throwOnError);
             var acl = entity?.Acl;
             return acl;
         }
@@ -333,7 +333,7 @@ namespace SenseNet.Security
         /*********************** Internal in memory entity structure **********************/
         internal SecurityEntity GetSecurityEntity(int entityId, bool throwError = false)
         {
-            return SecuritySystem.EntityManager.GetEntity(this, entityId, throwError);
+            return SecuritySystem.EntityManager.GetEntity(entityId, throwError);
         }
         internal bool HasAncestorRelation(SecurityEntity entity1, SecurityEntity entity2)
         {

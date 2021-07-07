@@ -293,7 +293,7 @@ namespace SenseNet.Security
         /// </summary>
         internal AclEditor NormalizeExplicitPermissions(int entityId, EntryType[] entryTypes)
         {
-            var firstAcl = Context.SecuritySystem.EntityManager.GetFirstAcl(this.Context, entityId, false);
+            var firstAcl = Context.SecuritySystem.EntityManager.GetFirstAcl(entityId, false);
             if (firstAcl == null)
                 return this; // there is no settings.
             if (entityId != firstAcl.EntityId)
@@ -353,7 +353,7 @@ namespace SenseNet.Security
         {
             if (!_acls.TryGetValue(entityId, out var aclInfo))
             {
-                aclInfo = Context.SecuritySystem.EntityManager.GetAclInfoCopy(this.Context, entityId, this.EntryType);
+                aclInfo = Context.SecuritySystem.EntityManager.GetAclInfoCopy(entityId, this.EntryType);
                 if (aclInfo == null)
                 {
                     // creating an empty acl

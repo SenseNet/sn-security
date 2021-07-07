@@ -78,15 +78,15 @@ namespace SenseNet.Security
             return dataProvider.LoadStoredSecurityEntity(entityId);
         }
 
-        public void CreateSecurityEntity(SecurityContext context, int entityId, int parentEntityId, int ownerId)
+        public void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId)
         {
-            CreateSecurityEntity(context, entityId, parentEntityId, ownerId, false);
+            CreateSecurityEntity(entityId, parentEntityId, ownerId, false);
         }
-        public void CreateSecurityEntitySafe(SecurityContext context, int entityId, int parentEntityId, int ownerId)
+        public void CreateSecurityEntitySafe(int entityId, int parentEntityId, int ownerId)
         {
-            CreateSecurityEntity(context, entityId, parentEntityId, ownerId, true);
+            CreateSecurityEntity(entityId, parentEntityId, ownerId, true);
         }
-        private void CreateSecurityEntity(SecurityContext context, int entityId, int parentEntityId, int ownerId, bool safe)
+        private void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId, bool safe)
         {
             if (entityId == default)
                 throw new ArgumentException("entityId cannot be default(int)");
@@ -95,8 +95,8 @@ namespace SenseNet.Security
             {
                 // load or create parent
                 var parent = safe
-                    ? _securitySystem.EntityManager.GetEntitySafe(context, parentEntityId, false)
-                    : _securitySystem.EntityManager.GetEntity(context, parentEntityId, false);
+                    ? _securitySystem.EntityManager.GetEntitySafe(parentEntityId, false)
+                    : _securitySystem.EntityManager.GetEntity(parentEntityId, false);
                 if (parent == null)
                     throw new EntityNotFoundException(
                         $"Cannot create entity {entityId} because its parent {parentEntityId} does not exist.");
@@ -109,7 +109,8 @@ namespace SenseNet.Security
                 IsInherited = true,
                 OwnerId = ownerId
             };
-            context.DataProvider.InsertSecurityEntity(entity);
+
+            _securitySystem.SecurityDataProvider.InsertSecurityEntity(entity);
         }
 
         public void ModifySecurityEntityOwner(SecurityContext context, int entityId, int ownerId)
@@ -162,7 +163,7 @@ namespace SenseNet.Security
             context.DataProvider.UpdateSecurityEntity(entity);
         }
 
-        public void WritePermissionEntries(SecurityContext context, IEnumerable<StoredAce> aces)
+        public void WritePermissionEntries(IEnumerable<StoredAce> aces)
         {
             var softReload = false;
             var hardReload = false;
@@ -172,7 +173,7 @@ namespace SenseNet.Security
                 try
                 {
                     // ReSharper disable once PossibleMultipleEnumeration
-                    context.DataProvider.WritePermissionEntries(aces);
+                    _securitySystem.SecurityDataProvider.WritePermissionEntries(aces);
                     return;
                 }
                 catch (SecurityStructureException)
@@ -185,7 +186,7 @@ namespace SenseNet.Security
                         // ReSharper disable once PossibleMultipleEnumeration
                         foreach (var entityId in aces.Select(a => a.EntityId).Distinct())
                         {
-                            _securitySystem.EntityManager.GetEntity(context, entityId, true);
+                            _securitySystem.EntityManager.GetEntity(entityId, true);
                         }
 
                         softReload = true;

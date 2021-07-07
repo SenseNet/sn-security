@@ -87,7 +87,7 @@ namespace SenseNet.Security
             var allow = 0ul;
             var deny = 0ul;
 
-            var firstAcl = _entityManager.GetFirstAclSafe(_securityContext, entityId, true);
+            var firstAcl = _entityManager.GetFirstAclSafe(entityId, true);
 
             if (firstAcl == null)
                 return PermissionValue.Undefined;
@@ -130,8 +130,8 @@ namespace SenseNet.Security
             _entityManager.EnterReadLock();
             try
             {
-                var entity = _entityManager.GetEntitySafe(_securityContext, entityId, true);
-                var firstAcl = _entityManager.GetFirstAclSafe(_securityContext, entityId, true);
+                var entity = _entityManager.GetEntitySafe(entityId, true);
+                var firstAcl = _entityManager.GetFirstAclSafe(entityId, true);
 
                 //======== #1: start bits: get permission bits
                 //==>
@@ -246,7 +246,7 @@ namespace SenseNet.Security
             var aces = new List<AceInfo>();
 
             //==>
-            var firstAcl = _entityManager.GetFirstAclSafe(_securityContext, entityId, true);
+            var firstAcl = _entityManager.GetFirstAclSafe(entityId, true);
             if (firstAcl != null)
             {
                 relatedIdentities = relatedIdentities?.ToArray();
@@ -262,11 +262,11 @@ namespace SenseNet.Security
 
         internal List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return GetExplicitEntriesSafe(entityId, _entityManager.GetFirstAcl(_securityContext, entityId, true), relatedIdentities, entryType);
+            return GetExplicitEntriesSafe(entityId, _entityManager.GetFirstAcl(entityId, true), relatedIdentities, entryType);
         }
         internal List<AceInfo> GetExplicitEntriesSafe(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return GetExplicitEntriesSafe(entityId, _entityManager.GetFirstAclSafe(_securityContext, entityId, true), relatedIdentities, entryType);
+            return GetExplicitEntriesSafe(entityId, _entityManager.GetFirstAclSafe(entityId, true), relatedIdentities, entryType);
         }
         private static List<AceInfo> GetExplicitEntriesSafe(int entityId, AclInfo acl, IEnumerable<int> relatedIdentities, EntryType? entryType)
         {

@@ -31,7 +31,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.SecuritySystem.EntityManager.DeleteEntity(context, EntityId);
+            context.SecuritySystem.EntityManager.DeleteEntity(EntityId);
         }
 
         internal override bool MustWaitFor(SecurityActivity olderActivity)
@@ -58,7 +58,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             if (olderActivity is MoveSecurityEntityActivity moveSecurityEntityActivity)
             {
                 var ctx = Context;
-                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(ctx, EntityId, moveSecurityEntityActivity.SourceId, moveSecurityEntityActivity.TargetId);
+                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(EntityId, moveSecurityEntityActivity.SourceId, moveSecurityEntityActivity.TargetId);
 
                 var deleteTarget = entities[0];
                 var moveSource = entities[1];

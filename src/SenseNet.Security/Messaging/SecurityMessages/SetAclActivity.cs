@@ -83,7 +83,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         protected override void Store(SecurityContext context)
         {
             var dataHandler = context.SecuritySystem.DataHandler;
-            dataHandler.WritePermissionEntries(context, _entries);
+            dataHandler.WritePermissionEntries(_entries);
             dataHandler.RemovePermissionEntries(context, _entriesToRemove);
 
             foreach (var entityId in _breaks)
@@ -99,7 +99,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         protected override void Apply(SecurityContext context)
         {
             var relevantAcls = _acls?.Where(x => !_emptyAcls.Contains(x.EntityId)).ToArray() ?? new AclInfo[0];
-            context.SecuritySystem.EntityManager.ApplyAclEditing(context, relevantAcls, _breaks, _undoBreaks, _entriesToRemove, _emptyAcls);
+            context.SecuritySystem.EntityManager.ApplyAclEditing(relevantAcls, _breaks, _undoBreaks, _entriesToRemove, _emptyAcls);
         }
 
         [NonSerialized]

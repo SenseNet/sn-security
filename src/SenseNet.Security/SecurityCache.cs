@@ -201,7 +201,7 @@ namespace SenseNet.Security
                 group.UserMemberIds.Remove(userId);
 
             // delete ACEs & empty ACLs
-            _securitySystem.EntityManager.RemoveIdentityRelatedAces(context, userId);
+            _securitySystem.EntityManager.RemoveIdentityRelatedAces(userId);
         }
 
         internal void DeleteSecurityGroup(SecurityContext context, int groupId)
@@ -225,7 +225,7 @@ namespace SenseNet.Security
             }
 
             // delete ACEs & empty ACLs
-            _securitySystem.EntityManager.RemoveIdentityRelatedAces(context, groupId);
+            _securitySystem.EntityManager.RemoveIdentityRelatedAces(groupId);
         }
 
         internal void DeleteIdentities(SecurityContext context, IEnumerable<int> identityIds)
@@ -258,7 +258,7 @@ namespace SenseNet.Security
                 }
 
                 // delete Aces & empty ACLs
-                _securitySystem.EntityManager.RemoveIdentityRelatedAces(context, identityId);
+                _securitySystem.EntityManager.RemoveIdentityRelatedAces(identityId);
             }
         }
 

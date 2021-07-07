@@ -42,12 +42,13 @@ namespace SenseNet.Security
         }
 
         /************************************************************************* Readers */
-        internal SecurityEntity GetEntity(SecurityContext ctx, int entityId, bool throwError)
+
+        internal SecurityEntity GetEntity(int entityId, bool throwError)
         {
             EnterReadLock();
             try
             {
-                return GetEntitySafe(ctx, entityId, throwError);
+                return GetEntitySafe(entityId, throwError);
             }
             finally
             {
@@ -65,7 +66,7 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the entity</param>
         /// <param name="throwError">Determines whether to throw an <see cref="EntityNotFoundException"/> if the entity was not found.</param>
         /// <returns>The security entity.</returns>
-        internal SecurityEntity GetEntitySafe(SecurityContext ctx, int entityId, bool throwError)
+        internal SecurityEntity GetEntitySafe(int entityId, bool throwError)
         {
             _cache.Entities.TryGetValue(entityId, out var entity);
 
@@ -77,7 +78,7 @@ namespace SenseNet.Security
                 var storedEntity = dataHandler.GetStoredSecurityEntity(_dataProvider, entityId);
                 if (storedEntity != null)
                 {
-                    entity = CreateEntitySafe(ctx, entityId, storedEntity.ParentId, storedEntity.OwnerId, storedEntity.IsInherited, storedEntity.HasExplicitEntry);
+                    entity = CreateEntitySafe(entityId, storedEntity.ParentId, storedEntity.OwnerId, storedEntity.IsInherited, storedEntity.HasExplicitEntry);
 
                     var acl = new AclInfo(entityId);
                     var entries = _dataProvider.LoadPermissionEntries(new[] { entityId });
@@ -90,8 +91,8 @@ namespace SenseNet.Security
                 {
                     if (_missingEntityHandler.GetMissingEntity(entityId, out var parentId, out var ownerId))
                     {
-                        dataHandler.CreateSecurityEntitySafe(ctx, entityId, parentId, ownerId);
-                        entity = CreateEntitySafe(ctx, entityId, parentId, ownerId);
+                        dataHandler.CreateSecurityEntitySafe(entityId, parentId, ownerId);
+                        entity = CreateEntitySafe(entityId, parentId, ownerId);
                     }
                 }
 
@@ -101,19 +102,19 @@ namespace SenseNet.Security
             return entity;
         }
 
-        internal SecurityEntity[] PeekEntities(SecurityContext ctx, params int[] securityEntityIds)
+        internal SecurityEntity[] PeekEntities(params int[] securityEntityIds)
         {
             EnterReadLock();
             try
             {
-                return PeekEntitiesSafe(ctx, securityEntityIds);
+                return PeekEntitiesSafe(securityEntityIds);
             }
             finally
             {
                 ExitReadLock();
             }
         }
-        internal SecurityEntity[] PeekEntitiesSafe(SecurityContext ctx, params int[] securityEntityIds)
+        internal SecurityEntity[] PeekEntitiesSafe(params int[] securityEntityIds)
         {
             var result = new SecurityEntity[securityEntityIds.Length];
             var entities = _cache.Entities;
@@ -122,13 +123,13 @@ namespace SenseNet.Security
             return result;
         }
 
-        internal AccessControlList GetAccessControlList(SecurityContext ctx, int entityId, EntryType entryType = EntryType.Normal)
+        internal AccessControlList GetAccessControlList(int entityId, EntryType entryType = EntryType.Normal)
         {
             EnterReadLock();
             try
             {
-                var entity = GetEntitySafe(ctx, entityId, true);
-                var aclInfo = GetFirstAclSafe(ctx, entityId, false);
+                var entity = GetEntitySafe(entityId, true);
+                var aclInfo = GetFirstAclSafe(entityId, false);
                 return aclInfo == null
                     ? AclInfo.CreateEmptyAccessControlList(entityId, entity.IsInherited)
                     : aclInfo.ToAccessControlList(entityId, entryType);
@@ -139,35 +140,35 @@ namespace SenseNet.Security
             }
         }
 
-        internal AclInfo GetAclInfoCopy(SecurityContext ctx, int entityId, EntryType? entryType = null)
+        internal AclInfo GetAclInfoCopy(int entityId, EntryType? entryType = null)
         {
-            var entity = GetEntitySafe(ctx, entityId, false);
+            var entity = GetEntitySafe(entityId, false);
             var acl = entity?.Acl;
             return acl == null ? null : entity.Acl.Copy(entryType);
         }
 
         //---- todo
 
-        internal AclInfo GetFirstAcl(SecurityContext ctx, int entityId, bool throwError)
+        internal AclInfo GetFirstAcl(int entityId, bool throwError)
         {
             EnterReadLock();
             try
             {
-                return GetFirstAclSafe(ctx, entityId, throwError);
+                return GetFirstAclSafe(entityId, throwError);
             }
             finally
             {
                 ExitReadLock();
             }
         }
-        internal AclInfo GetFirstAclSafe(SecurityContext ctx, int entityId, bool throwError)
+        internal AclInfo GetFirstAclSafe(int entityId, bool throwError)
         {
-            var entity = GetEntitySafe(ctx, entityId, throwError);
+            var entity = GetEntitySafe(entityId, throwError);
             return entity?.GetFirstAcl();
         }
-        internal int GetFirstAclId(SecurityContext ctx, int entityId)
+        internal int GetFirstAclId(int entityId)
         {
-            var acl = GetFirstAcl(ctx, entityId, false);
+            var acl = GetFirstAcl(entityId, false);
             return acl?.Entity.Id ?? 0;
         }
 
@@ -192,25 +193,25 @@ namespace SenseNet.Security
 
         /************************************************************************* Writers */
 
-        internal void BreakInheritance(SecurityContext ctx, IEnumerable<int> entityIds)
+        internal void BreakInheritance(IEnumerable<int> entityIds)
         {
             EnterWriteLock();
             try
             {
                 foreach (var entityId in entityIds)
-                    BreakInheritanceSafe(ctx, entityId);
+                    BreakInheritanceSafe(entityId);
             }
             finally
             {
                 ExitWriteLock();
             }
         }
-        internal void BreakInheritance(SecurityContext ctx, int entityId)
+        internal void BreakInheritance(int entityId)
         {
             EnterWriteLock();
             try
             {
-                BreakInheritanceSafe(ctx, entityId);
+                BreakInheritanceSafe(entityId);
             }
             finally
             {
@@ -218,9 +219,9 @@ namespace SenseNet.Security
             }
 
         }
-        internal void BreakInheritanceSafe(SecurityContext ctx, int entityId)
+        internal void BreakInheritanceSafe(int entityId)
         {
-            var entity = GetEntitySafe(ctx, entityId, false);
+            var entity = GetEntitySafe(entityId, false);
             if (entity == null)
                 return;
 
@@ -233,34 +234,34 @@ namespace SenseNet.Security
             }
         }
 
-        internal void UndoBreakInheritance(SecurityContext ctx, IEnumerable<int> entityIds)
+        internal void UndoBreakInheritance(IEnumerable<int> entityIds)
         {
             EnterWriteLock();
             try
             {
                 foreach (var entityId in entityIds)
-                    UndoBreakInheritanceSafe(ctx, entityId);
+                    UndoBreakInheritanceSafe(entityId);
             }
             finally
             {
                 ExitWriteLock();
             }
         }
-        internal void UndoBreakInheritance(SecurityContext ctx, int entityId)
+        internal void UndoBreakInheritance(int entityId)
         {
             EnterWriteLock();
             try
             {
-                UndoBreakInheritanceSafe(ctx, entityId);
+                UndoBreakInheritanceSafe(entityId);
             }
             finally
             {
                 ExitWriteLock();
             }
         }
-        internal void UndoBreakInheritanceSafe(SecurityContext ctx, int entityId)
+        internal void UndoBreakInheritanceSafe(int entityId)
         {
-            var entity = GetEntitySafe(ctx, entityId, false);
+            var entity = GetEntitySafe(entityId, false);
             if (entity == null)
                 return;
 
@@ -271,12 +272,12 @@ namespace SenseNet.Security
                 entity.SetAclSafe(null);
         }
 
-        internal SecurityEntity CreateEntity(SecurityContext ctx, int entityId, int parentEntityId, int ownerId, bool? isInherited = null, bool? hasExplicitEntry = null)
+        internal SecurityEntity CreateEntity(int entityId, int parentEntityId, int ownerId, bool? isInherited = null, bool? hasExplicitEntry = null)
         {
             EnterWriteLock();
             try
             {
-                return CreateEntitySafe(ctx, entityId, parentEntityId, ownerId, isInherited, hasExplicitEntry);
+                return CreateEntitySafe(entityId, parentEntityId, ownerId, isInherited, hasExplicitEntry);
             }
             finally
             {
@@ -284,13 +285,13 @@ namespace SenseNet.Security
             }
 
         }
-        internal SecurityEntity CreateEntitySafe(SecurityContext ctx, int entityId, int parentEntityId, int ownerId, bool? isInherited = null, bool? hasExplicitEntry = null)
+        internal SecurityEntity CreateEntitySafe(int entityId, int parentEntityId, int ownerId, bool? isInherited = null, bool? hasExplicitEntry = null)
         {
             SecurityEntity parent = null;
             if (parentEntityId != default)
             {
                 // if the parent cannot be loaded (even from the db), this will throw an exception
-                parent = GetEntitySafe(ctx, parentEntityId, true);
+                parent = GetEntitySafe(parentEntityId, true);
             }
 
             var entity = new SecurityEntity
@@ -306,12 +307,12 @@ namespace SenseNet.Security
             return entity;
         }
 
-        internal void ModifyEntityOwner(SecurityContext ctx, int entityId, int ownerId)
+        internal void ModifyEntityOwner(int entityId, int ownerId)
         {
             EnterWriteLock();
             try
             {
-                var entity = GetEntitySafe(ctx, entityId, true);
+                var entity = GetEntitySafe(entityId, true);
                 entity.OwnerId = ownerId;
             }
             finally
@@ -320,27 +321,27 @@ namespace SenseNet.Security
             }
         }
 
-        internal void DeleteEntity(SecurityContext ctx, int entityId)
+        internal void DeleteEntity(int entityId)
         {
             EnterWriteLock();
             try
             {
-                var entity = GetEntitySafe(ctx, entityId, false);
+                var entity = GetEntitySafe(entityId, false);
                 if (entity == null)
                     return;
-                DeleteEntityRecursiveSafe(ctx, entity);
+                DeleteEntityRecursiveSafe(entity);
             }
             finally
             {
                 ExitWriteLock();
             }
         }
-        private void DeleteEntityRecursiveSafe(SecurityContext ctx, SecurityEntity entity)
+        private void DeleteEntityRecursiveSafe(SecurityEntity entity)
         {
             var children = entity.Children;
             if (children != null)
                 foreach (var child in children.ToArray())
-                    DeleteEntityRecursiveSafe(ctx, child);
+                    DeleteEntityRecursiveSafe(child);
 
             entity.Parent?.RemoveChild(entity);
 
@@ -349,13 +350,13 @@ namespace SenseNet.Security
             _cache.Entities.Remove(entity.Id);
         }
 
-        internal void MoveEntity(SecurityContext ctx, int sourceEntityId, int targetEntityId)
+        internal void MoveEntity(int sourceEntityId, int targetEntityId)
         {
             EnterWriteLock();
             try
             {
-                var source = GetEntitySafe(ctx, sourceEntityId, false);
-                var target = GetEntitySafe(ctx, targetEntityId, false);
+                var source = GetEntitySafe(sourceEntityId, false);
+                var target = GetEntitySafe(targetEntityId, false);
                 if (source == null || target == null)
                     return;
 
@@ -369,29 +370,28 @@ namespace SenseNet.Security
             }
         }
 
-        internal void RemoveAcls(SecurityContext ctx, IEnumerable<int> entityIds)
+        internal void RemoveAcls(IEnumerable<int> entityIds)
         {
             EnterWriteLock();
             try
             {
-                RemoveAclsSafe(ctx, entityIds);
+                RemoveAclsSafe(entityIds);
             }
             finally
             {
                 ExitWriteLock();
             }
         }
-        private void RemoveAclsSafe(SecurityContext ctx, IEnumerable<int> entityIds)
+        private void RemoveAclsSafe(IEnumerable<int> entityIds)
         {
             foreach (var entityId in entityIds)
             {
-                var entity = GetEntitySafe(ctx, entityId, false);
+                var entity = GetEntitySafe(entityId, false);
                 entity?.SetAclSafe(null);
             }
         }
 
-        internal void ApplyAclEditing(SecurityContext ctx, AclInfo[] aclsToSet,
-            IEnumerable<int> breaks, IEnumerable<int> undoBreaks,
+        internal void ApplyAclEditing(AclInfo[] aclsToSet, IEnumerable<int> breaks, IEnumerable<int> undoBreaks,
             List<StoredAce> entriesToRemove, List<int> emptyAclList)
         {
             EnterWriteLock();
@@ -402,16 +402,16 @@ namespace SenseNet.Security
                 using (var op = SnTrace.Security.StartOperation("ApplyAcl started."))
                 {
                     foreach (var aclInfo in aclsToSet)
-                        SetAclSafe(ctx, aclInfo);
+                        SetAclSafe(aclInfo);
                     foreach (var entityId in breakIdArray)
-                        BreakInheritanceSafe(ctx, entityId);
+                        BreakInheritanceSafe(entityId);
                     foreach (var entityId in undoBreakIdArray)
-                        UndoBreakInheritanceSafe(ctx, entityId);
+                        UndoBreakInheritanceSafe(entityId);
 
-                    RemoveEntriesSafe(ctx, entriesToRemove);
+                    RemoveEntriesSafe(entriesToRemove);
 
                     var aclsToRemove = emptyAclList.Where(x => x != default && _cache.Entities[x].IsInherited).ToArray();
-                    RemoveAclsSafe(ctx, aclsToRemove);
+                    RemoveAclsSafe(aclsToRemove);
 
                     op.Successful = true;
                 }
@@ -427,12 +427,12 @@ namespace SenseNet.Security
             }
         }
 
-        private void RemoveEntriesSafe(SecurityContext ctx, IEnumerable<StoredAce> entries)
+        private void RemoveEntriesSafe(IEnumerable<StoredAce> entries)
         {
             foreach (var entry in entries)
             {
                 // get entity without error
-                var entity = GetEntitySafe(ctx, entry.EntityId, false);
+                var entity = GetEntitySafe(entry.EntityId, false);
 
                 // get acl if exists
                 var acl = entity?.Acl;
@@ -452,9 +452,9 @@ namespace SenseNet.Security
             }
         }
 
-        private void SetAclSafe(SecurityContext ctx, AclInfo aclInfo)
+        private void SetAclSafe(AclInfo aclInfo)
         {
-            var entity = GetEntitySafe(ctx, aclInfo.EntityId, false);
+            var entity = GetEntitySafe(aclInfo.EntityId, false);
             if (entity == null)
             {
                 SnTrace.Security.WriteError("Entity in AclInfo not found: {0}", aclInfo.EntityId);
@@ -492,21 +492,22 @@ namespace SenseNet.Security
                 entity.SetAclSafe(aclInfo);
             }
         }
+
         // for new membership API
 
-        internal void RemoveIdentityRelatedAces(SecurityContext ctx, int identityId)
+        internal void RemoveIdentityRelatedAces(int identityId)
         {
             EnterWriteLock();
             try
             {
-                RemoveIdentityRelatedAcesSafe(ctx, identityId);
+                RemoveIdentityRelatedAcesSafe(identityId);
             }
             finally
             {
                 ExitWriteLock();
             }
         }
-        internal void RemoveIdentityRelatedAcesSafe(SecurityContext ctx, int identityId)
+        internal void RemoveIdentityRelatedAcesSafe(int identityId)
         {
             foreach (var entity in _cache.Entities.Values)
             {

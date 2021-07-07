@@ -33,7 +33,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.SecuritySystem.EntityManager.MoveEntity(context, SourceId, TargetId);
+            context.SecuritySystem.EntityManager.MoveEntity(SourceId, TargetId);
         }
 
         internal override bool MustWaitFor(SecurityActivity olderActivity)
@@ -49,7 +49,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             if (olderActivity is DeleteSecurityEntityActivity deleteSecurityEntityActivity)
             {
                 var ctx = Context;
-                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(ctx, deleteSecurityEntityActivity.EntityId, SourceId, TargetId);
+                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(deleteSecurityEntityActivity.EntityId, SourceId, TargetId);
 
                 var deleteTarget = entities[0];
                 var moveSource = entities[1];
@@ -64,7 +64,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             if (olderActivity is MoveSecurityEntityActivity moveSecurityEntityActivity)
             {
                 var ctx = Context;
-                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(ctx, SourceId, TargetId, moveSecurityEntityActivity.SourceId, moveSecurityEntityActivity.TargetId);
+                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(SourceId, TargetId, moveSecurityEntityActivity.SourceId, moveSecurityEntityActivity.TargetId);
                 var move1Source = entities[0];
                 var move1Target = entities[1];
                 var move2Source = entities[2];

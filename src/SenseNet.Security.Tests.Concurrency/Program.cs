@@ -300,7 +300,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 var target1 = entities[52];
 
                 var target = source.Parent == target0 ? target1 : target0;
-                ctx.SecuritySystem.EntityManager.MoveEntity(ctx, source.Id, target.Id);
+                ctx.SecuritySystem.EntityManager.MoveEntity(source.Id, target.Id);
 
                 //----------------------
 

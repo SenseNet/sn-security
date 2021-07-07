@@ -65,7 +65,7 @@ namespace SenseNet.Security
         }
         private readonly SecurityContext _context;
         private readonly Axis _axis;
-        private SecurityEntityManager _entityManager;
+        private readonly SecurityEntityManager _entityManager;
 
         /// <summary>
         /// Returns all entities in the predefined axis (All, ParentChain, Subtree) of the specified entity.
@@ -81,7 +81,7 @@ namespace SenseNet.Security
             _entityManager.EnterReadLock();
             try
             {
-                var root = _context.SecuritySystem.EntityManager.GetEntitySafe(_context, entityId, false);
+                var root = _entityManager.GetEntitySafe(entityId, false);
 
                 IEnumerable<SecurityEntity> collection;
                 switch (_axis)
