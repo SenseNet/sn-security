@@ -9,9 +9,12 @@ namespace SenseNet.Security
     /// </summary>
     internal class PermissionQuery
     {
+        //UNDONE: Get _entityManager via ctor injection
+        private static SecurityEntityManager _entityManager => SecuritySystem.Instance.EntityManager;
+
         public static Dictionary<PermissionTypeBase, int> GetExplicitPermissionsInSubtree(SecurityContext context, int entityId, int[] identities, bool includeRoot)
         {
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var counters = new int[PermissionTypeBase.PermissionCount];
@@ -40,7 +43,7 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
 
@@ -49,7 +52,7 @@ namespace SenseNet.Security
         public static IEnumerable<int> GetRelatedIdentities(SecurityContext context, int entityId, PermissionLevel level)
         {
             var identities = new List<int>();
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var root = context.SecuritySystem.EntityManager.GetEntitySafe(context, entityId, true);
@@ -69,7 +72,7 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
             return identities;
         }
@@ -96,7 +99,7 @@ namespace SenseNet.Security
             if (!explicitOnly)
                 throw new NotSupportedException("Not supported in this version. Use explicitOnly = true");
 
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var counters = new int[PermissionTypeBase.PermissionCount];
@@ -130,7 +133,7 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
         private static void CollectPermissionsFromLocalAces(List<AceInfo> aces, PermissionBitMask localBits)
@@ -189,7 +192,7 @@ namespace SenseNet.Security
             if (!explicitOnly)
                 throw new NotSupportedException("Not supported in this version. Use explicitOnly = true");
 
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var entityIds = new List<int>();
@@ -224,7 +227,7 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
 
         }
@@ -270,7 +273,7 @@ namespace SenseNet.Security
 
         public static IEnumerable<int> GetRelatedIdentities(SecurityContext context, int entityId, PermissionLevel level, IEnumerable<PermissionTypeBase> permissionTypes)
         {
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var identities = new List<int>();
@@ -293,7 +296,7 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
         private static void CollectIdentitiesFromAces(List<AceInfo> aces, PermissionLevel level, ulong mask, List<int> identities)
@@ -323,7 +326,7 @@ namespace SenseNet.Security
 
         public static IEnumerable<int> GetRelatedEntitiesOneLevel(SecurityContext context, int entityId, PermissionLevel level, int identityId, IEnumerable<PermissionTypeBase> permissionTypes)
         {
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var result = new List<int>();
@@ -340,7 +343,7 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
 

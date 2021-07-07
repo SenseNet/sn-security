@@ -14,25 +14,6 @@ namespace SenseNet.Security
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public class SecurityEntity
     {
-        // ReSharper disable once InconsistentNaming
-        private static readonly ReaderWriterLockSlim __lock = new ReaderWriterLockSlim();
-        internal static void EnterReadLock()
-        {
-            __lock.EnterReadLock();
-        }
-        internal static void ExitReadLock()
-        {
-            __lock.ExitReadLock();
-        }
-        private static void EnterWriteLock()
-        {
-            __lock.EnterWriteLock();
-        }
-        private static void ExitWriteLock()
-        {
-            __lock.ExitWriteLock();
-        }
-
         /// <summary>
         /// Converts the information of this instance to its equivalent string representation.
         /// </summary>

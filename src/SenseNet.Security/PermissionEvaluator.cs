@@ -62,14 +62,14 @@ namespace SenseNet.Security
             if (userId == Configuration.Identities.SystemUserId)
                 return PermissionValue.Allowed;
 
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 return GetPermissionSafe(userId, entityId, ownerId, entryType, permissions);
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
         internal PermissionValue GetPermissionSafe(int userId, int entityId, int ownerId, params PermissionTypeBase[] permissions)
@@ -127,7 +127,7 @@ namespace SenseNet.Security
                 return PermissionValue.Allowed;
 
             var identities = GetIdentities(userId, ownerId, entityId);
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var entity = _entityManager.GetEntitySafe(_securityContext, entityId, true);
@@ -224,21 +224,21 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
             return PermissionValue.Allowed;
         }
 
         internal List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 return GetEffectiveEntriesSafe(entityId, relatedIdentities, entryType);
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
         internal List<AceInfo> GetEffectiveEntriesSafe(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)

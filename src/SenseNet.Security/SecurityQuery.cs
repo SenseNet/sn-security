@@ -61,9 +61,11 @@ namespace SenseNet.Security
         {
             _context = context;
             _axis = axis;
+            _entityManager = context.SecuritySystem.EntityManager;
         }
         private readonly SecurityContext _context;
         private readonly Axis _axis;
+        private SecurityEntityManager _entityManager;
 
         /// <summary>
         /// Returns all entities in the predefined axis (All, ParentChain, Subtree) of the specified entity.
@@ -76,7 +78,7 @@ namespace SenseNet.Security
         /// <returns>The IEnumerable&lt;SecurityEntity&gt; to further filtering.</returns>
         public IEnumerable<SecurityEntity> GetEntities(int entityId, BreakOptions handleBreaks = BreakOptions.Default)
         {
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var root = _context.SecuritySystem.EntityManager.GetEntitySafe(_context, entityId, false);
@@ -103,7 +105,7 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
         /// <summary>
