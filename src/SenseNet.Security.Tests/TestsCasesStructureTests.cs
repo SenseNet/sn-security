@@ -765,11 +765,11 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_ResolveMissingEntity()
         {
-            //var ctx = new MissingEntityResolverContext(TestUser.User1);
-
             var ctx = CurrentContext.Security;
-            //CurrentContext.Security = ctx;
-            ctx.SecuritySystem.EntityManager = new SecurityEntityManager(new TestMissingEntityHandler());
+            ctx.SecuritySystem.EntityManager = new SecurityEntityManager(
+                ctx.SecuritySystem.SecurityDataProvider,
+                ctx.SecuritySystem.Cache,
+                new TestMissingEntityHandler());
 
             //----
 

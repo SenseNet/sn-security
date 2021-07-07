@@ -11,10 +11,14 @@ namespace SenseNet.Security
     internal class SecurityEntityManager
     {
         private readonly IMissingEntityHandler _missingEntityHandler;
+        private readonly ISecurityDataProvider _dataProvider;
+        private readonly SecurityCache _cache;
 
-        public SecurityEntityManager(IMissingEntityHandler missingEntityHandler)
+        public SecurityEntityManager(ISecurityDataProvider dataProvider, SecurityCache cache, IMissingEntityHandler missingEntityHandler)
         {
             _missingEntityHandler = missingEntityHandler;
+            _dataProvider = dataProvider;
+            _cache = cache;
         }
 
         // ReSharper disable once InconsistentNaming
@@ -63,20 +67,20 @@ namespace SenseNet.Security
         /// <returns>The security entity.</returns>
         internal SecurityEntity GetEntitySafe(SecurityContext ctx, int entityId, bool throwError)
         {
-            ctx.Cache.Entities.TryGetValue(entityId, out var entity);
+            _cache.Entities.TryGetValue(entityId, out var entity);
 
             if (entity == null)
             {
                 var dataHandler = SecuritySystem.Instance.DataHandler;
 
                 // compensation: try to load the entity and its aces from the db
-                var storedEntity = dataHandler.GetStoredSecurityEntity(ctx.DataProvider, entityId);
+                var storedEntity = dataHandler.GetStoredSecurityEntity(_dataProvider, entityId);
                 if (storedEntity != null)
                 {
                     entity = CreateEntitySafe(ctx, entityId, storedEntity.ParentId, storedEntity.OwnerId, storedEntity.IsInherited, storedEntity.HasExplicitEntry);
 
                     var acl = new AclInfo(entityId);
-                    var entries = ctx.DataProvider.LoadPermissionEntries(new[] { entityId });
+                    var entries = _dataProvider.LoadPermissionEntries(new[] { entityId });
                     foreach (var entry in entries)
                         acl.Entries.Add(new AceInfo { EntryType = entry.EntryType, IdentityId = entry.IdentityId, LocalOnly = entry.LocalOnly, AllowBits = entry.AllowBits, DenyBits = entry.DenyBits });
                     if (acl.Entries.Count > 0)
@@ -112,7 +116,7 @@ namespace SenseNet.Security
         internal SecurityEntity[] PeekEntitiesSafe(SecurityContext ctx, params int[] securityEntityIds)
         {
             var result = new SecurityEntity[securityEntityIds.Length];
-            var entities = ctx.Cache.Entities;
+            var entities = _cache.Entities;
             for (var i = 0; i < securityEntityIds.Length; i++)
                 result[i] = entities.TryGetValue(securityEntityIds[i], out var entity) ? entity : null;
             return result;
@@ -297,7 +301,7 @@ namespace SenseNet.Security
                 Parent = parent
             };
             parent?.AddChild(entity);
-            ctx.Cache.Entities[entityId] = entity;
+            _cache.Entities[entityId] = entity;
 
             return entity;
         }
@@ -342,7 +346,7 @@ namespace SenseNet.Security
 
             entity.SetAclSafe(null);
 
-            ctx.Cache.Entities.Remove(entity.Id);
+            _cache.Entities.Remove(entity.Id);
         }
 
         internal void MoveEntity(SecurityContext ctx, int sourceEntityId, int targetEntityId)
@@ -406,7 +410,7 @@ namespace SenseNet.Security
 
                     RemoveEntriesSafe(ctx, entriesToRemove);
 
-                    var aclsToRemove = emptyAclList.Where(x => x != default && ctx.Cache.Entities[x].IsInherited).ToArray();
+                    var aclsToRemove = emptyAclList.Where(x => x != default && _cache.Entities[x].IsInherited).ToArray();
                     RemoveAclsSafe(ctx, aclsToRemove);
 
                     op.Successful = true;
@@ -504,7 +508,7 @@ namespace SenseNet.Security
         }
         internal void RemoveIdentityRelatedAcesSafe(SecurityContext ctx, int identityId)
         {
-            foreach (var entity in ctx.Cache.Entities.Values)
+            foreach (var entity in _cache.Entities.Values)
             {
                 var acl = entity.Acl;
                 if (acl == null)

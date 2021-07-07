@@ -78,7 +78,6 @@ namespace SenseNet.Security
             DataHandler = new DataHandler(this);
             SecurityDataProvider = securityDataProvider;
             MessageProvider = messageProvider;
-            EntityManager = new SecurityEntityManager(missingEntityHandler);
             MissingEntityHandler = missingEntityHandler;
             _configuration = configuration;
         }
@@ -112,6 +111,8 @@ namespace SenseNet.Security
                 Cache = cache;
                 op.Successful = true;
             }
+
+            EntityManager = new SecurityEntityManager(SecurityDataProvider, Cache, MissingEntityHandler);
 
             CommunicationMonitor = new CommunicationMonitor(this);
 
