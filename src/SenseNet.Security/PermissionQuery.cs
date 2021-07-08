@@ -7,7 +7,7 @@ namespace SenseNet.Security
     /// <summary>
     /// Contains an internal API for querying permission values in the system by entities, identities or permission types.
     /// </summary>
-    internal class PermissionQuery
+    internal class PermissionQuery //UNDONE: Has static members
     {
         //UNDONE: Get _entityManager via ctor injection
         private static SecurityEntityManager _entityManager => SecuritySystem.Instance.EntityManager;

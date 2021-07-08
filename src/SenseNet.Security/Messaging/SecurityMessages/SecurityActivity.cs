@@ -334,7 +334,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             RemoveDependency(WaitingFor, olderActivity);
             RemoveDependency(olderActivity.WaitingForMe, this);
         }
-        private static void RemoveDependency(List<SecurityActivity> dependencyList, SecurityActivity activity)
+        private void RemoveDependency(List<SecurityActivity> dependencyList, SecurityActivity activity)
         {
             // this method must called from thread safe block.
             dependencyList.RemoveAll(x => x.Id == activity.Id);

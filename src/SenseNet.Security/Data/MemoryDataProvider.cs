@@ -11,7 +11,7 @@ namespace SenseNet.Security.Data
     /// Complete ISecurityDataProvider implementation only for testing purposes.
     /// Do not use this class in any business solution.
     /// </summary>
-    public class MemoryDataProvider : ISecurityDataProvider
+    public class MemoryDataProvider : ISecurityDataProvider //UNDONE: Has static members
     {
         private static readonly object MessageLock = new object();
         private static readonly object AcesLock = new object();
@@ -91,7 +91,7 @@ namespace SenseNet.Security.Data
             }
             return groups.Values;
         }
-        private static SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
+        private SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
         {
             if (!groups.TryGetValue(groupId, out var group))
             {

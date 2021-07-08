@@ -248,7 +248,7 @@ namespace SenseNet.Security
             activity.Execute(this);
         }
 
-        private static bool AllNullOrEmpty(params IEnumerable<int>[] args)
+        private bool AllNullOrEmpty(params IEnumerable<int>[] args)
         {
             return !args.Any(a => a != null && a.FirstOrDefault() != default);
         }
@@ -284,7 +284,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Static instance of the SecuritySystemUser
         /// </summary>
-        protected static readonly ISecurityUser SystemUser = new SecuritySystemUser();
+        protected static readonly ISecurityUser SystemUser = new SecuritySystemUser(); //UNDONE: static member
 
     }
 }

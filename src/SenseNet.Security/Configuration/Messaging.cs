@@ -3,7 +3,7 @@ using System.Configuration;
 
 namespace SenseNet.Security.Configuration
 {
-    internal static class Messaging
+    internal static class Messaging //UNDONE: Has static members (configuration)
     {
         // ReSharper disable once ConvertToConstant.Local
         private static readonly string MessageProviderKey = "SecurityMessageProvider";

@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading;
-using SenseNet.Diagnostics;
 // ReSharper disable ArrangeStaticMemberQualifier
 
 namespace SenseNet.Security

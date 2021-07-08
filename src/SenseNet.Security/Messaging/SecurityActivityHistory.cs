@@ -11,7 +11,7 @@ namespace SenseNet.Security.Messaging
     /// Contains momentary state information about the security activity execution
     /// and the recent processed activities in details.
     /// </summary>
-    public class SecurityActivityHistory
+    public class SecurityActivityHistory //UNDONE: Has static members
     {
         /// <summary>
         /// Contains momentary state information about the security activity execution.

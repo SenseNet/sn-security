@@ -6,7 +6,7 @@ namespace SenseNet.Security.Messaging
     /// Represents a message sender.
     /// </summary>
     [Serializable]
-    public class MessageSender : IMessageSender
+    public class MessageSender : IMessageSender //UNDONE: Has static members
     {
         private static string _computerId;
 
