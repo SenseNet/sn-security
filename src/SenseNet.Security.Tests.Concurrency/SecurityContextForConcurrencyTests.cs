@@ -8,7 +8,7 @@ namespace SenseNet.Security.Tests.TestPortal
         public new static void StartTheSystem(SecurityConfiguration configuration)
         {
             SecuritySystem.StartTheSystem(configuration);
-            General = new SecurityContextForConcurrencyTests(SystemUser);
+            General = new SecurityContextForConcurrencyTests(SecuritySystem.Instance.SystemUser);
         }
 
         /*********************** Low level evaluator API **********************/

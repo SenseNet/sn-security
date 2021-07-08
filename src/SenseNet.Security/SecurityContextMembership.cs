@@ -262,29 +262,5 @@ namespace SenseNet.Security
         {
             return CurrentUser.GetDynamicGroups(entityId);
         }
-
-        /*********************** Built-in system user for general context **********************/
-
-        /// <summary>
-        /// Represents a user who has permission for everything.
-        /// </summary>
-        protected class SecuritySystemUser : ISecurityUser
-        {
-            private static readonly int[] EmptyGroups = new int[0];
-
-            /// <summary>Interface implementation. Not used in this class.</summary>
-            public IEnumerable<int> GetDynamicGroups(int entityId)
-            {
-                return EmptyGroups;
-            }
-
-            /// <summary>Id of the user. This value comes from Configuration.Identities.SystemUserId</summary>
-            public int Id => Configuration.Identities.SystemUserId;
-        }
-        /// <summary>
-        /// Static instance of the SecuritySystemUser
-        /// </summary>
-        protected static readonly ISecurityUser SystemUser = new SecuritySystemUser(); //UNDONE: static member
-
     }
 }
