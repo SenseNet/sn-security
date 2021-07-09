@@ -22,7 +22,7 @@ namespace SenseNet.Security.Tests
         {
             _StartTest(TestContext);
 
-            CurrentContext = Tools.GetEmptyContext(TestUser.User1);
+            CurrentContext = GetEmptyContext(TestUser.User1);
             CreatePlayground();
         }
 
@@ -31,7 +31,7 @@ namespace SenseNet.Security.Tests
         {
             try
             {
-                Tools.CheckIntegrity(TestContext.TestName, CurrentContext.Security);
+                CheckIntegrity(TestContext.TestName, CurrentContext.Security);
             }
             finally
             {
@@ -229,7 +229,7 @@ namespace SenseNet.Security.Tests
             var entityId = Id(entityName);
             var permTypes = permissions.Select(p => _permissions[p]).ToArray();
             var result = CurrentContext.Security.GetAllowedUsers(entityId, permTypes);
-            return string.Join(", ", result.Select(Tools.IdToName).OrderBy(s => s));
+            return string.Join(", ", result.Select(IdToName).OrderBy(s => s));
         }
 
         [TestMethod]
@@ -262,7 +262,7 @@ namespace SenseNet.Security.Tests
         {
             var identityId = Id(identityName);
             var result = CurrentContext.Security.GetParentGroups(identityId, directOnly);
-            return string.Join(", ", result.Select(Tools.IdToName).OrderBy(s => s));
+            return string.Join(", ", result.Select(IdToName).OrderBy(s => s));
         }
 
         #region Helper methods

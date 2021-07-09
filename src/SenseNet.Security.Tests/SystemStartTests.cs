@@ -26,7 +26,7 @@ namespace SenseNet.Security.Tests
         {
             try
             {
-                Tools.CheckIntegrity(TestContext.TestName, _context.Security);
+                CheckIntegrity(TestContext.TestName, _context.Security);
             }
             finally
             {
@@ -62,7 +62,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(aces.Count, storage.Aces.Count);
 
             //---- check membership in the evaluator
-            var s = Tools.ReplaceIds(_context.Security.Evaluator._traceMembership());
+            var s = ReplaceIds(_context.Security.Evaluator._traceMembership());
             const string expected = @"U1:[G1,G3]U2:[G1]U3:[G2,G3]U4:[G2,G4]U5:[G5]";
             Assert.AreEqual(expected, s.Replace(Environment.NewLine, "").Replace(" ", ""));
 
@@ -90,7 +90,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(id50, entityTable[Id("E53")].GetFirstAclId());
 
             //---- check ACLs in the evaluator
-            var allAcls = Tools.CollectAllAcls(_context.Security);
+            var allAcls = CollectAllAcls(_context.Security);
             Assert.AreEqual(4, allAcls.Count);
             var acl1 = GetAcl(allAcls, id1);
             var acl3 = GetAcl(allAcls, id3);

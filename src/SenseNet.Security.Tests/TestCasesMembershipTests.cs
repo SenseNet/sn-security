@@ -1150,15 +1150,15 @@ namespace SenseNet.Security.Tests
 
                 CleanupMemberships();
 
-                Tools.SetMembership(CurrentContext.Security, "U1:G2,G3");
+                SetMembership(CurrentContext.Security, "U1:G2,G3");
 
-                Tools.SetAcl(CurrentContext.Security, "+E2|Normal|+G1:______________+");
-                Tools.SetAcl(CurrentContext.Security, "+E3|Normal|+G2:______________+");
-                Tools.SetAcl(CurrentContext.Security, "+E4|Normal|+G3:______________+");
+                SetAcl(CurrentContext.Security, "+E2|Normal|+G1:______________+");
+                SetAcl(CurrentContext.Security, "+E3|Normal|+G2:______________+");
+                SetAcl(CurrentContext.Security, "+E4|Normal|+G3:______________+");
 
-                Tools.SetAcl(CurrentContext.Security, "-E5|Normal|+G4:______________+");
-                Tools.SetAcl(CurrentContext.Security, "-E8|Normal|+G4:______________+");
-                Tools.SetAcl(CurrentContext.Security, "-E11|Normal|+G4:______________+");
+                SetAcl(CurrentContext.Security, "-E5|Normal|+G4:______________+");
+                SetAcl(CurrentContext.Security, "-E8|Normal|+G4:______________+");
+                SetAcl(CurrentContext.Security, "-E11|Normal|+G4:______________+");
 
                 //# User hasn't read permission so she is not in the G4 group
                 TestUser.User1.SetDynamicGroups(null);

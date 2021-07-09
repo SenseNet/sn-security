@@ -22,7 +22,7 @@ namespace SenseNet.Security.Tests
         {
             _StartTest(TestContext);
 
-            CurrentContext = Tools.GetEmptyContext(TestUser.User1);
+            CurrentContext = GetEmptyContext(TestUser.User1);
             CreatePlayground();
         }
         [TestCleanup]
@@ -569,7 +569,7 @@ namespace SenseNet.Security.Tests
         {
             var ctx = CurrentContext.Security;
 
-            Tools.SetMembership(CurrentContext.Security, "U4:G4");
+            SetMembership(CurrentContext.Security, "U4:G4");
             ctx.CreateAclEditor()
                 .Allow(Id("E1"), Id("G4"), false, PermissionType.Custom04)
                 .Allow(Id("E42"), Id("G4"), false, PermissionType.Custom04)

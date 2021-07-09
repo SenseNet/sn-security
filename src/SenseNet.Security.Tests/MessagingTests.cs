@@ -29,7 +29,7 @@ namespace SenseNet.Security.Tests
         {
             try
             {
-                Tools.CheckIntegrity(TestContext.TestName, _context.Security);
+                CheckIntegrity(TestContext.TestName, _context.Security);
             }
             finally
             {
