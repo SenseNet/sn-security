@@ -75,15 +75,18 @@ namespace SenseNet.Security
         public SecuritySystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider,
             IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration)
         {
+            SnTrace.Write("<SecuritySystem ctor");
             DataHandler = new DataHandler(this);
             SecurityDataProvider = securityDataProvider;
             MessageProvider = messageProvider;
             MissingEntityHandler = missingEntityHandler;
             _configuration = configuration;
+            SnTrace.Write("SecuritySystem ctor>");
         }
 
         public void Start()
         {
+            SnTrace.Write("<SecuritySystem Start");
             GeneralSecurityContext = null;
 
             // The message provider must receive ongoing activities at this time.
@@ -122,6 +125,7 @@ namespace SenseNet.Security
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
 
             _killed = false;
+            SnTrace.Write("SecuritySystem Start>");
         }
 
         /// <summary>

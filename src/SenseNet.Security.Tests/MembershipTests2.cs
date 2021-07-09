@@ -3,6 +3,8 @@ using SenseNet.Security.Tests.TestPortal;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SenseNet.Diagnostics;
+
 // ReSharper disable InconsistentNaming
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable UnusedMember.Local
@@ -10,7 +12,7 @@ using System.Text;
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public class MembershipTests2
+    public class MembershipTests2 : TestBase
     {
         #region G1-G23: initial groups (well known when any test starting)
 
@@ -117,9 +119,12 @@ namespace SenseNet.Security.Tests
         private Context context;
         public TestContext TestContext { get; set; }
 
+        private SnTrace.Operation _snTraceOperation;
         [TestInitialize]
         public void StartTest()
         {
+            _StartTest(TestContext);
+
             context = Tools.GetEmptyContext(TestUser.User1);
             Tools.InitializeInMemoryMembershipStorage(context,
                 @"G1:G2,G3,G4,G5,G6|G2:U1,U2|G3:U10,G7,G8,G9,G10,G11|G4:U3,U4,U5|G5:G12,G13,G14,G15|
@@ -131,7 +136,14 @@ namespace SenseNet.Security.Tests
         [TestCleanup]
         public void FinishTest()
         {
-            Tools.CheckIntegrity(TestContext.TestName, context.Security);
+            try
+            {
+                Tools.CheckIntegrity(TestContext.TestName, context.Security);
+            }
+            finally
+            {
+                _FinishTest(TestContext);
+            }
         }
 
         /*==================================================================================*/

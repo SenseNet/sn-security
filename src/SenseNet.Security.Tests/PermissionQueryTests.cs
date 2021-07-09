@@ -2,21 +2,26 @@
 using SenseNet.Security.Tests.TestPortal;
 using System.Collections.Generic;
 using System.Linq;
+using SenseNet.Diagnostics;
+
 // ReSharper disable JoinDeclarationAndInitializer
 // ReSharper disable UnusedMethodReturnValue.Local
 
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public class PermissionQueryTests
+    public class PermissionQueryTests : TestBase
     {
         private Context CurrentContext { get; set; }
 
         public TestContext TestContext { get; set; }
 
+        private SnTrace.Operation _snTraceOperation;
         [TestInitialize]
         public void StartTest()
         {
+            _StartTest(TestContext);
+
             CurrentContext = Tools.GetEmptyContext(TestUser.User1);
             CreatePlayground();
         }
@@ -24,7 +29,14 @@ namespace SenseNet.Security.Tests
         [TestCleanup]
         public void FinishTest()
         {
-            Tools.CheckIntegrity(TestContext.TestName, CurrentContext.Security);
+            try
+            {
+                Tools.CheckIntegrity(TestContext.TestName, CurrentContext.Security);
+            }
+            finally
+            {
+                _FinishTest(TestContext);
+            }
         }
 
         //---------------------------------------------------------------

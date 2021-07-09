@@ -3,24 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SenseNet.Diagnostics;
 using SenseNet.Security.Tests.TestPortal;
 
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public class SecurityQueryTests
+    public class SecurityQueryTests : TestBase
     {
         #region Infrastructure
         private Context CurrentContext { get; set; }
 
         public TestContext TestContext { get; set; }
 
+        private SnTrace.Operation _snTraceOperation;
         [TestInitialize]
         public void StartTest()
         {
+            _StartTest(TestContext);
+
             CurrentContext = Tools.GetEmptyContext(TestUser.User1);
             CreatePlayground();
         }
+        [TestCleanup]
+        public void FinishTest()
+        {
+            _FinishTest(TestContext);
+        }
+
         #endregion
 
         [TestMethod]

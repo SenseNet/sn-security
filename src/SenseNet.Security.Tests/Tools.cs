@@ -11,6 +11,7 @@ namespace SenseNet.Security.Tests
 {
     public static class Tools
     {
+        [Obsolete("##", false)]
         public static int GetId(string name)
         {
             if (name[0] == 'G')
@@ -21,6 +22,7 @@ namespace SenseNet.Security.Tests
                 return TestEntity.GetId(byte.Parse(name.Substring(1)));
             throw new NotSupportedException("Invalid name: " + name);
         }
+        [Obsolete("##", false)]
         internal static string IdToName(int id)
         {
             var category = id / 100;
@@ -38,6 +40,7 @@ namespace SenseNet.Security.Tests
             }
 
         }
+        [Obsolete("##", false)]
         internal static string ReplaceIds(string src)
         {
             var p = src.IndexOf('(');
@@ -53,6 +56,7 @@ namespace SenseNet.Security.Tests
             return src;
         }
 
+        [Obsolete("##", false)]
         internal static void ParsePermissions(string src, out ulong allowBits, out ulong denyBits)
         {
             //+_____-____++++
@@ -73,6 +77,7 @@ namespace SenseNet.Security.Tests
         /// </summary>
         /// <param name="src">Use like tis: "______________+"</param>
         /// <returns>PermissionType[]</returns>
+        [Obsolete("##", false)]
         internal static PermissionTypeBase[] GetPermissionTypes(string src)
         {
             var result = new List<PermissionTypeBase>();
@@ -86,18 +91,21 @@ namespace SenseNet.Security.Tests
             return result.ToArray();
         }
 
+        [Obsolete("##", false)]
         internal static Context GetEmptyContext(TestUser currentUser)
         {
             SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             MemoryDataProvider.LastActivityId = 0;
             return GetEmptyContext(currentUser, new MemoryDataProvider(DatabaseStorage.CreateEmpty()));
         }
+        [Obsolete("##", false)]
         internal static Context GetEmptyContext(TestUser currentUser, ISecurityDataProvider dbProvider, TextWriter traceChannel = null)
         {
             Context.StartTheSystem(dbProvider, new DefaultMessageProvider(), traceChannel);
             return new Context(currentUser);
         }
 
+        [Obsolete("##", false)]
         internal static Dictionary<int, TestEntity> CreateRepository(TestSecurityContext context)
         {
             var u1 = TestUser.User1;
@@ -215,6 +223,7 @@ namespace SenseNet.Security.Tests
             repository.Add(entity.Id, entity);
             context.CreateSecurityEntity(entity);
         }
+        [Obsolete("##", false)]
         internal static string EntityIdStructureToString(SecurityContext ctx)
         {
             var root = ctx.Cache.Entities.First().Value;
@@ -239,6 +248,7 @@ namespace SenseNet.Security.Tests
             }
         }
 
+        [Obsolete("##", false)]
         internal static void SetMembership(SecurityContext context, string src)
         {
             // "U1:G1,G2|U2:G1"
@@ -254,6 +264,7 @@ namespace SenseNet.Security.Tests
             }
         }
 
+        [Obsolete("##", false)]
         internal static void SetAcl(SecurityContext context, string src)
         {
             // "+E1|Normal|+U1:____++++,+G1:____++++"
@@ -307,15 +318,18 @@ namespace SenseNet.Security.Tests
 
         //============================================================================================================
 
+        [Obsolete("##", false)]
         internal static void CheckIntegrity(string testName, SecurityContext context)
         {
             CheckIntegrity(testName, context, context.DataProvider.LoadSecurityEntities(), context.DataProvider.LoadAllGroups());
         }
+        [Obsolete("##", false)]
         internal static void CheckIntegrity(string testName, SecurityContext context, IEnumerable<StoredSecurityEntity> entities, IEnumerable<SecurityGroup> groups)
         {
             //TODO: REWRITE WHOLE CONSISTENCY CHECK
         }
 
+        [Obsolete("##", false)]
         internal static Dictionary<int, AclInfo> CollectAllAcls(SecurityContext ctx)
         {
             var result = ctx.Cache.Entities.Values.Where(e => e.Acl != null).Select(e => e.Acl).ToDictionary(e => e.EntityId);
@@ -324,6 +338,7 @@ namespace SenseNet.Security.Tests
 
         //============================================================================================================
 
+        [Obsolete("##", false)]
         public static void InitializeInMemoryMembershipStorage(Context ctx, string src)
         {
             var memoryDataProvider = (MemoryDataProvider) ctx.Security.DataProvider;
@@ -331,6 +346,7 @@ namespace SenseNet.Security.Tests
             var table = memoryDataProvider.Storage.Memberships;
             InitializeInMemoryMembershipTable(src, table);
         }
+        [Obsolete("##", false)]
         public static List<Membership> CreateInMemoryMembershipTable(Dictionary<int, SecurityGroup> groups)
         {
             var table = new List<Membership>();
@@ -343,6 +359,7 @@ namespace SenseNet.Security.Tests
             }
             return table;
         }
+        [Obsolete("##", false)]
         internal static void InitializeInMemoryMembershipTable(string src, List<Membership> table)
         {
             table.Clear();

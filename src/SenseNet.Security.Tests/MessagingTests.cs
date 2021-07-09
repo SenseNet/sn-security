@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
@@ -11,15 +13,28 @@ using SenseNet.Security.Messaging.SecurityMessages;
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public class MessagingTests
+    public class MessagingTests : TestBase
     {
         private Context _context;
         public TestContext TestContext { get; set; }
 
+        private SnTrace.Operation _snTraceOperation;
+        [TestInitialize]
+        public void StartTest()
+        {
+            _StartTest(TestContext);
+        }
         [TestCleanup]
         public void FinishTest()
         {
-            Tools.CheckIntegrity(TestContext.TestName, _context.Security);
+            try
+            {
+                Tools.CheckIntegrity(TestContext.TestName, _context.Security);
+            }
+            finally
+            {
+                _FinishTest(TestContext);
+            }
         }
 
         //===================================================================
@@ -27,6 +42,9 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Messaging_BigActivity()
         {
+//Debugger.Launch();
+//Debugger.Break();
+
             SnLog.Instance = new TestLogger();
 
             //---- Ensure test data

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Tests.TestPortal;
@@ -9,15 +10,28 @@ using SenseNet.Security.Tests.TestPortal;
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public class SystemStartTests
+    public class SystemStartTests : TestBase
     {
         private Context _context;
         public TestContext TestContext { get; set; }
 
+        private SnTrace.Operation _snTraceOperation;
+        [TestInitialize]
+        public void StartTest()
+        {
+            _StartTest(TestContext);
+        }
         [TestCleanup]
         public void FinishTest()
         {
-            Tools.CheckIntegrity(TestContext.TestName, _context.Security);
+            try
+            {
+                Tools.CheckIntegrity(TestContext.TestName, _context.Security);
+            }
+            finally
+            {
+                _FinishTest(TestContext);
+            }
         }
 
         //===================================================================
