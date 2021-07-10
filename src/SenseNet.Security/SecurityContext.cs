@@ -43,7 +43,7 @@ namespace SenseNet.Security
         {
             CurrentUser = currentUser;
             SecuritySystem = securitySystem ?? SecuritySystem.Instance;
-            DataProvider = SecuritySystem.SecurityDataProvider.CreateNew();
+            DataProvider = SecuritySystem.SecurityDataProvider;
             Evaluator = new PermissionEvaluator(this);
         }
 
