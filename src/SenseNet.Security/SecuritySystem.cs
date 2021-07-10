@@ -58,6 +58,7 @@ namespace SenseNet.Security
         internal SecurityActivityQueue SecurityActivityQueue { get; private set; }
         internal SecurityEntityManager EntityManager { get; set; }
         internal IMissingEntityHandler MissingEntityHandler { get; set; }
+        internal SecurityActivityHistoryController ActivityHistory { get; set; }
 
         private readonly SecurityConfiguration _configuration;
         private bool _killed;
@@ -77,6 +78,7 @@ namespace SenseNet.Security
         {
             SnTrace.Write("<SecuritySystem ctor");
             DataHandler = new DataHandler(this);
+            ActivityHistory = new SecurityActivityHistoryController();
             SecurityDataProvider = securityDataProvider;
             MessageProvider = messageProvider;
             MissingEntityHandler = missingEntityHandler;

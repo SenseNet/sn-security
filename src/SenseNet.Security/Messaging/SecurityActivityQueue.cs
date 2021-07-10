@@ -24,9 +24,9 @@ namespace SenseNet.Security.Messaging
         {
             _securitySystem = securitySystem;
             _serializer = new Serializer(this, securitySystem);
-            _executor = new Executor();
+            _executor = new Executor(securitySystem);
             _terminationHistory = new TerminationHistory();
-            _dependencyManager = new DependencyManager(_serializer, _executor, _terminationHistory);
+            _dependencyManager = new DependencyManager(_serializer, _executor, _terminationHistory, securitySystem);
             _serializer.DependencyManager = _dependencyManager;
             _executor.DependencyManager = _dependencyManager;
         }
@@ -185,7 +185,7 @@ namespace SenseNet.Security.Messaging
                     {
                         SnTrace.SecurityQueue.Write("SAQ: Startup: SA{0} enqueued from db.", loadedActivity.Id);
 
-                        SecurityActivityHistory.Arrive(loadedActivity);
+                        _securitySystem.ActivityHistory.Arrive(loadedActivity);
                         _arrivalQueue.Enqueue(loadedActivity);
                         _lastQueued = loadedActivity.Id;
                         count++;
@@ -197,7 +197,7 @@ namespace SenseNet.Security.Messaging
                     foreach (var loadedActivity in loadedActivities)
                     {
                         SnTrace.SecurityQueue.Write("SAQ: Startup: SA{0} enqueued from db.", loadedActivity.Id);
-                        SecurityActivityHistory.Arrive(loadedActivity);
+                        _securitySystem.ActivityHistory.Arrive(loadedActivity);
                         SnTrace.SecurityQueue.Write("SecurityActivityArrived SA{0}", loadedActivity.Id);
                         _arrivalQueue.Enqueue(loadedActivity);
                         _lastQueued = loadedActivity.Id;
@@ -230,7 +230,7 @@ namespace SenseNet.Security.Messaging
             {
                 SnTrace.SecurityQueue.Write("SAQ: SA{0} arrived{1}. {2}", activity.Id, activity.FromReceiver ? " from another computer" : "", activity.TypeName);
 
-                SecurityActivityHistory.Arrive(activity);
+                _securitySystem.ActivityHistory.Arrive(activity);
 
                 lock (_arrivalQueueLock)
                 {
@@ -268,7 +268,7 @@ namespace SenseNet.Security.Messaging
 
                         foreach (var loadedActivity in loadedActivities)
                         {
-                            SecurityActivityHistory.Arrive(loadedActivity);
+                            _securitySystem.ActivityHistory.Arrive(loadedActivity);
                             _arrivalQueue.Enqueue(loadedActivity);
                             _lastQueued = loadedActivity.Id;
                             SnTrace.SecurityQueue.Write("SAQ: SA{0} enqueued from db.", loadedActivity.Id);
@@ -316,12 +316,15 @@ namespace SenseNet.Security.Messaging
             private readonly Serializer _serializer;
             private readonly Executor _executor;
             private readonly TerminationHistory _terminationHistory;
+            private readonly SecuritySystem _securitySystem;
 
-            public DependencyManager(Serializer serializer, Executor executor, TerminationHistory terminationHistory)
+            public DependencyManager(Serializer serializer, Executor executor, TerminationHistory terminationHistory,
+                SecuritySystem securitySystem)
             {
                 _serializer = serializer;
                 _executor = executor;
                 _terminationHistory = terminationHistory;
+                _securitySystem = securitySystem;
             }
 
             internal void Reset()
@@ -380,7 +383,7 @@ namespace SenseNet.Security.Messaging
                         {
                             newerActivity.WaitFor(olderActivity);
                             SnTrace.SecurityQueue.Write("SAQ: SA{0} depends from SA{1}", newerActivity.Id, olderActivity.Id);
-                            SecurityActivityHistory.Wait(newerActivity);
+                            _securitySystem.ActivityHistory.Wait(newerActivity);
                         }
                     }
 
@@ -402,7 +405,7 @@ namespace SenseNet.Security.Messaging
                     activity.Finish();
 
                     // register activity termination in the log.
-                    SecurityActivityHistory.Finish(activity.Id);
+                    _securitySystem.ActivityHistory.Finish(activity.Id);
 
                     // register activity termination.
                     _terminationHistory.FinishActivity(activity);
@@ -429,7 +432,7 @@ namespace SenseNet.Security.Messaging
                     }
                 }
                 activity.Finish(); // release blocked thread
-                SecurityActivityHistory.Finish(activity.Id);
+                _securitySystem.ActivityHistory.Finish(activity.Id);
                 SnTrace.SecurityQueue.Write("SAQ: SA{0} ignored: finished but not executed.", activity.Id);
             }
 
@@ -503,9 +506,17 @@ namespace SenseNet.Security.Messaging
 
         private class Executor
         {
+            private SecuritySystem _securitySystem;
+
             public DependencyManager DependencyManager { get; set; }
 
             private bool _enabled = true;
+
+            public Executor(SecuritySystem securitySystem)
+            {
+                _securitySystem = securitySystem;
+            }
+
             internal void __enable()
             {
                 _enabled = true;
@@ -519,7 +530,7 @@ namespace SenseNet.Security.Messaging
                 if (!_enabled)
                     return;
 
-                SecurityActivityHistory.Start(activity.Id);
+                _securitySystem.ActivityHistory.Start(activity.Id);
                 try
                 {
                     using (var op = SnTrace.SecurityQueue.StartOperation("SAQ: EXECUTION START SA{0} .", activity.Id))
@@ -531,7 +542,7 @@ namespace SenseNet.Security.Messaging
                 catch (Exception e)
                 {
                     SnTrace.Security.Write("SAQ: EXECUTION ERROR SA{0}: {1}", activity.Id, e.Message);
-                    SecurityActivityHistory.Error(activity.Id, e);
+                    _securitySystem.ActivityHistory.Error(activity.Id, e);
                 }
                 finally
                 {

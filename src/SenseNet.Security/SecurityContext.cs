@@ -450,7 +450,7 @@ namespace SenseNet.Security
         /// </summary>
         protected SecurityActivityHistory GetRecentActivities()
         {
-            return SecurityActivityHistory.GetHistory();
+            return SecuritySystem.ActivityHistory.GetHistory();
         }
         /// <summary>WARNING! Do not use this method in your code. Used in consistency checker tool.</summary>
         protected IEnumerable<long> GetCachedMembershipForConsistencyCheck()
