@@ -17,20 +17,17 @@ namespace SenseNet.Security.Tests
         protected abstract ISecurityDataProvider GetDataProvider();
         protected abstract void CleanupMemberships();
 
-        private SnTrace.Operation _snTraceOperation;
         [TestInitialize]
         public void StartTest()
         {
             _StartTest(TestContext);
 
             var dataProvider = GetDataProvider();
-            dataProvider.DeleteEverything();
+            //dataProvider.DeleteEverything();
+            dataProvider.InstallDatabase();
 
-            SecuritySystem.StartTheSystem(new SecurityConfiguration
-                {SecurityDataProvider = dataProvider, MessageProvider = new DefaultMessageProvider()});
-
-            SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             Context.StartTheSystem(dataProvider, new DefaultMessageProvider());
+            SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             CurrentContext = new Context(TestUser.User1);
         }
         [TestCleanup]
