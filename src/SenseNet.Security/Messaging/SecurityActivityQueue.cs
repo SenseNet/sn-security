@@ -552,7 +552,7 @@ namespace SenseNet.Security.Messaging
         }
     }
 
-    internal class Retrier
+    internal class Retrier //UNDONE: Has static members
     {
         public static T Retry<T>(int count, int waitMilliseconds, Func<T> callback, Func<T, int, Exception, bool> expectation)
         {

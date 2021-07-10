@@ -3,7 +3,7 @@
 namespace SenseNet.Security.Messaging.RabbitMQ.Configuration
 {
     // ReSharper disable once InconsistentNaming
-    internal class RabbitMQ : SnConfig
+    internal class RabbitMQ : SnConfig //UNDONE: Has static members (configuration)
     {
         private const string SectionName = "sensenet/rabbitmq";
 

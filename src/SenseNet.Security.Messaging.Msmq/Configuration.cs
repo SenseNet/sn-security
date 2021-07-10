@@ -2,7 +2,7 @@
 
 namespace SenseNet.Security.Messaging.Msmq
 {
-    internal static class Configuration
+    internal static class Configuration //UNDONE: Has static members (configuration)
     {
         // ReSharper disable once ConvertToConstant.Local
         private static readonly string MessageQueueNameKey = "SecurityMsmqChannelQueueName";

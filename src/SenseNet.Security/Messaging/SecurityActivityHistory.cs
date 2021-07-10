@@ -242,7 +242,7 @@ namespace SenseNet.Security.Messaging
     /// <summary>
     /// Contains information about the executed activities.
     /// </summary>
-    public class CompletionState
+    public class CompletionState //UNDONE: Has static members
     {
         /// <summary>
         /// Id of the last executed activity.
