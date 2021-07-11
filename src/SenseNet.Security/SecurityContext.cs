@@ -47,16 +47,6 @@ namespace SenseNet.Security
             Evaluator = new PermissionEvaluator(this);
         }
 
-        /// <summary>
-        /// Empties the database and memory.
-        /// WARNING! Do not use this method in your code except in installing or developing scenarios.
-        /// </summary>
-        protected void DeleteAllAndRestart()
-        {
-            DataProvider.DeleteEverything();
-            Cache.Reset(DataProvider);
-        }
-
         /*********************** ACL API **********************/
         /// <summary>
         /// Creates a new instance of the AclEditor class for modifying access control data.

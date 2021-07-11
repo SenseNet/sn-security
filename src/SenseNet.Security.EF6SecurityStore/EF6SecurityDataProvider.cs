@@ -81,17 +81,6 @@ namespace SenseNet.Security.EF6SecurityStore
         }
 
         /// <summary>
-        /// Empties the entire database (clears all records from all tables).
-        /// </summary>
-        public void DeleteEverything()
-        {
-            using (var db = Db())
-            {
-                db.CleanupDatabase();
-            }
-        }
-
-        /// <summary>
         /// Creates the database schema and other components (tables, etc.). It requires an existing database.
         /// </summary>
         public void InstallDatabase()

@@ -15,11 +15,6 @@ namespace SenseNet.Security
         string ConnectionString { get; set; }
 
         /// <summary>
-        /// Empties the entire database (clears all records from all tables).
-        /// </summary>
-        void DeleteEverything();
-
-        /// <summary>
         /// Creates the database schema and other components (tables, etc.). It requires an existing database.
         /// </summary>
         // ReSharper disable once UnusedMemberInSuper.Global

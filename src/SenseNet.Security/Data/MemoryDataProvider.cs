@@ -36,11 +36,6 @@ namespace SenseNet.Security.Data
         public string ConnectionString { get; set; }
 
         /// <inheritdoc />
-        public void DeleteEverything()
-        {
-            Storage = DatabaseStorage.CreateEmpty();
-        }
-        /// <inheritdoc />
         public void InstallDatabase()
         {
             // do nothing
