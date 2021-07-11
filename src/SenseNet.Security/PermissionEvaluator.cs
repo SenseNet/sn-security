@@ -34,13 +34,15 @@ namespace SenseNet.Security
     {
         private readonly SecurityContext _securityContext;
         private readonly SecurityEntityManager _entityManager;
-        private SecurityCache _cache;
+        private readonly SecurityCache _cache;
+        private readonly PermissionQuery _permissionQuery;
 
         internal PermissionEvaluator(SecurityContext securityContext)
         {
             _securityContext = securityContext;
             _cache = securityContext.SecuritySystem.Cache;
             _entityManager = securityContext.SecuritySystem.EntityManager;
+            _permissionQuery = securityContext.SecuritySystem.PermissionQuery;
         }
 
         internal void Initialize()
@@ -330,7 +332,7 @@ namespace SenseNet.Security
             {
                 if (!flattened.Contains(groupId))
                     flattened.Add(groupId);
-                foreach (var id in PermissionQuery.GetParentGroups(_securityContext, groupId, false))
+                foreach (var id in _permissionQuery.GetParentGroups(_securityContext, groupId, false))
                     if (!flattened.Contains(id))
                         flattened.Add(id);
             }

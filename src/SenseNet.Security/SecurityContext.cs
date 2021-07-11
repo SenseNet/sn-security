@@ -32,6 +32,8 @@ namespace SenseNet.Security
 
         internal PermissionEvaluator Evaluator { get; }
 
+        private PermissionQuery _permissionQuery;
+
         /***************************** Context **************************/
 
         /// <summary>
@@ -45,6 +47,7 @@ namespace SenseNet.Security
             SecuritySystem = securitySystem ?? SecuritySystem.Instance;
             DataProvider = SecuritySystem.SecurityDataProvider;
             Evaluator = new PermissionEvaluator(this);
+            _permissionQuery = SecuritySystem.PermissionQuery;
         }
 
         /*********************** ACL API **********************/
@@ -351,7 +354,7 @@ namespace SenseNet.Security
         /// <param name="includeRoot">Determines whether the provided root entity's permissions should be included in the result set.</param>
         protected Dictionary<PermissionTypeBase, int> GetExplicitPermissionsInSubtree(int entityId, int[] identities, bool includeRoot)
         {
-            return PermissionQuery.GetExplicitPermissionsInSubtree(this, entityId, identities, includeRoot);
+            return _permissionQuery.GetExplicitPermissionsInSubtree(this, entityId, identities, includeRoot);
         }
 
         /// <summary>
@@ -361,7 +364,7 @@ namespace SenseNet.Security
         /// <param name="level">Filtering by the permission value. It can be Allowed, Denied, AllowedOrDenied.</param>
         protected IEnumerable<int> GetRelatedIdentities(int entityId, PermissionLevel level)
         {
-            return PermissionQuery.GetRelatedIdentities(this, entityId, level);
+            return _permissionQuery.GetRelatedIdentities(this, entityId, level);
         }
         /// <summary>
         /// Collects all permission settings on the given entity and its subtree related to the specified user or group.
@@ -374,7 +377,7 @@ namespace SenseNet.Security
         /// <param name="isEnabled">Filter method that can enable or disable any entity.</param>
         protected Dictionary<PermissionTypeBase, int> GetRelatedPermissions(int entityId, PermissionLevel level, bool explicitOnly, int identityId, Func<int, bool> isEnabled)
         {
-           return PermissionQuery.GetRelatedPermissions(this, entityId, level, explicitOnly, identityId, isEnabled);
+           return _permissionQuery.GetRelatedPermissions(this, entityId, level, explicitOnly, identityId, isEnabled);
         }
         /// <summary>
         /// Returns all entity ids in the requested entity's subtree that have any permission setting
@@ -387,7 +390,7 @@ namespace SenseNet.Security
         /// <param name="permissions">Only those entities appear in the output that have permission settings in connection with the given permissions.</param>
         protected IEnumerable<int> GetRelatedEntities(int entityId, PermissionLevel level, bool explicitOnly, int identityId, IEnumerable<PermissionTypeBase> permissions)
         {
-            return PermissionQuery.GetRelatedEntities(this, entityId, level, explicitOnly, identityId, permissions);
+            return _permissionQuery.GetRelatedEntities(this, entityId, level, explicitOnly, identityId, permissions);
         }
 
         /// <summary>
@@ -398,7 +401,7 @@ namespace SenseNet.Security
         /// <param name="permissions">Only that entities appear in the output that have permission settings in connection with the given permissions.</param>
         protected IEnumerable<int> GetRelatedIdentities(int entityId, PermissionLevel level, IEnumerable<PermissionTypeBase> permissions)
         {
-            return PermissionQuery.GetRelatedIdentities(this, entityId, level, permissions);
+            return _permissionQuery.GetRelatedIdentities(this, entityId, level, permissions);
         }
         /// <summary>
         /// Returns all entity ids in the requested entity's direct children that have any permission setting
@@ -410,7 +413,7 @@ namespace SenseNet.Security
         /// <param name="permissions">Only those entities appear in the output that have permission settings in connection with the given permissions.</param>
         protected IEnumerable<int> GetRelatedEntitiesOneLevel(int entityId, PermissionLevel level, int identityId, IEnumerable<PermissionTypeBase> permissions)
         {
-            return PermissionQuery.GetRelatedEntitiesOneLevel(this, entityId, level, identityId, permissions);
+            return _permissionQuery.GetRelatedEntitiesOneLevel(this, entityId, level, identityId, permissions);
         }
 
         /// <summary>
@@ -421,7 +424,7 @@ namespace SenseNet.Security
         /// <param name="permissions">Only those users appear in the output that have permission settings in connection with the given permissions.</param>
         protected IEnumerable<int> GetAllowedUsers(int entityId, IEnumerable<PermissionTypeBase> permissions)
         {
-            return PermissionQuery.GetAllowedUsers(this, entityId, permissions);
+            return _permissionQuery.GetAllowedUsers(this, entityId, permissions);
         }
 
         /// <summary>
@@ -431,7 +434,7 @@ namespace SenseNet.Security
         /// <param name="directOnly">Switch of the direct or indirect membership.</param>
         protected IEnumerable<int> GetParentGroups(int identityId, bool directOnly)
         {
-            return PermissionQuery.GetParentGroups(this, identityId, directOnly);
+            return _permissionQuery.GetParentGroups(this, identityId, directOnly);
         }
 
         /***************** Debug info ***************/

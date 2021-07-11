@@ -58,6 +58,7 @@ namespace SenseNet.Security
         internal SecurityEntityManager EntityManager { get; set; }
         internal IMissingEntityHandler MissingEntityHandler { get; set; }
         internal SecurityActivityHistoryController ActivityHistory { get; set; }
+        internal PermissionQuery PermissionQuery { get; set; }
 
         private readonly SecurityConfiguration _configuration;
         private bool _killed;
@@ -117,6 +118,8 @@ namespace SenseNet.Security
             }
 
             EntityManager = new SecurityEntityManager(SecurityDataProvider, Cache, MissingEntityHandler);
+
+            PermissionQuery = new PermissionQuery(EntityManager, Cache);
 
             CommunicationMonitor = new CommunicationMonitor(this);
 

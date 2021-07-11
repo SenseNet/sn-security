@@ -7,14 +7,18 @@ namespace SenseNet.Security
     /// <summary>
     /// Contains an internal API for querying permission values in the system by entities, identities or permission types.
     /// </summary>
-    internal class PermissionQuery //UNDONE: Has static members
+    internal class PermissionQuery
     {
-        //UNDONE: Get _entityManager via ctor injection
-        private static SecurityEntityManager _entityManager => SecuritySystem.Instance.EntityManager;
-        //UNDONE: Get _cache via ctor injection
-        private static SecurityCache _cache => SecuritySystem.Instance.Cache;
+        private readonly SecurityEntityManager _entityManager;
+        private readonly SecurityCache _cache;
 
-        public static Dictionary<PermissionTypeBase, int> GetExplicitPermissionsInSubtree(SecurityContext context, int entityId, int[] identities, bool includeRoot)
+        public PermissionQuery(SecurityEntityManager entityManager, SecurityCache cache)
+        {
+            _entityManager = entityManager;
+            _cache = cache;
+        }
+
+        public Dictionary<PermissionTypeBase, int> GetExplicitPermissionsInSubtree(SecurityContext context, int entityId, int[] identities, bool includeRoot)
         {
             _entityManager.EnterReadLock();
             try
@@ -51,7 +55,7 @@ namespace SenseNet.Security
 
         /******************************************************************************************************* Related Identities */
 
-        public static IEnumerable<int> GetRelatedIdentities(SecurityContext context, int entityId, PermissionLevel level)
+        public IEnumerable<int> GetRelatedIdentities(SecurityContext context, int entityId, PermissionLevel level)
         {
             var identities = new List<int>();
             _entityManager.EnterReadLock();
@@ -78,7 +82,7 @@ namespace SenseNet.Security
             }
             return identities;
         }
-        private static void CollectIdentitiesFromAces(List<AceInfo> aces, PermissionLevel level, List<int> identities)
+        private void CollectIdentitiesFromAces(List<AceInfo> aces, PermissionLevel level, List<int> identities)
         {
             foreach (var ace in aces)
             {
@@ -96,7 +100,7 @@ namespace SenseNet.Security
 
         /****************************************************************************************************** Related Permissions */
 
-        public static Dictionary<PermissionTypeBase, int> GetRelatedPermissions(SecurityContext context, int entityId, PermissionLevel level, bool explicitOnly, int identityId, Func<int, bool> isEnabled)
+        public Dictionary<PermissionTypeBase, int> GetRelatedPermissions(SecurityContext context, int entityId, PermissionLevel level, bool explicitOnly, int identityId, Func<int, bool> isEnabled)
         {
             if (!explicitOnly)
                 throw new NotSupportedException("Not supported in this version. Use explicitOnly = true");
@@ -138,7 +142,7 @@ namespace SenseNet.Security
                 _entityManager.ExitReadLock();
             }
         }
-        private static void CollectPermissionsFromLocalAces(List<AceInfo> aces, PermissionBitMask localBits)
+        private void CollectPermissionsFromLocalAces(List<AceInfo> aces, PermissionBitMask localBits)
         {
             foreach (var ace in aces)
             {
@@ -146,7 +150,7 @@ namespace SenseNet.Security
                 localBits.DenyBits |= ace.DenyBits;
             }
         }
-        private static void CollectPermissionsFromAces(List<AceInfo> aces, PermissionLevel level, int[] counters, PermissionBitMask localBits)
+        private void CollectPermissionsFromAces(List<AceInfo> aces, PermissionLevel level, int[] counters, PermissionBitMask localBits)
         {
             // Aggregate aces and switch of the 'used bits' in the local only permission bit set.
             foreach (var ace in aces)
@@ -158,7 +162,7 @@ namespace SenseNet.Security
             // Finally play the rest bits (all broken bits are switched in that is not used in any explicit entry)
             SetPermissionsCountersByPermissionLevel(counters, level, localBits.AllowBits, localBits.DenyBits);
         }
-        private static void SetPermissionsCountersByPermissionLevel(int[] counters, PermissionLevel level, ulong allowBits, ulong denyBits)
+        private void SetPermissionsCountersByPermissionLevel(int[] counters, PermissionLevel level, ulong allowBits, ulong denyBits)
         {
             // ReSharper disable once SwitchStatementMissingSomeCases
             switch (level)
@@ -175,7 +179,7 @@ namespace SenseNet.Security
                     break;
             }
         }
-        private static void IncrementCounters(ulong bits, int[] counters)
+        private void IncrementCounters(ulong bits, int[] counters)
         {
             var mask = 1uL;
             var b = bits;
@@ -189,7 +193,7 @@ namespace SenseNet.Security
 
         /********************************************************************************************************* Related Entities */
 
-        public static IEnumerable<int> GetRelatedEntities(SecurityContext context, int entityId, PermissionLevel level, bool explicitOnly, int identityId, IEnumerable<PermissionTypeBase> permissionTypes)
+        public IEnumerable<int> GetRelatedEntities(SecurityContext context, int entityId, PermissionLevel level, bool explicitOnly, int identityId, IEnumerable<PermissionTypeBase> permissionTypes)
         {
             if (!explicitOnly)
                 throw new NotSupportedException("Not supported in this version. Use explicitOnly = true");
@@ -233,7 +237,7 @@ namespace SenseNet.Security
             }
 
         }
-        private static bool HasBitsByEffectiveAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
+        private bool HasBitsByEffectiveAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
         {
             var permBits = new PermissionBitMask();
             foreach (var ace in aces)
@@ -246,7 +250,7 @@ namespace SenseNet.Security
             }
             return HasBits(permBits, level, mask);
         }
-        private static bool HasBitsByExplicitAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
+        private bool HasBitsByExplicitAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
         {
             var permBits = new PermissionBitMask();
             foreach (var ace in aces)
@@ -256,7 +260,7 @@ namespace SenseNet.Security
             }
             return HasBits(permBits, level, mask);
         }
-        private static bool HasBits(PermissionBitMask permBits, PermissionLevel level, ulong permissionMask)
+        private bool HasBits(PermissionBitMask permBits, PermissionLevel level, ulong permissionMask)
         {
             switch (level)
             {
@@ -273,7 +277,7 @@ namespace SenseNet.Security
 
         /**************************************************************************************************** Related Identities #2 */
 
-        public static IEnumerable<int> GetRelatedIdentities(SecurityContext context, int entityId, PermissionLevel level, IEnumerable<PermissionTypeBase> permissionTypes)
+        public IEnumerable<int> GetRelatedIdentities(SecurityContext context, int entityId, PermissionLevel level, IEnumerable<PermissionTypeBase> permissionTypes)
         {
             _entityManager.EnterReadLock();
             try
@@ -301,7 +305,7 @@ namespace SenseNet.Security
                 _entityManager.ExitReadLock();
             }
         }
-        private static void CollectIdentitiesFromAces(List<AceInfo> aces, PermissionLevel level, ulong mask, List<int> identities)
+        private void CollectIdentitiesFromAces(List<AceInfo> aces, PermissionLevel level, ulong mask, List<int> identities)
         {
             foreach (var ace in aces)
                 if (!identities.Contains(ace.IdentityId))
@@ -309,7 +313,7 @@ namespace SenseNet.Security
                         if(!identities.Contains(ace.IdentityId))
                             identities.Add(ace.IdentityId);
         }
-        private static bool HasBits(ulong allowBits, ulong denyBits, PermissionLevel level, ulong permissionMask)
+        private bool HasBits(ulong allowBits, ulong denyBits, PermissionLevel level, ulong permissionMask)
         {
             switch (level)
             {
@@ -326,7 +330,7 @@ namespace SenseNet.Security
 
         /********************************************************************************************* Related Entities one level#2 */
 
-        public static IEnumerable<int> GetRelatedEntitiesOneLevel(SecurityContext context, int entityId, PermissionLevel level, int identityId, IEnumerable<PermissionTypeBase> permissionTypes)
+        public IEnumerable<int> GetRelatedEntitiesOneLevel(SecurityContext context, int entityId, PermissionLevel level, int identityId, IEnumerable<PermissionTypeBase> permissionTypes)
         {
             _entityManager.EnterReadLock();
             try
@@ -351,7 +355,7 @@ namespace SenseNet.Security
 
         /********************************************************************************************* Allowed Users */
 
-        public static IEnumerable<int> GetAllowedUsers(SecurityContext context, int entityId, IEnumerable<PermissionTypeBase> permissions)
+        public IEnumerable<int> GetAllowedUsers(SecurityContext context, int entityId, IEnumerable<PermissionTypeBase> permissions)
         {
             var ownerId = context.GetOwnerId(entityId);
             var permArray = permissions.ToArray();
@@ -363,7 +367,7 @@ namespace SenseNet.Security
                 .ToArray();
             return allowedIdentities;
         }
-        private static IEnumerable<int> GetFlattenedUsers(SecurityContext context, IEnumerable<int> identities)
+        private IEnumerable<int> GetFlattenedUsers(SecurityContext context, IEnumerable<int> identities)
         {
             var flattenedUsers = new List<int>();
 
@@ -395,29 +399,29 @@ namespace SenseNet.Security
 
         /********************************************************************************************* Parent Groups */
 
-        public static IEnumerable<int> GetParentGroups(SecurityContext context, int identityId, bool directOnly)
+        public IEnumerable<int> GetParentGroups(SecurityContext context, int identityId, bool directOnly)
         {
             if (_cache.Groups.TryGetValue(identityId, out var group))
                 return directOnly ? GetDirectOnlyParentGroups(group) : GetAllParentGroups(context, group);
             return directOnly ? GetDirectOnlyParentGroups(context, identityId) : GetAllParentGroups(context, identityId);
         }
-        private static IEnumerable<int> GetAllParentGroups(SecurityContext context, SecurityGroup group)
+        private IEnumerable<int> GetAllParentGroups(SecurityContext context, SecurityGroup group)
         {
             return _cache.GetAllParentGroupIds(group);
         }
-        private static IEnumerable<int> GetAllParentGroups(SecurityContext context, int userId)
+        private IEnumerable<int> GetAllParentGroups(SecurityContext context, int userId)
         {
             if (_cache.Membership.TryGetValue(userId, out var groupIds))
                 return groupIds;
             return new int[0];
         }
-        private static IEnumerable<int> GetDirectOnlyParentGroups(SecurityGroup group)
+        private IEnumerable<int> GetDirectOnlyParentGroups(SecurityGroup group)
         {
             return group.ParentGroups
                 .Select(g => g.Id)
                 .ToArray();
         }
-        private static IEnumerable<int> GetDirectOnlyParentGroups(SecurityContext context, int userId)
+        private IEnumerable<int> GetDirectOnlyParentGroups(SecurityContext context, int userId)
         {
             return _cache.Groups.Values
                 .Where(g => g.UserMemberIds.Contains(userId))
