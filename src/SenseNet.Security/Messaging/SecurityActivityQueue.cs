@@ -550,32 +550,32 @@ namespace SenseNet.Security.Messaging
                 }
             }
         }
-    }
 
-    internal class Retrier //UNDONE: Has static members
-    {
-        public static T Retry<T>(int count, int waitMilliseconds, Func<T> callback, Func<T, int, Exception, bool> expectation)
+        private class Retrier
         {
-            var retryCount = count;
-            var result = default(T);
-            while (retryCount > 0)
+            public static T Retry<T>(int count, int waitMilliseconds, Func<T> callback, Func<T, int, Exception, bool> expectation)
             {
-                Exception error = null;
-                try
+                var retryCount = count;
+                var result = default(T);
+                while (retryCount > 0)
                 {
-                    result = callback();
-                }
-                catch (Exception e)
-                {
-                    error = e;
-                }
+                    Exception error = null;
+                    try
+                    {
+                        result = callback();
+                    }
+                    catch (Exception e)
+                    {
+                        error = e;
+                    }
 
-                if (expectation(result, retryCount, error))
-                    break;
-                retryCount--;
-                Thread.Sleep(waitMilliseconds);
+                    if (expectation(result, retryCount, error))
+                        break;
+                    retryCount--;
+                    Thread.Sleep(waitMilliseconds);
+                }
+                return result;
             }
-            return result;
         }
     }
 
