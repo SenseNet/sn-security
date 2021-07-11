@@ -12,7 +12,7 @@ namespace SenseNet.Security.Tests
     {
         protected override ISecurityDataProvider GetDataProvider()
         {
-            MemoryDataProvider.LastActivityId = 0;
+            //MemoryDataProvider.LastActivityId = 0;
             return new MemoryDataProvider(DatabaseStorage.CreateEmpty());
         }
 

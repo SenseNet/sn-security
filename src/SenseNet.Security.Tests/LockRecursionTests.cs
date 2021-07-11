@@ -30,7 +30,7 @@ namespace SenseNet.Security.Tests
         private Context GetContextAndStartTheSystem(LockRecursionUser currentUser)
         {
             SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
-            MemoryDataProvider.LastActivityId = 0;
+            //MemoryDataProvider.LastActivityId = 0;
             Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), new DefaultMessageProvider());
             var context = new Context(currentUser);
             CreatePlayground(context);
@@ -39,7 +39,7 @@ namespace SenseNet.Security.Tests
         private static Context GetContext(LockRecursionUser currentUser)
         {
             SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
-            MemoryDataProvider.LastActivityId = 0;
+            //MemoryDataProvider.LastActivityId = 0;
             return new Context(currentUser);
         }
 
