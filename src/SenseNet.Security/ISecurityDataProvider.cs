@@ -15,11 +15,6 @@ namespace SenseNet.Security
         string ConnectionString { get; set; }
 
         /// <summary>
-        /// Creator method. Returns a brand new ISecurityDataProvider instance
-        /// </summary>
-        ISecurityDataProvider CreateNew();
-
-        /// <summary>
         /// Empties the entire database (clears all records from all tables).
         /// </summary>
         void DeleteEverything();

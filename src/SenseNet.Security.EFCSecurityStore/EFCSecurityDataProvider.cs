@@ -84,13 +84,6 @@ namespace SenseNet.Security.EFCSecurityStore
         }
 
         /// <summary>
-        /// Creator method. Returns a brand new ISecurityDataProvider instance.
-        /// </summary>
-        public ISecurityDataProvider CreateNew()
-        {
-            return new EFCSecurityDataProvider(Options.Create(_options), _logger);
-        }
-        /// <summary>
         /// Empties the entire database (clears all records from all tables).
         /// </summary>
         public void DeleteEverything()

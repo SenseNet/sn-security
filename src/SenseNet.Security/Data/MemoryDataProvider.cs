@@ -36,11 +36,6 @@ namespace SenseNet.Security.Data
         public string ConnectionString { get; set; }
 
         /// <inheritdoc />
-        public virtual ISecurityDataProvider CreateNew()
-        {
-            return new MemoryDataProvider(Storage);
-        }
-        /// <inheritdoc />
         public void DeleteEverything()
         {
             Storage = DatabaseStorage.CreateEmpty();
