@@ -242,7 +242,7 @@ namespace SenseNet.Security.Messaging
     /// <summary>
     /// Contains information about the executed activities.
     /// </summary>
-    public class CompletionState //UNDONE: Has static members
+    public class CompletionState
     {
         /// <summary>
         /// Id of the last executed activity.
@@ -266,7 +266,7 @@ namespace SenseNet.Security.Messaging
             Gaps = new int[0];
         }
 
-        internal static CompletionState GetCurrent()
+        internal CompletionState GetCurrent()
         {
             return SecuritySystem.Instance.SecurityActivityQueue.GetCurrentCompletionState();
         }
@@ -279,7 +279,7 @@ namespace SenseNet.Security.Messaging
             return $"{LastActivityId}({GapsToString(Gaps, 50, 10)})";
         }
 
-        internal static object GapsToString(int[] gaps, int maxCount, int growth)
+        internal string GapsToString(int[] gaps, int maxCount, int growth)
         {
             if (gaps.Length < maxCount + growth)
                 maxCount = gaps.Length;

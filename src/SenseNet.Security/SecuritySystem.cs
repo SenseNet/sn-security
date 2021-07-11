@@ -49,7 +49,6 @@ namespace SenseNet.Security
         }
 
 
-        //UNDONE: Don't use the _securityDataProvider as a prototype if the ISecurityDataProvider is not a transient service (see it's state, thread safety, etc.)
         public ISecurityDataProvider SecurityDataProvider { get; }
         internal DataHandler DataHandler { get; }
         public IMessageProvider MessageProvider { get; }
