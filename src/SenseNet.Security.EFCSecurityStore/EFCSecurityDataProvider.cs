@@ -472,7 +472,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 result = db.EFMessages.Add(new EFMessage
                 {
                     ExecutionState = ExecutionState.Wait,
-                    SavedBy = activity.Context.MessageProvider.ReceiverName,
+                    SavedBy = activity.Context.SecuritySystem.MessageProvider.ReceiverName,
                     SavedAt = DateTime.UtcNow,
                     Body = body
                 });
@@ -501,7 +501,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 string result;
                 using (var db = Db())
                     result = db.AcquireSecurityActivityExecutionLock(
-                        securityActivity.Id, securityActivity.Context.MessageProvider.ReceiverName, timeoutInSeconds);
+                        securityActivity.Id, securityActivity.Context.SecuritySystem.MessageProvider.ReceiverName, timeoutInSeconds);
 
                 // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (result)

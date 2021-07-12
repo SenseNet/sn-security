@@ -27,7 +27,7 @@ namespace SenseNet.Security.TestConsole
 
 
             //======== Test
-            var channel = context.Security.MessageProvider;
+            var channel = context.Security.SecuritySystem.MessageProvider;
             channel.MessageReceived += MessageReceived;
             channel.SendException += SendException;
             channel.ReceiveException += ReceiveException;

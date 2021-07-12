@@ -23,10 +23,11 @@ namespace SenseNet.Security
         /// Gets the configured ISecurityDataProvider instance
         /// </summary>
         protected internal ISecurityDataProvider DataProvider { get; }
-        /// <summary>
-        /// Gets the configured IMessageProvider instance
-        /// </summary>
-        public IMessageProvider MessageProvider => SecuritySystem.MessageProvider; //UNDONE: obsolete
+///// <summary>
+///// Gets the configured IMessageProvider instance
+///// </summary>
+//[Obsolete("##", true)]
+//public IMessageProvider MessageProvider => SecuritySystem.MessageProvider;
 
         internal SecurityCache Cache => SecuritySystem.Cache;
 

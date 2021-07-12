@@ -115,7 +115,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             DistributedMessage msg = this;
             if (BodySize > Configuration.Messaging.DistributableSecurityActivityMaxSize)
                 msg = new BigActivityMessage { DatabaseId = Id };
-            context.MessageProvider.SendMessage(msg);
+            context.SecuritySystem.MessageProvider.SendMessage(msg);
         }
 
         /// <summary>
