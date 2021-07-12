@@ -23,17 +23,12 @@ namespace SenseNet.Security
         /// Gets the configured ISecurityDataProvider instance
         /// </summary>
         protected internal ISecurityDataProvider DataProvider { get; }
-///// <summary>
-///// Gets the configured IMessageProvider instance
-///// </summary>
-//[Obsolete("##", true)]
-//public IMessageProvider MessageProvider => SecuritySystem.MessageProvider;
 
         internal SecurityCache Cache => SecuritySystem.Cache;
 
         internal PermissionEvaluator Evaluator { get; }
 
-        private PermissionQuery _permissionQuery;
+        private readonly PermissionQuery _permissionQuery;
 
         /***************************** Context **************************/
 

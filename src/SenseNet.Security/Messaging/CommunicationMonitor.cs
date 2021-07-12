@@ -6,8 +6,8 @@ namespace SenseNet.Security.Messaging
 {
     internal class CommunicationMonitor
     {
-        private SecuritySystem _securitySystem;
-        private System.Timers.Timer _timer;
+        private readonly SecuritySystem _securitySystem;
+        private readonly System.Timers.Timer _timer;
 
         internal CommunicationMonitor(SecuritySystem securitySystem)
         {
