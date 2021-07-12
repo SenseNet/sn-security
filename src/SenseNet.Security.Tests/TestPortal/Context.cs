@@ -18,11 +18,14 @@ namespace SenseNet.Security.Tests.TestPortal
             // Get configured or default messaging component and initialize it.
             var messageProvider = ResolveMessageProvider();
             messageProvider.Initialize();
-            MessageSender.Initialize(messageProvider.ReceiverName);
 
             // call the second step
             Debug.WriteLine("SECU> StartTheSystem: " + securityDataProvider.GetType().Name);
             StartTheSystem(securityDataProvider, messageProvider);
+
+            // legacy logic
+            // original line: MessageSender.Initialize(messageProvider.ReceiverName);
+            SecuritySystem.Instance.MessageSenderManager = new MessageSenderManager(messageProvider.ReceiverName);
         }
         // Called by tests. The messageProvider must be initialized.
         internal static void StartTheSystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider, TextWriter traceChannel = null)

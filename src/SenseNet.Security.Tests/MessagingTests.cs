@@ -40,6 +40,52 @@ namespace SenseNet.Security.Tests
         //===================================================================
 
         [TestMethod]
+        public void Messaging_MessageSender()
+        {
+            SnLog.Instance = new TestLogger();
+
+            //---- Ensure test data
+            var entities = CreateTestEntities();
+            var groups = SystemStartTests.CreateTestGroups();
+            var memberships = Tools.CreateInMemoryMembershipTable(groups);
+            var aces = CreateTestAces();
+            var storage = new DatabaseStorage
+            {
+                Aces = aces,
+                Memberships = memberships,
+                Entities = entities,
+                Messages = new List<Tuple<int, DateTime, byte[]>>()
+            };
+
+            //---- Start the system
+            var msgProvider = new TestMessageProvider();
+            msgProvider.MessageReceived += MsgProvider_MessageReceived;
+            msgProvider.Initialize();
+
+            Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
+
+            _context = new Context(TestUser.User1);
+
+            // small activity from me
+            var activity1 = new TestActivity();
+            activity1.Execute(_context.Security);
+
+            // small activity from another
+            var activity2 = new TestActivity
+            {
+                Sender = new TestMessageSender {ComputerID = Environment.MachineName, InstanceID = "AnotherAppDomain"}
+            };
+            activity2.Execute(_context.Security);
+
+            Assert.AreEqual("true, false", string.Join(", ", msgProvider.ReceiverMessages));
+        }
+        private void MsgProvider_MessageReceived(object sender, MessageReceivedEventArgs args)
+        {
+            var msgProvider = (TestMessageProvider) sender;
+            msgProvider.ReceiverMessages.Add(msgProvider.MessageSenderManager.IsMe(args.Message.Sender).ToString().ToLower());
+        }
+
+        [TestMethod]
         public void Messaging_BigActivity()
         {
 //Debugger.Launch();
@@ -244,10 +290,21 @@ namespace SenseNet.Security.Tests
                 }
             }
         }
+        [Serializable]
+        private class TestMessageSender : IMessageSender
+        {
+            public string ComputerID { get; set; }
+            public string InstanceID { get;  set; }
+        }
+
         private class TestMessageProvider : IMessageProvider
         {
             public string ReceiverName => "TestMessageProvider";
             public int IncomingMessageCount => 0;
+            //UNDONE: Initialize MessageSenderManager via ctor
+            public IMessageSenderManager MessageSenderManager => SecuritySystem.Instance.MessageSenderManager;
+
+            public List<string> ReceiverMessages { get; } = new List<string>();
 
             public void Initialize() {}
 

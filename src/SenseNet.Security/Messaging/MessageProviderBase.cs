@@ -20,6 +20,8 @@ namespace SenseNet.Security.Messaging
         private int _incomingMessageCount;
         private bool _allowMessageProcessing;
         private DateTime _startingTheSystem = DateTime.MaxValue;
+        //UNDONE: Initialize MessageSenderManager via ctor
+        public IMessageSenderManager MessageSenderManager => SecuritySystem.Instance.MessageSenderManager;
 
         /// <summary>
         /// Gets or sets a value that tells the system whether the component has been shut down.
@@ -88,7 +90,7 @@ namespace SenseNet.Security.Messaging
             var message = DeserializeMessage(messageBody);
             if (message == null)
                 return;
-            if (message.Sender.IsMe)
+            if (MessageSenderManager.IsMe(message.Sender))
             {
                 SnTrace.Messaging.Write($"{message.GetType().Name} SKIPPED as local (from me).");
                 return;

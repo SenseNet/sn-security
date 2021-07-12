@@ -58,6 +58,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         public void Execute(SecurityContext context, bool waitForComplete = true)
         {
             _context = context;
+            if (Sender == null)
+                Sender = context.SecuritySystem.MessageSenderManager.CreateMessageSender();
+
             context.SecuritySystem.SecurityActivityQueue.ExecuteActivity(this);
 
             if(waitForComplete)

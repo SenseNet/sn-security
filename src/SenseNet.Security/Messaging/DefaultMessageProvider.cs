@@ -18,6 +18,9 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         public int IncomingMessageCount => 0;
 
+        //UNDONE: Initialize MessageSenderManager via ctor
+        public IMessageSenderManager MessageSenderManager => SecuritySystem.Instance.MessageSenderManager;
+
         /// <summary>
         /// Initializes the provider instance.
         /// </summary>

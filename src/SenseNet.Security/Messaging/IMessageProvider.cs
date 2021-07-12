@@ -15,7 +15,10 @@ namespace SenseNet.Security.Messaging
         /// Gets a total count of received messages
         /// </summary>
         int IncomingMessageCount { get; }
-
+        /// <summary>
+        /// Manages the <see cref="IMessageSender"/> objects.
+        /// </summary>
+        IMessageSenderManager MessageSenderManager { get; }
         /// <summary>
         /// Initializes the provider instance.
         /// </summary>
