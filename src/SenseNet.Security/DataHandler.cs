@@ -18,15 +18,15 @@ namespace SenseNet.Security
             _dataProvider = dataProvider;
         }
 
-        public IDictionary<int, SecurityEntity> LoadSecurityEntities(ISecurityDataProvider dataProvider)
+        public IDictionary<int, SecurityEntity> LoadSecurityEntities()
         {
-            var count = dataProvider.GetEstimatedEntityCount();
+            var count = _dataProvider.GetEstimatedEntityCount();
             var capacity = count + count / 10;
 
             var entities = new Dictionary<int, SecurityEntity>(capacity);
             var relations = new List<Tuple<SecurityEntity, int>>(capacity); // first is Id, second is ParentId
 
-            foreach (var storedEntity in dataProvider.LoadSecurityEntities())
+            foreach (var storedEntity in _dataProvider.LoadSecurityEntities())
             {
                 var entity = new SecurityEntity
                 {
@@ -53,16 +53,16 @@ namespace SenseNet.Security
             return new ConcurrentDictionary<int, SecurityEntity>(entities);
         }
 
-        public IDictionary<int, SecurityGroup> LoadAllGroups(ISecurityDataProvider dataProvider)
+        public IDictionary<int, SecurityGroup> LoadAllGroups()
         {
-            var groups = dataProvider.LoadAllGroups();
+            var groups = _dataProvider.LoadAllGroups();
             return groups.ToDictionary(x => x.Id);
         }
-        public Dictionary<int, AclInfo> LoadAcls(ISecurityDataProvider dataProvider, IDictionary<int, SecurityEntity> entities)
+        public Dictionary<int, AclInfo> LoadAcls()
         {
             var acls = new Dictionary<int, AclInfo>();
 
-            foreach (var storedAce in dataProvider.LoadAllAces())
+            foreach (var storedAce in _dataProvider.LoadAllAces())
             {
                 if (!acls.TryGetValue(storedAce.EntityId, out var acl))
                 {

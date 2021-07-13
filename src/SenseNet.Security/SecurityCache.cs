@@ -13,31 +13,29 @@ namespace SenseNet.Security
         internal IDictionary<int, SecurityGroup> Groups { get; private set; }     // GroupId  --> Group
         internal Dictionary<int, List<int>> Membership { get; private set; }      // UserId   --> list of ContainerIds
 
-        private readonly ISecurityDataProvider _dataProvider;
+        private readonly DataHandler _dataHandler;
         private readonly SecuritySystem _securitySystem;
-        public SecurityCache(SecuritySystem securitySystem)
+        public SecurityCache(SecuritySystem securitySystem, DataHandler dataHandler)
         {
-            _dataProvider = securitySystem.DataProvider;
             _securitySystem = securitySystem;
+            _dataHandler = dataHandler;
         }
         internal void Initialize()
         {
-            Load(_dataProvider);
+            Load();
         }
         internal void Reset(ISecurityDataProvider dataProvider)
         {
-            Load(dataProvider);
+            Load();
         }
-        internal void Load(ISecurityDataProvider dataProvider)
+        internal void Load()
         {
-            var dataHandler = _securitySystem.DataHandler;
-
-            var entities = dataHandler.LoadSecurityEntities(dataProvider);
-            var aclTable = dataHandler.LoadAcls(dataProvider, entities);
+            var entities = _dataHandler.LoadSecurityEntities();
+            var aclTable = _dataHandler.LoadAcls();
             BuildAcls(entities, aclTable);
 
             Entities = entities;
-            Groups = dataHandler.LoadAllGroups(dataProvider);
+            Groups = _dataHandler.LoadAllGroups();
             Membership = FlattenUserMembership(Groups);
         }
 
