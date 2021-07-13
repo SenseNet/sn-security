@@ -84,13 +84,13 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         {
             var dataHandler = context.SecuritySystem.DataHandler;
             dataHandler.WritePermissionEntries(_entries);
-            dataHandler.RemovePermissionEntries(context, _entriesToRemove);
+            dataHandler.RemovePermissionEntries(_entriesToRemove);
 
             foreach (var entityId in _breaks)
-                dataHandler.BreakInheritance(context, entityId);
+                dataHandler.BreakInheritance(entityId);
 
             foreach (var entityId in _undoBreaks)
-                dataHandler.UnBreakInheritance(context, entityId);
+                dataHandler.UnBreakInheritance(entityId);
         }
 
         /// <summary>

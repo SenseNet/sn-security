@@ -25,7 +25,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            context.SecuritySystem.DataHandler.MoveSecurityEntity(context, SourceId, TargetId);
+            context.SecuritySystem.DataHandler.MoveSecurityEntity(SourceId, TargetId);
         }
 
         /// <summary>

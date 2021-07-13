@@ -115,7 +115,7 @@ namespace SenseNet.Security
             _securitySystem.DataProvider.InsertSecurityEntity(entity);
         }
 
-        public void ModifySecurityEntityOwner(SecurityContext context, int entityId, int ownerId)
+        public void ModifySecurityEntityOwner(int entityId, int ownerId)
         {
             var entity = _dataProvider.LoadStoredSecurityEntity(entityId);
             if (entity == null)
@@ -124,12 +124,12 @@ namespace SenseNet.Security
             _dataProvider.UpdateSecurityEntity(entity);
         }
         
-        public void DeleteSecurityEntity(SecurityContext context, int entityId)
+        public void DeleteSecurityEntity(int entityId)
         {
             _dataProvider.DeleteEntitiesAndEntries(entityId);
         }
 
-        public void MoveSecurityEntity(SecurityContext context, int sourceId, int targetId)
+        public void MoveSecurityEntity(int sourceId, int targetId)
         {
             var source = _dataProvider.LoadStoredSecurityEntity(sourceId);
             if (source == null)
@@ -142,7 +142,7 @@ namespace SenseNet.Security
             _dataProvider.MoveSecurityEntity(sourceId, targetId);
         }
 
-        public void BreakInheritance(SecurityContext context, int entityId)
+        public void BreakInheritance(int entityId)
         {
             var entity = _dataProvider.LoadStoredSecurityEntity(entityId);
             if (entity == null)
@@ -151,12 +151,7 @@ namespace SenseNet.Security
             _dataProvider.UpdateSecurityEntity(entity);
         }
 
-        [Obsolete("Use the overload with correct name.", true)]
-        public void UnbreakInheritance(SecurityContext context, int entityId)
-        {
-            UnBreakInheritance(context, entityId);
-        }
-        public void UnBreakInheritance(SecurityContext context, int entityId)
+        public void UnBreakInheritance(int entityId)
         {
             var entity = _dataProvider.LoadStoredSecurityEntity(entityId);
             if (entity == null)
@@ -213,7 +208,7 @@ namespace SenseNet.Security
             }
         }
 
-        public void RemovePermissionEntries(SecurityContext context, IEnumerable<StoredAce> aces)
+        public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
             _dataProvider.RemovePermissionEntries(aces);
         }
@@ -324,27 +319,27 @@ namespace SenseNet.Security
 
         /*============================================================================================== Membership */
 
-        public SecurityGroup GetSecurityGroup(SecurityContext context, int groupId)
+        public SecurityGroup GetSecurityGroup(int groupId)
         {
             return _dataProvider.LoadSecurityGroup(groupId);
         }
 
-        internal void DeleteUser(SecurityContext context, int userId)
+        internal void DeleteUser(int userId)
         {
             _dataProvider.DeleteIdentityAndRelatedEntries(userId);
         }
 
-        public void DeleteSecurityGroup(SecurityContext context, int groupId)
+        public void DeleteSecurityGroup(int groupId)
         {
             _dataProvider.DeleteIdentityAndRelatedEntries(groupId);
         }
 
-        internal void DeleteIdentities(SecurityContext context, IEnumerable<int> ids)
+        internal void DeleteIdentities(IEnumerable<int> ids)
         {
             _dataProvider.DeleteIdentitiesAndRelatedEntries(ids);
         }
 
-        internal void AddMembers(SecurityContext context, int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups)
+        internal void AddMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups)
         {
             _dataProvider.AddMembers(groupId, userMembers, groupMembers);
             if (parentGroups != null)
@@ -352,7 +347,7 @@ namespace SenseNet.Security
                     _dataProvider.AddMembers(parentGroupId, null, new[] { groupId });
         }
 
-        internal void RemoveMembers(SecurityContext context, int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups)
+        internal void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups)
         {
             _dataProvider.RemoveMembers(groupId, userMembers, groupMembers);
             if (parentGroups != null)
@@ -360,13 +355,13 @@ namespace SenseNet.Security
                     _dataProvider.RemoveMembers(parentGroupId, null, new[] { groupId });
         }
 
-        internal void AddUserToGroups(SecurityContext context, int userId, IEnumerable<int> parentGroups)
+        internal void AddUserToGroups(int userId, IEnumerable<int> parentGroups)
         {
             foreach (var parentGroupId in parentGroups.Distinct())
                 _dataProvider.AddMembers(parentGroupId, new[] { userId }, null);
         }
 
-        internal void RemoveUserFromGroups(SecurityContext context, int userId, IEnumerable<int> parentGroups)
+        internal void RemoveUserFromGroups(int userId, IEnumerable<int> parentGroups)
         {
             foreach (var parentGroupId in parentGroups.Distinct())
                 _dataProvider.RemoveMembers(parentGroupId, new[] { userId }, null);
