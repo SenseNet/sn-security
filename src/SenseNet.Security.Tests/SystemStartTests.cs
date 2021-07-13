@@ -254,7 +254,7 @@ namespace SenseNet.Security.Tests
 
             //---- Start the system
             Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider());
-            var ctxAcc = new PrivateObject(SecuritySystem.Instance);
+            var ctxAcc = new ObjectAccessor(SecuritySystem.Instance);
             var killed = (bool)ctxAcc.GetField("_killed");
             Assert.IsFalse(killed);
 
