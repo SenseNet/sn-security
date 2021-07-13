@@ -11,14 +11,14 @@ namespace SenseNet.Security
     internal class SecurityEntityManager
     {
         private readonly IMissingEntityHandler _missingEntityHandler;
-        private readonly ISecurityDataProvider _dataProvider;
+        private readonly DataHandler _dataHandler;
         private readonly SecurityCache _cache;
 
-        public SecurityEntityManager(ISecurityDataProvider dataProvider, SecurityCache cache, IMissingEntityHandler missingEntityHandler)
+        public SecurityEntityManager(SecurityCache cache, IMissingEntityHandler missingEntityHandler)
         {
             _missingEntityHandler = missingEntityHandler;
-            _dataProvider = dataProvider;
             _cache = cache;
+            _dataHandler = SecuritySystem.Instance.DataHandler;
         }
 
         // ReSharper disable once InconsistentNaming
@@ -62,7 +62,6 @@ namespace SenseNet.Security
         /// <see cref="IMissingEntityHandler.GetMissingEntity"/> method to compensate possible
         /// concurrency errors.
         /// </summary>
-        /// <param name="ctx">The context to be used.</param>
         /// <param name="entityId">Id of the entity</param>
         /// <param name="throwError">Determines whether to throw an <see cref="EntityNotFoundException"/> if the entity was not found.</param>
         /// <returns>The security entity.</returns>
@@ -72,16 +71,14 @@ namespace SenseNet.Security
 
             if (entity == null)
             {
-                var dataHandler = SecuritySystem.Instance.DataHandler;
-
                 // compensation: try to load the entity and its aces from the db
-                var storedEntity = dataHandler.GetStoredSecurityEntity(_dataProvider, entityId);
+                var storedEntity = _dataHandler.GetStoredSecurityEntity(entityId);
                 if (storedEntity != null)
                 {
                     entity = CreateEntitySafe(entityId, storedEntity.ParentId, storedEntity.OwnerId, storedEntity.IsInherited, storedEntity.HasExplicitEntry);
 
                     var acl = new AclInfo(entityId);
-                    var entries = _dataProvider.LoadPermissionEntries(new[] { entityId });
+                    var entries = _dataHandler.LoadPermissionEntries(new[] { entityId });
                     foreach (var entry in entries)
                         acl.Entries.Add(new AceInfo { EntryType = entry.EntryType, IdentityId = entry.IdentityId, LocalOnly = entry.LocalOnly, AllowBits = entry.AllowBits, DenyBits = entry.DenyBits });
                     if (acl.Entries.Count > 0)
@@ -91,7 +88,7 @@ namespace SenseNet.Security
                 {
                     if (_missingEntityHandler.GetMissingEntity(entityId, out var parentId, out var ownerId))
                     {
-                        dataHandler.CreateSecurityEntitySafe(entityId, parentId, ownerId);
+                        _dataHandler.CreateSecurityEntitySafe(entityId, parentId, ownerId);
                         entity = CreateEntitySafe(entityId, parentId, ownerId);
                     }
                 }

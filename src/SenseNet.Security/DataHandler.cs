@@ -75,9 +75,9 @@ namespace SenseNet.Security
             return acls;
         }
 
-        public StoredSecurityEntity GetStoredSecurityEntity(ISecurityDataProvider dataProvider, int entityId)
+        public StoredSecurityEntity GetStoredSecurityEntity(int entityId)
         {
-            return dataProvider.LoadStoredSecurityEntity(entityId);
+            return _dataProvider.LoadStoredSecurityEntity(entityId);
         }
 
         public void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId)
@@ -158,6 +158,11 @@ namespace SenseNet.Security
                 throw new EntityNotFoundException("Cannot undo break inheritance because the entity does not exist: " + entityId);
             entity.IsInherited = true;
             _dataProvider.UpdateSecurityEntity(entity);
+        }
+
+        public IEnumerable<StoredAce> LoadPermissionEntries(IEnumerable<int> entityIds)
+        {
+            return _dataProvider.LoadPermissionEntries(entityIds);
         }
 
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)

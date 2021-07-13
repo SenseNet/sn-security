@@ -766,10 +766,7 @@ namespace SenseNet.Security.Tests
         public void Structure_ResolveMissingEntity()
         {
             var ctx = CurrentContext.Security;
-            ctx.SecuritySystem.EntityManager = new SecurityEntityManager(
-                ctx.SecuritySystem.DataProvider,
-                ctx.SecuritySystem.Cache,
-                new TestMissingEntityHandler());
+            ctx.SecuritySystem.EntityManager = new SecurityEntityManager(ctx.SecuritySystem.Cache, new TestMissingEntityHandler());
 
             //----
 
