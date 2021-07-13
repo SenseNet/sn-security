@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Messaging
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.TestConsole", "SenseNet.Security.TestConsole\SenseNet.Security.TestConsole.csproj", "{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Tests.Concurrency", "SenseNet.Security.Tests.Concurrency\SenseNet.Security.Tests.Concurrency.csproj", "{EB816791-BE56-45F5-B18A-37DA918ADAB4}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security.Messaging.RabbitMQ", "SenseNet.Security.Messaging.RabbitMQ\SenseNet.Security.Messaging.RabbitMQ.csproj", "{84F97FC3-12B9-4D30-95B6-3308EE3CC322}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security.EFCSecurityStore", "SenseNet.Security.EFCSecurityStore\SenseNet.Security.EFCSecurityStore.csproj", "{398CF1C1-6721-4DFB-B624-F86EB996E47E}"
@@ -18,6 +16,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security.EFCSecurityStore.Tests", "SenseNet.Security.EFCSecurityStore.Tests\SenseNet.Security.EFCSecurityStore.Tests.csproj", "{3858F7DE-E3E0-4483-A227-38A38650F2BD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security.Tests", "SenseNet.Security.Tests\SenseNet.Security.Tests.csproj", "{797748F0-D729-48FD-A805-52D6AFBFC829}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Tests.Concurrency", "SenseNet.Security.Tests.Concurrency\SenseNet.Security.Tests.Concurrency.csproj", "{A1346136-E251-496B-B2E3-F323C75E29DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +37,6 @@ Global
 		{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EB816791-BE56-45F5-B18A-37DA918ADAB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EB816791-BE56-45F5-B18A-37DA918ADAB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EB816791-BE56-45F5-B18A-37DA918ADAB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EB816791-BE56-45F5-B18A-37DA918ADAB4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{84F97FC3-12B9-4D30-95B6-3308EE3CC322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{84F97FC3-12B9-4D30-95B6-3308EE3CC322}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84F97FC3-12B9-4D30-95B6-3308EE3CC322}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -57,6 +53,10 @@ Global
 		{797748F0-D729-48FD-A805-52D6AFBFC829}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{797748F0-D729-48FD-A805-52D6AFBFC829}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{797748F0-D729-48FD-A805-52D6AFBFC829}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1346136-E251-496B-B2E3-F323C75E29DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1346136-E251-496B-B2E3-F323C75E29DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1346136-E251-496B-B2E3-F323C75E29DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1346136-E251-496B-B2E3-F323C75E29DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

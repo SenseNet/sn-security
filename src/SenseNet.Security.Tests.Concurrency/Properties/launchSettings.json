@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SenseNet.Security.Tests.Concurrency": {
+      "commandName": "Project",
+      "commandLineArgs": "/test:ACL /agents:2"
+    }
+  }
+}
