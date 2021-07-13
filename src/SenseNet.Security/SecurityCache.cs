@@ -24,7 +24,7 @@ namespace SenseNet.Security
         {
             Load();
         }
-        internal void Reset(ISecurityDataProvider dataProvider)
+        internal void Reset()
         {
             Load();
         }

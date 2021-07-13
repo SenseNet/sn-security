@@ -29,8 +29,7 @@ namespace SenseNet.Security
         /***************************** Context **************************/
 
         /// <summary>
-        /// Creates a new instance of the SecurityContext using the passed user instance
-        /// and pointers to the ISecurityDataProvider, IMessageProvider and SecurityCache global objects.
+        /// Creates a new instance of the SecurityContext using the passed user instance.
         /// </summary>
         public SecurityContext(ISecurityUser currentUser) : this(currentUser, null) { }
         public SecurityContext(ISecurityUser currentUser, SecuritySystem securitySystem)

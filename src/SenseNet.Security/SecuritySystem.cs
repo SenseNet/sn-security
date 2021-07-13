@@ -127,7 +127,7 @@ namespace SenseNet.Security
 
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
 
-            SecurityActivityQueue = new SecurityActivityQueue(this);
+            SecurityActivityQueue = new SecurityActivityQueue(this, DataHandler, ActivityHistory);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
 
             _killed = false;

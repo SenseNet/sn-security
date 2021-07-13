@@ -15,18 +15,21 @@ namespace SenseNet.Security.Messaging
         internal static int SecurityActivityLoadingBufferSize = 200;
 
         private readonly SecuritySystem _securitySystem;
+        private readonly DataHandler _dataHandler;
         private readonly Serializer _serializer;
         private readonly DependencyManager _dependencyManager;
         private readonly TerminationHistory _terminationHistory;
         private readonly Executor _executor;
 
-        public SecurityActivityQueue(SecuritySystem securitySystem)
+        public SecurityActivityQueue(SecuritySystem securitySystem, DataHandler dataHandler,
+            SecurityActivityHistoryController activityHistory)
         {
             _securitySystem = securitySystem;
-            _serializer = new Serializer(this, securitySystem);
-            _executor = new Executor(securitySystem);
+            _dataHandler = dataHandler;
+            _serializer = new Serializer(this, activityHistory, securitySystem);
+            _executor = new Executor(activityHistory);
             _terminationHistory = new TerminationHistory();
-            _dependencyManager = new DependencyManager(_serializer, _executor, _terminationHistory, securitySystem);
+            _dependencyManager = new DependencyManager(_serializer, _executor, _terminationHistory, activityHistory);
             _serializer.DependencyManager = _dependencyManager;
             _executor.DependencyManager = _dependencyManager;
         }
@@ -58,7 +61,7 @@ namespace SenseNet.Security.Messaging
             }
 
             var lastId = _terminationHistory.GetLastTerminatedId();
-            var lastDbId = _securitySystem.DataHandler.GetLastSecurityActivityId(_securitySystem.StartedAt);
+            var lastDbId = _dataHandler.GetLastSecurityActivityId(_securitySystem.StartedAt);
             if (lastId < lastDbId)
             {
                 SnTrace.SecurityQueue.Write("SAQ: Health checker is processing activities from {0} to {1}", lastId + 1, lastDbId);
@@ -107,7 +110,7 @@ namespace SenseNet.Security.Messaging
         public void ExecuteActivity(SecurityActivity activity)
         {
             if (!activity.FromDatabase && !activity.FromReceiver)
-                _securitySystem.DataHandler.SaveActivity(activity);
+                _dataHandler.SaveActivity(activity);
 
             _serializer.EnqueueActivity(activity);
         }
@@ -139,11 +142,14 @@ namespace SenseNet.Security.Messaging
             public DependencyManager DependencyManager { get; set; }
 
             private readonly SecurityActivityQueue _securityActivityQueue;
+            private readonly SecurityActivityHistoryController _activityHistory;
             private readonly SecuritySystem _securitySystem;
 
-            public Serializer(SecurityActivityQueue securityActivityQueue, SecuritySystem securitySystem)
+            public Serializer(SecurityActivityQueue securityActivityQueue, SecurityActivityHistoryController activityHistory,
+                SecuritySystem securitySystem)
             {
                 _securityActivityQueue = securityActivityQueue;
+                _activityHistory = activityHistory;
                 _securitySystem = securitySystem;
             }
 
@@ -185,7 +191,7 @@ namespace SenseNet.Security.Messaging
                     {
                         SnTrace.SecurityQueue.Write("SAQ: Startup: SA{0} enqueued from db.", loadedActivity.Id);
 
-                        _securitySystem.ActivityHistory.Arrive(loadedActivity);
+                        _activityHistory.Arrive(loadedActivity);
                         _arrivalQueue.Enqueue(loadedActivity);
                         _lastQueued = loadedActivity.Id;
                         count++;
@@ -197,7 +203,7 @@ namespace SenseNet.Security.Messaging
                     foreach (var loadedActivity in loadedActivities)
                     {
                         SnTrace.SecurityQueue.Write("SAQ: Startup: SA{0} enqueued from db.", loadedActivity.Id);
-                        _securitySystem.ActivityHistory.Arrive(loadedActivity);
+                        _activityHistory.Arrive(loadedActivity);
                         SnTrace.SecurityQueue.Write("SecurityActivityArrived SA{0}", loadedActivity.Id);
                         _arrivalQueue.Enqueue(loadedActivity);
                         _lastQueued = loadedActivity.Id;
@@ -230,7 +236,7 @@ namespace SenseNet.Security.Messaging
             {
                 SnTrace.SecurityQueue.Write("SAQ: SA{0} arrived{1}. {2}", activity.Id, activity.FromReceiver ? " from another computer" : "", activity.TypeName);
 
-                _securitySystem.ActivityHistory.Arrive(activity);
+                _activityHistory.Arrive(activity);
 
                 lock (_arrivalQueueLock)
                 {
@@ -268,7 +274,7 @@ namespace SenseNet.Security.Messaging
 
                         foreach (var loadedActivity in loadedActivities)
                         {
-                            _securitySystem.ActivityHistory.Arrive(loadedActivity);
+                            _activityHistory.Arrive(loadedActivity);
                             _arrivalQueue.Enqueue(loadedActivity);
                             _lastQueued = loadedActivity.Id;
                             SnTrace.SecurityQueue.Write("SAQ: SA{0} enqueued from db.", loadedActivity.Id);
@@ -316,15 +322,15 @@ namespace SenseNet.Security.Messaging
             private readonly Serializer _serializer;
             private readonly Executor _executor;
             private readonly TerminationHistory _terminationHistory;
-            private readonly SecuritySystem _securitySystem;
+            private readonly SecurityActivityHistoryController _activityHistory;
 
             public DependencyManager(Serializer serializer, Executor executor, TerminationHistory terminationHistory,
-                SecuritySystem securitySystem)
+                SecurityActivityHistoryController activityHistory)
             {
                 _serializer = serializer;
                 _executor = executor;
                 _terminationHistory = terminationHistory;
-                _securitySystem = securitySystem;
+                _activityHistory = activityHistory;
             }
 
             internal void Reset()
@@ -383,7 +389,7 @@ namespace SenseNet.Security.Messaging
                         {
                             newerActivity.WaitFor(olderActivity);
                             SnTrace.SecurityQueue.Write("SAQ: SA{0} depends from SA{1}", newerActivity.Id, olderActivity.Id);
-                            _securitySystem.ActivityHistory.Wait(newerActivity);
+                            _activityHistory.Wait(newerActivity);
                         }
                     }
 
@@ -405,7 +411,7 @@ namespace SenseNet.Security.Messaging
                     activity.Finish();
 
                     // register activity termination in the log.
-                    _securitySystem.ActivityHistory.Finish(activity.Id);
+                    _activityHistory.Finish(activity.Id);
 
                     // register activity termination.
                     _terminationHistory.FinishActivity(activity);
@@ -432,7 +438,7 @@ namespace SenseNet.Security.Messaging
                     }
                 }
                 activity.Finish(); // release blocked thread
-                _securitySystem.ActivityHistory.Finish(activity.Id);
+                _activityHistory.Finish(activity.Id);
                 SnTrace.SecurityQueue.Write("SAQ: SA{0} ignored: finished but not executed.", activity.Id);
             }
 
@@ -506,15 +512,15 @@ namespace SenseNet.Security.Messaging
 
         private class Executor
         {
-            private SecuritySystem _securitySystem;
+            private readonly SecurityActivityHistoryController _activityHistory;
 
             public DependencyManager DependencyManager { get; set; }
 
             private bool _enabled = true;
 
-            public Executor(SecuritySystem securitySystem)
+            public Executor(SecurityActivityHistoryController activityHistory)
             {
-                _securitySystem = securitySystem;
+                _activityHistory = activityHistory;
             }
 
             internal void __enable()
@@ -530,7 +536,7 @@ namespace SenseNet.Security.Messaging
                 if (!_enabled)
                     return;
 
-                _securitySystem.ActivityHistory.Start(activity.Id);
+                _activityHistory.Start(activity.Id);
                 try
                 {
                     using (var op = SnTrace.SecurityQueue.StartOperation("SAQ: EXECUTION START SA{0} .", activity.Id))
@@ -542,7 +548,7 @@ namespace SenseNet.Security.Messaging
                 catch (Exception e)
                 {
                     SnTrace.Security.Write("SAQ: EXECUTION ERROR SA{0}: {1}", activity.Id, e.Message);
-                    _securitySystem.ActivityHistory.Error(activity.Id, e);
+                    _activityHistory.Error(activity.Id, e);
                 }
                 finally
                 {

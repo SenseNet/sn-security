@@ -112,7 +112,7 @@ namespace SenseNet.Security
                 OwnerId = ownerId
             };
 
-            _securitySystem.DataProvider.InsertSecurityEntity(entity);
+            _dataProvider.InsertSecurityEntity(entity);
         }
 
         public void ModifySecurityEntityOwner(int entityId, int ownerId)
@@ -175,7 +175,7 @@ namespace SenseNet.Security
                 try
                 {
                     // ReSharper disable once PossibleMultipleEnumeration
-                    _securitySystem.DataProvider.WritePermissionEntries(aces);
+                    _dataProvider.WritePermissionEntries(aces);
                     return;
                 }
                 catch (SecurityStructureException)
@@ -280,27 +280,27 @@ namespace SenseNet.Security
 
         internal int GetLastSecurityActivityId(DateTime startedTime)
         {
-            return _securitySystem.DataProvider.GetLastSecurityActivityId(startedTime);
+            return _dataProvider.GetLastSecurityActivityId(startedTime);
         }
 
         internal IEnumerable<SecurityActivity> LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities)
         {
-            return _securitySystem.DataProvider.LoadSecurityActivities(from, to, count, executingUnprocessedActivities);
+            return _dataProvider.LoadSecurityActivities(from, to, count, executingUnprocessedActivities);
         }
 
         internal IEnumerable<SecurityActivity> LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities)
         {
-            return _securitySystem.DataProvider.LoadSecurityActivities(gaps, executingUnprocessedActivities);
+            return _dataProvider.LoadSecurityActivities(gaps, executingUnprocessedActivities);
         }
 
         internal SecurityActivity LoadBigSecurityActivity(int id)
         {
-            return _securitySystem.DataProvider.LoadSecurityActivity(id);
+            return _dataProvider.LoadSecurityActivity(id);
         }
 
         internal void CleanupSecurityActivities()
         {
-            _securitySystem.DataProvider.CleanupSecurityActivities(Configuration.Messaging.SecurityActivityLifetimeInMinutes);
+            _dataProvider.CleanupSecurityActivities(Configuration.Messaging.SecurityActivityLifetimeInMinutes);
         }
 
 
