@@ -59,7 +59,7 @@ namespace SenseNet.Security
         /// Loads a security entity. If the entity cannot be found in the cache, it loads it
         /// from the database and puts it into the cache. It the entity cannot be loaded
         /// from the db either, a callback is made to the host application using the
-        /// <see cref="SecuritySystem.GetMissingEntity"/> method to compensate possible
+        /// <see cref="IMissingEntityHandler.GetMissingEntity"/> method to compensate possible
         /// concurrency errors.
         /// </summary>
         /// <param name="ctx">The context to be used.</param>

@@ -22,9 +22,9 @@ namespace SenseNet.Security
         /// <summary>
         /// Gets the configured ISecurityDataProvider instance
         /// </summary>
-        protected internal ISecurityDataProvider DataProvider { get; }
+        protected internal ISecurityDataProvider DataProvider { get; } //UNDONE: Remove unnecessary dependency: DataProvider
 
-        internal SecurityCache Cache => SecuritySystem.Cache;
+        internal SecurityCache Cache => SecuritySystem.Cache; //UNDONE: Remove unnecessary dependency: Cache
 
         internal PermissionEvaluator Evaluator { get; }
 
