@@ -20,12 +20,6 @@ namespace SenseNet.Security
         /// </summary>
         protected internal ISecurityUser CurrentUser { get; }
 
-        /// <summary>
-        /// Gets the configured ISecurityDataProvider instance
-        /// </summary>
-        [Obsolete("###", true)]
-        protected internal ISecurityDataProvider DataProvider => SecuritySystem.Instance.SecurityDataProvider; //UNDONE: Remove unnecessary dependency: DataProvider
-
         internal SecurityCache Cache => SecuritySystem.Cache; //UNDONE: Remove unnecessary dependency: Cache
 
         internal PermissionEvaluator Evaluator { get; }

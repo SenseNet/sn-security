@@ -767,7 +767,7 @@ namespace SenseNet.Security.Tests
         {
             var ctx = CurrentContext.Security;
             ctx.SecuritySystem.EntityManager = new SecurityEntityManager(
-                ctx.SecuritySystem.SecurityDataProvider,
+                ctx.SecuritySystem.DataProvider,
                 ctx.SecuritySystem.Cache,
                 new TestMissingEntityHandler());
 
@@ -862,7 +862,7 @@ namespace SenseNet.Security.Tests
 
         private StoredSecurityEntity GetStoredSecurityEntity(int entityId)
         {
-            return SecuritySystem.Instance.SecurityDataProvider.LoadStoredSecurityEntity(entityId);
+            return SecuritySystem.Instance.DataProvider.LoadStoredSecurityEntity(entityId);
         }
 
     }

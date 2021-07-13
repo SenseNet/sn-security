@@ -338,8 +338,8 @@ namespace SenseNet.Security.Tests
         internal void CheckIntegrity(string testName, SecurityContext context)
         {
             CheckIntegrity(testName, context,
-                context.SecuritySystem.SecurityDataProvider.LoadSecurityEntities(),
-                context.SecuritySystem.SecurityDataProvider.LoadAllGroups());
+                context.SecuritySystem.DataProvider.LoadSecurityEntities(),
+                context.SecuritySystem.DataProvider.LoadAllGroups());
         }
         internal void CheckIntegrity(string testName, SecurityContext context, IEnumerable<StoredSecurityEntity> entities, IEnumerable<SecurityGroup> groups)
         {
@@ -356,7 +356,7 @@ namespace SenseNet.Security.Tests
 
         public void InitializeInMemoryMembershipStorage(Context ctx, string src)
         {
-            var memoryDataProvider = (MemoryDataProvider)ctx.Security.SecuritySystem.SecurityDataProvider;
+            var memoryDataProvider = (MemoryDataProvider)ctx.Security.SecuritySystem.DataProvider;
             // "G1:U1,G2,G3|G2:U2,G4,G5|G3:U3|G4:U4|G5:U5"
             var table = memoryDataProvider.Storage.Memberships;
             InitializeInMemoryMembershipTable(src, table);

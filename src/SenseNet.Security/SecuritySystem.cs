@@ -49,7 +49,7 @@ namespace SenseNet.Security
         }
 
 
-        public ISecurityDataProvider SecurityDataProvider { get; }
+        public ISecurityDataProvider DataProvider { get; }
         internal DataHandler DataHandler { get; }
         public IMessageProvider MessageProvider { get; }
         internal IMessageSenderManager MessageSenderManager { get; set; }
@@ -74,13 +74,13 @@ namespace SenseNet.Security
         internal DateTime StartedAt { get; private set; }
 
 
-        public SecuritySystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider,
+        public SecuritySystem(ISecurityDataProvider dataProvider, IMessageProvider messageProvider,
             IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration)
         {
             SnTrace.Write("<SecuritySystem ctor");
-            DataHandler = new DataHandler(this, securityDataProvider);
+            DataHandler = new DataHandler(this, dataProvider);
             ActivityHistory = new SecurityActivityHistoryController();
-            SecurityDataProvider = securityDataProvider;
+            DataProvider = dataProvider;
             MessageProvider = messageProvider;
             MessageSenderManager = new MessageSenderManager();
             MissingEntityHandler = missingEntityHandler;
@@ -96,7 +96,7 @@ namespace SenseNet.Security
             // The message provider must receive ongoing activities at this time.
             StartedAt = DateTime.UtcNow;
 
-            var uncompleted = DataHandler.LoadCompletionState(SecurityDataProvider, out var lastActivityIdFromDb);
+            var uncompleted = DataHandler.LoadCompletionState(DataProvider, out var lastActivityIdFromDb);
 
             MessageProvider.MessageReceived += MessageProvider_MessageReceived;
 
@@ -119,7 +119,7 @@ namespace SenseNet.Security
                 op.Successful = true;
             }
 
-            EntityManager = new SecurityEntityManager(SecurityDataProvider, Cache, MissingEntityHandler);
+            EntityManager = new SecurityEntityManager(DataProvider, Cache, MissingEntityHandler);
 
             PermissionQuery = new PermissionQuery(EntityManager, Cache);
 

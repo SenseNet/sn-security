@@ -17,7 +17,7 @@ namespace SenseNet.Security
         private readonly SecuritySystem _securitySystem;
         public SecurityCache(SecuritySystem securitySystem)
         {
-            _dataProvider = securitySystem.SecurityDataProvider;
+            _dataProvider = securitySystem.DataProvider;
             _securitySystem = securitySystem;
         }
         internal void Initialize()
