@@ -9,11 +9,13 @@ namespace SenseNet.Security
 {
     internal class DataHandler
     {
-        private SecuritySystem _securitySystem;
+        private readonly SecuritySystem _securitySystem;
+        private readonly ISecurityDataProvider _dataProvider;
 
-        public DataHandler(SecuritySystem securitySystem)
+        public DataHandler(SecuritySystem securitySystem, ISecurityDataProvider dataProvider)
         {
             _securitySystem = securitySystem;
+            _dataProvider = dataProvider;
         }
 
         public IDictionary<int, SecurityEntity> LoadSecurityEntities(ISecurityDataProvider dataProvider)
@@ -115,38 +117,38 @@ namespace SenseNet.Security
 
         public void ModifySecurityEntityOwner(SecurityContext context, int entityId, int ownerId)
         {
-            var entity = context.DataProvider.LoadStoredSecurityEntity(entityId);
+            var entity = _dataProvider.LoadStoredSecurityEntity(entityId);
             if (entity == null)
                 throw new EntityNotFoundException("Cannot update a SecurityEntity beacuse it does not exist: " + entityId);
             entity.OwnerId = ownerId;
-            context.DataProvider.UpdateSecurityEntity(entity);
+            _dataProvider.UpdateSecurityEntity(entity);
         }
         
         public void DeleteSecurityEntity(SecurityContext context, int entityId)
         {
-            context.DataProvider.DeleteEntitiesAndEntries(entityId);
+            _dataProvider.DeleteEntitiesAndEntries(entityId);
         }
 
         public void MoveSecurityEntity(SecurityContext context, int sourceId, int targetId)
         {
-            var source = context.DataProvider.LoadStoredSecurityEntity(sourceId);
+            var source = _dataProvider.LoadStoredSecurityEntity(sourceId);
             if (source == null)
                 throw new EntityNotFoundException("Cannot move the entity because it does not exist: " + sourceId);
-            var target = context.DataProvider.LoadStoredSecurityEntity(targetId);
+            var target = _dataProvider.LoadStoredSecurityEntity(targetId);
             if (target == null)
                 throw new EntityNotFoundException("Cannot move the entity because the target does not exist: " + targetId);
 
             // moving
-            context.DataProvider.MoveSecurityEntity(sourceId, targetId);
+            _dataProvider.MoveSecurityEntity(sourceId, targetId);
         }
 
         public void BreakInheritance(SecurityContext context, int entityId)
         {
-            var entity = context.DataProvider.LoadStoredSecurityEntity(entityId);
+            var entity = _dataProvider.LoadStoredSecurityEntity(entityId);
             if (entity == null)
                 throw new EntityNotFoundException("Cannot break inheritance because the entity does not exist: " + entityId);
             entity.IsInherited = false;
-            context.DataProvider.UpdateSecurityEntity(entity);
+            _dataProvider.UpdateSecurityEntity(entity);
         }
 
         [Obsolete("Use the overload with correct name.", true)]
@@ -156,11 +158,11 @@ namespace SenseNet.Security
         }
         public void UnBreakInheritance(SecurityContext context, int entityId)
         {
-            var entity = context.DataProvider.LoadStoredSecurityEntity(entityId);
+            var entity = _dataProvider.LoadStoredSecurityEntity(entityId);
             if (entity == null)
                 throw new EntityNotFoundException("Cannot undo break inheritance because the entity does not exist: " + entityId);
             entity.IsInherited = true;
-            context.DataProvider.UpdateSecurityEntity(entity);
+            _dataProvider.UpdateSecurityEntity(entity);
         }
 
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
@@ -213,7 +215,7 @@ namespace SenseNet.Security
 
         public void RemovePermissionEntries(SecurityContext context, IEnumerable<StoredAce> aces)
         {
-            context.DataProvider.RemovePermissionEntries(aces);
+            _dataProvider.RemovePermissionEntries(aces);
         }
 
         //==============================================================================================
@@ -271,7 +273,7 @@ namespace SenseNet.Security
 
         internal void SaveActivity(SecurityActivity activity)
         {
-            var id = activity.Context.DataProvider.SaveSecurityActivity(activity, out var bodySize);
+            var id = _dataProvider.SaveSecurityActivity(activity, out var bodySize);
             activity.BodySize = bodySize;
             activity.Id = id;
         }
@@ -308,67 +310,66 @@ namespace SenseNet.Security
                 ? int.MaxValue
                 : Configuration.Messaging.SecurityActivityExecutionLockTimeoutInSeconds;
 
-            return securityActivity.Context.DataProvider
-                .AcquireSecurityActivityExecutionLock(securityActivity, timeout);
+            return _dataProvider.AcquireSecurityActivityExecutionLock(securityActivity, timeout);
         }
         internal void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)
         {
-            securityActivity.Context.DataProvider.RefreshSecurityActivityExecutionLock(securityActivity);
+            _dataProvider.RefreshSecurityActivityExecutionLock(securityActivity);
         }
         internal void ReleaseSecurityActivityExecutionLock(SecurityActivity securityActivity, bool fullExecutionEnabled)
         {
             if(fullExecutionEnabled)
-                securityActivity.Context.DataProvider.ReleaseSecurityActivityExecutionLock(securityActivity);
+                _dataProvider.ReleaseSecurityActivityExecutionLock(securityActivity);
         }
 
         /*============================================================================================== Membership */
 
         public SecurityGroup GetSecurityGroup(SecurityContext context, int groupId)
         {
-            return context.DataProvider.LoadSecurityGroup(groupId);
+            return _dataProvider.LoadSecurityGroup(groupId);
         }
 
         internal void DeleteUser(SecurityContext context, int userId)
         {
-            context.DataProvider.DeleteIdentityAndRelatedEntries(userId);
+            _dataProvider.DeleteIdentityAndRelatedEntries(userId);
         }
 
         public void DeleteSecurityGroup(SecurityContext context, int groupId)
         {
-            context.DataProvider.DeleteIdentityAndRelatedEntries(groupId);
+            _dataProvider.DeleteIdentityAndRelatedEntries(groupId);
         }
 
         internal void DeleteIdentities(SecurityContext context, IEnumerable<int> ids)
         {
-            context.DataProvider.DeleteIdentitiesAndRelatedEntries(ids);
+            _dataProvider.DeleteIdentitiesAndRelatedEntries(ids);
         }
 
         internal void AddMembers(SecurityContext context, int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups)
         {
-            context.DataProvider.AddMembers(groupId, userMembers, groupMembers);
+            _dataProvider.AddMembers(groupId, userMembers, groupMembers);
             if (parentGroups != null)
                 foreach (var parentGroupId in parentGroups.Distinct())
-                    context.DataProvider.AddMembers(parentGroupId, null, new[] { groupId });
+                    _dataProvider.AddMembers(parentGroupId, null, new[] { groupId });
         }
 
         internal void RemoveMembers(SecurityContext context, int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups)
         {
-            context.DataProvider.RemoveMembers(groupId, userMembers, groupMembers);
+            _dataProvider.RemoveMembers(groupId, userMembers, groupMembers);
             if (parentGroups != null)
                 foreach (var parentGroupId in parentGroups.Distinct())
-                    context.DataProvider.RemoveMembers(parentGroupId, null, new[] { groupId });
+                    _dataProvider.RemoveMembers(parentGroupId, null, new[] { groupId });
         }
 
         internal void AddUserToGroups(SecurityContext context, int userId, IEnumerable<int> parentGroups)
         {
             foreach (var parentGroupId in parentGroups.Distinct())
-                context.DataProvider.AddMembers(parentGroupId, new[] { userId }, null);
+                _dataProvider.AddMembers(parentGroupId, new[] { userId }, null);
         }
 
         internal void RemoveUserFromGroups(SecurityContext context, int userId, IEnumerable<int> parentGroups)
         {
             foreach (var parentGroupId in parentGroups.Distinct())
-                context.DataProvider.RemoveMembers(parentGroupId, new[] { userId }, null);
+                _dataProvider.RemoveMembers(parentGroupId, new[] { userId }, null);
         }
     }
 }

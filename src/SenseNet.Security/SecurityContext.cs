@@ -19,10 +19,12 @@ namespace SenseNet.Security
         /// Gets the associated user instance.
         /// </summary>
         protected internal ISecurityUser CurrentUser { get; }
+
         /// <summary>
         /// Gets the configured ISecurityDataProvider instance
         /// </summary>
-        protected internal ISecurityDataProvider DataProvider { get; } //UNDONE: Remove unnecessary dependency: DataProvider
+        [Obsolete("###", true)]
+        protected internal ISecurityDataProvider DataProvider => SecuritySystem.Instance.SecurityDataProvider; //UNDONE: Remove unnecessary dependency: DataProvider
 
         internal SecurityCache Cache => SecuritySystem.Cache; //UNDONE: Remove unnecessary dependency: Cache
 
@@ -41,7 +43,6 @@ namespace SenseNet.Security
         {
             CurrentUser = currentUser;
             SecuritySystem = securitySystem ?? SecuritySystem.Instance;
-            DataProvider = SecuritySystem.SecurityDataProvider;
             Evaluator = new PermissionEvaluator(this);
             _permissionQuery = SecuritySystem.PermissionQuery;
         }

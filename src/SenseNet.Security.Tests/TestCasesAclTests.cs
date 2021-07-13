@@ -499,7 +499,7 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             AclEditor ed;
-            var _ = CurrentContext.Security.DataProvider;
+            var _ = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
 
             var u1 = Id("U1");
             var u2 = Id("U2");
@@ -954,7 +954,7 @@ namespace SenseNet.Security.Tests
             ed0.Deny(Id("E2"), u1, false, GetPermissionTypes("_p_p_p_________"));
             ed0.Apply();
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
 
             Assert.AreEqual("_________________________________________________+-+-+-+-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default));
             var dbEntries1 = db.LoadPermissionEntries(new[] { Id("E1") }).ToArray();
@@ -1199,7 +1199,7 @@ namespace SenseNet.Security.Tests
             var entity = sec.GetSecurityEntity(Id("E5"));
             Assert.IsFalse(entity.IsInherited);
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var aceTable = db.LoadAllAces(); // dbAcc.Storage.Aces;
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(2, aces.Length);
@@ -1224,7 +1224,7 @@ namespace SenseNet.Security.Tests
             var entity = sec.GetSecurityEntity(Id("E2"));
             Assert.IsFalse(entity.IsInherited);
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E2")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(2, aces.Length);
@@ -1249,7 +1249,7 @@ namespace SenseNet.Security.Tests
             var entity = sec.GetSecurityEntity(Id("E5"));
             Assert.IsFalse(entity.IsInherited);
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(0, aces.Length);
@@ -1286,7 +1286,7 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual("-E32|", ReplaceIds(aclE32.ToString()));
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var sec = CurrentContext.Security;
             var entity = sec.GetSecurityEntity(Id("E32"));
             Assert.IsFalse(entity.IsInherited);
@@ -1330,7 +1330,7 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual("-E12|Normal|+G2:_______________________________________________________++++++___", ReplaceIds(aclE12.ToString()));
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var sec = CurrentContext.Security;
             var entity = sec.GetSecurityEntity(Id("E12"));
             Assert.IsFalse(entity.IsInherited);
@@ -1375,7 +1375,7 @@ namespace SenseNet.Security.Tests
 
                 Assert.AreEqual("-E12|Normal|+G2:_______________________________________________________++++++___", ReplaceIds(aclE12.ToString()));
 
-                var db = CurrentContext.Security.DataProvider;
+                var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
                 var sec = CurrentContext.Security;
                 var entity = sec.GetSecurityEntity(Id("E12"));
                 Assert.IsFalse(entity.IsInherited);
@@ -1422,7 +1422,7 @@ namespace SenseNet.Security.Tests
             var entity = sec.GetSecurityEntity(Id("E5"));
             Assert.IsTrue(entity.IsInherited);
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(1, aces.Length);
@@ -1446,7 +1446,7 @@ namespace SenseNet.Security.Tests
             var entity = sec.GetSecurityEntity(Id("E5"));
             Assert.IsTrue(entity.IsInherited);
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(2, aces.Length);
@@ -1462,7 +1462,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+___________++_");
 
             var sec = CurrentContext.Security;
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var aceTable = db.LoadAllAces().ToArray();
 
             Assert.AreEqual("+E2|Normal|+G2:_________________________________________________+___________++_", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E2")).ToString()));
@@ -1492,7 +1492,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+___________++_");
 
             var sec = CurrentContext.Security;
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
 
             var e2Id = Id("E2");
             var e5Id = Id("E5");
@@ -1543,7 +1543,7 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual("+E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-_________++++", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(2, aces.Length);
@@ -1563,7 +1563,7 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual("+E14|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-_________++++", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E14")).ToString()));
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E14")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(2, aces.Length);
@@ -1583,7 +1583,7 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual("+E5|Normal|+G2:_________________________________________________-__________+___", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E5")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(1, aces.Length);
@@ -1603,7 +1603,7 @@ namespace SenseNet.Security.Tests
 
             Assert.IsNull(CurrentContext.Security.GetAclInfo(Id("E14")));
 
-            var db = CurrentContext.Security.DataProvider;
+            var db = CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             var aceTable = db.LoadAllAces();
             var aces = aceTable.Where(x => x.EntityId == Id("E14")).OrderBy(x => x.IdentityId).ToArray();
             Assert.AreEqual(0, aces.Length);

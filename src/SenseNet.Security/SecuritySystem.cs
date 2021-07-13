@@ -78,7 +78,7 @@ namespace SenseNet.Security
             IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration)
         {
             SnTrace.Write("<SecuritySystem ctor");
-            DataHandler = new DataHandler(this);
+            DataHandler = new DataHandler(this, securityDataProvider);
             ActivityHistory = new SecurityActivityHistoryController();
             SecurityDataProvider = securityDataProvider;
             MessageProvider = messageProvider;

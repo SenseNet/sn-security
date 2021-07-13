@@ -54,7 +54,7 @@ namespace SenseNet.Security.Tests
             _context = new Context(TestUser.User1);
 
             //---- check cache
-            var dbAcc = new MemoryDataProviderAccessor((MemoryDataProvider)_context.Security.DataProvider);
+            var dbAcc = new MemoryDataProviderAccessor((MemoryDataProvider)_context.Security.SecuritySystem.SecurityDataProvider);
             Assert.AreEqual(entities.Count, _context.Security.Cache.Entities.Count);
             Assert.AreEqual(entities.Count, dbAcc.Storage.Entities.Count);
             Assert.AreEqual(groups.Count, _context.Security.Cache.Groups.Count);

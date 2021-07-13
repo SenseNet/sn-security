@@ -18,7 +18,7 @@ namespace SenseNet.Security.Tests
 
         protected override void CleanupMemberships()
         {
-            var memoryDataProvider = (MemoryDataProvider)CurrentContext.Security.DataProvider;
+            var memoryDataProvider = (MemoryDataProvider)CurrentContext.Security.SecuritySystem.SecurityDataProvider;
             memoryDataProvider.Storage.Memberships.Clear();
         }
 
