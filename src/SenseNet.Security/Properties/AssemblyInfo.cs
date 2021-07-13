@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 
 [assembly: InternalsVisibleTo("SenseNet.Security.Tests")]
 [assembly: InternalsVisibleTo("SenseNet.Security.Tests.Concurrency")]
+[assembly: InternalsVisibleTo("SenseNet.Security.EFCSecurityStore.Tests")]
 
 [assembly: AssemblyTrademark("Sense/Net Inc.")]
 

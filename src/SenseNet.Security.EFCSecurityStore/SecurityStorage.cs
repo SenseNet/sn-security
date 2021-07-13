@@ -90,6 +90,14 @@ DELETE FROM EFMessages
         {
             Database.ExecuteSqlRaw(sql);
         }
+        internal IEnumerable<T> ExecuteTestScript<T>(string sql)
+        {
+            if (typeof(T) == typeof(int))
+                return (IEnumerable<T>)EfcIntSet.FromSqlRaw(sql).Select(x=>x.Value).AsEnumerable();
+            if (typeof(T) == typeof(string))
+                return (IEnumerable<T>)EfcStringSet.FromSqlRaw(sql).Select(x => x.Value).AsEnumerable();
+            throw new NotSupportedException();
+        }
 
         internal int GetEstimatedEntityCount()
         {
