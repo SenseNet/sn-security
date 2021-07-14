@@ -8,6 +8,9 @@ namespace SenseNet.Security.Messaging
     /// </summary>
     public interface IMessageSenderManager
     {
+        string ComputerId { get; }
+        string InstanceId { get; }
+
         /// <summary>
         /// Creates a new <see cref="IMessageSender"/> instance.
         /// </summary>
@@ -20,23 +23,23 @@ namespace SenseNet.Security.Messaging
 
     internal class MessageSenderManager : IMessageSenderManager
     {
-        private readonly string _computerId;
-        private readonly string _instanceId;
-
         public MessageSenderManager(string computerId = null, string instanceId = null)
         {
-            _computerId = computerId ?? Environment.MachineName;
-            _instanceId = instanceId ?? Guid.NewGuid().ToString();
+            ComputerId = computerId ?? Environment.MachineName;
+            InstanceId = instanceId ?? Guid.NewGuid().ToString();
         }
+
+        public string ComputerId { get; }
+        public string InstanceId { get; }
 
         public IMessageSender CreateMessageSender()
         {
-            return new MessageSender(_computerId, _instanceId);
+            return new MessageSender(ComputerId, InstanceId);
         }
 
         public bool IsMe(IMessageSender sender)
         {
-            return sender.InstanceID == _instanceId;
+            return sender.InstanceID == InstanceId;
         }
     }
 

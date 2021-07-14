@@ -24,6 +24,7 @@ namespace SenseNet.Security.EFCSecurityStore
     {
         private readonly DataOptions _options;
         private readonly ILogger<EFCSecurityDataProvider> _logger;
+        private IMessageSenderManager MessageSenderManager => SecuritySystem.Instance.MessageSenderManager;
 
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
         [Obsolete("Use the constructor with IOptions and dependency injection instead.")]
@@ -472,7 +473,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 result = db.EFMessages.Add(new EFMessage
                 {
                     ExecutionState = ExecutionState.Wait,
-                    SavedBy = activity.Context.SecuritySystem.MessageProvider.ReceiverName,
+                    SavedBy = MessageSenderManager.InstanceId,
                     SavedAt = DateTime.UtcNow,
                     Body = body
                 });
@@ -501,7 +502,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 string result;
                 using (var db = Db())
                     result = db.AcquireSecurityActivityExecutionLock(
-                        securityActivity.Id, securityActivity.Context.SecuritySystem.MessageProvider.ReceiverName, timeoutInSeconds);
+                        securityActivity.Id, MessageSenderManager.InstanceId, timeoutInSeconds);
 
                 // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (result)

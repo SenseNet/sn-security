@@ -52,7 +52,7 @@ namespace SenseNet.Security
         public ISecurityDataProvider DataProvider { get; }
         internal DataHandler DataHandler { get; }
         public IMessageProvider MessageProvider { get; }
-        internal IMessageSenderManager MessageSenderManager { get; set; }
+        public IMessageSenderManager MessageSenderManager { get; set; }
         internal SecurityCache Cache { get; private set; }
         internal CommunicationMonitor CommunicationMonitor { get; private set; }
         internal SecurityActivityQueue SecurityActivityQueue { get; private set; }
