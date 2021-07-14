@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace SenseNet.Security
 {
-    internal class DataHandler
+    public class DataHandler
     {
         private readonly SecuritySystem _securitySystem;
         private readonly ISecurityDataProvider _dataProvider;
@@ -312,15 +312,15 @@ namespace SenseNet.Security
 
             return _dataProvider.AcquireSecurityActivityExecutionLock(securityActivity, timeout);
         }
-        internal void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)
-        {
-            _dataProvider.RefreshSecurityActivityExecutionLock(securityActivity);
-        }
-        internal void ReleaseSecurityActivityExecutionLock(SecurityActivity securityActivity, bool fullExecutionEnabled)
-        {
-            if(fullExecutionEnabled)
-                _dataProvider.ReleaseSecurityActivityExecutionLock(securityActivity);
-        }
+        //internal void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)
+        //{
+        //    _dataProvider.RefreshSecurityActivityExecutionLock(securityActivity);
+        //}
+        //internal void ReleaseSecurityActivityExecutionLock(SecurityActivity securityActivity, bool fullExecutionEnabled)
+        //{
+        //    if(fullExecutionEnabled)
+        //        _dataProvider.ReleaseSecurityActivityExecutionLock(securityActivity);
+        //}
 
         /*============================================================================================== Membership */
 

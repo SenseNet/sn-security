@@ -509,11 +509,11 @@ namespace SenseNet.Security.EFCSecurityStore
                 {
                     case ExecutionState.LockedForYou:
                         // enable full executing
-                        return new SecurityActivityExecutionLock(securityActivity, true);
+                        return new SecurityActivityExecutionLock(securityActivity, this, true);
                     case ExecutionState.Executing:
                     case ExecutionState.Done:
                         // enable partially executing
-                        return new SecurityActivityExecutionLock(securityActivity, false);
+                        return new SecurityActivityExecutionLock(securityActivity, this, false);
                 }
             }
             throw new SecurityActivityTimeoutException(

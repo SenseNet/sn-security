@@ -391,7 +391,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public Messaging.SecurityActivityExecutionLock AcquireSecurityActivityExecutionLock(SecurityActivity securityActivity, int timeoutInSeconds)
         {
-            return new Messaging.SecurityActivityExecutionLock(securityActivity, true);
+            return new Messaging.SecurityActivityExecutionLock(securityActivity, this, true);
         }
         /// <inheritdoc />
         public void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)
