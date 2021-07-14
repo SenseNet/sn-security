@@ -220,9 +220,9 @@ namespace SenseNet.Security
 
         //==============================================================================================
 
-        internal Messaging.CompletionState LoadCompletionState(ISecurityDataProvider dataProvider, out int lastDatabaseId)
+        internal Messaging.CompletionState LoadCompletionState(out int lastDatabaseId)
         {
-            var ids = dataProvider.GetUnprocessedActivityIds();
+            var ids = _dataProvider.GetUnprocessedActivityIds();
             lastDatabaseId = ids.LastOrDefault();
 
             var result = new Messaging.CompletionState();
