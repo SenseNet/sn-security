@@ -6,12 +6,14 @@ namespace SenseNet.Security.Messaging
 {
     internal class CommunicationMonitor
     {
-        private readonly SecuritySystem _securitySystem;
+        private readonly DataHandler _dataHandler;
         private readonly System.Timers.Timer _timer;
 
-        internal CommunicationMonitor(SecuritySystem securitySystem)
+        public event EventHandler HearthBeat;
+
+        internal CommunicationMonitor(DataHandler dataHandler)
         {
-            _securitySystem = securitySystem;
+            _dataHandler = dataHandler;
 
             var interval = Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds * 1000.0;
 
@@ -37,10 +39,19 @@ namespace SenseNet.Security.Messaging
 
             var timerEnabled = _timer.Enabled;
             _timer.Enabled = false;
+
             try
             {
-                _securitySystem.SecurityActivityQueue.HealthCheck();
-                _securitySystem.DataHandler.CleanupSecurityActivities();
+                HearthBeat?.Invoke(null, EventArgs.Empty);
+            }
+            catch (Exception ex) //logged
+            {
+                SnLog.WriteException(ex, EventMessage.Error.HealthCheck, EventId.RepositoryRuntime);
+            }
+
+            try
+            {
+                _dataHandler.CleanupSecurityActivities();
             }
             catch (Exception ex) //logged
             {

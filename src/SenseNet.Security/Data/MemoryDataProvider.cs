@@ -301,7 +301,7 @@ namespace SenseNet.Security.Data
         }
 
         /// <inheritdoc />
-        public int GetLastSecurityActivityId(DateTime startedTime)
+        public virtual int GetLastSecurityActivityId(DateTime startedTime)
         {
             lock (_messageLock)
             {
@@ -376,7 +376,7 @@ namespace SenseNet.Security.Data
         }
 
         /// <inheritdoc />
-        public void CleanupSecurityActivities(int timeLimitInMinutes)
+        public virtual void CleanupSecurityActivities(int timeLimitInMinutes)
         {
             lock (_messageLock)
             {

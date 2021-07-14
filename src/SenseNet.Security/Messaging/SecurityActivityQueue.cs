@@ -15,16 +15,18 @@ namespace SenseNet.Security.Messaging
         internal static int SecurityActivityLoadingBufferSize = 200;
 
         private readonly SecuritySystem _securitySystem;
+        private readonly CommunicationMonitor _communicationMonitor;
         private readonly DataHandler _dataHandler;
         private readonly Serializer _serializer;
         private readonly DependencyManager _dependencyManager;
         private readonly TerminationHistory _terminationHistory;
         private readonly Executor _executor;
 
-        public SecurityActivityQueue(SecuritySystem securitySystem, DataHandler dataHandler,
-            SecurityActivityHistoryController activityHistory)
+        public SecurityActivityQueue(SecuritySystem securitySystem, CommunicationMonitor communicationMonitor,
+            DataHandler dataHandler, SecurityActivityHistoryController activityHistory)
         {
             _securitySystem = securitySystem;
+            _communicationMonitor = communicationMonitor;
             _dataHandler = dataHandler;
             _serializer = new Serializer(this, activityHistory, dataHandler);
             _executor = new Executor(activityHistory);
@@ -32,6 +34,8 @@ namespace SenseNet.Security.Messaging
             _dependencyManager = new DependencyManager(_serializer, _executor, _terminationHistory, activityHistory);
             _serializer.DependencyManager = _dependencyManager;
             _executor.DependencyManager = _dependencyManager;
+
+            communicationMonitor.HearthBeat += (sender, args) => HealthCheck();
         }
 
         internal void HealthCheck()
@@ -76,14 +80,14 @@ namespace SenseNet.Security.Messaging
 
         internal void Startup(CompletionState uncompleted, int lastActivityIdFromDb)
         {
-            _securitySystem.CommunicationMonitor.Stop();
+            _communicationMonitor.Stop();
 
             _serializer.Reset();
             _dependencyManager.Reset();
             _terminationHistory.Reset(uncompleted.LastActivityId, uncompleted.Gaps);
             _serializer.Start(lastActivityIdFromDb, uncompleted.LastActivityId, uncompleted.Gaps);
 
-            _securitySystem.CommunicationMonitor.Start();
+            _communicationMonitor.Start();
         }
 
         internal void Shutdown()

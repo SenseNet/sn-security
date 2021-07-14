@@ -123,11 +123,11 @@ namespace SenseNet.Security
 
             PermissionQuery = new PermissionQuery(EntityManager, Cache);
 
-            CommunicationMonitor = new CommunicationMonitor(this);
+            CommunicationMonitor = new CommunicationMonitor(DataHandler);
 
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
 
-            SecurityActivityQueue = new SecurityActivityQueue(this, DataHandler, ActivityHistory);
+            SecurityActivityQueue = new SecurityActivityQueue(this, CommunicationMonitor, DataHandler, ActivityHistory);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
 
             _killed = false;
