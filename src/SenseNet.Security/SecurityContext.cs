@@ -13,6 +13,10 @@ namespace SenseNet.Security
     /// </summary>
     public partial class SecurityContext
     {
+        private readonly DataHandler _dataHandler;
+        private readonly SecurityEntityManager _entityManager;
+        private readonly IMissingEntityHandler _missingEntityHandler;
+
         public SecuritySystem SecuritySystem { get; }
 
         /// <summary>
@@ -38,6 +42,9 @@ namespace SenseNet.Security
             SecuritySystem = securitySystem ?? SecuritySystem.Instance;
             Evaluator = new PermissionEvaluator(this);
             _permissionQuery = SecuritySystem.PermissionQuery;
+            _dataHandler = SecuritySystem.DataHandler;
+            _entityManager = SecuritySystem.EntityManager;
+            _missingEntityHandler = SecuritySystem.MissingEntityHandler;
         }
 
         /*********************** ACL API **********************/
@@ -296,7 +303,36 @@ namespace SenseNet.Security
         /*********************** Internal in memory entity structure **********************/
         internal SecurityEntity GetSecurityEntity(int entityId, bool throwError = false)
         {
-            return SecuritySystem.EntityManager.GetEntity(entityId, throwError);
+            var entity = _entityManager.GetEntity(entityId, throwError);
+            if (entity == null)
+            {
+                // compensation: try to load the entity and its aces from the db
+                var storedEntity = _dataHandler.GetStoredSecurityEntity(entityId);
+                if (storedEntity != null)
+                {
+                    entity = _entityManager.CreateEntitySafe(entityId, storedEntity.ParentId, storedEntity.OwnerId, storedEntity.IsInherited, storedEntity.HasExplicitEntry);
+
+                    var acl = new AclInfo(entityId);
+                    var entries = _dataHandler.LoadPermissionEntries(new[] { entityId });
+                    foreach (var entry in entries)
+                        acl.Entries.Add(new AceInfo { EntryType = entry.EntryType, IdentityId = entry.IdentityId, LocalOnly = entry.LocalOnly, AllowBits = entry.AllowBits, DenyBits = entry.DenyBits });
+                    if (acl.Entries.Count > 0)
+                        entity.SetAclSafe(acl);
+                }
+                else
+                {
+                    if (_missingEntityHandler.GetMissingEntity(entityId, out var parentId, out var ownerId))
+                    {
+                        _dataHandler.CreateSecurityEntitySafe(entityId, parentId, ownerId);
+                        entity = _entityManager.CreateEntitySafe(entityId, parentId, ownerId);
+                    }
+                }
+
+                if (throwError && entity == null)
+                    throw new EntityNotFoundException("Entity not found: " + entityId);
+            }
+
+            return entity;
         }
         internal bool HasAncestorRelation(SecurityEntity entity1, SecurityEntity entity2)
         {

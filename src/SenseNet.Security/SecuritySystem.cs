@@ -119,7 +119,7 @@ namespace SenseNet.Security
                 op.Successful = true;
             }
 
-            EntityManager = new SecurityEntityManager(Cache, MissingEntityHandler);
+            EntityManager = new SecurityEntityManager(Cache);
 
             PermissionQuery = new PermissionQuery(EntityManager, Cache);
 
