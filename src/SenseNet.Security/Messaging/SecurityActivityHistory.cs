@@ -102,12 +102,6 @@ namespace SenseNet.Security.Messaging
             return result;
         }
 
-        internal void _traceHistoryCount(string msg)
-        {
-            var count = _history.Count(x => x != null);
-            SnTrace.Write($">>>> history active items ({msg}): {count}");
-        }
-
         private readonly object _lock = new object();
         private const int HistoryLength = 1023;
         private readonly SecurityActivityHistoryItem[] _history = new SecurityActivityHistoryItem[HistoryLength];
