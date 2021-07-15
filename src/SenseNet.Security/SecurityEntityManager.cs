@@ -10,11 +10,15 @@ namespace SenseNet.Security
     /// </summary>
     internal class SecurityEntityManager
     {
+        private readonly IMissingEntityHandler _missingEntityHandler;
+        private readonly DataHandler _dataHandler;
         private readonly SecurityCache _cache;
 
-        public SecurityEntityManager(SecurityCache cache)
+        public SecurityEntityManager(SecurityCache cache, IMissingEntityHandler missingEntityHandler)
         {
+            _missingEntityHandler = missingEntityHandler;
             _cache = cache;
+            _dataHandler = SecuritySystem.Instance.DataHandler;
         }
 
         // ReSharper disable once InconsistentNaming
@@ -65,33 +69,33 @@ namespace SenseNet.Security
         {
             _cache.Entities.TryGetValue(entityId, out var entity);
 
-//if (entity == null)
-//{
-//    // compensation: try to load the entity and its aces from the db
-//    var storedEntity = _dataHandler.GetStoredSecurityEntity(entityId);
-//    if (storedEntity != null)
-//    {
-//        entity = CreateEntitySafe(entityId, storedEntity.ParentId, storedEntity.OwnerId, storedEntity.IsInherited, storedEntity.HasExplicitEntry);
+            if (entity == null)
+            {
+                // compensation: try to load the entity and its aces from the db
+                var storedEntity = _dataHandler.GetStoredSecurityEntity(entityId);
+                if (storedEntity != null)
+                {
+                    entity = CreateEntitySafe(entityId, storedEntity.ParentId, storedEntity.OwnerId, storedEntity.IsInherited, storedEntity.HasExplicitEntry);
 
-//        var acl = new AclInfo(entityId);
-//        var entries = _dataHandler.LoadPermissionEntries(new[] { entityId });
-//        foreach (var entry in entries)
-//            acl.Entries.Add(new AceInfo { EntryType = entry.EntryType, IdentityId = entry.IdentityId, LocalOnly = entry.LocalOnly, AllowBits = entry.AllowBits, DenyBits = entry.DenyBits });
-//        if (acl.Entries.Count > 0)
-//            entity.SetAclSafe(acl);
-//    }
-//    else
-//    {
-//        if (_missingEntityHandler.GetMissingEntity(entityId, out var parentId, out var ownerId))
-//        {
-//            _dataHandler.CreateSecurityEntitySafe(entityId, parentId, ownerId);
-//            entity = CreateEntitySafe(entityId, parentId, ownerId);
-//        }
-//    }
+                    var acl = new AclInfo(entityId);
+                    var entries = _dataHandler.LoadPermissionEntries(new[] { entityId });
+                    foreach (var entry in entries)
+                        acl.Entries.Add(new AceInfo { EntryType = entry.EntryType, IdentityId = entry.IdentityId, LocalOnly = entry.LocalOnly, AllowBits = entry.AllowBits, DenyBits = entry.DenyBits });
+                    if (acl.Entries.Count > 0)
+                        entity.SetAclSafe(acl);
+                }
+                else
+                {
+                    if (_missingEntityHandler.GetMissingEntity(entityId, out var parentId, out var ownerId))
+                    {
+                        _dataHandler.CreateSecurityEntitySafe(entityId, parentId, ownerId);
+                        entity = CreateEntitySafe(entityId, parentId, ownerId);
+                    }
+                }
 
-//    if (throwError && entity == null)
-//        throw new EntityNotFoundException("Entity not found: " + entityId);
-//}
+                if (throwError && entity == null)
+                    throw new EntityNotFoundException("Entity not found: " + entityId);
+            }
             return entity;
         }
 

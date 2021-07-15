@@ -765,11 +765,13 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_ResolveMissingEntity()
         {
-            SecuritySystem.Instance.MissingEntityHandler = new TestMissingEntityHandler();
-            var user = CurrentContext.Security.CurrentUser;
-            CurrentContext.Security = new TestSecurityContext(user); // recreate with the hacked instances
+            //SecuritySystem.Instance.MissingEntityHandler = new TestMissingEntityHandler();
+            //var user = CurrentContext.Security.CurrentUser;
+            //CurrentContext.Security = new TestSecurityContext(user); // recreate with the hacked instances
+            //var ctx = CurrentContext.Security;
+            //ctx.SecuritySystem.EntityManager = new SecurityEntityManager(ctx.SecuritySystem.Cache);
             var ctx = CurrentContext.Security;
-            ctx.SecuritySystem.EntityManager = new SecurityEntityManager(ctx.SecuritySystem.Cache);
+            ctx.SecuritySystem.EntityManager = new SecurityEntityManager(ctx.SecuritySystem.Cache, new TestMissingEntityHandler());
 
             //----
 
