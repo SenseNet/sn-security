@@ -12,12 +12,11 @@ namespace SenseNet.Security
         internal IDictionary<int, SecurityEntity> Entities { get; private set; }  // EntityId --> SecurityEntity
         internal IDictionary<int, SecurityGroup> Groups { get; private set; }     // GroupId  --> Group
         internal Dictionary<int, List<int>> Membership { get; private set; }      // UserId   --> list of ContainerIds
+        internal SecurityEntityManager EntityManager { get; set; } // Property injection
 
         private readonly DataHandler _dataHandler;
-        private readonly SecuritySystem _securitySystem;
-        public SecurityCache(SecuritySystem securitySystem, DataHandler dataHandler)
+        public SecurityCache(DataHandler dataHandler)
         {
-            _securitySystem = securitySystem;
             _dataHandler = dataHandler;
         }
         internal void Initialize()
@@ -199,7 +198,7 @@ namespace SenseNet.Security
                 group.UserMemberIds.Remove(userId);
 
             // delete ACEs & empty ACLs
-            _securitySystem.EntityManager.RemoveIdentityRelatedAces(userId);
+            EntityManager.RemoveIdentityRelatedAces(userId);
         }
 
         internal void DeleteSecurityGroup(SecurityContext context, int groupId)
@@ -223,7 +222,7 @@ namespace SenseNet.Security
             }
 
             // delete ACEs & empty ACLs
-            _securitySystem.EntityManager.RemoveIdentityRelatedAces(groupId);
+            EntityManager.RemoveIdentityRelatedAces(groupId);
         }
 
         internal void DeleteIdentities(SecurityContext context, IEnumerable<int> identityIds)
@@ -256,7 +255,7 @@ namespace SenseNet.Security
                 }
 
                 // delete Aces & empty ACLs
-                _securitySystem.EntityManager.RemoveIdentityRelatedAces(identityId);
+                EntityManager.RemoveIdentityRelatedAces(identityId);
             }
         }
 

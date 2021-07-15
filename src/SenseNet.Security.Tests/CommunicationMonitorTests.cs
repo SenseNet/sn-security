@@ -43,7 +43,7 @@ namespace SenseNet.Security.Tests
                 var missingEntityHandler = new MissingEntityHandler();
                 var securitySystem = new SecuritySystem(testDp, messageProvider, missingEntityHandler,
                     new SecurityConfiguration());
-                var dataHandler = new DataHandler(securitySystem, testDp);
+                var dataHandler = new DataHandler(testDp);
                 var communicationMonitor = new CommunicationMonitor(dataHandler);
                 var activityHistory = new SecurityActivityHistoryController();
                 var securityActivityQueue = new SecurityActivityQueue(securitySystem, communicationMonitor, dataHandler, activityHistory);

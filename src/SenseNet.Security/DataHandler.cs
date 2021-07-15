@@ -9,12 +9,11 @@ namespace SenseNet.Security
 {
     public class DataHandler
     {
-        private readonly SecuritySystem _securitySystem;
         private readonly ISecurityDataProvider _dataProvider;
+        internal SecurityEntityManager EntityManager { get; set; } // Property injection
 
-        public DataHandler(SecuritySystem securitySystem, ISecurityDataProvider dataProvider)
+        public DataHandler(ISecurityDataProvider dataProvider)
         {
-            _securitySystem = securitySystem;
             _dataProvider = dataProvider;
         }
 
@@ -97,8 +96,8 @@ namespace SenseNet.Security
             {
                 // load or create parent
                 var parent = safe
-                    ? _securitySystem.EntityManager.GetEntitySafe(parentEntityId, false)
-                    : _securitySystem.EntityManager.GetEntity(parentEntityId, false);
+                    ? EntityManager.GetEntitySafe(parentEntityId, false)
+                    : EntityManager.GetEntity(parentEntityId, false);
                 if (parent == null)
                     throw new EntityNotFoundException(
                         $"Cannot create entity {entityId} because its parent {parentEntityId} does not exist.");
@@ -188,7 +187,7 @@ namespace SenseNet.Security
                         // ReSharper disable once PossibleMultipleEnumeration
                         foreach (var entityId in aces.Select(a => a.EntityId).Distinct())
                         {
-                            _securitySystem.EntityManager.GetEntity(entityId, true);
+                            EntityManager.GetEntity(entityId, true);
                         }
 
                         softReload = true;

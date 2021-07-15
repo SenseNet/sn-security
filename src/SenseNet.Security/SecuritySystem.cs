@@ -78,7 +78,7 @@ namespace SenseNet.Security
             IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration)
         {
             SnTrace.Write("<SecuritySystem ctor");
-            DataHandler = new DataHandler(this, dataProvider);
+            DataHandler = new DataHandler(dataProvider);
             ActivityHistory = new SecurityActivityHistoryController();
             DataProvider = dataProvider;
             MessageProvider = messageProvider;
@@ -113,13 +113,15 @@ namespace SenseNet.Security
 
             using (var op = SnTrace.Security.StartOperation("Security initial loading."))
             {
-                var cache = new SecurityCache(this, DataHandler);
+                var cache = new SecurityCache(DataHandler);
                 cache.Initialize();
                 Cache = cache;
                 op.Successful = true;
             }
 
             EntityManager = new SecurityEntityManager(Cache, MissingEntityHandler);
+            Cache.EntityManager = EntityManager; // Property injection
+            DataHandler.EntityManager = EntityManager; // Property injection
 
             PermissionQuery = new PermissionQuery(EntityManager, Cache);
 
