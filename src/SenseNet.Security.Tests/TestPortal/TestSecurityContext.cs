@@ -12,7 +12,7 @@ namespace SenseNet.Security.Tests.TestPortal
         public static SecuritySystem StartTheSystem(SecurityConfiguration configuration)
         {
             _securitySystem = SecuritySystem.StartTheSystem(configuration);
-            General = new TestSecurityContext(SecuritySystem.Instance.SystemUser);
+            General = new TestSecurityContext(_securitySystem.SystemUser);
             return _securitySystem;
         }
 

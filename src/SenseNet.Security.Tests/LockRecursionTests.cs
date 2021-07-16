@@ -29,7 +29,7 @@ namespace SenseNet.Security.Tests
         #region Infrastructure 
         private Context GetContextAndStartTheSystem(LockRecursionUser currentUser)
         {
-            SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
+            //SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             //MemoryDataProvider.LastActivityId = 0;
             Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), new DefaultMessageProvider(new MessageSenderManager()));
             var context = new Context(currentUser);
@@ -38,7 +38,7 @@ namespace SenseNet.Security.Tests
         }
         private static Context GetContext(LockRecursionUser currentUser)
         {
-            SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
+            //SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             //MemoryDataProvider.LastActivityId = 0;
             return new Context(currentUser);
         }
