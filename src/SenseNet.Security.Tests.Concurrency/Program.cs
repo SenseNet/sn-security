@@ -52,17 +52,18 @@ namespace SenseNet.Security.Tests.Concurrency
 
         internal static void StartTheSystem(ISecurityDataProvider securityDataProvider)
         {
+            var messageSenderManager = new MessageSenderManager("asdf");
             // Call SecurityContext starter method.
             SecurityContextForConcurrencyTests.StartTheSystem(new SecurityConfiguration
             {
                 SecurityDataProvider = securityDataProvider,
-                MessageProvider = new DefaultMessageProvider(),
+                MessageProvider = new DefaultMessageProvider(messageSenderManager),
                 CommunicationMonitorRunningPeriodInSeconds = 31
             });
 
             // legacy logic
             // original line: MessageSender.Initialize("asdf");
-            SecuritySystem.Instance.MessageSenderManager = new MessageSenderManager("asdf");
+            SecuritySystem.Instance.MessageSenderManager = messageSenderManager;
         }
 
         private static int Id(string name)

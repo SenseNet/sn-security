@@ -31,7 +31,7 @@ namespace SenseNet.Security.Tests
         {
             SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             //MemoryDataProvider.LastActivityId = 0;
-            Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), new DefaultMessageProvider());
+            Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), new DefaultMessageProvider(new MessageSenderManager()));
             var context = new Context(currentUser);
             CreatePlayground(context);
             return context;

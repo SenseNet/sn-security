@@ -39,7 +39,7 @@ namespace SenseNet.Security.Tests
                 value => Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds = value))
             {
                 var testDp = new TestDp(DatabaseStorage.CreateEmpty());
-                var messageProvider = new DefaultMessageProvider();
+                var messageProvider = new DefaultMessageProvider(new MessageSenderManager());
                 var missingEntityHandler = new MissingEntityHandler();
                 var securitySystem = new SecuritySystem(testDp, messageProvider, missingEntityHandler,
                     new SecurityConfiguration());

@@ -48,7 +48,7 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             //---- Start the system
-            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider());
+            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
 
             //---- Start the request
             _context = new Context(TestUser.User1);
@@ -253,7 +253,7 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             //---- Start the system
-            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider());
+            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
             var ctxAcc = new ObjectAccessor(SecuritySystem.Instance);
             var killed = (bool)ctxAcc.GetField("_killed");
             Assert.IsFalse(killed);

@@ -109,8 +109,7 @@ namespace SenseNet.Security.Tests
                 new MemoryDataProvider(storage),
                 new TestMessageProvider(messageSenderManager, messageQueue, isReceiver),
                 new MissingEntityHandler(),
-                new SecurityConfiguration(),
-                messageSenderManager);
+                new SecurityConfiguration());
 
             securitySystem.Start();
 

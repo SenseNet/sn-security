@@ -47,7 +47,7 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             var timer = Stopwatch.StartNew();
-            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider());
+            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
             timer.Stop();
             var elapsed = timer.Elapsed;
 

@@ -26,7 +26,7 @@ namespace SenseNet.Security.Tests
             //dataProvider.DeleteEverything();
             dataProvider.InstallDatabase();
 
-            Context.StartTheSystem(dataProvider, new DefaultMessageProvider());
+            Context.StartTheSystem(dataProvider, new DefaultMessageProvider(new MessageSenderManager()));
             SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             CurrentContext = new Context(TestUser.User1);
         }

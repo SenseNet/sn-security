@@ -122,7 +122,7 @@ namespace SenseNet.Security.Tests
         }
         internal Context GetEmptyContext(TestUser currentUser, ISecurityDataProvider dbProvider, TextWriter traceChannel = null)
         {
-            Context.StartTheSystem(dbProvider, new DefaultMessageProvider(), traceChannel);
+            Context.StartTheSystem(dbProvider, new DefaultMessageProvider(new MessageSenderManager()), traceChannel);
             return new Context(currentUser);
         }
 

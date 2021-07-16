@@ -75,14 +75,13 @@ namespace SenseNet.Security
 
 
         public SecuritySystem(ISecurityDataProvider dataProvider, IMessageProvider messageProvider,
-            IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration,
-            IMessageSenderManager messageSenderManager = null)
+            IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration)
         {
             DataHandler = new DataHandler(dataProvider);
             ActivityHistory = new SecurityActivityHistoryController();
             DataProvider = dataProvider;
             MessageProvider = messageProvider;
-            MessageSenderManager = messageSenderManager ?? new MessageSenderManager();
+            MessageSenderManager = messageProvider.MessageSenderManager;
             MissingEntityHandler = missingEntityHandler;
             _configuration = configuration;
         }
