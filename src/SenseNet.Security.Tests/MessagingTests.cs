@@ -58,7 +58,8 @@ namespace SenseNet.Security.Tests
             };
 
             //---- Start the system
-            var msgProvider = new TestMessageProvider();
+            var messageSenderManager = new MessageSenderManager();
+            var msgProvider = new TestMessageProvider(messageSenderManager);
             msgProvider.MessageReceived += MsgProvider_MessageReceived;
             msgProvider.Initialize();
 
@@ -107,7 +108,8 @@ namespace SenseNet.Security.Tests
             };
 
             //---- Start the system
-            var msgProvider = new TestMessageProvider();
+            var messageSenderManager = new MessageSenderManager();
+            var msgProvider = new TestMessageProvider(messageSenderManager);
             msgProvider.Initialize();
             Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
 
@@ -301,10 +303,15 @@ namespace SenseNet.Security.Tests
         {
             public string ReceiverName => "TestMessageProvider";
             public int IncomingMessageCount => 0;
-            //UNDONE: Initialize MessageSenderManager via ctor
-            public IMessageSenderManager MessageSenderManager => SecuritySystem.Instance.MessageSenderManager;
+
+            public IMessageSenderManager MessageSenderManager { get; }
 
             public List<string> ReceiverMessages { get; } = new List<string>();
+
+            public TestMessageProvider(IMessageSenderManager messageSenderManager)
+            {
+                MessageSenderManager = messageSenderManager;
+            }
 
             public void Initialize() {}
 

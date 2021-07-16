@@ -8,7 +8,7 @@ namespace SenseNet.Security.Tests.TestPortal
         public static SecuritySystem StartTheSystem(SecurityConfiguration configuration)
         {
             var securitySystem = SecuritySystem.StartTheSystem(configuration);
-            General = new SecurityContextForConcurrencyTests(SecuritySystem.Instance.SystemUser, securitySystem);
+            General = new SecurityContextForConcurrencyTests(securitySystem.SystemUser, securitySystem);
             return securitySystem;
         }
 

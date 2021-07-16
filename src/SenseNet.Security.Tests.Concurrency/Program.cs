@@ -63,7 +63,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
             // legacy logic
             // original line: MessageSender.Initialize("asdf");
-            SecuritySystem.Instance.MessageSenderManager = messageSenderManager;
+            securitySystem.MessageSenderManager = messageSenderManager;
 
             return securitySystem;
         }
@@ -227,7 +227,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
                 var _ = new SecurityContext(TestUser.User2, securitySystem);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
-                SecuritySystem.Instance.DataHandler.SaveActivity(activity);
+                securitySystem.DataHandler.SaveActivity(activity);
 
                 var method = typeof(SecurityContext).GetMethod("MessageProvider_MessageReceived", BindingFlags.Static | BindingFlags.NonPublic);
                 if (method == null)
@@ -251,7 +251,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
                 var _ = new SecurityContext(TestUser.User2, securitySystem);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
-                SecuritySystem.Instance.DataHandler.SaveActivity(activity);
+                securitySystem.DataHandler.SaveActivity(activity);
 
                 count++;
             }
@@ -269,23 +269,23 @@ namespace SenseNet.Security.Tests.Concurrency
 
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities, Messages = new List<Tuple<int, DateTime, byte[]>>() };
 
-            StartTheSystem(new MemoryDataProvider(storage));
+            var securitySystem = StartTheSystem(new MemoryDataProvider(storage));
 
             var ctx = new TestSecurityContext(TestUser.User3);
             var unused1 = ctx.HasPermission(52, PermissionType.Custom01);
 
             _started = DateTime.UtcNow;
 
-            var unused2 = Enumerable.Range(1, 4).Select(x => Task.Run(() => MoveExercise(x))).ToArray();
+            var unused2 = Enumerable.Range(1, 4).Select(x => Task.Run(() => MoveExercise(x, securitySystem))).ToArray();
         }
-        private static void MoveExercise(int id)
+        private static void MoveExercise(int id, SecuritySystem securitySystem)
         {
             if (id % 4 == 1)
-                MoveExerciseWriter(id);
+                MoveExerciseWriter(id, securitySystem);
             else
-                MoveExerciseReader(id);
+                MoveExerciseReader(id, securitySystem);
         }
-        private static void MoveExerciseWriter(int id)
+        private static void MoveExerciseWriter(int id, SecuritySystem securitySystem)
         {
             var name = "Writer-" + id;
             var count = 0;
@@ -298,7 +298,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
                 //---------------------- work
 
-                var ctx = SecuritySystem.Instance.GeneralSecurityContext;
+                var ctx = securitySystem.GeneralSecurityContext;
                 var entities = ctx.Cache.Entities;
                 var source = entities[3];
                 var target0 = entities[1];
@@ -313,12 +313,12 @@ namespace SenseNet.Security.Tests.Concurrency
             }
 
         }
-        private static void MoveExerciseReader(int id)
+        private static void MoveExerciseReader(int id, SecuritySystem securitySystem)
         {
             var name = "Reader-" + id;
             var count = 0;
 
-                var ctx = SecuritySystem.Instance.GeneralSecurityContext;
+                var ctx = securitySystem.GeneralSecurityContext;
                 var entities = ctx.Cache.Entities;
 
             while (!_stopped)
