@@ -262,11 +262,6 @@ namespace SenseNet.Security.Messaging
             Gaps = new int[0];
         }
 
-        internal CompletionState GetCurrent()
-        {
-            return SecuritySystem.Instance.SecurityActivityQueue.GetCurrentCompletionState();
-        }
-
         /// <summary>
         /// Returns a string that represents the current object.
         /// </summary>
