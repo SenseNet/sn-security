@@ -253,8 +253,8 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             //---- Start the system
-            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
-            var ctxAcc = new ObjectAccessor(SecuritySystem.Instance);
+            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
+            var ctxAcc = new ObjectAccessor(securitySystem);
             var killed = (bool)ctxAcc.GetField("_killed");
             Assert.IsFalse(killed);
 
@@ -265,7 +265,7 @@ namespace SenseNet.Security.Tests
             _context.Security.HasPermission(entities.First().Value.Id, PermissionType.Open);
 
             //---- kill the system
-            SecuritySystem.Instance.Shutdown();
+            _context.Security.SecuritySystem.Shutdown();
 
             //---- check killed state
             killed = (bool)ctxAcc.GetField("_killed");

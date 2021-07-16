@@ -864,7 +864,7 @@ namespace SenseNet.Security.Tests
 
         private StoredSecurityEntity GetStoredSecurityEntity(int entityId)
         {
-            return SecuritySystem.Instance.DataProvider.LoadStoredSecurityEntity(entityId);
+            return SecuritySystem.DataProvider.LoadStoredSecurityEntity(entityId);
         }
 
     }

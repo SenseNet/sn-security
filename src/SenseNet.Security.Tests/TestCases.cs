@@ -13,6 +13,9 @@ namespace SenseNet.Security.Tests
         public TestContext TestContext { get; set; }
 
         protected Context CurrentContext { get; private set; }
+        protected DataHandler DataHandler { get; private set; }
+        protected ISecurityDataProvider DataProvider { get; private set; }
+        protected SecuritySystem SecuritySystem { get; private set; }
 
         protected abstract ISecurityDataProvider GetDataProvider();
         protected abstract void CleanupMemberships();
@@ -26,9 +29,13 @@ namespace SenseNet.Security.Tests
             //dataProvider.DeleteEverything();
             dataProvider.InstallDatabase();
 
-            Context.StartTheSystem(dataProvider, new DefaultMessageProvider(new MessageSenderManager()));
-            SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
+            var securitySystem = Context.StartTheSystem(dataProvider, new DefaultMessageProvider(new MessageSenderManager()));
+            securitySystem.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             CurrentContext = new Context(TestUser.User1);
+
+            DataHandler = securitySystem.DataHandler;
+            DataProvider = securitySystem.DataProvider;
+            SecuritySystem = securitySystem;
         }
         [TestCleanup]
         public void FinishTest()

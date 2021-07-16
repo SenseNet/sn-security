@@ -9,10 +9,11 @@ namespace SenseNet.Security.Tests.TestPortal
 
         public TestSecurityContext(ISecurityUser currentUser) : base(currentUser, _securitySystem) { }
 
-        public static void StartTheSystem(SecurityConfiguration configuration)
+        public static SecuritySystem StartTheSystem(SecurityConfiguration configuration)
         {
             _securitySystem = SecuritySystem.StartTheSystem(configuration);
             General = new TestSecurityContext(SecuritySystem.Instance.SystemUser);
+            return _securitySystem;
         }
 
         public ISecurityDataProvider GetDataProvider() => SecuritySystem.DataProvider;

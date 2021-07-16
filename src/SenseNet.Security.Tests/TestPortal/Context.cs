@@ -13,7 +13,7 @@ namespace SenseNet.Security.Tests.TestPortal
         /// Building and connecting necessary LEGO bricks.
         /// One of the possible comfortable solution. Every component is stateless so we can be stored for long time.
         /// </summary>
-        public static void StartTheSystem(ISecurityDataProvider securityDataProvider)
+        public static SecuritySystem StartTheSystem(ISecurityDataProvider securityDataProvider)
         {
             // Get configured or default messaging component and initialize it.
             var messageProvider = ResolveMessageProvider();
@@ -21,19 +21,21 @@ namespace SenseNet.Security.Tests.TestPortal
 
             // call the second step
             Debug.WriteLine("SECU> StartTheSystem: " + securityDataProvider.GetType().Name);
-            StartTheSystem(securityDataProvider, messageProvider);
+            var securitySystem = StartTheSystem(securityDataProvider, messageProvider);
 
             // legacy logic
             // original line: MessageSender.Initialize(messageProvider.ReceiverName);
-            SecuritySystem.Instance.MessageSenderManager = new MessageSenderManager(messageProvider.ReceiverName);
+            securitySystem.MessageSenderManager = new MessageSenderManager(messageProvider.ReceiverName);
+
+            return securitySystem;
         }
         // Called by tests. The messageProvider must be initialized.
-        internal static void StartTheSystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider, TextWriter traceChannel = null)
+        internal static SecuritySystem StartTheSystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider, TextWriter traceChannel = null)
         {
             // Timestamp of the starting.
             var startingTheSystem = DateTime.UtcNow;
             // Call SecurityContext starter method.
-            TestSecurityContext.StartTheSystem(new SecurityConfiguration
+            var securitySystem = TestSecurityContext.StartTheSystem(new SecurityConfiguration
             {
                 SecurityDataProvider = securityDataProvider,
                 MessageProvider = messageProvider,
@@ -41,6 +43,8 @@ namespace SenseNet.Security.Tests.TestPortal
             });
             // Staring message system. Messages before 'startingTheSystem' will be ignored.
             messageProvider.Start(startingTheSystem);
+
+            return securitySystem;
         }
 
         private static IMessageProvider ResolveMessageProvider()

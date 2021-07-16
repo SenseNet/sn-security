@@ -266,7 +266,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E1| Normal|+G1:_____________++");
 
             // ASSERT 1
-            var storedAces = SecuritySystem.Instance.DataProvider.LoadAllAces().ToArray();
+            var storedAces = SecuritySystem.DataProvider.LoadAllAces().ToArray();
             Assert.AreEqual(1, storedAces.Length);
             Assert.AreEqual(EntryType.Normal, storedAces[0].EntryType);
             Assert.AreEqual(0x3ul, storedAces[0].AllowBits);
@@ -280,7 +280,7 @@ namespace SenseNet.Security.Tests
             SetAcl("+E1|Sharing|+G1:___________++__");
 
             // ASSERT 2
-            storedAces = SecuritySystem.Instance.DataProvider.LoadAllAces().ToArray();
+            storedAces = SecuritySystem.DataProvider.LoadAllAces().ToArray();
             Assert.AreEqual(2, storedAces.Length);
             Assert.AreEqual(0x3ul, storedAces[0].AllowBits);
             Assert.AreEqual(EntryType.Normal, storedAces[0].EntryType);

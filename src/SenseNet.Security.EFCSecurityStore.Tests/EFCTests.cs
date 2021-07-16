@@ -15,9 +15,6 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
     [TestClass]
     public class EFCTests : TestCases
     {
-        private DataHandler DataHandler => SecuritySystem.Instance.DataHandler;
-        private ISecurityDataProvider DataProvider => SecuritySystem.Instance.DataProvider;
-
         protected override ISecurityDataProvider GetDataProvider()
         {
             return new EFCSecurityDataProvider(new MessageSenderManager(), 0, Configuration.Instance.GetConnectionString());
@@ -42,7 +39,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             }
         }
 
-        private SecurityActivityQueue SecurityActivityQueue => SecuritySystem.Instance.SecurityActivityQueue;
+        private SecurityActivityQueue SecurityActivityQueue => SecuritySystem.SecurityActivityQueue;
 
         [TestMethod]
         public void EFC_LoadActivities_AtStart_DataHandlerLevel()
@@ -244,7 +241,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
         public void EFC_LoadActivities_SmartGapResolution()
         {
             var sb = new StringBuilder();
-            SecuritySystem.Instance.CommunicationMonitor.Stop();
+            SecuritySystem.CommunicationMonitor.Stop();
             var sCtx = CurrentContext.Security;
             var user1Id = TestUser.User1.Id;
             var rootEntityId = Id("E01");
@@ -300,7 +297,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             Assert.AreEqual(0, cs3.Gaps.Length);
             Assert.AreEqual(cs2.LastActivityId, cs3.LastActivityId);
 
-            SecuritySystem.Instance.CommunicationMonitor.Start();
+            SecuritySystem.CommunicationMonitor.Start();
         }
 
         [TestMethod]
