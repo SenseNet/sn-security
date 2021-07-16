@@ -60,6 +60,8 @@ namespace SenseNet.Security.Messaging
 
     public class SecurityActivityHistoryController
     {
+        internal SecurityActivityQueue SecurityActivityQueue { get; set; } // Property injection
+
         internal SecurityActivityHistory GetHistory()
         {
             SecurityActivityHistory result;
@@ -75,7 +77,7 @@ namespace SenseNet.Security.Messaging
 
                 result = new SecurityActivityHistory
                 {
-                    State = SecuritySystem.Instance.SecurityActivityQueue.GetCurrentState(),
+                    State = SecurityActivityQueue.GetCurrentState(),
                     Recent = list.ToArray(),
                     Message = _unfinished < 1 ? null : "RECENT ARRAY TOO SHORT. Cannot register the full activity lifecycle. Unfinished items: " + _unfinished
                 };
@@ -95,7 +97,7 @@ namespace SenseNet.Security.Messaging
 
                 result = new SecurityActivityHistory
                 {
-                    State = SecuritySystem.Instance.SecurityActivityQueue.GetCurrentState(),
+                    State = SecurityActivityQueue.GetCurrentState(),
                     Recent = new SecurityActivityHistoryItem[0]
                 };
             }
