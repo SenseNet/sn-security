@@ -3,12 +3,13 @@ namespace SenseNet.Security.Tests.TestPortal
 {
     public class SecurityContextForConcurrencyTests : SecurityContext
     {
-        public SecurityContextForConcurrencyTests(ISecurityUser currentUser) : base(currentUser) { }
+        public SecurityContextForConcurrencyTests(ISecurityUser currentUser, SecuritySystem securitySystem) : base(currentUser, securitySystem) { }
 
-        public static void StartTheSystem(SecurityConfiguration configuration)
+        public static SecuritySystem StartTheSystem(SecurityConfiguration configuration)
         {
-            SecuritySystem.StartTheSystem(configuration);
-            General = new SecurityContextForConcurrencyTests(SecuritySystem.Instance.SystemUser);
+            var securitySystem = SecuritySystem.StartTheSystem(configuration);
+            General = new SecurityContextForConcurrencyTests(SecuritySystem.Instance.SystemUser, securitySystem);
+            return securitySystem;
         }
 
         internal static SecurityContextForConcurrencyTests General { get; private set; }

@@ -5,11 +5,13 @@ namespace SenseNet.Security.Tests.TestPortal
 {
     public class TestSecurityContext : SecurityContext
     {
-        public TestSecurityContext(ISecurityUser currentUser) : base(currentUser) { }
+        private static SecuritySystem _securitySystem;
+
+        public TestSecurityContext(ISecurityUser currentUser) : base(currentUser, _securitySystem) { }
 
         public static void StartTheSystem(SecurityConfiguration configuration)
         {
-            SecuritySystem.StartTheSystem(configuration);
+            _securitySystem = SecuritySystem.StartTheSystem(configuration);
             General = new TestSecurityContext(SecuritySystem.Instance.SystemUser);
         }
 

@@ -40,12 +40,13 @@ namespace SenseNet.Security
         /// ISecurityDataProvider instance, IMessageProvider instance and SecurityCache instance.
         /// </summary>
         //UNDONE: REMOVE: public static void StartTheSystem(SecurityConfiguration configuration)
-        public static void StartTheSystem(SecurityConfiguration configuration)
+        public static SecuritySystem StartTheSystem(SecurityConfiguration configuration)
         {
             var ss = new SecuritySystem(configuration.SecurityDataProvider, configuration.MessageProvider,
                 configuration.MissingEntityHandler, configuration);
             Instance = ss;
             ss.Start();
+            return ss;
         }
 
 
@@ -180,6 +181,7 @@ namespace SenseNet.Security
             if (activity != null)
             {
                 activity.FromReceiver = true;
+                //activity.Context = GeneralSecurityContext;
                 activity.Execute(GeneralSecurityContext, false);
             }
         }

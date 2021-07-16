@@ -50,11 +50,11 @@ namespace SenseNet.Security.Tests.Concurrency
         }
 
 
-        internal static void StartTheSystem(ISecurityDataProvider securityDataProvider)
+        internal static SecuritySystem StartTheSystem(ISecurityDataProvider securityDataProvider)
         {
             var messageSenderManager = new MessageSenderManager("asdf");
             // Call SecurityContext starter method.
-            SecurityContextForConcurrencyTests.StartTheSystem(new SecurityConfiguration
+            var securitySystem = SecurityContextForConcurrencyTests.StartTheSystem(new SecurityConfiguration
             {
                 SecurityDataProvider = securityDataProvider,
                 MessageProvider = new DefaultMessageProvider(messageSenderManager),
@@ -64,6 +64,8 @@ namespace SenseNet.Security.Tests.Concurrency
             // legacy logic
             // original line: MessageSender.Initialize("asdf");
             SecuritySystem.Instance.MessageSenderManager = messageSenderManager;
+
+            return securitySystem;
         }
 
         private static int Id(string name)
@@ -84,9 +86,9 @@ namespace SenseNet.Security.Tests.Concurrency
             var aces = SystemStartTests.CreateTestAces();
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities, Messages = new List<Tuple<int, DateTime, byte[]>>() };
 
-            StartTheSystem(new MemoryDataProvider(storage));
+            var securitySystem = StartTheSystem(new MemoryDataProvider(storage));
 
-            var ctx = new SecurityContextForConcurrencyTests(TestUser.User2);
+            var ctx = new SecurityContextForConcurrencyTests(TestUser.User2, securitySystem);
             // ReSharper disable once NotAccessedVariable
             var ok = ctx.HasPermission(1, PermissionType.See);
             new AclEditor(ctx)
@@ -103,20 +105,20 @@ namespace SenseNet.Security.Tests.Concurrency
 
             _started = DateTime.UtcNow;
 
-            Task.Run(() => AclExercise1(0));
-            var _ = Enumerable.Range(1, arguments.Agents).Select(x => Task.Run(() => AclExercise(x))).ToArray();
+            Task.Run(() => AclExercise1(0, securitySystem));
+            var _ = Enumerable.Range(1, arguments.Agents).Select(x => Task.Run(() => AclExercise(x, securitySystem))).ToArray();
         }
-        private static void AclExercise(int id)
+        private static void AclExercise(int id, SecuritySystem securitySystem)
         {
             if (0 == id % 2)
-                AclExercise1(id);
+                AclExercise1(id, securitySystem);
             else
-                AclExercise2(id);
+                AclExercise2(id, securitySystem);
         }
-        private static void AclExercise1(int id)
+        private static void AclExercise1(int id, SecuritySystem securitySystem)
         {
             var name = "Reader-" + id;
-            var ctx = new SecurityContextForConcurrencyTests(TestUser.User2);
+            var ctx = new SecurityContextForConcurrencyTests(TestUser.User2, securitySystem);
             var count = 0;
             while (!_stopped)
             {
@@ -133,10 +135,10 @@ namespace SenseNet.Security.Tests.Concurrency
                 count++;
             }
         }
-        private static void AclExercise2(int id)
+        private static void AclExercise2(int id, SecuritySystem securitySystem)
         {
             var name = "Writer-" + id;
-            var ctx = new SecurityContext(TestUser.User2);
+            var ctx = new SecurityContext(TestUser.User2, securitySystem);
             var count = 0;
             var permTypes = new[]{PermissionType.Custom01, PermissionType.Custom02};
             while (!_stopped)
@@ -168,32 +170,32 @@ namespace SenseNet.Security.Tests.Concurrency
             var aces = SystemStartTests.CreateTestAces();
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities, Messages = new List<Tuple<int, DateTime, byte[]>>() };
 
-            StartTheSystem(new MemoryDataProvider(storage));
+            var securitySystem = StartTheSystem(new MemoryDataProvider(storage));
 
             _started = DateTime.UtcNow;
 
-            var _ = Enumerable.Range(1, arguments.Agents).Select(x => Task.Run(() => SaqExercise(x))).ToArray();
+            var _ = Enumerable.Range(1, arguments.Agents).Select(x => Task.Run(() => SaqExercise(x, securitySystem))).ToArray();
         }
-        private static void SaqExercise(int id)
+        private static void SaqExercise(int id, SecuritySystem securitySystem)
         {
             // ReSharper disable once SwitchStatementMissingSomeCases
             switch (id % 3)
             {
                 case 0:
-                    SaqExercise0(id);
+                    SaqExercise0(id, securitySystem);
                     break;
                 case 1:
-                    SaqExercise1(id);
+                    SaqExercise1(id, securitySystem);
                     break;
                 case 2:
-                    SaqExercise2(id);
+                    SaqExercise2(id, securitySystem);
                     break;
                 //case 3:
                 //    SAQExercise3(id);
                 //    break;
             }
         }
-        private static void SaqExercise0(int id)
+        private static void SaqExercise0(int id, SecuritySystem securitySystem)
         {
             var name = "WaitA-" + id;
             var count = 0;
@@ -204,7 +206,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 if (0 == count % 100)
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
-                var ctx = new SecurityContext(TestUser.User2);
+                var ctx = new SecurityContext(TestUser.User2, securitySystem);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
                 activity.Execute(ctx, false);
 
@@ -212,7 +214,7 @@ namespace SenseNet.Security.Tests.Concurrency
             }
 
         }
-        private static void SaqExercise1(int id)
+        private static void SaqExercise1(int id, SecuritySystem securitySystem)
         {
             var name = "WaitB-" + id;
             var count = 0;
@@ -223,7 +225,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 if (0 == count % 100)
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
-                var _ = new SecurityContext(TestUser.User2);
+                var _ = new SecurityContext(TestUser.User2, securitySystem);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
                 SecuritySystem.Instance.DataHandler.SaveActivity(activity);
 
@@ -236,7 +238,7 @@ namespace SenseNet.Security.Tests.Concurrency
             }
 
         }
-        private static void SaqExercise2(int id)
+        private static void SaqExercise2(int id, SecuritySystem securitySystem)
         {
             var name = "WaitC-" + id;
             var count = 0;
@@ -247,7 +249,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 if (0 == count % 100)
                     Console.WriteLine("Running time: {0}, errors: {1}. {2} {3}", DateTime.UtcNow - _started, _errors, name, count);
 
-                var _ = new SecurityContext(TestUser.User2);
+                var _ = new SecurityContext(TestUser.User2, securitySystem);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
                 SecuritySystem.Instance.DataHandler.SaveActivity(activity);
 
@@ -355,7 +357,7 @@ namespace SenseNet.Security.Tests.Concurrency
             };
             var storage = new DatabaseStorage { Aces = aces, Memberships = new List<Membership>(), Entities = entities, Messages = new List<Tuple<int, DateTime, byte[]>>() };
 
-            StartTheSystem(new MemoryDataProvider(storage));
+            var securitySystem = StartTheSystem(new MemoryDataProvider(storage));
 
             const int retryCount = 100;
             const int threadCount = 6;
@@ -385,7 +387,7 @@ namespace SenseNet.Security.Tests.Concurrency
                     _stopped = true;
                 }));
 
-                tasks.AddRange(Enumerable.Range(1, threadCount).Select(x => Task.Run(() => DeleteCheckPermission(x))).ToList());
+                tasks.AddRange(Enumerable.Range(1, threadCount).Select(x => Task.Run(() => DeleteCheckPermission(x, securitySystem))).ToList());
 
                 Task.WaitAll(tasks.ToArray());
 
@@ -416,10 +418,10 @@ namespace SenseNet.Security.Tests.Concurrency
                 ctx.CreateSecurityEntity(i, i-1, Id("U1"));
             }
         }
-        private static void DeleteCheckPermission(int id)
+        private static void DeleteCheckPermission(int id, SecuritySystem securitySystem)
         {
             Trace.WriteLine("SECDEL> Start check thread id " + id);
-            var ctx = new SecurityContextForConcurrencyTests(TestUser.User1);
+            var ctx = new SecurityContextForConcurrencyTests(TestUser.User1, securitySystem);
             var eid = Id("E99");
             var caught = false;
             var count = 0;

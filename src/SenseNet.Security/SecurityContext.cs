@@ -31,11 +31,15 @@ namespace SenseNet.Security
         /// <summary>
         /// Creates a new instance of the SecurityContext using the passed user instance.
         /// </summary>
+        [Obsolete("##", true)]
         public SecurityContext(ISecurityUser currentUser) : this(currentUser, null) { }
+        /// <summary>
+        /// Creates a new instance of the SecurityContext using the passed user instance and the SecuritySystem.
+        /// </summary>
         public SecurityContext(ISecurityUser currentUser, SecuritySystem securitySystem)
         {
             CurrentUser = currentUser;
-            SecuritySystem = securitySystem ?? SecuritySystem.Instance;
+            SecuritySystem = securitySystem;
             Evaluator = new PermissionEvaluator(this);
             _permissionQuery = SecuritySystem.PermissionQuery;
         }
