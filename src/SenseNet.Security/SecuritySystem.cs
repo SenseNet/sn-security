@@ -96,7 +96,6 @@ namespace SenseNet.Security
 
             var uncompleted = DataHandler.LoadCompletionState(out var lastActivityIdFromDb);
 
-            MessageProvider.MessageReceived += MessageProvider_MessageReceived;
 
             Configuration.Identities.SystemUserId = _configuration.SystemUserId ?? -1;
             Configuration.Identities.VisitorUserId = _configuration.VisitorUserId ?? 6;
@@ -130,6 +129,8 @@ namespace SenseNet.Security
             SecurityActivityQueue = new SecurityActivityQueue(this, CommunicationMonitor, DataHandler, ActivityHistory);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
 
+            MessageProvider.MessageReceived += MessageProvider_MessageReceived;
+            MessageProvider.Initialize();
             MessageProvider.Start(StartedAt);
 
             _killed = false;
