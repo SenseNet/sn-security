@@ -771,7 +771,7 @@ namespace SenseNet.Security.Tests
             //var ctx = CurrentContext.Security;
             //ctx.SecuritySystem.EntityManager = new SecurityEntityManager(ctx.SecuritySystem.Cache);
             var ctx = CurrentContext.Security;
-            ctx.SecuritySystem.EntityManager = new SecurityEntityManager(ctx.SecuritySystem.Cache, new TestMissingEntityHandler());
+            ctx.SecuritySystem.EntityManager = new SecurityEntityManager(ctx.SecuritySystem.Cache, ctx.SecuritySystem.DataHandler, new TestMissingEntityHandler());
 
             //----
 

@@ -116,7 +116,7 @@ namespace SenseNet.Security
                 op.Successful = true;
             }
 
-            EntityManager = new SecurityEntityManager(Cache, MissingEntityHandler);
+            EntityManager = new SecurityEntityManager(Cache, DataHandler, MissingEntityHandler);
             Cache.EntityManager = EntityManager; // Property injection
             DataHandler.EntityManager = EntityManager; // Property injection
 

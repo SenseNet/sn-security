@@ -14,11 +14,11 @@ namespace SenseNet.Security
         private readonly DataHandler _dataHandler;
         private readonly SecurityCache _cache;
 
-        public SecurityEntityManager(SecurityCache cache, IMissingEntityHandler missingEntityHandler)
+        public SecurityEntityManager(SecurityCache cache, DataHandler dataHandler, IMissingEntityHandler missingEntityHandler)
         {
             _missingEntityHandler = missingEntityHandler;
             _cache = cache;
-            _dataHandler = SecuritySystem.Instance.DataHandler;
+            _dataHandler = dataHandler;
         }
 
         // ReSharper disable once InconsistentNaming
