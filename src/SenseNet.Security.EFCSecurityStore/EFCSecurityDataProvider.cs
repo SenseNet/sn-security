@@ -24,17 +24,19 @@ namespace SenseNet.Security.EFCSecurityStore
     {
         private readonly DataOptions _options;
         private readonly ILogger<EFCSecurityDataProvider> _logger;
-        private IMessageSenderManager MessageSenderManager => SecuritySystem.Instance.MessageSenderManager;
+        private readonly IMessageSenderManager _messageSenderManager;
 
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
         [Obsolete("Use the constructor with IOptions and dependency injection instead.")]
-        public EFCSecurityDataProvider() : this(0, null)
+        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager) : this(messageSenderManager, 0, null)
         {
         }
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
         [Obsolete("Use the constructor with IOptions and dependency injection instead.")]
-        public EFCSecurityDataProvider(int commandTimeout, string connectionString)
+        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager, int commandTimeout, string connectionString)
         {
+            _messageSenderManager = messageSenderManager;
+
             // fallback to configuration
             if (commandTimeout == 0)
                 commandTimeout = Configuration.Data.SecurityDatabaseCommandTimeoutInSeconds;
@@ -52,8 +54,10 @@ namespace SenseNet.Security.EFCSecurityStore
             _logger = NullLogger<EFCSecurityDataProvider>.Instance;
         }
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
-        public EFCSecurityDataProvider(IOptions<DataOptions> options, ILogger<EFCSecurityDataProvider> logger)
+        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager, IOptions<DataOptions> options, ILogger<EFCSecurityDataProvider> logger)
         {
+            _messageSenderManager = messageSenderManager;
+
             _options = options?.Value ?? new DataOptions();
             _logger = logger;
 
@@ -473,7 +477,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 result = db.EFMessages.Add(new EFMessage
                 {
                     ExecutionState = ExecutionState.Wait,
-                    SavedBy = MessageSenderManager.InstanceId,
+                    SavedBy = _messageSenderManager.InstanceId,
                     SavedAt = DateTime.UtcNow,
                     Body = body
                 });
@@ -502,7 +506,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 string result;
                 using (var db = Db())
                     result = db.AcquireSecurityActivityExecutionLock(
-                        securityActivity.Id, MessageSenderManager.InstanceId, timeoutInSeconds);
+                        securityActivity.Id, _messageSenderManager.InstanceId, timeoutInSeconds);
 
                 // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (result)

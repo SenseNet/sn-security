@@ -20,7 +20,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
 
         protected override ISecurityDataProvider GetDataProvider()
         {
-            return new EFCSecurityDataProvider(0, Configuration.Instance.GetConnectionString());
+            return new EFCSecurityDataProvider(new MessageSenderManager(), 0, Configuration.Instance.GetConnectionString());
         }
 
         private SecurityStorage Db()
@@ -308,7 +308,8 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
         {
             // part 1 ----------------------------------------------------------
             var services = new ServiceCollection()
-                .AddLogging();
+                .AddLogging()
+                .AddSingleton<IMessageSenderManager, MessageSenderManager>();
 
             // WITHOUT configuration
             services.AddEFCSecurityDataProvider();
@@ -318,10 +319,12 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
 
             Assert.IsTrue(sdp is EFCSecurityDataProvider);
             Assert.AreEqual(null, sdp.ConnectionString);
+            Assert.IsNotNull(new ObjectAccessor(sdp).GetField("_messageSenderManager"));
 
             // part 2 ----------------------------------------------------------
             services = new ServiceCollection()
-                .AddLogging();
+                .AddLogging()
+                .AddSingleton<IMessageSenderManager, MessageSenderManager>();
 
             // WITH configuration
             services.AddEFCSecurityDataProvider(options =>
@@ -335,6 +338,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
 
             Assert.IsTrue(sdp is EFCSecurityDataProvider);
             Assert.AreEqual("test123", sdp.ConnectionString);
+            Assert.IsNotNull(new ObjectAccessor(sdp).GetField("_messageSenderManager"));
         }
     }
 }
