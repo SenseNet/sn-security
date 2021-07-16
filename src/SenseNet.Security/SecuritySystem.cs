@@ -75,13 +75,14 @@ namespace SenseNet.Security
 
 
         public SecuritySystem(ISecurityDataProvider dataProvider, IMessageProvider messageProvider,
-            IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration)
+            IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration,
+            IMessageSenderManager messageSenderManager = null)
         {
             DataHandler = new DataHandler(dataProvider);
             ActivityHistory = new SecurityActivityHistoryController();
             DataProvider = dataProvider;
             MessageProvider = messageProvider;
-            MessageSenderManager = new MessageSenderManager();
+            MessageSenderManager = messageSenderManager ?? new MessageSenderManager();
             MissingEntityHandler = missingEntityHandler;
             _configuration = configuration;
         }
@@ -128,6 +129,8 @@ namespace SenseNet.Security
 
             SecurityActivityQueue = new SecurityActivityQueue(this, CommunicationMonitor, DataHandler, ActivityHistory);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
+
+            MessageProvider.Start(StartedAt);
 
             _killed = false;
         }

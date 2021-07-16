@@ -21,7 +21,7 @@ namespace SenseNet.Security.Messaging
         private bool _allowMessageProcessing;
         private DateTime _startingTheSystem = DateTime.MaxValue;
         //UNDONE: Initialize MessageSenderManager via ctor
-        public IMessageSenderManager MessageSenderManager => SecuritySystem.Instance.MessageSenderManager;
+        public IMessageSenderManager MessageSenderManager { get; }
 
         /// <summary>
         /// Gets or sets a value that tells the system whether the component has been shut down.
@@ -34,6 +34,11 @@ namespace SenseNet.Security.Messaging
         /// Returns the count of unprocessed incoming messages. Slowing down the producing of messages maybe necessary if it exceeds a certain amount.
         /// </summary>
         public virtual int IncomingMessageCount => _incomingMessageCount;
+
+        public MessageProviderBase(IMessageSenderManager messageSenderManager)
+        {
+            MessageSenderManager = messageSenderManager;
+        }
 
         /// <inheritdoc />
         public virtual void Initialize()

@@ -22,6 +22,9 @@ namespace SenseNet.Security.Messaging.Msmq
         public override string ReceiverName => _receiveQueue.Path;
 
         /* ============================================================================== Initialization */
+
+        public MsmqMessageProvider(IMessageSenderManager messageSenderManager) : base(messageSenderManager) { }
+
         public override void Initialize()
         {
             base.Initialize();

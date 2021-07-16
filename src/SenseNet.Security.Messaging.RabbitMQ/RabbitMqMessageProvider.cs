@@ -31,15 +31,19 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         /// <summary>
         /// Initializes a new instance of the RabbitMQMessageProvider class with default parameters.
         /// </summary>
-        public RabbitMQMessageProvider() { }
+        /// <param name="messageSenderManager">Required IMessageSenderManager instance.</param>
+        public RabbitMQMessageProvider(IMessageSenderManager messageSenderManager) : base(messageSenderManager) { }
+
         /// <summary>
         /// Initializes a new instance of the RabbitMQMessageProvider class.
         /// </summary>
+        /// <param name="messageSenderManager">Required IMessageSenderManager instance.</param>
         /// <param name="serviceUrl">RabbitMQ service url, including user credentials.</param>
         /// <param name="exchange">Optional exchange name. Mandatory in case the same service is used 
         /// by multiple different environments (e.g. test and live environment).</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public RabbitMQMessageProvider(string serviceUrl, string exchange = null)
+        public RabbitMQMessageProvider(IMessageSenderManager messageSenderManager, string serviceUrl,
+            string exchange = null) : base(messageSenderManager)
         {
             if (string.IsNullOrEmpty(serviceUrl))
                 throw new ArgumentNullException(nameof(serviceUrl));
