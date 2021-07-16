@@ -13,7 +13,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Gets a flattened list of group ids that the current is member of.
         /// </summary>
-        protected int[] GetFlattenedGroups()
+        public virtual int[] GetFlattenedGroups()
         {
             return Cache.GetGroups(CurrentUser.Id);
         }
@@ -21,7 +21,7 @@ namespace SenseNet.Security
         /// Gets a flattened list of group ids that the current is member of, plus Everyone (except in case of a visitor) 
         /// and the optional dynamic groups provided by the client application.
         /// </summary>
-        protected List<int> GetGroups()
+        public virtual List<int> GetGroups()
         {
             return Evaluator.GetGroups(CurrentUser.Id, 0, 0).ToList();
         }
@@ -29,7 +29,7 @@ namespace SenseNet.Security
         /// Gets a flattened list of group ids that the current is member of, plus Everyone (except in case of a visitor),
         /// plus Owners (if applicable) and the optional dynamic groups provided by the client application.
         /// </summary>
-        protected List<int> GetGroupsWithOwnership(int entityId)
+        public virtual List<int> GetGroupsWithOwnership(int entityId)
         {
             return Evaluator.GetGroups(CurrentUser.Id, GetOwnerId(entityId), entityId).ToList();
         }
@@ -39,7 +39,7 @@ namespace SenseNet.Security
         /// is transitive, meaning it will look for relations in the whole group graph, not 
         /// only direct memberships.
         /// </summary>
-        protected bool IsInGroup(int memberId, int groupId)
+        public virtual bool IsInGroup(int memberId, int groupId)
         {
             return Cache.IsInGroup(memberId, groupId);
         }
@@ -54,7 +54,7 @@ namespace SenseNet.Security
         /// <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
         /// <param name="parentGroups">Collection of the parent group member identifiers. Use this if the parent 
         /// group or groups are already known when this method is called. Can be null or empty.</param>
-        protected void AddMembersToSecurityGroup(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups = null)
+        public virtual void AddMembersToSecurityGroup(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups = null)
         {
             if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
@@ -72,7 +72,7 @@ namespace SenseNet.Security
         /// <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
         /// <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
-        protected void RemoveMembersFromSecurityGroup(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups = null)
+        public virtual void RemoveMembersFromSecurityGroup(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups = null)
         {
             if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
@@ -88,7 +88,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the container group. Cannot be 0.</param>
         /// <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
-        protected void AddGroupsToSecurityGroup(int groupId, IEnumerable<int> groupMembers)
+        public virtual void AddGroupsToSecurityGroup(int groupId, IEnumerable<int> groupMembers)
         {
             if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
@@ -103,7 +103,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the member group. Cannot be 0.</param>
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
-        protected void AddGroupToSecurityGroups(int groupId, IEnumerable<int> parentGroups)
+        public virtual void AddGroupToSecurityGroups(int groupId, IEnumerable<int> parentGroups)
         {
             if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
@@ -119,7 +119,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the container group. Cannot be 0.</param>
         /// <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
-        protected void RemoveGroupsFromSecurityGroup(int groupId, IEnumerable<int> groupMembers)
+        public virtual void RemoveGroupsFromSecurityGroup(int groupId, IEnumerable<int> groupMembers)
         {
             if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
@@ -135,7 +135,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the member group. Cannot be 0.</param>
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
-        protected void RemoveGroupFromSecurityGroups(int groupId, IEnumerable<int> parentGroups)
+        public virtual void RemoveGroupFromSecurityGroups(int groupId, IEnumerable<int> parentGroups)
         {
             if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
@@ -151,7 +151,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the container group. Cannot be 0.</param>
         /// <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
-        protected void AddUsersToSecurityGroup(int groupId, IEnumerable<int> userMembers)
+        public virtual void AddUsersToSecurityGroup(int groupId, IEnumerable<int> userMembers)
         {
             if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
@@ -166,7 +166,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="userId">Identifier of the the user member that will be added. Cannot be 0.</param>
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
-        protected void AddUserToSecurityGroups(int userId, IEnumerable<int> parentGroups)
+        public virtual void AddUserToSecurityGroups(int userId, IEnumerable<int> parentGroups)
         {
             if (userId == default)
                 throw new ArgumentException("The userId cannot be " + default(int));
@@ -182,7 +182,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the container group. Cannot be 0.</param>
         /// <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
-        protected void RemoveUsersFromSecurityGroup(int groupId, IEnumerable<int> userMembers)
+        public virtual void RemoveUsersFromSecurityGroup(int groupId, IEnumerable<int> userMembers)
         {
             if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
@@ -197,7 +197,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="userId">Identifier of the user the will be removed. Cannot be 0.</param>
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
-        protected void RemoveUserFromSecurityGroups(int userId, IEnumerable<int> parentGroups)
+        public virtual void RemoveUserFromSecurityGroups(int userId, IEnumerable<int> parentGroups)
         {
             if (userId == default)
                 throw new ArgumentException("The userId cannot be " + default(int));
@@ -210,7 +210,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes the specified group and its relations including related security entries.
         /// </summary>
-        protected void DeleteSecurityGroup(int groupId)
+        public virtual void DeleteSecurityGroup(int groupId)
         {
             if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
@@ -220,7 +220,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes the user from the system by removing all memberships and security entries related to this user.
         /// </summary>
-        protected void DeleteUser(int userId)
+        public virtual void DeleteUser(int userId)
         {
             if (userId == default)
                 throw new ArgumentException("The userId cannot be " + default(int));
@@ -230,7 +230,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes the specified group or user and its relations including related security entries.
         /// </summary>
-        protected void DeleteIdentity(int id)
+        public virtual void DeleteIdentity(int id)
         {
             if (id == default)
                 throw new ArgumentException("The id cannot be " + default(int));
@@ -240,7 +240,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes the specified groups or users and their relations including related security entries.
         /// </summary>
-        protected void DeleteIdentities(IEnumerable<int> ids)
+        public virtual void DeleteIdentities(IEnumerable<int> ids)
         {
             if (ids == null)
                 throw new ArgumentException("ids");
