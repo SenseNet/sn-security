@@ -28,28 +28,6 @@ namespace SenseNet.Security
     /// </summary>
     public class SecuritySystem
     {
-        //UNDONE: REMOVE: public static SecuritySystem.Instance
-        public static SecuritySystem Instance { get; private set; }
-
-        /// <summary>
-        /// Starts the security subsystem using the passed configuration.
-        /// Call this method only once in your application's startup sequence.
-        /// The method prepares and memorizes the main components for 
-        /// creating SecurityContext instances in a fastest possible way.
-        /// The main components are global objects: 
-        /// ISecurityDataProvider instance, IMessageProvider instance and SecurityCache instance.
-        /// </summary>
-        //UNDONE: REMOVE: public static void StartTheSystem(SecurityConfiguration configuration)
-        public static SecuritySystem StartTheSystem(SecurityConfiguration configuration)
-        {
-            var ss = new SecuritySystem(configuration.SecurityDataProvider, configuration.MessageProvider,
-                configuration.MissingEntityHandler, configuration);
-            Instance = ss;
-            ss.Start();
-            return ss;
-        }
-
-
         public ISecurityDataProvider DataProvider { get; }
         internal DataHandler DataHandler { get; }
         public IMessageProvider MessageProvider { get; }

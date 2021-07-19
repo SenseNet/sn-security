@@ -32,12 +32,15 @@ namespace SenseNet.Security.Tests.TestPortal
         // Called by tests. The messageProvider must be initialized.
         internal static SecuritySystem StartTheSystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider, TextWriter traceChannel = null)
         {
-            var securitySystem = SecuritySystem.StartTheSystem(new SecurityConfiguration
-            {
-                SecurityDataProvider = securityDataProvider,
-                MessageProvider = messageProvider,
-                CommunicationMonitorRunningPeriodInSeconds = 31
-            });
+            var securitySystem = new SecuritySystem(securityDataProvider, messageProvider,
+                new MissingEntityHandler(), new SecurityConfiguration
+                {
+                    SecurityDataProvider = securityDataProvider,
+                    MessageProvider = messageProvider,
+                    CommunicationMonitorRunningPeriodInSeconds = 31
+                });
+            securitySystem.Start();
+
             return securitySystem;
         }
 
