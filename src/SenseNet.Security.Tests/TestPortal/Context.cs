@@ -33,12 +33,8 @@ namespace SenseNet.Security.Tests.TestPortal
         internal static SecuritySystem StartTheSystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider, TextWriter traceChannel = null)
         {
             var securitySystem = new SecuritySystem(securityDataProvider, messageProvider,
-                new MissingEntityHandler(), new SecurityConfiguration
-                {
-                    SecurityDataProvider = securityDataProvider,
-                    MessageProvider = messageProvider,
-                    CommunicationMonitorRunningPeriodInSeconds = 31
-                });
+                new MissingEntityHandler(),
+                new SecurityConfiguration {CommunicationMonitorRunningPeriodInSeconds = 31});
             securitySystem.Start();
 
             return securitySystem;

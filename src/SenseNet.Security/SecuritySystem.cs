@@ -13,14 +13,16 @@ namespace SenseNet.Security
     {
         private static readonly int[] EmptyGroups = new int[0];
 
+        public SecuritySystemUser(int id) { Id = id; }
+
+        /// <summary>Id of the user. This value comes from Configuration.Identities.SystemUserId</summary>
+        public int Id { get; }
+
         /// <summary>Interface implementation. Not used in this class.</summary>
         public IEnumerable<int> GetDynamicGroups(int entityId)
         {
             return EmptyGroups;
         }
-
-        /// <summary>Id of the user. This value comes from Configuration.Identities.SystemUserId</summary>
-        public int Id => Configuration.Identities.SystemUserId;
     }
 
     /// <summary>
@@ -28,6 +30,7 @@ namespace SenseNet.Security
     /// </summary>
     public class SecuritySystem
     {
+        internal SecurityConfiguration Configuration { get; }
         public ISecurityDataProvider DataProvider { get; }
         internal DataHandler DataHandler { get; }
         public IMessageProvider MessageProvider { get; }
@@ -40,10 +43,9 @@ namespace SenseNet.Security
         internal SecurityActivityHistoryController ActivityHistory { get; set; }
         internal PermissionQuery PermissionQuery { get; set; }
 
-        private readonly SecurityConfiguration _configuration;
         private bool _killed;
 
-        public ISecurityUser SystemUser { get; } = new SecuritySystemUser();
+        public ISecurityUser SystemUser { get; }
 
         /// <summary>
         /// Gets a general context for built in system user
@@ -56,6 +58,7 @@ namespace SenseNet.Security
         public SecuritySystem(ISecurityDataProvider dataProvider, IMessageProvider messageProvider,
             IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration)
         {
+            Configuration = configuration;
             dataProvider.ActivitySerializer = new ActivitySerializer(this);
             DataHandler = new DataHandler(dataProvider);
             ActivityHistory = new SecurityActivityHistoryController();
@@ -63,7 +66,7 @@ namespace SenseNet.Security
             MessageProvider = messageProvider;
             MessageSenderManager = messageProvider.MessageSenderManager;
             MissingEntityHandler = missingEntityHandler;
-            _configuration = configuration;
+            SystemUser = new SecuritySystemUser(configuration.SystemUserId);
         }
 
         public void Start()
@@ -75,15 +78,9 @@ namespace SenseNet.Security
 
             var uncompleted = DataHandler.LoadCompletionState(out var lastActivityIdFromDb);
 
-
-            Configuration.Identities.SystemUserId = _configuration.SystemUserId ?? -1;
-            Configuration.Identities.VisitorUserId = _configuration.VisitorUserId ?? 6;
-            Configuration.Identities.EveryoneGroupId = _configuration.EveryoneGroupId ?? 8;
-            Configuration.Identities.OwnerGroupId = _configuration.OwnerGroupId ?? 9;
-
-            Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds = _configuration.CommunicationMonitorRunningPeriodInSeconds ?? 30;
-            Configuration.Messaging.SecurityActivityLifetimeInMinutes = _configuration.SecurityActivityLifetimeInMinutes ?? 42;
-            Configuration.Messaging.SecurityActivityTimeoutInSeconds = _configuration.SecurityActivityTimeoutInSeconds ?? 120;
+            Security.Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds = Configuration.CommunicationMonitorRunningPeriodInSeconds ?? 30;
+            Security.Configuration.Messaging.SecurityActivityLifetimeInMinutes = Configuration.SecurityActivityLifetimeInMinutes ?? 42;
+            Security.Configuration.Messaging.SecurityActivityTimeoutInSeconds = Configuration.SecurityActivityTimeoutInSeconds ?? 120;
 
             PermissionTypeBase.InferForcedRelations();
 

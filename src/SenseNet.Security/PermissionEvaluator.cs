@@ -37,12 +37,23 @@ namespace SenseNet.Security
         private readonly SecurityCache _cache;
         private readonly PermissionQuery _permissionQuery;
 
+        private readonly int _systemUserId;
+        private readonly int _visitorUserId;
+        private readonly int _everyoneGroupId;
+        private readonly int _ownerGroupId;
+
         internal PermissionEvaluator(SecurityContext securityContext)
         {
             _securityContext = securityContext;
             _cache = securityContext.SecuritySystem.Cache;
             _entityManager = securityContext.SecuritySystem.EntityManager;
             _permissionQuery = securityContext.SecuritySystem.PermissionQuery;
+
+            var config = securityContext.SecuritySystem.Configuration;
+            _systemUserId = config.SystemUserId;
+            _visitorUserId = config.VisitorUserId;
+            _everyoneGroupId = config.EveryoneGroupId;
+            _ownerGroupId = config.OwnerGroupId;
         }
 
         internal void Initialize()
@@ -64,7 +75,7 @@ namespace SenseNet.Security
         }
         internal PermissionValue GetPermission(int userId, int entityId, int ownerId, EntryType? entryType, params PermissionTypeBase[] permissions)
         {
-            if (userId == Configuration.Identities.SystemUserId)
+            if (userId == _securityContext.SecuritySystem.Configuration.SystemUserId)
                 return PermissionValue.Allowed;
 
             _entityManager.EnterReadLock();
@@ -84,7 +95,7 @@ namespace SenseNet.Security
         [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         internal PermissionValue GetPermissionSafe(int userId, int entityId, int ownerId, EntryType? entryType, params PermissionTypeBase[] permissions)
         {
-            if (userId == Configuration.Identities.SystemUserId)
+            if (userId == _systemUserId)
                 return PermissionValue.Allowed;
 
             //==>
@@ -128,7 +139,7 @@ namespace SenseNet.Security
         }
         internal PermissionValue GetSubtreePermission(int userId, int entityId, int ownerId, params PermissionTypeBase[] permissions)
         {
-            if (userId == Configuration.Identities.SystemUserId)
+            if (userId == _systemUserId)
                 return PermissionValue.Allowed;
 
             var identities = GetIdentities(userId, ownerId, entityId);
@@ -311,11 +322,11 @@ namespace SenseNet.Security
             if (_cache.Membership.TryGetValue(userId, out var flattenedGroups))
                 collection.AddRange(flattenedGroups);
 
-            if (userId != Configuration.Identities.VisitorUserId)
-                collection.Add(Configuration.Identities.EveryoneGroupId);
+            if (userId != _visitorUserId)
+                collection.Add(_everyoneGroupId);
 
             if (userId == ownerId)
-                collection.Add(Configuration.Identities.OwnerGroupId);
+                collection.Add(_ownerGroupId);
 
             var extension = _securityContext.GetDynamicGroups(entityId);
             if(extension==null)
