@@ -20,7 +20,7 @@ namespace SenseNet.Security.Messaging
         private int _incomingMessageCount;
         private bool _allowMessageProcessing;
         private DateTime _startingTheSystem = DateTime.MaxValue;
-        //UNDONE: Initialize MessageSenderManager via ctor
+
         public IMessageSenderManager MessageSenderManager { get; }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         public virtual int IncomingMessageCount => _incomingMessageCount;
 
-        public MessageProviderBase(IMessageSenderManager messageSenderManager)
+        protected MessageProviderBase(IMessageSenderManager messageSenderManager)
         {
             MessageSenderManager = messageSenderManager;
         }
