@@ -6,25 +6,6 @@ namespace SenseNet.Security.Configuration
     internal static class Messaging //UNDONE: Has static members (configuration)
     {
         // ReSharper disable once ConvertToConstant.Local
-        private static readonly string MessageProviderKey = "SecurityMessageProvider";
-        private static string _messageProvider;
-
-        public static string MessageProvider
-        {
-            get
-            {
-                if (_messageProvider == null)
-                {
-                    _messageProvider = ConfigurationManager.AppSettings[MessageProviderKey];
-                    if (string.IsNullOrEmpty(_messageProvider))
-                        _messageProvider = string.Empty;
-                }
-
-                return _messageProvider;
-            }
-        }
-
-        // ReSharper disable once ConvertToConstant.Local
         private static readonly string DistributableSecurityActivityMaxSizeKey = "DistributableSecurityActivityMaxSize";
         private static int? _distributableSecurityActivityMaxSize;
 
@@ -45,20 +26,8 @@ namespace SenseNet.Security.Configuration
         }
         public static int CommunicationMonitorRunningPeriodInSeconds { get; internal set; }
 
-        [Obsolete("Use the overload with correct name.", true)]
-        public static int SecuritActivityLifetimeInMinutes
-        {
-            get => SecurityActivityLifetimeInMinutes;
-            set => SecurityActivityLifetimeInMinutes = value;
-        }
         public static int SecurityActivityLifetimeInMinutes { get; internal set; }
 
-        [Obsolete("Use the overload with correct name.", true)]
-        public static int SecuritActivityTimeoutInSeconds
-        {
-            get => SecurityActivityTimeoutInSeconds;
-            set => SecurityActivityTimeoutInSeconds = value;
-        }
         public static int SecurityActivityTimeoutInSeconds { get; internal set; }
 
         internal static readonly int SecurityActivityExecutionLockRefreshPeriodInSeconds = 10;

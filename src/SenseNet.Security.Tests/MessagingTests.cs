@@ -89,9 +89,6 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Messaging_BigActivity()
         {
-//Debugger.Launch();
-//Debugger.Break();
-
             SnLog.Instance = new TestLogger();
 
             //---- Ensure test data

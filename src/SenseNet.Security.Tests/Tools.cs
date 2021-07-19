@@ -11,7 +11,6 @@ namespace SenseNet.Security.Tests
 {
     public static class Tools
     {
-        [Obsolete("##", false)]
         public static int GetId(string name)
         {
             if (name[0] == 'G')
@@ -23,9 +22,6 @@ namespace SenseNet.Security.Tests
             throw new NotSupportedException("Invalid name: " + name);
         }
 
-        //============================================================================================================
-
-        [Obsolete("##", false)]
         public static List<Membership> CreateInMemoryMembershipTable(Dictionary<int, SecurityGroup> groups)
         {
             var table = new List<Membership>();
