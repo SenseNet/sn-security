@@ -39,6 +39,8 @@ namespace SenseNet.Security.Data
         /// </summary>
         public string ConnectionString { get; set; }
 
+        public IActivitySerializer ActivitySerializer { get; set; }
+
         /// <inheritdoc />
         public void InstallDatabase()
         {
@@ -293,7 +295,7 @@ namespace SenseNet.Security.Data
             lock (_messageLock)
             {
                 var id = Interlocked.Increment(ref LastActivityId);
-                var body =  SecurityActivity.SerializeActivity(activity);
+                var body = ActivitySerializer.SerializeActivity(activity);
                 bodySize = body.Length;
                 Storage.Messages.Add(new Tuple<int, DateTime, byte[]>(id, DateTime.UtcNow, body));
                 return id;
@@ -325,7 +327,7 @@ namespace SenseNet.Security.Data
 
                 foreach (var (id, _, body) in Storage.Messages.Where(x => x.Item1 >= from && x.Item1 <= to).Take(count))
                 {
-                    var activity = SecurityActivity.DeserializeActivity(body);
+                    var activity = ActivitySerializer.DeserializeActivity(body);
                     if (activity == null)
                         continue;
                     activity.Id = id;
@@ -347,7 +349,7 @@ namespace SenseNet.Security.Data
 
                 foreach (var (id, _, body) in Storage.Messages.Where(x => gaps.Contains(x.Item1)))
                 {
-                    var activity = SecurityActivity.DeserializeActivity(body);
+                    var activity = ActivitySerializer.DeserializeActivity(body);
                     if (activity == null)
                         continue;
                     activity.Id = id;
@@ -369,7 +371,7 @@ namespace SenseNet.Security.Data
                 if (item == null)
                     return null;
 
-                var activity = SecurityActivity.DeserializeActivity(item.Item3);
+                var activity = ActivitySerializer.DeserializeActivity(item.Item3);
                 activity.Id = item.Item1;
                 return activity;
             }

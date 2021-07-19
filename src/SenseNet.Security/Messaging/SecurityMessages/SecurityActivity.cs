@@ -33,11 +33,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
         private Exception _executionException;
 
-        [NonSerialized] private SecurityContext _context;
+        [NonSerialized] private SecurityContext __context;
         /// <summary>
-        /// Pointer to the current SecurityContext.
+        /// Gets the current SecurityContext.
         /// </summary>
-        public SecurityContext Context => _context ?? SecuritySystem.Instance.GeneralSecurityContext;
+        public SecurityContext Context { get => __context; internal set => __context = value; }
 
         /// <summary>
         /// Initializes the instance.
@@ -57,7 +57,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// Otherwise the method returns immediately.</param>
         public void Execute(SecurityContext context, bool waitForComplete = true)
         {
-            _context = context;
+            Context = context;
             if (Sender == null)
                 Sender = context.SecuritySystem.MessageSenderManager.CreateMessageSender();
 
@@ -194,49 +194,6 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             AttachedActivity?.Finish();
             _finishSignal?.Set();
         }
-
-        /// <summary>
-        /// Serializes an activity for persisting to database.
-        /// </summary>
-        public static byte[] SerializeActivity(SecurityActivity activity)
-        {
-            try
-            {
-                var ms = new MemoryStream();
-                var bf = new BinaryFormatter();
-                bf.Serialize(ms, activity);
-                ms.Flush();
-                ms.Position = 0;
-                return ms.GetBuffer();
-            }
-            catch (Exception e) // logged and rethrown
-            {
-                SnLog.WriteException(e, EventMessage.Error.Serialization, EventId.Serialization);
-                throw;
-            }
-        }
-        /// <summary>
-        /// Deserializes an activity that comes from the to database.
-        /// </summary>
-        /// <param name="bytes"></param>
-        /// <returns></returns>
-        public static SecurityActivity DeserializeActivity(byte[] bytes)
-        {
-            Stream data = new MemoryStream(bytes);
-
-            var bf = new BinaryFormatter();
-            SecurityActivity activity = null;
-            try
-            {
-                activity = (SecurityActivity)bf.Deserialize(data);
-            }
-            catch (SerializationException e) // logged
-            {
-                SnLog.WriteException(e, EventMessage.Error.Deserialization, EventId.Serialization);
-            }
-            return activity;
-        }
-
 
         internal static class DependencyTools
         {

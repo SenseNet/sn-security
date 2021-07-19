@@ -88,6 +88,8 @@ namespace SenseNet.Security.EFCSecurityStore
             set => _options.ConnectionString = value;
         }
 
+        public IActivitySerializer ActivitySerializer { get; set; }
+
         /// <summary>
         /// Creates the database schema and other components (tables, etc.). It requires an existing database.
         /// </summary>
@@ -407,7 +409,7 @@ namespace SenseNet.Security.EFCSecurityStore
             {
                 foreach (var item in db.EFMessages.Where(x => x.Id >= from && x.Id <= to).OrderBy(x => x.Id).Take(count))
                 {
-                    var activity = SecurityActivity.DeserializeActivity(item.Body);
+                    var activity = ActivitySerializer.DeserializeActivity(item.Body);
                     if (activity == null)
                         continue;
                     activity.Id = item.Id;
@@ -434,7 +436,7 @@ namespace SenseNet.Security.EFCSecurityStore
             {
                 foreach (var item in db.EFMessages.Where(x => gaps.Contains(x.Id)).OrderBy(x => x.Id))
                 {
-                    var activity = SecurityActivity.DeserializeActivity(item.Body);
+                    var activity = ActivitySerializer.DeserializeActivity(item.Body);
                     if (activity == null)
                         continue;
                     activity.Id = item.Id;
@@ -455,7 +457,7 @@ namespace SenseNet.Security.EFCSecurityStore
             if (item == null)
                 return null;
 
-            var activity = SecurityActivity.DeserializeActivity(item.Body);
+            var activity = ActivitySerializer.DeserializeActivity(item.Body);
             activity.Id = item.Id;
             return activity;
         }
@@ -469,7 +471,7 @@ namespace SenseNet.Security.EFCSecurityStore
         /// <returns>The generated activity id.</returns>
         public int SaveSecurityActivity(SecurityActivity activity, out int bodySize)
         {
-            var body = SecurityActivity.SerializeActivity(activity);
+            var body = ActivitySerializer.SerializeActivity(activity);
             bodySize = body.Length;
             EntityEntry<EFMessage> result;
             using (var db = Db())

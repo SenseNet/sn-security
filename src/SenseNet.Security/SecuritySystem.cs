@@ -78,6 +78,7 @@ namespace SenseNet.Security
         public SecuritySystem(ISecurityDataProvider dataProvider, IMessageProvider messageProvider,
             IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration)
         {
+            dataProvider.ActivitySerializer = new ActivitySerializer(this);
             DataHandler = new DataHandler(dataProvider);
             ActivityHistory = new SecurityActivityHistoryController();
             DataProvider = dataProvider;
@@ -181,7 +182,7 @@ namespace SenseNet.Security
             if (activity != null)
             {
                 activity.FromReceiver = true;
-                //activity.Context = GeneralSecurityContext;
+                activity.Context = GeneralSecurityContext;
                 activity.Execute(GeneralSecurityContext, false);
             }
         }

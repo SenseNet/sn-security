@@ -15,6 +15,11 @@ namespace SenseNet.Security
         string ConnectionString { get; set; }
 
         /// <summary>
+        /// Gets or sets the ActivitySerializer for loading activities.
+        /// </summary>
+        IActivitySerializer ActivitySerializer { get; set; }
+
+        /// <summary>
         /// Creates the database schema and other components (tables, etc.). It requires an existing database.
         /// </summary>
         // ReSharper disable once UnusedMemberInSuper.Global
