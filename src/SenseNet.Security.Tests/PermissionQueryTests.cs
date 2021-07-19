@@ -204,10 +204,10 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(HasNormalPermission(id12, Id("E66"), _permissions["P6"]));
             Assert.IsFalse(HasNormalPermission(id13, Id("E66"), _permissions["P6"]));
         }
-        private static bool HasNormalPermission(int userId, int entityId, PermissionType permission)
+        private bool HasNormalPermission(int userId, int entityId, PermissionType permission)
         {
-            return new TestSecurityContext(TestUser.User1).Evaluator.GetPermission(userId, entityId, 0, EntryType.Normal,
-                permission) == PermissionValue.Allowed;
+            return new SecurityContext(TestUser.User1, CurrentContext.Security.SecuritySystem)
+                .Evaluator.GetPermission(userId, entityId, 0, EntryType.Normal, permission) == PermissionValue.Allowed;
         }
 
         [TestMethod]
@@ -461,7 +461,7 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
-            CurrentContext.Security.CreateSecurityEntity(entity);
+            CurrentContext.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
             return entity;
         }
 

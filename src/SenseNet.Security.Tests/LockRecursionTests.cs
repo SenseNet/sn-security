@@ -31,16 +31,10 @@ namespace SenseNet.Security.Tests
         {
             //SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             //MemoryDataProvider.LastActivityId = 0;
-            Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), new DefaultMessageProvider(new MessageSenderManager()));
-            var context = new Context(currentUser);
+            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), new DefaultMessageProvider(new MessageSenderManager()));
+            var context = new Context(currentUser, securitySystem);
             CreatePlayground(context);
             return context;
-        }
-        private static Context GetContext(LockRecursionUser currentUser)
-        {
-            //SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
-            //MemoryDataProvider.LastActivityId = 0;
-            return new Context(currentUser);
         }
 
         private readonly Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
@@ -222,7 +216,7 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
-            context.Security.CreateSecurityEntity(entity);
+            context.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
         }
 
         private static int Id(string name)
@@ -240,19 +234,5 @@ namespace SenseNet.Security.Tests
             context.Security.HasPermission(Id("E1"), PermissionType.Open);
         }
 
-        //[TestMethod]
-        public void LockRecursion_AvoidWithElevation()
-        {
-            var user = new LockRecursionUser(Id("E1"), entityId =>
-            {
-                // Simulate permission check in the getter of the PortalContext.ContextNode 
-                var elevatedContext = GetContext(new LockRecursionUser(-1, e => new int[0]));
-                var _ = elevatedContext.Security.GetEffectiveEntries(Id("E1"), new[] {Id("U1")});
-                return new int[0];
-            });
-
-            var context = GetContextAndStartTheSystem(user);
-            context.Security.HasPermission(Id("E1"), PermissionType.Open);
-        }
     }
 }

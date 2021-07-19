@@ -54,16 +54,21 @@ namespace SenseNet.Security.Tests.Concurrency
         {
             var messageSenderManager = new MessageSenderManager("asdf");
             // Call SecurityContext starter method.
-            var securitySystem = SecurityContextForConcurrencyTests.StartTheSystem(new SecurityConfiguration
-            {
-                SecurityDataProvider = securityDataProvider,
-                MessageProvider = new DefaultMessageProvider(messageSenderManager),
-                CommunicationMonitorRunningPeriodInSeconds = 31
-            });
+            //var securitySystem = SecurityContextForConcurrencyTests.StartTheSystem(new SecurityConfiguration
+            //{
+            //    SecurityDataProvider = securityDataProvider,
+            //    MessageProvider = new DefaultMessageProvider(messageSenderManager),
+            //    CommunicationMonitorRunningPeriodInSeconds = 31
+            //});
+            var config = new SecurityConfiguration {CommunicationMonitorRunningPeriodInSeconds = 31};
+            var securitySystem = new SecuritySystem(securityDataProvider,
+                new DefaultMessageProvider(messageSenderManager),
+                new MissingEntityHandler(), config);
+            securitySystem.Start();
 
             // legacy logic
             // original line: MessageSender.Initialize("asdf");
-            securitySystem.MessageSenderManager = messageSenderManager;
+            //securitySystem.MessageSenderManager = messageSenderManager;
 
             return securitySystem;
         }
@@ -88,7 +93,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
             var securitySystem = StartTheSystem(new MemoryDataProvider(storage));
 
-            var ctx = new SecurityContextForConcurrencyTests(TestUser.User2, securitySystem);
+            var ctx = new SecurityContext(TestUser.User2, securitySystem);
             // ReSharper disable once NotAccessedVariable
             var ok = ctx.HasPermission(1, PermissionType.See);
             new AclEditor(ctx)
@@ -118,7 +123,7 @@ namespace SenseNet.Security.Tests.Concurrency
         private static void AclExercise1(int id, SecuritySystem securitySystem)
         {
             var name = "Reader-" + id;
-            var ctx = new SecurityContextForConcurrencyTests(TestUser.User2, securitySystem);
+            var ctx = new SecurityContext(TestUser.User2, securitySystem);
             var count = 0;
             while (!_stopped)
             {
@@ -229,11 +234,11 @@ namespace SenseNet.Security.Tests.Concurrency
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
                 securitySystem.DataHandler.SaveActivity(activity);
 
-                var method = typeof(SecurityContext).GetMethod("MessageProvider_MessageReceived", BindingFlags.Static | BindingFlags.NonPublic);
+                var method = typeof(SecuritySystem).GetMethod("MessageProvider_MessageReceived", BindingFlags.Instance | BindingFlags.NonPublic);
                 if (method == null)
                     throw new ApplicationException("Method not found: MessageProvider_MessageReceived");
 
-                method.Invoke(null, new object[] { null, new MessageReceivedEventArgs(activity) });
+                method.Invoke(securitySystem, new object[] { null, new MessageReceivedEventArgs(activity) });
                 count++;
             }
 
@@ -271,7 +276,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
             var securitySystem = StartTheSystem(new MemoryDataProvider(storage));
 
-            var ctx = new TestSecurityContext(TestUser.User3);
+            var ctx = new SecurityContext(TestUser.User3, securitySystem);
             var unused1 = ctx.HasPermission(52, PermissionType.Custom01);
 
             _started = DateTime.UtcNow;
@@ -368,7 +373,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 _stopped = false;
 
                 // build the deep test entity tree
-                DeleteBuildSubtree();
+                DeleteBuildSubtree(securitySystem.GeneralSecurityContext);
 
                 var sw = Stopwatch.StartNew();
 
@@ -381,7 +386,7 @@ namespace SenseNet.Security.Tests.Concurrency
                     Trace.WriteLine("SECDEL> Start DEL thread.");
                     Thread.Sleep(10);
                     var delWatch = Stopwatch.StartNew();
-                    SecurityContextForConcurrencyTests.General.DeleteEntity(60);
+                    securitySystem.GeneralSecurityContext.DeleteEntity(60);
                     delWatch.Stop();
                     Trace.WriteLine($"SECDEL> End DEL thread. Elapsed time: {delWatch.ElapsedMilliseconds}");
                     _stopped = true;
@@ -406,10 +411,8 @@ namespace SenseNet.Security.Tests.Concurrency
         /// <summary>
         /// Create a deep tree
         /// </summary>
-        private static void DeleteBuildSubtree()
+        private static void DeleteBuildSubtree(SecurityContext ctx)
         {
-            var ctx = SecurityContextForConcurrencyTests.General;
-
             // create first entity
             ctx.CreateSecurityEntity(Id("E60"), Id("E42"), Id("U1"));
 
@@ -421,7 +424,7 @@ namespace SenseNet.Security.Tests.Concurrency
         private static void DeleteCheckPermission(int id, SecuritySystem securitySystem)
         {
             Trace.WriteLine("SECDEL> Start check thread id " + id);
-            var ctx = new SecurityContextForConcurrencyTests(TestUser.User1, securitySystem);
+            var ctx = new SecurityContext(TestUser.User1, securitySystem);
             var eid = Id("E99");
             var caught = false;
             var count = 0;

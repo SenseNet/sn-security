@@ -31,7 +31,7 @@ namespace SenseNet.Security.Tests
 
             var securitySystem = Context.StartTheSystem(dataProvider, new DefaultMessageProvider(new MessageSenderManager()));
             securitySystem.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
-            CurrentContext = new Context(TestUser.User1);
+            CurrentContext = new Context(TestUser.User1, securitySystem);
 
             DataHandler = securitySystem.DataHandler;
             DataProvider = securitySystem.DataProvider;
@@ -170,7 +170,7 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
-            CurrentContext.Security.CreateSecurityEntity(entity);
+            CurrentContext.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
         }
 
         private TestEntity GetRepositoryEntity(int id)

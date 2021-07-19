@@ -32,18 +32,12 @@ namespace SenseNet.Security.Tests.TestPortal
         // Called by tests. The messageProvider must be initialized.
         internal static SecuritySystem StartTheSystem(ISecurityDataProvider securityDataProvider, IMessageProvider messageProvider, TextWriter traceChannel = null)
         {
-            // Timestamp of the starting.
-            var startingTheSystem = DateTime.UtcNow;
-            // Call SecurityContext starter method.
-            var securitySystem = TestSecurityContext.StartTheSystem(new SecurityConfiguration
+            var securitySystem = SecuritySystem.StartTheSystem(new SecurityConfiguration
             {
                 SecurityDataProvider = securityDataProvider,
                 MessageProvider = messageProvider,
                 CommunicationMonitorRunningPeriodInSeconds = 31
             });
-            // Staring message system. Messages before 'startingTheSystem' will be ignored.
-            messageProvider.Start(startingTheSystem);
-
             return securitySystem;
         }
 
@@ -75,12 +69,12 @@ namespace SenseNet.Security.Tests.TestPortal
             return channelAdapterType;
         }
 
-        public Context(ISecurityUser currentUser)
+        public Context(ISecurityUser currentUser, SecuritySystem securitySystem)
         {
             // Create a new instance.
-            Security = new TestSecurityContext(currentUser);
+            Security = new SecurityContext(currentUser, securitySystem);
         }
 
-        public TestSecurityContext Security { get; set; }
+        public SecurityContext Security { get; set; }
     }
 }

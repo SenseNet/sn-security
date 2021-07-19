@@ -63,9 +63,9 @@ namespace SenseNet.Security.Tests
             msgProvider.MessageReceived += MsgProvider_MessageReceived;
             msgProvider.Initialize();
 
-            Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
+            var securitySystem = Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
 
-            _context = new Context(TestUser.User1);
+            _context = new Context(TestUser.User1, securitySystem);
 
             // small activity from me
             var activity1 = new TestActivity();
@@ -111,9 +111,9 @@ namespace SenseNet.Security.Tests
             var messageSenderManager = new MessageSenderManager();
             var msgProvider = new TestMessageProvider(messageSenderManager);
             msgProvider.Initialize();
-            Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
+            var securitySystem = Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
 
-            _context = new Context(TestUser.User1);
+            _context = new Context(TestUser.User1, securitySystem);
 
             // small activity
             var smallActivity = new TestActivity();

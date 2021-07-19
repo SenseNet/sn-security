@@ -1224,7 +1224,7 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             // #3: Validate the initial conditions: User4 has only Open and Custom04
-            ctx = new TestSecurityContext(TestUser.User4);
+            ctx = new SecurityContext(TestUser.User4, CurrentContext.Security.SecuritySystem);
             Assert.IsFalse(ctx.HasPermission(entityId, PermissionType.Open, PermissionType.Custom01));
             Assert.IsFalse(ctx.HasPermission(entityId, PermissionType.Open, PermissionType.Custom02));
             Assert.IsFalse(ctx.HasPermission(entityId, PermissionType.Open, PermissionType.Custom03));
@@ -1253,7 +1253,7 @@ namespace SenseNet.Security.Tests
 
         /* ======================================================================= Tools */
 
-        internal static void AddOrModifySecurityGroup(TestSecurityContext ctx, TestGroup group)
+        internal static void AddOrModifySecurityGroup(SecurityContext ctx, TestGroup group)
         {
             ctx.AddMembersToSecurityGroup(group.Id, group.GetUserMembers().Select(u => u.Id).ToArray(), group.GetGroupMembers().Select(g => g.Id).ToArray(), group.GetGroupsWhereThisIsMember().Select(p => p.Id).ToArray());
         }

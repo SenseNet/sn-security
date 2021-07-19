@@ -32,7 +32,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             //var db = (SecurityStorage)providerAcc.Invoke("Db");
             //db.Database.ExecuteSqlCommand("DELETE FROM [EFMemberships]");
 
-            var dp = CurrentContext.Security.GetDataProvider();
+            var dp = CurrentContext.Security.SecuritySystem.DataProvider;
             foreach (var group in dp.LoadAllGroups())
             {
                 dp.RemoveMembers(group.Id, group.UserMemberIds, group.Groups.Select(g => g.Id));

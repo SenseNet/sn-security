@@ -59,7 +59,7 @@ namespace SenseNet.Security.Tests
 
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
-            CurrentContext.Security.BreakInheritance(Id("E3"), false);
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E3"), new EntryType[0]).Apply();
             SetAcl("-E3|Normal|-G3:+-+-+-+-+-+-+-+");
 
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
@@ -73,7 +73,7 @@ namespace SenseNet.Security.Tests
 
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
-            CurrentContext.Security.BreakInheritance(Id("E3"), false);
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E3"), new EntryType[0]).Apply();
 
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
 
@@ -202,25 +202,25 @@ namespace SenseNet.Security.Tests
             var e1 = GetRepositoryEntity(Id("E1"));
             var e2 = GetRepositoryEntity(Id("E2"));
 
-            CurrentContext.Security.AssertPermission(e1, PermissionType.See);
-            CurrentContext.Security.AssertPermission(e1, PermissionType.Preview);
-            CurrentContext.Security.AssertPermission(e1, PermissionType.See, PermissionType.Preview);
-            CurrentContext.Security.AssertPermission(e2, PermissionType.See);
-            CurrentContext.Security.AssertPermission(e2, PermissionType.Preview);
-            CurrentContext.Security.AssertPermission(e2, PermissionType.See, PermissionType.Preview);
+            CurrentContext.Security.AssertPermission(e1.Id, PermissionType.See);
+            CurrentContext.Security.AssertPermission(e1.Id, PermissionType.Preview);
+            CurrentContext.Security.AssertPermission(e1.Id, PermissionType.See, PermissionType.Preview);
+            CurrentContext.Security.AssertPermission(e2.Id, PermissionType.See);
+            CurrentContext.Security.AssertPermission(e2.Id, PermissionType.Preview);
+            CurrentContext.Security.AssertPermission(e2.Id, PermissionType.See, PermissionType.Preview);
             foreach (var perm in PermissionTypeBase.GetPermissionTypes())
             {
                 if (perm != PermissionType.See && perm != PermissionType.Preview)
                 {
                     try
                     {
-                        CurrentContext.Security.AssertPermission(e1, perm);
+                        CurrentContext.Security.AssertPermission(e1.Id, perm);
                         Assert.Fail($"{perm.Name} permission on E1 is true, expected: false.");
                     }
                     catch (AccessDeniedException) { }
                     try
                     {
-                        CurrentContext.Security.AssertPermission(e2, perm);
+                        CurrentContext.Security.AssertPermission(e2.Id, perm);
                         Assert.Fail($"{perm.Name} permission on E2 is true, expected: false.");
                     }
                     catch (AccessDeniedException) { }
@@ -402,9 +402,9 @@ namespace SenseNet.Security.Tests
             var e1 = GetRepositoryEntity(Id("E1"));
             var e3 = GetRepositoryEntity(Id("E3"));
 
-            CurrentContext.Security.AssertSubtreePermission(e3, PermissionType.See);
-            CurrentContext.Security.AssertSubtreePermission(e3, PermissionType.Preview);
-            CurrentContext.Security.AssertSubtreePermission(e3, PermissionType.See, PermissionType.Preview);
+            CurrentContext.Security.AssertSubtreePermission(e3.Id, PermissionType.See);
+            CurrentContext.Security.AssertSubtreePermission(e3.Id, PermissionType.Preview);
+            CurrentContext.Security.AssertSubtreePermission(e3.Id, PermissionType.See, PermissionType.Preview);
 
             foreach (var perm in PermissionTypeBase.GetPermissionTypes())
             {
@@ -412,7 +412,7 @@ namespace SenseNet.Security.Tests
                 {
                     try
                     {
-                        CurrentContext.Security.AssertSubtreePermission(e1, perm);
+                        CurrentContext.Security.AssertSubtreePermission(e1.Id, perm);
                         Assert.Fail($"{perm.Name} subtree permission on E1 is true, expected: false.");
                     }
                     catch
@@ -421,7 +421,7 @@ namespace SenseNet.Security.Tests
                     }
                     try
                     {
-                        CurrentContext.Security.AssertSubtreePermission(e3, perm);
+                        CurrentContext.Security.AssertSubtreePermission(e3.Id, perm);
                         Assert.Fail($"{perm.Name} subtree permission on E3 is true, expected: false.");
                     }
                     catch

@@ -48,10 +48,10 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             //---- Start the system
-            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
+            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
 
             //---- Start the request
-            _context = new Context(TestUser.User1);
+            _context = new Context(TestUser.User1, securitySystem);
 
             //---- check cache
             var dbAcc = new MemoryDataProviderAccessor((MemoryDataProvider)_context.Security.SecuritySystem.DataProvider);
@@ -259,7 +259,7 @@ namespace SenseNet.Security.Tests
             Assert.IsFalse(killed);
 
             //---- Start the request
-            _context = new Context(TestUser.User1);
+            _context = new Context(TestUser.User1, securitySystem);
 
             //---- operation
             _context.Security.HasPermission(entities.First().Value.Id, PermissionType.Open);

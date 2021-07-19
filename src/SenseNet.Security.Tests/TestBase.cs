@@ -122,11 +122,11 @@ namespace SenseNet.Security.Tests
         }
         internal Context GetEmptyContext(TestUser currentUser, ISecurityDataProvider dbProvider, TextWriter traceChannel = null)
         {
-            Context.StartTheSystem(dbProvider, new DefaultMessageProvider(new MessageSenderManager()), traceChannel);
-            return new Context(currentUser);
+            var securitySystem = Context.StartTheSystem(dbProvider, new DefaultMessageProvider(new MessageSenderManager()), traceChannel);
+            return new Context(currentUser, securitySystem);
         }
 
-        internal Dictionary<int, TestEntity> CreateRepository(TestSecurityContext context)
+        internal Dictionary<int, TestEntity> CreateRepository(SecurityContext context)
         {
             var u1 = TestUser.User1;
             var repository = new Dictionary<int, TestEntity>();
@@ -230,7 +230,7 @@ namespace SenseNet.Security.Tests
             }
             return repository;
         }
-        private void CreateEntity(Dictionary<int, TestEntity> repository, TestSecurityContext context,
+        private void CreateEntity(Dictionary<int, TestEntity> repository, SecurityContext context,
             string name, string parentName, TestUser owner)
         {
             var entity = new TestEntity
@@ -241,7 +241,7 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : repository[GetId(parentName)]
             };
             repository.Add(entity.Id, entity);
-            context.CreateSecurityEntity(entity);
+            context.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
         }
         internal string EntityIdStructureToString(SecurityContext ctx)
         {
