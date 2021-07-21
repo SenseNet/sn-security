@@ -1,0 +1,2759 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SenseNet.Security</name>
+    </assembly>
+    <members>
+        <member name="T:SenseNet.Security.AccessControlEntry">
+            <summary>
+            Represents an aggregated permission settings of one entity for one user or group.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AccessControlEntry.EntryType">
+            <summary>
+            Category of the entry.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AccessControlEntry.IdentityId">
+            <summary>
+            Id of the related user or group.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AccessControlEntry.Permissions">
+            <summary>
+            Set of permissions.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AccessControlEntry.LocalOnly">
+            <summary>
+            Gets or sets the inheritance. If the value is true, the entry does not affect the child entities.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.AccessControlEntry.ToString">
+            <summary>
+            Converts the value of this instance to a System.String.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.AccessControlList">
+            <summary>
+            Contains read only information about an entity's all explicit and effective permissions 
+            for building a rich user interface. All changes should be made through the AclEditor class.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AccessControlList.EntityId">
+            <summary>Id of the related entity.</summary>
+        </member>
+        <member name="P:SenseNet.Security.AccessControlList.Inherits">
+            <summary>Determines whether the entity inherits any permission values from its ancestors.</summary>
+        </member>
+        <member name="P:SenseNet.Security.AccessControlList.Entries">
+            <summary>Set of AccessControlEntries</summary>
+        </member>
+        <member name="M:SenseNet.Security.AccessControlList.ToString">
+            <summary>Converts the value of this instance to a System.String.</summary>
+        </member>
+        <member name="T:SenseNet.Security.AccessDeniedException">
+            <summary>
+            Represents an error that occurs when a user does not have enough permissions to execute an operation.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.AccessDeniedException.#ctor(System.String,System.String,System.Int32,SenseNet.Security.ISecurityUser,SenseNet.Security.PermissionTypeBase[])">
+            <summary>Initializes a new instance of the AccessDeniedException class.</summary>
+        </member>
+        <member name="M:SenseNet.Security.AccessDeniedException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>Initializes a new instance of the AccessDeniedException class with serialized data.</summary>
+        </member>
+        <member name="T:SenseNet.Security.AceInfo">
+            <summary>
+            Represents in-memory information about an access control entry.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AceInfo.EntryType">
+            <summary>
+            Category of the entry.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AceInfo.IdentityId">
+            <summary>
+            Id of the identity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AceInfo.LocalOnly">
+            <summary>
+            Gets the inheritance state.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AceInfo.AllowBits">
+            <summary>
+            Allowed permissions as bitmask.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AceInfo.DenyBits">
+            <summary>
+            Denied permissions as bitmask.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.AceInfo.ToString">
+            <summary>
+            Converts the information of this instance to its equivalent string representation.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.AceInfo.BitsToString">
+            <summary>
+            Converts the AllowBits and DenyBits of this instance to its equivalent string representation.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.AceInfo.GetPermissionValues">
+            <summary>
+            Converts the AllowBits and DenyBits of this instance to its equivalent PermissionValue array.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:SenseNet.Security.AclEditor">
+            <summary>
+            Provides a fluent API for modifying permission settings and inheritance of one or more entities. Operations are executed only at the end, when you call the Apply method.
+            Execution is atomic and makes the modifications in both the security database and in-memory cache in the whole distributed system.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AclEditor.EntryType">
+            <summary>
+            Gets the category of entries. Only entries in this category can be edited in this instance.
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.AclEditor._acls">
+            <summary>
+            Modified AclInfo set indexed by entity id.
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.AclEditor._breaks">
+            <summary>
+            Id set of the entities where inheritance was cancelled.
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.AclEditor._unBreaks">
+            <summary>
+            Id set of the entities where inheritance was restored.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AclEditor.Context">
+            <summary>
+            Gets the current SecurityContext
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.#ctor(SenseNet.Security.SecurityContext,SenseNet.Security.EntryType)">
+            <summary>
+            Initializes a new instance of the AclEditor with a SecurityContext as the current context.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.Allow(System.Int32,System.Int32,System.Boolean,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            Allows one or more permissions on the requested entity for the requested identity.
+            Empty or null permission set is ineffective so this method cannot be used
+            to reset the explicitly allowed permissions.
+            </summary>
+            <param name="entityId">The requested entity.</param>
+            <param name="identityId">The requested identity.</param>
+            <param name="localOnly">False if the edited entry is inheritable.</param>
+            <param name="permissions">One or more permissions.</param>
+            <returns>A reference to this instance for calling more operations.</returns>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.Deny(System.Int32,System.Int32,System.Boolean,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            Denies one or more permissions on the requested entity for the requested identity.
+            Empty or null permission set is ineffective so this method cannot be used
+            to reset the explicitly denied permissions.
+            </summary>
+            <param name="entityId">The requested entity.</param>
+            <param name="identityId">The requested identity.</param>
+            <param name="localOnly">False if the edited entry is inheritable.</param>
+            <param name="permissions">One or more permissions.</param>
+            <returns>A reference to this instance for calling more operations.</returns>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.ClearPermission(System.Int32,System.Int32,System.Boolean,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            Clears one or more permissions on the requested entity for the requested identity.
+            Cleared permission is "Undefined" which means not "Allowed" and not "Denied".
+            Empty or null permission set is ineffective.
+            Entry will be deleted if it will be empty after clearing.
+            </summary>
+            <param name="entityId">The requested entity.</param>
+            <param name="identityId">The requested identity.</param>
+            <param name="localOnly">False if the edited entry is inheritable.</param>
+            <param name="permissions">One or more permissions.</param>
+            <returns>A reference to this instance for calling more operations.</returns>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.Set(System.Int32,System.Int32,System.Boolean,SenseNet.Security.PermissionBitMask)">
+            <summary>
+            Sets the allowed and denied permissions by the passed bitmask.
+            This method can not reset any allowed or denied permissions.
+            </summary>
+            <param name="entityId">The requested entity.</param>
+            <param name="identityId">The requested identity.</param>
+            <param name="localOnly">False if the edited entry is inheritable.</param>
+            <param name="permissionMask">Contains one or more permissions to allow or deny.</param>
+            <returns>A reference to this instance for calling more operations.</returns>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.Reset(System.Int32,System.Int32,System.Boolean,SenseNet.Security.PermissionBitMask)">
+            <summary>
+            Resets the allowed and denied permissions by the passed bitmask.
+            </summary>
+            <param name="entityId">The requested entity.</param>
+            <param name="identityId">The requested identity.</param>
+            <param name="localOnly">False if the edited entry is inheritable.</param>
+            <param name="permissionMask">Contains one or more permissions to allow or deny.</param>
+            <returns>A reference to this instance for calling more operations.</returns>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.SetEntry(System.Int32,SenseNet.Security.AceInfo,System.Boolean)">
+            <summary>
+            Copies the permission settings from the passed entry to the requested entity's explicit entry.
+            </summary>
+            <param name="entityId">Id of the requested entity.</param>
+            <param name="entry">The source entry.</param>
+            <param name="reset">If true, the original allowed and denied permissions will be cleared before copy.
+            Otherwise the result set will contain the original and source entry permission settings.</param>
+            <returns>A reference to this instance for calling more operations.</returns>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.BreakInheritance(System.Int32,System.Boolean)">
+            <summary>
+            Cancels the permission inheritance on the requested entity.
+            </summary>
+            <param name="entityId">The requested entity.</param>
+            <param name="convertToExplicit">If true (default), after the break operation all previous effective
+            permissions will be copied explicitly. WARNING: Only the Normal category will be copied.</param>
+            <returns>A reference to this instance for calling more operations.</returns>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.BreakInheritance(System.Int32,SenseNet.Security.EntryType[])">
+            <summary>
+            Cancels the permission inheritance on the requested entity.
+            </summary>
+            <param name="entityId">The requested entity.</param>
+            <param name="categoriesToCopy">After the break operation, all previous effective permissions will be
+            copied explicitly that are matched any of the given entry types.</param>
+            <returns>A reference to this instance for calling more operations.</returns>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.UnbreakInheritance(System.Int32,System.Boolean)">
+            <summary>
+            Restores the permission inheritance on the requested entity.
+            </summary>
+            <param name="entityId">The requested entity.</param>
+            <param name="normalize">If true (default is false), the unnecessary explicit entries will be removed.
+            WARNING: Only the Normal category will be copied.</param>
+            <returns>A reference to this instance for calling more operations.</returns>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.UnBreakInheritance(System.Int32,SenseNet.Security.EntryType[])">
+            <summary>
+            Restores the permission inheritance on the requested entity.
+            </summary>
+            <param name="entityId">The requested entity.</param>
+            <param name="categoriesToNormalize">Unnecessary explicit entries
+            that match these categories will be removed.</param>
+            <returns>A reference to this instance for calling more operations.</returns>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.Apply">
+            <summary>
+            Executes all modifications. If you do not call this method, no changes will be made.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.CopyEffectivePermissions(System.Int32,SenseNet.Security.EntryType[])">
+            <summary>
+            Copies effective permissions to explicit access control entries.
+            </summary>
+            <param name="entityId">The requested entity.</param>
+            <param name="entryTypes">Array of <see cref="P:SenseNet.Security.AclEditor.EntryType"/>. Only items of these types will be copied
+            Copy is skipped if the array is empty.</param>
+        </member>
+        <member name="M:SenseNet.Security.AclEditor.NormalizeExplicitPermissions(System.Int32,SenseNet.Security.EntryType[])">
+            <summary>
+            Removes inherited effective permissions from the explicit setting collection.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.AclInfo">
+            <summary>
+            Represents in-memory information about an access control list. Contains only explicit entries 
+            and an API for parent walk to aid the permission inheritance algorithm.
+            Contains helpers method also for building UI structures.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AclInfo.EntityId">
+            <summary>
+            Id of the entity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AclInfo.Inherits">
+            <summary>
+            Gets the inheritance state. True if the entity inherits the permission settings from the ancestors.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AclInfo.Entries">
+            <summary>
+            Set of ACEs.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.AclInfo.Parent">
+            <summary>
+            Parent AclInfo.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclInfo.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the AclInfo.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclInfo.AggregateLocalOnlyValues(System.Collections.Generic.List{System.Int32},System.UInt64@,System.UInt64@)">
+            <summary> Used for getting permission. </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclInfo.AggregateEffectiveValues(System.Collections.Generic.List{System.Int32},System.UInt64@,System.UInt64@)">
+            <summary> Used for getting permission. </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclInfo.AggregateLocalOnlyValues(System.Collections.Generic.List{System.Int32},SenseNet.Security.EntryType,System.UInt64@,System.UInt64@)">
+            <summary> Used for getting permission in a permission query. </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclInfo.AggregateEffectiveValues(System.Collections.Generic.List{System.Int32},SenseNet.Security.EntryType,System.UInt64@,System.UInt64@)">
+            <summary> Used for getting permission in a permission query. </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclInfo.AggregateLevelOnlyValues(System.Collections.Generic.List{SenseNet.Security.AceInfo},System.Collections.Generic.IEnumerable{System.Int32},System.Nullable{SenseNet.Security.EntryType})">
+            <summary> Used for getting effective entries. </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclInfo.AggregateEffectiveValues(System.Collections.Generic.List{SenseNet.Security.AceInfo},System.Collections.Generic.IEnumerable{System.Int32},System.Nullable{SenseNet.Security.EntryType})">
+            <summary> Used for getting effective entries. </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclInfo.EnsureAce(SenseNet.Security.AceInfo,System.Collections.Generic.List{SenseNet.Security.AceInfo})">
+            <summary> Used for getting effective entries. </summary>
+        </member>
+        <member name="M:SenseNet.Security.AclInfo.ToString">
+            <summary>
+            Converts the information of this instance to its equivalent string representation.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Configuration.Messaging.MessageProcessorThreadCount">
+            <summary>
+            Number of message processor threads. Default is 3.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Configuration.Messaging.MessageProcessorThreadMaxMessages">
+            <summary>
+            Max number of messages processed by a single message processor thread. Default is 100.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Data.DatabaseStorage">
+            <summary>
+            Simulates a data of any database
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.Data.DatabaseStorage.Messages">
+            <summary>Id, SavedAt, Body</summary>
+        </member>
+        <member name="T:SenseNet.Security.Data.MemoryDataProvider">
+            <summary>
+            Complete ISecurityDataProvider implementation only for testing purposes.
+            Do not use this class in any business solution.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.#ctor(SenseNet.Security.Data.DatabaseStorage)">
+            <summary>
+            Initializes a new instance of the MemoryDataProvider
+            </summary>
+            <param name="storage"></param>
+        </member>
+        <member name="P:SenseNet.Security.Data.MemoryDataProvider.ConnectionString">
+            <summary>
+            Not used in this case.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.InstallDatabase">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.GetEstimatedEntityCount">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.LoadSecurityEntities">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.LoadAffectedEntityIdsByEntriesAndBreaks">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.LoadAllGroups">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.LoadAllAces">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.LoadStoredSecurityEntity(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.InsertSecurityEntity(SenseNet.Security.StoredSecurityEntity)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.UpdateSecurityEntity(SenseNet.Security.StoredSecurityEntity)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.DeleteSecurityEntity(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.MoveSecurityEntity(System.Int32,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.LoadSecurityGroup(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.LoadAllPermissionEntries">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.LoadPermissionEntries(System.Collections.Generic.IEnumerable{System.Int32})">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.WritePermissionEntries(System.Collections.Generic.IEnumerable{SenseNet.Security.StoredAce})">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.RemovePermissionEntries(System.Collections.Generic.IEnumerable{SenseNet.Security.StoredAce})">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.RemovePermissionEntriesByEntity(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.DeleteEntitiesAndEntries(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.QueryGroupRelatedEntities(System.Int32,System.Collections.Generic.IEnumerable{System.Int32}@,System.Collections.Generic.IEnumerable{System.Int32}@)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.SaveSecurityActivity(SenseNet.Security.Messaging.SecurityMessages.SecurityActivity,System.Int32@)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.GetLastSecurityActivityId(System.DateTime)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.GetUnprocessedActivityIds">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.LoadSecurityActivities(System.Int32,System.Int32,System.Int32,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.LoadSecurityActivities(System.Int32[],System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.LoadSecurityActivity(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.CleanupSecurityActivities(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.AcquireSecurityActivityExecutionLock(SenseNet.Security.Messaging.SecurityMessages.SecurityActivity,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.RefreshSecurityActivityExecutionLock(SenseNet.Security.Messaging.SecurityMessages.SecurityActivity)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.ReleaseSecurityActivityExecutionLock(SenseNet.Security.Messaging.SecurityMessages.SecurityActivity)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.DeleteIdentityAndRelatedEntries(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.DeleteIdentitiesAndRelatedEntries(System.Collections.Generic.IEnumerable{System.Int32})">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.AddMembers(System.Int32,System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.RemoveMembers(System.Int32,System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Data.MemoryDataProvider.GetMembershipForConsistencyCheck">
+            <inheritdoc />
+        </member>
+        <member name="T:SenseNet.Security.EntityNotFoundException">
+            <summary>
+            Represents an error that occurs when an existence of an entity is expected but it is not found.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.EntityNotFoundException.#ctor">
+            <summary>Initializes a new instance of the EntityNotFoundException class.</summary>
+        </member>
+        <member name="M:SenseNet.Security.EntityNotFoundException.#ctor(System.String)">
+            <summary>Initializes a new instance of the EntityNotFoundException class.</summary>
+        </member>
+        <member name="M:SenseNet.Security.EntityNotFoundException.#ctor(System.String,System.Exception)">
+            <summary>Initializes a new instance of the EntityNotFoundException class.</summary>
+        </member>
+        <member name="M:SenseNet.Security.EntityNotFoundException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>Initializes a new instance of the EntityNotFoundException class with serialized data.</summary>
+        </member>
+        <member name="T:SenseNet.Security.EntryType">
+            <summary>
+            Defines categories for Access Control Entry
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.EntryType.Normal">
+            <summary>
+            Category for general access control entry.
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.EntryType.Sharing">
+            <summary>
+            Category for an access control entry that has further access rights by document-sharing.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.IMissingEntityHandler.GetMissingEntity(System.Int32,System.Int32@,System.Int32@)">
+            <summary>
+            Collects security-related information about an entity and returns true if the entity with 
+            the specified id exists in the host application's database.
+            This method is used by the security component when an entity seems to be missing because of
+            concurrency reasons. The host application must provide the correct entity information here 
+            otherwise <see cref="T:SenseNet.Security.EntityNotFoundException"/> may occur in some scenarios under heavy load 
+            in load balanced multi-threaded environments.
+            </summary>
+            <param name="entityId">Id of the missing entity.</param>
+            <param name="parentId">Id of the missing entity's parent or 0.</param>
+            <param name="ownerId">Id of the missing entity's owner or 0.</param>
+        </member>
+        <member name="T:SenseNet.Security.ISecurityDataProvider">
+            <summary>
+            Describes a customizable storage layer interface of the Security Component.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.ISecurityDataProvider.ConnectionString">
+            <summary>
+            Control data for building a connection to the database server.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.ISecurityDataProvider.ActivitySerializer">
+            <summary>
+            Gets or sets the ActivitySerializer for loading activities.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.InstallDatabase">
+            <summary>
+            Creates the database schema and other components (tables, etc.). It requires an existing database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.LoadSecurityEntities">
+            <summary>
+            Pre-loader method for retrieving all stored SecurityEntity. Called during system start.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.LoadAffectedEntityIdsByEntriesAndBreaks">
+            <summary>
+            Loads the set of security holder entity ids.
+            This is a distinct int list of entities in entries plus entities that are not inherited (IsInherited = false).
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.LoadAllAces">
+            <summary>
+            Loader method for retrieving all ACE-s. Called during system start.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.LoadStoredSecurityEntity(System.Int32)">
+            <summary>
+            Retrieves the SecurityEntity by the passed identifier. Returns with null if the entity was not found.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.InsertSecurityEntity(SenseNet.Security.StoredSecurityEntity)">
+            <summary>
+            Writes the given entity to the database. If it exists before writing, the operation will be skipped.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.UpdateSecurityEntity(SenseNet.Security.StoredSecurityEntity)">
+            <summary>
+            Updates the given entity to the database. If it does not exist before updating, a SecurityStructureException must be thrown.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.DeleteSecurityEntity(System.Int32)">
+            <summary>
+            Deletes an entity by the given identifier. If the entity does not exist before deleting, this method does nothing.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.MoveSecurityEntity(System.Int32,System.Int32)">
+            <summary>
+            Moves the source entity to the target entity. Only a parent relink is needed. All other operations call other data provider methods.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.LoadAllGroups">
+            <summary>
+            Pre-loader method for retrieving all stored SecurityGroups. Called during system start.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.LoadSecurityGroup(System.Int32)">
+            <summary>
+            Loads a SecurityGroup from the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.QueryGroupRelatedEntities(System.Int32,System.Collections.Generic.IEnumerable{System.Int32}@,System.Collections.Generic.IEnumerable{System.Int32}@)">
+            <summary>
+            This method provides a collection of entity ids that have a group-related access control entry.
+            </summary>
+            <param name="groupId"></param>
+            <param name="entityIds">Entities that have one or more group related ACEs. These ACEs will be removed from the ACLs.</param>
+            <param name="exclusiveEntityIds">Entities that have only the given group related ACEs. These ACLs will be removed.</param>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.DeleteIdentityAndRelatedEntries(System.Int32)">
+            <summary>
+            Deletes memberships and entries related to an identity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.DeleteIdentitiesAndRelatedEntries(System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Deletes memberships and entries related to the provided identities.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.AddMembers(System.Int32,System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Adds one or more users and groups to the specified group.
+            </summary>
+            <param name="groupId">Id of the group that will have new members.</param>
+            <param name="userMembers">Contains the ids of new users. Can be null or an empty list too.</param>
+            <param name="groupMembers">Contains the ids of new groups. Can be null or an empty list too.</param>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.RemoveMembers(System.Int32,System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Removes one or more users and groups from the specified group.
+            </summary>
+            <param name="groupId">Id of a group.</param>
+            <param name="userMembers">Contains the ids of users that will be removed. Can be null or an empty list too.</param>
+            <param name="groupMembers">Contains the ids of groups that will be removed. Can be null or an empty list too.</param>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.LoadAllPermissionEntries">
+            <summary>
+            This method must return with all stored ACEs that exist in the database in an unordered list.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.LoadPermissionEntries(System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Loads an ACL-chain. Caller provides the parent chain of an entity.
+            This method must return with all stored ACEs that belong to any of the passed entity ids.
+            Order is irrelevant.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.GetEstimatedEntityCount">
+            <summary>
+            Returns with the estimated security entity count as fast as possible.
+            System start sequence uses this method.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.WritePermissionEntries(System.Collections.Generic.IEnumerable{SenseNet.Security.StoredAce})">
+            <summary>
+            Inserts or updates one or more StoredACEs.
+            An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.RemovePermissionEntries(System.Collections.Generic.IEnumerable{SenseNet.Security.StoredAce})">
+            <summary>
+            Deletes the given ACEs.  If an ACE does not exist before deleting, it must be skipped.
+            An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.RemovePermissionEntriesByEntity(System.Int32)">
+            <summary>
+            Deletes all ACEs related to the given entity id.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.DeleteEntitiesAndEntries(System.Int32)">
+            <summary>
+            Deletes all ACEs related to any of the entities in a subtree defined by the provided root id, then deletes all the entities too.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.SaveSecurityActivity(SenseNet.Security.Messaging.SecurityMessages.SecurityActivity,System.Int32@)">
+            <summary>
+            Stores the full data of the passed activity.
+            Returns with the generated activity id and the size of the activity's body. 
+            Activity ids in the database must be a consecutive list of numbers.
+            </summary>
+            <param name="activity">Activity to save.</param>
+            <param name="bodySize">Activity size in bytes.</param>
+            <returns>The generated activity id.</returns>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.GetLastSecurityActivityId(System.DateTime)">
+            <summary>
+            Returns the biggest activity id that was saved before the provided time if there is any.
+            Otherwise returns with 0.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.GetUnprocessedActivityIds">
+            <summary>
+            Returns an array of all unprocessed activity ids supplemented with the last stored activity id.
+            Empty array means that the database does not contain any activities.
+            Array with only one element means that the database does not contain any unprocessed element and the last stored activity id is the returned item.
+            Two or more element means that the array contains one or more unprocessed activity id and the last element is the last stored activity id.
+            </summary>
+            <returns>Zero or more id of unprocessed elements supplemented with the last stored activity id.</returns>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.LoadSecurityActivities(System.Int32,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Loads a SecurityActivity fragment within the specified limits.
+            If the count of activities in the id boundary ("from", "to") is bigger
+            than the given fragment size ("count"), the largest id could not reach.
+            Activities in the result array are sorted by id.
+            Value of the IsUnprocessedActivity property of every loaded object
+            will be the value of the given "executingUnprocessedActivities" parameter.
+            </summary>
+            <param name="from">Least expected id.</param>
+            <param name="to">Largest allowed id.</param>
+            <param name="count">Fragment size.</param>
+            <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.LoadSecurityActivities(System.Int32[],System.Boolean)">
+            <summary>
+            Loads a SecurityActivity fragment by the individual id array.
+            Activities in the result array are sorted by id.
+            Value of the IsUnprocessedActivity property of every loaded object
+            will be the value of the given "executingUnprocessedActivities" parameter.
+            </summary>
+            <param name="gaps">Individual id array</param>
+            <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.LoadSecurityActivity(System.Int32)">
+            <summary>
+            Returns a SecurityActivity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.CleanupSecurityActivities(System.Int32)">
+            <summary>
+            Deletes all the activities that were saved before the given time limit.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.AcquireSecurityActivityExecutionLock(SenseNet.Security.Messaging.SecurityMessages.SecurityActivity,System.Int32)">
+            <summary>
+            Ensures an exclusive (only one) object for the activity. Returns the new lock object or null.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.RefreshSecurityActivityExecutionLock(SenseNet.Security.Messaging.SecurityMessages.SecurityActivity)">
+            <summary>
+            Refreshes the lock object to avoid its timeout.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.ReleaseSecurityActivityExecutionLock(SenseNet.Security.Messaging.SecurityMessages.SecurityActivity)">
+            <summary>
+            Releases the lock and prevents locking that activity again by setting its state to Executed.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityDataProvider.GetMembershipForConsistencyCheck">
+            <summary>
+            Returns with information for consistency check: a compound number containing the group's and the member's id.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.ISecurityIdentity">
+            <summary>
+            Specifies an identity that can be a group or a user.
+            Group id set and user id set must be disjunct: it is forbidden to have a group and a user with the same id.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.ISecurityIdentity.Id">
+            <summary>
+            Unique id of this instance.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.ISecurityUser">
+            <summary>
+            Represents a user.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.ISecurityUser.GetDynamicGroups(System.Int32)">
+            <summary>
+            Dynamic membership extensibility. Called in the permission evaluation process on the user instance of the current SecurityContext.
+            The client application can extend the group membership of the current user in connection with an entity id.
+            The evaluator calculates with all stored groups plus this extension every time a permission evaluation happens.
+            </summary>
+            <param name="entityId">Focused entity.</param>
+            <returns>Zero, one or more group id. Null is allowed.</returns>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.BigActivityMessage">
+            <summary>
+            Represents a placeholder message that is sent in place of the original one that contains a huge amount of data.
+            On the receiver side the whole message can be loaded from the database by the carried message id.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.BigActivityMessage.DatabaseId">
+            <summary>
+            Message id in the database.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.DebugMessage">
+            <summary>
+            Message type for debugging purposes.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.DebugMessage.Message">
+            <summary>
+            Carried message.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.DebugMessage.ToString">
+            <summary>
+            Converts the information of this instance to its equivalent string representation.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.PingMessage">
+            <summary>
+            Message type for communication testing purposes.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.PingMessage.#ctor">
+            <summary>
+            Initializes a new instance of the PingMessage.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.PongMessage">
+            <summary>
+            Message type for communication testing purposes.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.PongMessage.#ctor">
+            <summary>
+            Initializes a new instance of the PongMessage.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.DefaultMessageProvider">
+            <summary>
+            Default implementation of the IMessageProvider.
+            Does nothing, it is absolutely inactive.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.DefaultMessageProvider.ReceiverName">
+            <summary>
+            Gets the name of the receiver (or channel)
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.DefaultMessageProvider.IncomingMessageCount">
+            <summary>
+            Gets a total count of received messages
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.DefaultMessageProvider.Initialize">
+            <summary>
+            Initializes the provider instance.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.DefaultMessageProvider.SendMessage(SenseNet.Security.Messaging.IDistributedMessage)">
+            <summary>
+            Sends the passed message to all other AppDomains.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.DefaultMessageProvider.Start(System.DateTime)">
+            <summary>
+            Starts sending and receiving messages. This is the first call that is in the system startup sequence.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.DefaultMessageProvider.Start">
+            <summary>
+            Starts sending and receiving messages after stop.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.DefaultMessageProvider.Stop">
+            <summary>
+            Stops sending and receiving messages.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.DefaultMessageProvider.Purge">
+            <summary>
+            Clears all messages that were not sent.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.DefaultMessageProvider.ShutDown">
+            <summary>
+            Shuts down the component.
+            </summary>
+        </member>
+        <member name="E:SenseNet.Security.Messaging.DefaultMessageProvider.MessageReceived">
+            <summary>
+            Fired when a receiver gets a message.
+            </summary>
+        </member>
+        <member name="E:SenseNet.Security.Messaging.DefaultMessageProvider.ReceiveException">
+            <summary>
+            Fired when a receiver catches an exception.
+            </summary>
+        </member>
+        <member name="E:SenseNet.Security.Messaging.DefaultMessageProvider.SendException">
+            <summary>
+            Fired when a message sender catches an exception.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.DistributedMessage">
+            <summary>
+            Base class of any kind of messages in the security system.
+            Implements the IDistributedMessage interface.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.DistributedMessage.MessageSent">
+            <summary>
+            DateTime of the message sending.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.DistributedMessage.Sender">
+            <summary>
+            Information about the current sender.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.IDistributedMessage">
+            <summary>
+            Base interface of all message types.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.IDistributedMessage.MessageSent">
+            <summary>
+            DateTime when the message was sent.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.IDistributedMessage.Sender">
+            <summary>
+            Information about the current sender.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.UnknownMessage">
+            <summary>
+            Represents a message from unknown source.
+            Created by the receiver if it cannot recognize the type of the message.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.UnknownMessage.MessageSent">
+            <summary>
+            DateTime of the message sending.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.UnknownMessage.Sender">
+            <summary>
+            Information about the current sender.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.UnknownMessage.MessageData">
+            <summary>
+            Received data
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.IMessageProvider">
+            <summary>
+            Describes an interface for sending and receiving messages among AppDomains.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.IMessageProvider.ReceiverName">
+            <summary>
+            Gets the name of the receiver (or channel)
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.IMessageProvider.IncomingMessageCount">
+            <summary>
+            Gets a total count of received messages
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.IMessageProvider.MessageSenderManager">
+            <summary>
+            Manages the <see cref="T:SenseNet.Security.Messaging.IMessageSender"/> objects.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.IMessageProvider.Initialize">
+            <summary>
+            Initializes the provider instance.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.IMessageProvider.SendMessage(SenseNet.Security.Messaging.IDistributedMessage)">
+            <summary>
+            Sends the passed message to all other AppDomains.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.IMessageProvider.Start(System.DateTime)">
+            <summary>
+            Starts sending and receiving messages. This is the first call that is in the system startup sequence.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.IMessageProvider.Start">
+            <summary>
+            Starts sending and receiving messages after stop.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.IMessageProvider.Stop">
+            <summary>
+            Stops sending and receiving messages.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.IMessageProvider.Purge">
+            <summary>
+            Clears all messages that are not sent (if there are).
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.IMessageProvider.ShutDown">
+            <summary>
+            Shuts down the component.
+            </summary>
+        </member>
+        <member name="E:SenseNet.Security.Messaging.IMessageProvider.MessageReceived">
+            <summary>
+            Occurs when a message received
+            </summary>
+        </member>
+        <member name="E:SenseNet.Security.Messaging.IMessageProvider.ReceiveException">
+            <summary>
+            Occurs when an error occured during receiving a message.
+            </summary>
+        </member>
+        <member name="E:SenseNet.Security.Messaging.IMessageProvider.SendException">
+            <summary>
+            Occurs when an error occured during sending a message.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.MessageReceivedEventHandler">
+            <summary>
+            Fired when a receiver gets a message.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.ReceiveExceptionEventHandler">
+            <summary>
+            Fired when a receiver catches an exception.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SendExceptionEventHandler">
+            <summary>
+            Fired when a message sender catches an exception.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.MessageReceivedEventArgs">
+            <summary>
+            Used in the MessageReceivedEventHandler. Contains the received message.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.MessageReceivedEventArgs.Message">
+            <summary>
+            Gets or sets the received message.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageReceivedEventArgs.#ctor(SenseNet.Security.Messaging.IDistributedMessage)">
+            <summary>
+            Initializes a new instance of the MessageReceivedEventArgs
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.ExceptionEventArgs">
+            <summary>
+            Used in the SendExceptionEventHandler and the ReceiveExceptionEventHandler. Contains the message and the exception.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.ExceptionEventArgs.Exception">
+            <summary>
+            Gets or sets the caught exception.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.ExceptionEventArgs.Message">
+            <summary>
+            Gets or sets the message that was tried to send.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.ExceptionEventArgs.#ctor(System.Exception,SenseNet.Security.Messaging.IDistributedMessage)">
+            <summary>
+            Initializes a new instance of the ExceptionEventArgs
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.IMessageSenderManager">
+            <summary>
+            Manages the <see cref="T:SenseNet.Security.Messaging.IMessageSender"/> objects.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.IMessageSenderManager.CreateMessageSender">
+            <summary>
+            Creates a new <see cref="T:SenseNet.Security.Messaging.IMessageSender"/> instance.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.IMessageSenderManager.IsMe(SenseNet.Security.Messaging.IMessageSender)">
+            <summary>
+            Returns true if the message was sent from the current appdomain.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.IMessageSender">
+            <summary>
+            Represents information about the sender of the message
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.IMessageSender.ComputerID">
+            <summary>
+            Computer identifier. Must be unique in the cluster (computers that can interact through messaging).
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.IMessageSender.InstanceID">
+            <summary>
+            Technical identifier. Must be unique.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.MessageProviderBase">
+            <summary>
+            A built-in message provider implementation that is able to put messages into
+            a pipeline and process them simultaneously on a configurable number of threads.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.MessageProviderBase.Shutdown">
+            <summary>
+            Gets or sets a value that tells the system whether the component has been shut down.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.MessageProviderBase.ReceiverName">
+            <inheritdoc />
+        </member>
+        <member name="P:SenseNet.Security.Messaging.MessageProviderBase.IncomingMessageCount">
+            <summary>
+            Returns the count of unprocessed incoming messages. Slowing down the producing of messages maybe necessary if it exceeds a certain amount.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.Initialize">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.SendMessage(SenseNet.Security.Messaging.IDistributedMessage)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.Start(System.DateTime)">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.Start">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.Stop">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.Purge">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.ShutDown">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.OnMessageReceived(System.IO.Stream)">
+            <summary>
+            Called when a message arrives. This method has to deserialize the message
+            and put in a worker queue where it will be picked up and executed.
+            </summary>
+        </member>
+        <member name="E:SenseNet.Security.Messaging.MessageProviderBase.MessageReceived">
+            <inheritdoc />
+        </member>
+        <member name="E:SenseNet.Security.Messaging.MessageProviderBase.ReceiveException">
+            <inheritdoc />
+        </member>
+        <member name="E:SenseNet.Security.Messaging.MessageProviderBase.SendException">
+            <inheritdoc />
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.OnSendException(SenseNet.Security.Messaging.IDistributedMessage,System.Exception)">
+            <summary>
+            Derived classes may call this method when an exception occurs during sending a message.
+            </summary>
+            <param name="message"></param>
+            <param name="exception"></param>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.OnReceiveException(System.Exception)">
+            <summary>
+            Derived classes may call this method when an exception occurs during receiving a message.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.DeserializeMessage(System.IO.Stream)">
+            <summary>
+            Helper method for deserializing a message object. The current implementation
+            uses BinaryFormatter for this purpose.
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.MessageProviderBase.SerializeMessage(System.Object)">
+            <summary>
+            Helper method for serializing a message object. The current implementation
+            uses BinaryFormatter for this purpose.
+            </summary>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.MessageSender">
+            <summary>
+            Represents a message sender.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.MessageSender.ComputerID">
+            <summary>
+            Gets an id to identify computers. This is an invariant value that comes typically
+            from the ReceiverName property of the initialized IMessageProvider implementation instance.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.MessageSender.InstanceID">
+            <summary>
+            Gets an unique identifier that is used during the lifetime of the current AppDomain. This is an invariant value.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityActivityExecutionLock">
+            <summary>
+            Helper object for serializing the activity executions.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityExecutionLock.FullExecutionEnabled">
+            <summary>
+            Gets a value that is true if all activity operation must be executed:
+            storing, distributing, applying in the memory. Otherwise only the memory operations are allowed.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityActivityExecutionLock.#ctor(SenseNet.Security.Messaging.SecurityMessages.SecurityActivity,SenseNet.Security.ISecurityDataProvider,System.Boolean)">
+            <summary>
+            Initializes a new instance of the SecurityActivityExecutionLock
+            </summary>
+            <param name="activity">Activity that is locked.</param>
+            <param name="dataProvider">An ISecurityDataProvider instance that need to be called in the Refresh and Release methods.</param>
+            <param name="fullExecutionEnabled">If true, all activity operation must be executed:
+            storing, distributing, applying in the memory. Otherwise only the memory operations are allowed.</param>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityActivityExecutionLock.Dispose">
+            <summary>
+            Releases the lock.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityActivityHistory">
+            <summary>
+            Contains momentary state information about the security activity execution
+            and the recent processed activities in details.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistory.State">
+            <summary>
+            Contains momentary state information about the security activity execution.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistory.Message">
+            <summary>
+            It is empty or contains a message about any error in connection with the SecurityActivityHistory feature.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistory.RecentLength">
+            <summary>
+            Length of the Recent
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistory.Recent">
+            <summary>
+            Array of the recently executed activities.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityActivitySerializerState">
+            <summary>
+            Contains information about the serialized activities on the arrival size.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivitySerializerState.LastQueued">
+            <summary>
+            Id of the last arrived activity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivitySerializerState.QueueLength">
+            <summary>
+            Length of the Queue
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivitySerializerState.Queue">
+            <summary>
+            Ids of th Arrived but not parallel activities.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityActivityDependencyState">
+            <summary>
+            Contains information about the waiting activities.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityDependencyState.WaitingSetLength">
+            <summary>
+            Length of the WaitingSet.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityDependencyState.WaitingSet">
+            <summary>
+            Ids of the all waiting activities.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.CompletionState">
+            <summary>
+            Contains information about the executed activities.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.CompletionState.LastActivityId">
+            <summary>
+            Id of the last executed activity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.CompletionState.GapsLength">
+            <summary>
+            Length of the Gaps array.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.CompletionState.Gaps">
+            <summary>
+            Contains activity ids that are not executed yet and are lower than the LastActivityId.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.CompletionState.#ctor">
+            <summary>
+            Initializes a new instance of the CompletionState class.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.CompletionState.ToString">
+            <summary>
+            Returns a string that represents the current object.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityActivityQueueState">
+            <summary>
+            Contains momentary state information about the security activity execution for debugging purposes.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityQueueState.Serializer">
+            <summary>
+            Activity serializer state on the arrival side.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityQueueState.DependencyManager">
+            <summary>
+            State of the waiting activities.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityQueueState.Termination">
+            <summary>
+            State of the executed activities.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityActivityHistoryItem">
+            <summary>
+            Contains debug information about a security activity execution.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.Id">
+            <summary>
+            Id of the activity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.TypeName">
+            <summary>
+            Short name of the activity type.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.FromReceiver">
+            <summary>
+            True if the activity was received from another computer.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.FromDb">
+            <summary>
+            True if the activity was loaded from the database.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.IsStartup">
+            <summary>
+            True if the activity is instantiated during in the startup process.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.Error">
+            <summary>
+            Contains error message if the activity execution was unsuccessful.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.WaitedFor">
+            <summary>
+            Ids of the activities that are delayed the execution of this activity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.ArrivedAt">
+            <summary>
+            Arrival time.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.StartedAt">
+            <summary>
+            Time of the execution start.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.FinishedAt">
+            <summary>
+            Time of the execution end.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.WaitTime">
+            <summary>
+            Waiting time (StartedAt - ArrivedAt)
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.ExecTime">
+            <summary>
+            Execution time (FinishedAt - StartedAt)
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityActivityHistoryItem.FullTime">
+            <summary>
+            Full time (FinishedAt - ArrivedAt)
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityActivityQueue._setCurrentExecutionState(SenseNet.Security.Messaging.CompletionState)">
+            <summary>Only for tests</summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityActivityQueue.Serializer.Start(System.Int32,System.Int32,System.Int32[])">
+            <summary>
+            MUST BE SYNCHRONOUS
+            GAPS MUST BE ORDERED
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.AddMembersToGroupActivity">
+            <summary>
+            Represents an activity that allows adding any amount of new members to a group in one step.
+            It is also able to add one group to one or more parent groups in one step.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.AddMembersToGroupActivity.#ctor(System.Int32,System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Initializes a new instance of the AddMembersToGroupActivity.
+            If any of the given groups is missing, it will be created.
+            </summary>
+            <param name="groupId">The group identifier.</param>
+            <param name="userMembers">Collection of the ids of new user members.</param>
+            <param name="groupMembers">Collection of the ids of new group members.</param>
+            <param name="parentGroups">Collection of group ids. The provided group will be a member of these groups.</param>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.AddMembersToGroupActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.AddMembersToGroupActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.AddUserToSecurityGroupsActivity">
+            <summary>
+            Represents an activity that allows adding a user to one or more groups in one step.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.AddUserToSecurityGroupsActivity.#ctor(System.Int32,System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Initializes a new instance of the AddMembersToGroupActivity.
+            </summary>
+            <param name="userId">Id of the user.</param>
+            <param name="parentGroups">Group ids that will be parent of this user.</param>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.AddUserToSecurityGroupsActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.AddUserToSecurityGroupsActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.CreateSecurityEntityActivity">
+            <summary>
+            Represents an activity that creates a security entity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.CreateSecurityEntityActivity.#ctor(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Initializes a new instance of the CreateSecurityEntityActivity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.CreateSecurityEntityActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.CreateSecurityEntityActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.DeleteGroupActivity">
+            <summary>
+            Represents an activity that deletes a group.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteGroupActivity.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the DeleteGroupActivity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteGroupActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteGroupActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.DeleteIdentitiesActivity">
+            <summary>
+            Represents an activity that deletes one or more identities.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteIdentitiesActivity.#ctor(System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Initializes a new instance of the DeleteIdentitiesActivity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteIdentitiesActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteIdentitiesActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.DeleteSecurityEntityActivity">
+            <summary>
+            Represents an activity that deletes a security entity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteSecurityEntityActivity.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the DeleteSecurityEntityActivity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteSecurityEntityActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteSecurityEntityActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.DeleteUserActivity">
+            <summary>
+            Represents an activity that deletes a user.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteUserActivity.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the DeleteUserActivity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteUserActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.DeleteUserActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.MembershipActivity">
+            <summary>
+            Base class of membership related activities.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.ModifySecurityEntityOwnerActivity">
+            <summary>
+            Represents an activity that updates the owner of an entity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.ModifySecurityEntityOwnerActivity.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Initializes a new instance of the ModifySecurityEntityOwnerActivity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.ModifySecurityEntityOwnerActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.ModifySecurityEntityOwnerActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.MoveSecurityEntityActivity">
+            <summary>
+            Represents an activity that moves an entity to another location in the entity tree.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.MoveSecurityEntityActivity.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Initializes a new instance of the MoveSecurityEntityActivity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.MoveSecurityEntityActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.MoveSecurityEntityActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.RemoveMembersFromGroupActivity">
+            <summary>
+            Represents an activity that removes one or more members from a group in one step.
+            It can also remove one group from multiple parent groups in one step.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.RemoveMembersFromGroupActivity.#ctor(System.Int32,System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Initializes a new instance of the RemoveMembersFromGroupActivity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.RemoveMembersFromGroupActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.RemoveMembersFromGroupActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.RemoveUserFromSecurityGroupsActivity">
+            <summary>
+            Represents an activity that removes a user from one or more groups.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.RemoveUserFromSecurityGroupsActivity.#ctor(System.Int32,System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Initializes a new instance of the RemoveUserFromSecurityGroupsActivity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.RemoveUserFromSecurityGroupsActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.RemoveUserFromSecurityGroupsActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity">
+            <summary>
+            Base class of all security related activities.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.Context">
+            <summary>
+            Gets the current SecurityContext.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.#ctor">
+            <summary>
+            Initializes the instance.
+            Sets the TypeName property to the name of the .Net type of this instance;
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.Execute(SenseNet.Security.SecurityContext,System.Boolean)">
+            <summary>
+            Executes the activity by adding it to the activity queue.
+            </summary>
+            <param name="context">Current SecurityContext</param>
+            <param name="waitForComplete">If the value is true (default),
+            the current thread waits for the full execution on this computer.
+            Otherwise the method returns immediately.</param>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.ExecuteInternal">
+            <summary>
+            Called by an internal component in right order.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.Initialize(SenseNet.Security.SecurityContext)">
+            <summary>
+            Extension point for initializing the activity data before executing any operations.
+            </summary>
+            <param name="context">Current SecurityContext to use any security related thing.</param>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Customization point for the activity data persistence.
+            </summary>
+            <param name="context">Current SecurityContext to use any security related thing.</param>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Customization point for the memory operations based on the activity data.
+            </summary>
+            <param name="context">Current SecurityContext to use any security related thing.</param>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.Attach(SenseNet.Security.Messaging.SecurityMessages.SecurityActivity)">
+            <summary>
+            When an activity gets executed and needs to be finalized, all activity objects that have
+            the same id need to be finalized too. The Attach methods puts all activities with the
+            same id to a chain to let the Finish method call the Finish method of each object in the chain.
+            This method was needed because it is possible that the same activity arrives from different
+            sources: e.g from messaging, from database or from direct execution.
+            </summary>
+            <param name="activity"></param>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.Finish">
+            <summary>
+            Finish the full activity chain (see the Attach method for details).
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.Id">
+            <summary>
+            Database id of the activity instance
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.TypeName">
+            <summary>
+            Name of the activity type.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.FromReceiver">
+            <summary>
+            Gets or sets whether the activity comes from the message receiver.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.FromDatabase">
+            <summary>
+            Gets or sets whether the activity is loaded from the database.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.IsUnprocessedActivity">
+            <summary>
+            Gets or sets whether the activity is loaded from the database at the system start.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SecurityActivity.OnDeserialization(System.Object)">
+            <summary>
+            Runs when the entire object graph has been deserialized.
+            Called by the .NET framework.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Messaging.SecurityMessages.SetAclActivity">
+            <summary>
+            Represents an activity that controls Access control list modifications.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SetAclActivity.#ctor(System.Collections.Generic.IEnumerable{SenseNet.Security.AclInfo},System.Collections.Generic.List{System.Int32},System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Initializes a new instance of the SetAclActivity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SetAclActivity.Initialize(SenseNet.Security.SecurityContext)">
+            <summary>
+            Initializes the data.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SetAclActivity.Store(SenseNet.Security.SecurityContext)">
+            <summary>
+            Stores the modifications in the database.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Messaging.SecurityMessages.SetAclActivity.Apply(SenseNet.Security.SecurityContext)">
+            <summary>
+            Applies the modifications in the memory structures.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.Permission">
+            <summary>
+            Permission representation in AccessControlEntry.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Permission.Name">
+            <summary>
+            Name of the permission.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Permission.Allow">
+            <summary>
+            True if the permission is allowed.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Permission.Deny">
+            <summary>
+            True if the permission is denied.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Permission.AllowFrom">
+            <summary>
+            Id of the entity on the ancestor chain where this permission is allowed explicitly.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Permission.DenyFrom">
+            <summary>
+            Id of the entity on the ancestor chain where this permission is denied explicitly.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Permission.AllowEnabled">
+            <summary>
+            Editing is enabled if this permission has an explicit setting.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.Permission.DenyEnabled">
+            <summary>
+            Editing is enabled if this permission has an explicit setting.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.Permission.ToString">
+            <summary>Converts the value of this instance to a System.String.</summary>
+        </member>
+        <member name="T:SenseNet.Security.PermissionBitMask">
+            <summary>
+            Combines the allowed and denied permission sets in one object.
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.PermissionBitMask.AllowBits">
+            <summary>
+            Represents the allowed permission set. 
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.PermissionBitMask.DenyBits">
+            <summary>
+            Represents the denied permission set. 
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.PermissionBitMask.op_BitwiseOr(SenseNet.Security.PermissionBitMask,SenseNet.Security.PermissionBitMask)">
+            <summary>
+            Combines the two parameters with bitwise | operation and returns with a new value.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionBitMask.AllAllowed">
+            <summary>
+            Bitmask that represents all the supported permission types as allowed.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionBitMask.AllDenied">
+            <summary>
+            Bitmask that represents all the supported permission types as denied.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionBitMask.All">
+            <summary>
+            All used PermissionType bits are 1 in allowed and denied bits too.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.PermissionChange">
+            <summary>
+            Represents a changed permission set of the identity on the entity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionChange.Entity">
+            <summary>
+            Gets the related entity object.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionChange.IdentityId">
+            <summary>
+            Gets the Id of the related identity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionChange.EntryType">
+            <summary>
+            Gets the type of changed entry.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionChange.ChangedBits">
+            <summary>
+            Gets the changed bitmask. Every bit indicate a permission modification state: 1 changed, 0 unchanged.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.PermissionValue">
+            <summary>
+            Represents value of a permission
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.PermissionValue.Undefined">
+            <summary>
+            Means: the associated permission is not controlled in this case.
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.PermissionValue.Allowed">
+            <summary>
+            The associated permission is granted.
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.PermissionValue.Denied">
+            <summary>
+            The associated permission is explicitly denied.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.PermissionEvaluator">
+            <summary>
+            Central class for evaluating permission requests. It is responsible for collecting 
+            the relevant identities (mainly groups) for the user in context and deciding whether 
+            a certain permission is allowed or denied for that user.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.PermissionLevel">
+            <summary>
+            Level of permission in the PermissionQuery operations.
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.PermissionLevel.Allowed">
+            <summary>Query only allowed permissions.</summary>
+        </member>
+        <member name="F:SenseNet.Security.PermissionLevel.Denied">
+            <summary>Query only denied permissions.</summary>
+        </member>
+        <member name="F:SenseNet.Security.PermissionLevel.AllowedOrDenied">
+            <summary>Query allowed and denied permissions too.</summary>
+        </member>
+        <member name="T:SenseNet.Security.PermissionQuery">
+            <summary>
+            Contains an internal API for querying permission values in the system by entities, identities or permission types.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.PermissionTypeBase">
+            <summary>
+            Represents one permission in the system. 3rd party developers may inherit from this base class and 
+            provide others with named permissions.
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.PermissionTypeBase.PermissionMaxCount">
+            <summary>Permission type capacity.</summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionTypeBase.PermissionCount">
+            <summary>Count of registered permission types.</summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionTypeBase.Index">
+            <summary> 0 based index. Max value is the bit count of long.</summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionTypeBase.Name">
+            <summary>Case sensitive unique name.</summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionTypeBase.Mask">
+            <summary>
+            Bitmask value of the permission type. The bit on the position determined by Index is 1, any other is 0.
+            Calculated in construction time.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.PermissionTypeBase.Allows">
+            <summary>
+            Provides other permission types that must be allowed if this permission is allowed.
+            Can contain zero, one or more existing permission types. These forced settings
+            have chained effect so it is strongly recommended that this array contain
+            such permission types that have a smaller index than the owner.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.PermissionTypeBase.#ctor(System.String,System.Int32)">
+            <summary>
+            Creates and memorizes the instance of the permission type with passed index and name.
+            Index is 0 &lt;= i &lt; bit count of ulong (64).
+            </summary>
+            <param name="name">Case sensitive unique name.</param>
+            <param name="index">Set of values: 0 &lt;= i &lt; 64 (bit count of ulong).</param>
+        </member>
+        <member name="M:SenseNet.Security.PermissionTypeBase.GetPermissionTypeByIndex(System.Int32)">
+            <summary>
+            Returns a PermissionTypeBase instance by the passed 0 based index.
+            </summary>
+            <param name="index">0 based index value.</param>
+            <returns>The matched permission type or null if it does not exist.</returns>
+            <exception cref="T:System.IndexOutOfRangeException">IndexOutOfRangeException</exception>
+        </member>
+        <member name="M:SenseNet.Security.PermissionTypeBase.GetPermissionTypeByName(System.String)">
+            <summary>
+            Returns a PermissionTypeBase instance by the passed name.
+            </summary>
+            <param name="name">Case sensitive name of the permission.</param>
+            <returns>The matched permission type or null if it does not exist.</returns>
+            <exception cref="T:System.Collections.Generic.KeyNotFoundException">KeyNotFoundException</exception>
+        </member>
+        <member name="M:SenseNet.Security.PermissionTypeBase.GetPermissionMask(System.Collections.Generic.IEnumerable{SenseNet.Security.PermissionTypeBase})">
+            <summary>
+            Returns with the aggregated bitmask of the passed permission type set.
+            </summary>
+            <param name="permissionTypes">Empty parameter means all the permission types.
+            Permission type order is irrelevant.</param>
+            <returns>Aggregated bitmask.</returns>
+        </member>
+        <member name="M:SenseNet.Security.PermissionTypeBase.op_Implicit(SenseNet.Security.PermissionTypeBase)~SenseNet.Security.PermissionBitMask">
+            <summary>
+            Converts a permission to a bitmask.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.PermissionTypeBase.op_OnesComplement(SenseNet.Security.PermissionTypeBase)">
+            <summary>
+            Negates all bits.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.PermissionTypeBase.op_BitwiseOr(SenseNet.Security.PermissionTypeBase,SenseNet.Security.PermissionTypeBase)">
+            <summary>
+            Returns a value that has combined bit-masks of the parameters.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.SecurityActivityTimeoutException">
+            <summary>
+            Represents an error that occurs when a SecurityActivity execution times out.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityActivityTimeoutException.#ctor">
+            <summary>Initializes a new instance of the SecurityActivityTimeoutException class.</summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityActivityTimeoutException.#ctor(System.String)">
+            <summary>Initializes a new instance of the SecurityActivityTimeoutException class.</summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityActivityTimeoutException.#ctor(System.String,System.Exception)">
+            <summary>Initializes a new instance of the SecurityActivityTimeoutException class.</summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityActivityTimeoutException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>Initializes a new instance of the SecurityActivityTimeoutException class with serialized data.</summary>
+        </member>
+        <member name="T:SenseNet.Security.SecurityCache">
+            <summary>
+            Internal class holding the in-memory representation of all the entity and membership data in the system.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityCache.FlattenerClass.GetAllParentGroupIdsInclusive(SenseNet.Security.SecurityGroup)">
+            <summary>
+            Gathers all the parent groups of a group. The initial group WILL be in the list.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityCache.FlattenerClass.GetAllParentGroupIdsExclusive(SenseNet.Security.SecurityGroup)">
+            <summary>
+            Gathers all the parent groups of a group. The initial group 
+            will be in the list ONLY if there is a circle in the graph.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.SecurityConfiguration">
+            <summary>
+            Configuration object for the security component.
+            It is provided by the host application and used only during system start.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityConfiguration.SystemUserId">
+            <summary>Default: -1</summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityConfiguration.VisitorUserId">
+            <summary>Default: 6</summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityConfiguration.EveryoneGroupId">
+            <summary>Default: 8</summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityConfiguration.OwnerGroupId">
+            <summary>Default: 9</summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityConfiguration.CommunicationMonitorRunningPeriodInSeconds">
+            <summary>Default: 30</summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityConfiguration.SecurityActivityLifetimeInMinutes">
+            <summary>Time span before executed activities are cleared from the database. Default: 42</summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityConfiguration.SecurityActivityTimeoutInSeconds">
+            <summary>Default: 120</summary>
+        </member>
+        <member name="T:SenseNet.Security.SecurityContext">
+            <summary>
+            The front-end object of the SenseNet.Security component.
+            Provides an environment for querying and editing security related data.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityContext.CurrentUser">
+            <summary>
+            Gets the associated user instance.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.#ctor(SenseNet.Security.ISecurityUser,SenseNet.Security.SecuritySystem)">
+            <summary>
+            Creates a new instance of the SecurityContext using the passed user instance and the SecuritySystem.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.CreateAclEditor(SenseNet.Security.EntryType)">
+            <summary>
+            Creates a new instance of the AclEditor class for modifying access control data.
+            Editor handles only one type of entries. Default EntryType is Normal.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetAcl(System.Int32,SenseNet.Security.EntryType)">
+            <summary>
+            Returns the AccessControlList of the passed entity to help building a rich GUI for modifications.
+            The entity must exist. Entity resolution can compensate the entity integrity error.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetEffectiveEntries(System.Int32,System.Collections.Generic.IEnumerable{System.Int32},System.Nullable{SenseNet.Security.EntryType})">
+            <summary>
+            Returns an aggregated effective entries of the requested entity.
+            Inheritance information is not included.
+            The entity must exist. Entity resolution can compensate the entity integrity error.
+            </summary>
+            <param name="entityId">Id of the entity.</param>
+            <param name="relatedIdentities">Optional, can be null.
+            If it is provided, the output will be filtered for the related identities.
+            Empty collection means nobody, so in case of passing empty,
+            the method will return an empty list.</param>
+            <param name="entryType">Optional filter parameter.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetExplicitEntries(System.Int32,System.Collections.Generic.IEnumerable{System.Int32},System.Nullable{SenseNet.Security.EntryType})">
+            <summary>
+            Returns the explicit entries of the requested entity.
+            Inheritance information is not included.
+            The entity must exist. Entity resolution can compensate the entity integrity error.
+            </summary>
+            <param name="entityId">Id of the entity.</param>
+            <param name="relatedIdentities">Optional, can be null.
+            If it is provided, the output will be filtered for the related identities.
+            Empty collection means nobody, so in case of passing empty,
+            the method will return an empty list.</param>
+            <param name="entryType">Optional filter parameter.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.AssertPermission(System.Int32,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            If one or more passed permissions are not allowed (undefined or denied)
+            on the passed entity for the current user,
+            an <see cref="T:SenseNet.Security.AccessDeniedException"/> will be thrown.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+            <param name="permissions">Set of related permissions. Cannot be null.
+            Empty set means "allowed nothing" so SenseNetSecurityException will be thrown.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.AssertPermission(System.Int32,SenseNet.Security.EntryType,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            If one or more passed permissions are not allowed (undefined or denied)
+            on the passed entity for the current user,
+            an <see cref="T:SenseNet.Security.AccessDeniedException"/> will be thrown.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+            <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
+            <param name="permissions">Set of related permissions. Cannot be null.
+            Empty set means "allowed nothing" so SenseNetSecurityException will be thrown.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.AssertSubtreePermission(System.Int32,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            If one or more passed permissions are not allowed (undefined or denied)
+            on every entity in the whole subtree of the passed entity for the current user,
+            an <see cref="T:SenseNet.Security.AccessDeniedException"/> will be thrown.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+            <param name="permissions">Set of related permissions. Cannot be null.
+            Empty set means "allowed nothing" so AccessDeniedException will be thrown.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.HasPermission(System.Int32,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            Returns true if all passed permissions are allowed on the passed entity for the current user.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+            <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.HasPermission(System.Int32,SenseNet.Security.EntryType,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            Returns true if all passed permissions are allowed on the passed entity for the current user.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+            <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
+            <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.HasSubtreePermission(System.Int32,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            Returns true if all passed permissions are allowed for the current user on every entity in the whole subtree of the passed entity.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+            <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetPermission(System.Int32,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            Returns an aggregated permission value by all passed permissions for the current user on the passed entity.
+            Value is Denied if there is at least one denied among the passed permissions,
+              Undefined if there is an undefined and there is no denied among the passed permissions,
+              Allowed if every passed permission is allowed.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+            <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetPermission(System.Int32,SenseNet.Security.EntryType,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            Returns an aggregated permission value by all passed permissions for the current user on the passed entity.
+            Value is Denied if there is at least one denied among the passed permissions,
+              Undefined if there is an undefined and there is no denied among the passed permissions,
+              Allowed if every passed permission is allowed.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+            <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
+            <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetSubtreePermission(System.Int32,SenseNet.Security.PermissionTypeBase[])">
+            <summary>
+            Returns an aggregated permission value by all passed permissions for the current user on every entity in whole subtree of the passed entity.
+            Value is Denied if there is at least one denied among the passed permissions,
+              Undefined if there is an undefined and there is no denied among the passed permissions,
+              Allowed if every passed permission is allowed in the whole subtree of the entity.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+            <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.CreateSecurityEntity(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Creates a new entity. If it already exists, creation is skipped.
+            Parent entity must exist. Parent resolution can compensate the entity integrity error.
+            </summary>
+            <param name="entityId">Id of the created entity. Cannot be 0.</param>
+            <param name="parentEntityId">Id of the parent entity. Cannot be 0.</param>
+            <param name="ownerId">Id of the entity's owner identity.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.ModifyEntityOwner(System.Int32,System.Int32)">
+            <summary>
+            Changes the owner of the entity.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+            <param name="ownerId">Id of the entity's owner identity.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.DeleteEntity(System.Int32)">
+            <summary>
+            Deletes the entity, it's whole subtree and all related ACLs.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.MoveEntity(System.Int32,System.Int32)">
+            <summary>
+            Moves the entity and it's whole subtree, including the related ACLs.
+            Source entity will be a child of the target entity.
+            </summary>
+            <param name="sourceId">Id of the source entity. Cannot be 0.</param>
+            <param name="targetId">Id of the target entity that will contain the source. Cannot be 0.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.IsEntityInherited(System.Int32)">
+            <summary>
+            Returns false if the entity inherits permissions from it's parent.
+            </summary>
+            <param name="entityId">Id of the entity. Cannot be 0.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.IsEntityExist(System.Int32)">
+            <summary>
+            Returns true if the entity exists in the security system.
+            This method assumes that the entity exists and if not, executes a compensation algorithm
+            that can repair a data integrity error (which may occur in case of a distributed system).
+            The compensation works on two level:
+            1 - loads the entity from the security database to the memory.
+            2 - executes a callback to the host application (<see cref="T:SenseNet.Security.IMissingEntityHandler"/>) and saves the entity if it is needed.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetExplicitPermissionsInSubtree(System.Int32,System.Int32[],System.Boolean)">
+            <summary>
+            Collects all permission settings on the given entity and its subtree related to the specified user or group set.
+            Output is grouped by permission types and can be filtered by the permission value.
+            </summary>
+            <param name="entityId">Id of the entity.</param>
+            <param name="identities">Id of the groups or users.</param>
+            <param name="includeRoot">Determines whether the provided root entity's permissions should be included in the result set.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetRelatedIdentities(System.Int32,SenseNet.Security.PermissionLevel)">
+            <summary>
+            Returns all user and group ids that have any explicit permissions on the given entity or its subtree.
+            </summary>
+            <param name="entityId">Id of the entity.</param>
+            <param name="level">Filtering by the permission value. It can be Allowed, Denied, AllowedOrDenied.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetRelatedPermissions(System.Int32,SenseNet.Security.PermissionLevel,System.Boolean,System.Int32,System.Func{System.Int32,System.Boolean})">
+            <summary>
+            Collects all permission settings on the given entity and its subtree related to the specified user or group.
+            Output is grouped by permission types and can be filtered by the permission value.
+            </summary>
+            <param name="entityId">Id of the entity.</param>
+            <param name="level">Filtering by the permission value. It can be Allowed, Denied, AllowedOrDenied.</param>
+            <param name="explicitOnly">Filter parameter for future use only. Allowed value is true.</param>
+            <param name="identityId">Id of the group or user.</param>
+            <param name="isEnabled">Filter method that can enable or disable any entity.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetRelatedEntities(System.Int32,SenseNet.Security.PermissionLevel,System.Boolean,System.Int32,System.Collections.Generic.IEnumerable{SenseNet.Security.PermissionTypeBase})">
+            <summary>
+            Returns all entity ids in the requested entity's subtree that have any permission setting
+            filtered by permission value, user or group, and a permission mask
+            </summary>
+            <param name="entityId">Id of the entity.</param>
+            <param name="level">Filtering by the permission value. It can be Allowed, Denied, AllowedOrDenied.</param>
+            <param name="explicitOnly">Filter parameter for future use only. The currently allowed value is true.</param>
+            <param name="identityId">Id of the group or user.</param>
+            <param name="permissions">Only those entities appear in the output that have permission settings in connection with the given permissions.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetRelatedIdentities(System.Int32,SenseNet.Security.PermissionLevel,System.Collections.Generic.IEnumerable{SenseNet.Security.PermissionTypeBase})">
+            <summary>
+            Returns all user and group ids that have any explicit permission on the given entity and its subtree.
+            </summary>
+            <param name="entityId">Id of the entity.</param>
+            <param name="level">Filtering by the permission value. It can be Allowed, Denied, AllowedOrDenied.</param>
+            <param name="permissions">Only that entities appear in the output that have permission settings in connection with the given permissions.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetRelatedEntitiesOneLevel(System.Int32,SenseNet.Security.PermissionLevel,System.Int32,System.Collections.Generic.IEnumerable{SenseNet.Security.PermissionTypeBase})">
+            <summary>
+            Returns all entity ids in the requested entity's direct children that have any permission setting
+            filtered by permission value, user or group, and a permission mask
+            </summary>
+            <param name="entityId">Id of the entity.</param>
+            <param name="level">Filtering by the permission value. It can be Allowed, Denied, AllowedOrDenied.</param>
+            <param name="identityId">Id of the group or user.</param>
+            <param name="permissions">Only those entities appear in the output that have permission settings in connection with the given permissions.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetAllowedUsers(System.Int32,System.Collections.Generic.IEnumerable{SenseNet.Security.PermissionTypeBase})">
+            <summary>
+            Returns Ids of all users that have all given permission on the entity.
+            User will be resulted even if the permissions are granted on a group where she is member directly or indirectly.
+            </summary>
+            <param name="entityId">Id of the entity.</param>
+            <param name="permissions">Only those users appear in the output that have permission settings in connection with the given permissions.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetParentGroups(System.Int32,System.Boolean)">
+            <summary>
+            Returns Ids of all groups where the given user or group is member directly or indirectly.
+            </summary>
+            <param name="identityId">Id of the group or user.</param>
+            <param name="directOnly">Switch of the direct or indirect membership.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetRecentActivities">
+            <summary>
+            Returns an object that contains information about the execution of the last few SecurityActivities.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetCachedMembershipForConsistencyCheck">
+            <summary>WARNING! Do not use this method in your code. Used in consistency checker tool.</summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetFlatteningForConsistencyCheck(System.Collections.Generic.IEnumerable{System.Int64}@,System.Collections.Generic.IEnumerable{System.Int64}@)">
+            <summary>WARNING! Do not use this method in your code. Used in consistency checker tool.</summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetCachedEntitiesForConsistencyCheck">
+            <summary>WARNING! Do not use this method in your code. Used in consistency checker tool.</summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetFlattenedGroups">
+            <summary>
+            Gets a flattened list of group ids that the current is member of.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetGroups">
+            <summary>
+            Gets a flattened list of group ids that the current is member of, plus Everyone (except in case of a visitor) 
+            and the optional dynamic groups provided by the client application.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetGroupsWithOwnership(System.Int32)">
+            <summary>
+            Gets a flattened list of group ids that the current is member of, plus Everyone (except in case of a visitor),
+            plus Owners (if applicable) and the optional dynamic groups provided by the client application.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.IsInGroup(System.Int32,System.Int32)">
+            <summary>
+            Queries whether the provided member (user or group) is a member of a group. This method
+            is transitive, meaning it will look for relations in the whole group graph, not 
+            only direct memberships.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.AddMembersToSecurityGroup(System.Int32,System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Adds different kinds of members to a group in one step.
+            Non-existing groups or member groups will be created.
+            If all the parameters are null or empty, nothing will happen.
+            </summary>
+            <param name="groupId">Identifier of the container group. Cannot be 0.</param>
+            <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
+            <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
+            <param name="parentGroups">Collection of the parent group member identifiers. Use this if the parent 
+            group or groups are already known when this method is called. Can be null or empty.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.RemoveMembersFromSecurityGroup(System.Int32,System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Removes multiple kinds of members from a group in one step.
+            Non-existing groups or member groups will be skipped.
+            If all the parameters are null or empty, nothing will happen.
+            </summary>
+            <param name="groupId">Identifier of the container group. Cannot be 0.</param>
+            <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
+            <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
+            <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.AddGroupsToSecurityGroup(System.Int32,System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Add one or more group members to a group. If the main group or any member is unknown it will be created.
+            This method is a shortcut for AddMembersToSecurityGroup(...).
+            </summary>
+            <param name="groupId">Identifier of the container group. Cannot be 0.</param>
+            <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.AddGroupToSecurityGroups(System.Int32,System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Add a group as a member of one or more parent groups. If the main group or any parent is unknown it will be created.
+            This method is a shortcut for AddMembersToSecurityGroup(...).
+            </summary>
+            <param name="groupId">Identifier of the member group. Cannot be 0.</param>
+            <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.RemoveGroupsFromSecurityGroup(System.Int32,System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Removes one or more group members from a group in one step.
+            Non-existing group or member groups will be skipped.
+            This method is a shortcut for RemoveMembersFromSecurityGroup(...).
+            </summary>
+            <param name="groupId">Identifier of the container group. Cannot be 0.</param>
+            <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.RemoveGroupFromSecurityGroups(System.Int32,System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Removes a group from one or more parent groups
+            Non-existing group or parent groups will be skipped.
+            This method is a shortcut for RemoveMembersFromSecurityGroup(...).
+            </summary>
+            <param name="groupId">Identifier of the member group. Cannot be 0.</param>
+            <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.AddUsersToSecurityGroup(System.Int32,System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Adds one or more users to a group in one step.
+            Non-existing group will be created.
+            This method is a shortcut for AddMembersToSecurityGroup(...).
+            </summary>
+            <param name="groupId">Identifier of the container group. Cannot be 0.</param>
+            <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.AddUserToSecurityGroups(System.Int32,System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Add a user to one or more groups in one step.
+            Non-existing groups will be created.
+            </summary>
+            <param name="userId">Identifier of the the user member that will be added. Cannot be 0.</param>
+            <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.RemoveUsersFromSecurityGroup(System.Int32,System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Removes one or more users from a group in one step.
+            Non-existing group or member will be skipped.
+            This method is a shortcut for RemoveMembersFromSecurityGroup(...).
+            </summary>
+            <param name="groupId">Identifier of the container group. Cannot be 0.</param>
+            <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.RemoveUserFromSecurityGroups(System.Int32,System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Removes a user from one or more groups in one step.
+            Non-existing group or member will be skipped.
+            </summary>
+            <param name="userId">Identifier of the user the will be removed. Cannot be 0.</param>
+            <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.DeleteSecurityGroup(System.Int32)">
+            <summary>
+            Deletes the specified group and its relations including related security entries.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.DeleteUser(System.Int32)">
+            <summary>
+            Deletes the user from the system by removing all memberships and security entries related to this user.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.DeleteIdentity(System.Int32)">
+            <summary>
+            Deletes the specified group or user and its relations including related security entries.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.DeleteIdentities(System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Deletes the specified groups or users and their relations including related security entries.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityContext.GetDynamicGroups(System.Int32)">
+            <summary>
+            Gets the list of additional group ids for the user dynamically defined by the client application.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.SecurityEntity">
+            <summary>
+            Represents an entity that can be used to build a tree from and have security entries.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityEntity.ToString">
+            <summary>
+            Converts the information of this instance to its equivalent string representation.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityEntity.Id">
+            <summary>
+            Unique id of the entity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityEntity.OwnerId">
+            <summary>
+            Id of the owner user or group.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityEntity.IsInherited">
+            <summary>
+            Gets the inheritance state. True if the entity inherits the permission settings from its ancestors.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityEntity.Parent">
+            <summary>
+            Parent of this entity or null.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityEntity.Acl">
+            <summary>
+            Explicit permission entries. If this contains a value, it means this entity has explicit permission entries.
+            Serves only test purposes, do not modify this object.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityEntity.Level">
+            <summary>
+            Gets the entity's level in the tree. It is the count of the items in the parent chain.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityEntity.AddChild_Unsafe(SenseNet.Security.SecurityEntity)">
+            <summary>
+            Used only by the initial loading process.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityEntity.HasExplicitAcl">
+            <summary>
+            True if this entity has explicit entries.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.SecurityEntityManager">
+            <summary>
+            Manages SecurityEntity tree (designed for internal singleton service).
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityEntityManager.GetEntitySafe(System.Int32,System.Boolean)">
+            <summary>
+            Loads a security entity. If the entity cannot be found in the cache, it loads it
+            from the database and puts it into the cache. It the entity cannot be loaded
+            from the db either, a callback is made to the host application using the
+            <see cref="M:SenseNet.Security.IMissingEntityHandler.GetMissingEntity(System.Int32,System.Int32@,System.Int32@)"/> method to compensate possible
+            concurrency errors.
+            </summary>
+            <param name="entityId">Id of the entity</param>
+            <param name="throwError">Determines whether to throw an <see cref="T:SenseNet.Security.EntityNotFoundException"/> if the entity was not found.</param>
+            <returns>The security entity.</returns>
+        </member>
+        <member name="M:SenseNet.Security.SecurityEntityManager.CollectEntityIds(SenseNet.Security.SecurityEntity,System.Collections.Generic.List{System.Int32})">
+            <summary>
+            Collects all entity ids in a subtree, including the root entity's.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.SecurityGroup">
+            <summary>
+            Represents a group node int the in-memory membership graph.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityGroup.Id">
+            <summary>
+            Id of the group.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityGroup.ParentGroups">
+            <summary>
+            Groups that contain this group directly.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityGroup.Groups">
+            <summary>
+            Member groups.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecurityGroup.UserMemberIds">
+            <summary>
+            Member user ids.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityGroup.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the SecurityGroup
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityGroup.ToString">
+            <summary>
+            Converts the information of this instance to its equivalent string representation.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.BreakOptions">
+            <summary>
+            Controls the inheritance handling in the collection enumerators.
+            </summary>
+        </member>
+        <member name="F:SenseNet.Security.BreakOptions.Default">
+            <summary>Indicates that the tree walker does not take into account any inheritance break.</summary>
+        </member>
+        <member name="F:SenseNet.Security.BreakOptions.StopAtParentBreak">
+            <summary>Indicates that the parent chain walker stops at any inheritance break.</summary>
+        </member>
+        <member name="F:SenseNet.Security.BreakOptions.StopAtSubtreeBreaks">
+            <summary>Indicates that the subtree walker do not enter into the broken inheritance subtrees.</summary>
+        </member>
+        <member name="T:SenseNet.Security.SecurityQuery">
+            <summary>
+            Contains security-related queryable collections.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityQuery.All(SenseNet.Security.SecurityContext)">
+            <summary>
+            Returns SecurityQuery instance that supports any query on the parent chain
+            and the subtree of a later specified entity.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityQuery.ParentChain(SenseNet.Security.SecurityContext)">
+            <summary>
+            Returns SecurityQuery instance that supports any query on the parent chain of a later specified entity.
+            Note that the focused entity is not a member of its parent chain.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityQuery.Subtree(SenseNet.Security.SecurityContext)">
+            <summary>
+            Returns SecurityQuery instance that supports any query in the subtree of a later specified entity.
+            Note that the focused entity is a member of its subtree.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityQuery.GetEntities(System.Int32,SenseNet.Security.BreakOptions)">
+            <summary>
+            Returns all entities in the predefined axis (All, ParentChain, Subtree) of the specified entity.
+            The collection is empty if the entity was not found.
+            This operation is thread safe. The thread safety uses system resources, so to minimize these,
+            it's strongly recommended processing as fast as possible.
+            </summary>
+            <param name="entityId">The Id of the focused entity.</param>
+            <param name="handleBreaks">Controls the permission inheritance handling.</param>
+            <returns>The IEnumerable&lt;SecurityEntity&gt; to further filtering.</returns>
+        </member>
+        <member name="M:SenseNet.Security.SecurityQuery.GetEntries(System.Int32,SenseNet.Security.BreakOptions)">
+            <summary>
+            Returns all entries in the predefined axis (All, ParentChain, Subtree) of the specified entity.
+            The collection is empty if the entity was not found.
+            Note that the output entries do not refers their owner entities and there is no inexpensive way 
+            to recover them.
+            This operation is thread safe. The thread safety uses system resources, so to minimize these,
+            it's strongly recommended processing as fast as possible.
+            </summary>
+            <param name="entityId">The Id of the focused entity.</param>
+            <param name="handleBreaks">Controls the permission inheritance handling.</param>
+            <returns>The IEnumerable&lt;SecurityEntity&gt; to further filtering.</returns>
+        </member>
+        <member name="M:SenseNet.Security.SecurityQuery.GetPermissionChanges(System.Int32,System.Collections.Generic.IEnumerable{System.Int32},SenseNet.Security.BreakOptions)">
+            <summary>
+            Returns permission changes in the predefined axis (All, ParentChain, Subtree) of the specified entity.
+            A permission is changed when the parent permission and local permission are not equal.
+            The collection can be pre-filtered with a relatedIdentity parameter.
+            This operation is thread safe. The thread safety uses system resources, so to minimize these,
+            it's strongly recommended processing as fast as possible.
+            </summary>
+            <param name="entityId">The Id of the focused entity.</param>
+            <param name="relatedIdentities">Identity filter. Null or empty means inactive filter.</param>
+            <param name="handleBreaks">Controls the permission inheritance handling.</param>
+            <returns>The IEnumerable&lt;PermissionChange&gt; to further filtering.</returns>
+        </member>
+        <member name="T:SenseNet.Security.SecurityStructureException">
+            <summary>
+            Represents an error that occurs when there is a mistake in connection with
+            creating, updating or deleting entities or entries.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityStructureException.#ctor">
+            <summary>Initializes a new instance of the SecurityStructureException class.</summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityStructureException.#ctor(System.String)">
+            <summary>Initializes a new instance of the SecurityStructureException class.</summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityStructureException.#ctor(System.String,System.Exception)">
+            <summary>Initializes a new instance of the SecurityStructureException class.</summary>
+        </member>
+        <member name="M:SenseNet.Security.SecurityStructureException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>Initializes a new instance of the SecurityStructureException class with serialized data.</summary>
+        </member>
+        <member name="T:SenseNet.Security.SecuritySystemUser">
+            <summary>
+            Represents a user who has permission for everything.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecuritySystemUser.Id">
+            <summary>Id of the user. This value comes from Configuration.Identities.SystemUserId</summary>
+        </member>
+        <member name="M:SenseNet.Security.SecuritySystemUser.GetDynamicGroups(System.Int32)">
+            <summary>Interface implementation. Not used in this class.</summary>
+        </member>
+        <member name="T:SenseNet.Security.SecuritySystem">
+            <summary>
+            Central object of the security subsystem.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.SecuritySystem.GeneralSecurityContext">
+            <summary>
+            Gets a general context for built in system user
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.SecuritySystem.Shutdown">
+            <summary>
+            Stops the security subsystem.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.StoredAce">
+            <summary>
+            Represents persistent information about an access control entry.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredAce.EntityId">
+            <summary>
+            Id of the entity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredAce.EntryType">
+            <summary>
+            Category of the entry.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredAce.IdentityId">
+            <summary>
+            Id of the identity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredAce.LocalOnly">
+            <summary>
+            Gets or sets the inheritance. If the value is true, the entry does not affect child entities.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredAce.AllowBits">
+            <summary>
+            Allowed permissions as bitmask.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredAce.DenyBits">
+            <summary>
+            Denied permissions as bitmask.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Security.StoredAce.ToString">
+            <summary>
+            Converts the information of this instance to its equivalent string representation.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Security.StoredSecurityEntity">
+            <summary>
+            Represents information about a SecurityEntity instance to persist.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredSecurityEntity.Id">
+            <summary>
+            Unique id of the entity.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredSecurityEntity.OwnerId">
+            <summary>
+            Id of the owner user or group. 0 means: nobody.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredSecurityEntity.ParentId">
+            <summary>
+            Id of the parent entity or 0.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredSecurityEntity.IsInherited">
+            <summary>
+            Gets or sets the inheritance. True if this entity inherits the permission settings from its parent.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredSecurityEntity.HasExplicitEntry">
+            <summary>
+            True if this entity has any explicit entry.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredSecurityEntity.nullableParentId">
+            <summary>
+            Nullable representation of the ParentId. Null if there is no parent.
+            </summary>
+        </member>
+        <member name="P:SenseNet.Security.StoredSecurityEntity.nullableOwnerId">
+            <summary>
+            Nullable representation of the OwnerId. Null if there is no owner.
+            </summary>
+        </member>
+        <member name="T:SenseNet.Extensions.DependencyInjection.SecurityExtensions">
+            <summary>
+            Security extension methods.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Extensions.DependencyInjection.SecurityExtensions.AddInMemorySecurityDataProvider(Microsoft.Extensions.DependencyInjection.IServiceCollection,SenseNet.Security.Data.DatabaseStorage)">
+            <summary>
+            Registers <see cref="T:SenseNet.Security.Data.MemoryDataProvider"/> as the security data provider in the service collection.
+            </summary>
+        </member>
+        <member name="M:SenseNet.Extensions.DependencyInjection.SecurityExtensions.AddDefaultMessageProvider(Microsoft.Extensions.DependencyInjection.IServiceCollection,SenseNet.Security.Messaging.IMessageSenderManager)">
+            <summary>
+            Registers <see cref="T:SenseNet.Security.Messaging.DefaultMessageProvider"/> as the security message provider in the service collection.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -82,11 +82,14 @@ namespace SenseNet.Security.Tests
                 ctx.CreateSecurityEntity(999, 1, user.Id);
 
                 Assert.IsTrue(((MemoryDataProvider) sourceSystem.DataProvider).Storage.Entities.ContainsKey(999));
+                Assert.IsFalse(((MemoryDataProvider) targetSystem.DataProvider).Storage.Entities.ContainsKey(999));
                 Assert.AreEqual(1, messageQueue.Count);
 
                 ((TestMessageProvider) targetSystem.MessageProvider).ReceiveOne();
+
                 Assert.AreEqual(0, messageQueue.Count);
                 Thread.Sleep(200);
+                Assert.IsTrue(((MemoryDataProvider)sourceSystem.DataProvider).Storage.Entities.ContainsKey(999));
                 Assert.IsTrue(((MemoryDataProvider) targetSystem.DataProvider).Storage.Entities.ContainsKey(999));
             }
             finally

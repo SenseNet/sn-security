@@ -52,7 +52,7 @@ namespace SenseNet.Security
         /// Returns the AccessControlList of the passed entity to help building a rich GUI for modifications.
         /// The entity must exist. Entity resolution can compensate the entity integrity error.
         /// </summary>
-        public AccessControlList GetAcl(int entityId, EntryType entryType = EntryType.Normal)
+        public virtual AccessControlList GetAcl(int entityId, EntryType entryType = EntryType.Normal)
         {
             return SecuritySystem.EntityManager.GetAccessControlList(entityId, entryType);
         }

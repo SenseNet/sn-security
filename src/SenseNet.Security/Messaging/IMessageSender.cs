@@ -21,7 +21,7 @@ namespace SenseNet.Security.Messaging
         bool IsMe(IMessageSender sender);
     }
 
-    internal class MessageSenderManager : IMessageSenderManager
+    public class MessageSenderManager : IMessageSenderManager
     {
         public MessageSenderManager(string computerId = null, string instanceId = null)
         {
