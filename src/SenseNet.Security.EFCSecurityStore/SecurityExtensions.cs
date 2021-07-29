@@ -21,7 +21,7 @@ namespace SenseNet.Extensions.DependencyInjection
             if (configure != null)
                 services.Configure(configure);
 
-            return services.AddSingleton<ISecurityDataProvider, EFCSecurityDataProvider>();
+            return services.AddSecurityDataProvider<EFCSecurityDataProvider>();
         }
     }
 }

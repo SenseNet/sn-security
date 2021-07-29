@@ -19,14 +19,29 @@ namespace SenseNet.Extensions.DependencyInjection
         {
             return services.AddSingleton<ISecurityDataProvider>(provider => new MemoryDataProvider(storage));
         }
+        /// <summary>
+        /// Registers a security data provider in the service collection.
+        /// </summary>
+        public static IServiceCollection AddSecurityDataProvider<T>(this IServiceCollection services)
+            where T: class, ISecurityDataProvider
+        {
+            return services.AddSingleton<ISecurityDataProvider, T>();
+        }
 
         /// <summary>
         /// Registers <see cref="DefaultMessageProvider"/> as the security message provider in the service collection.
         /// </summary>
-        public static IServiceCollection AddDefaultMessageProvider(this IServiceCollection services, IMessageSenderManager messageSenderManager = null)
+        public static IServiceCollection AddDefaultSecurityMessageProvider(this IServiceCollection services)
         {
-            return services.AddScoped<IMessageProvider>(provider =>
-                new DefaultMessageProvider(messageSenderManager ?? new MessageSenderManager()));
+            return services.AddSecurityMessageProvider<DefaultMessageProvider>();
+        }
+        /// <summary>
+        /// Registers a security message provider in the service collection.
+        /// </summary>
+        public static IServiceCollection AddSecurityMessageProvider<T>(this IServiceCollection services) 
+            where T: class, IMessageProvider
+        {
+            return services.AddSingleton<IMessageProvider, T>();
         }
     }
 }
