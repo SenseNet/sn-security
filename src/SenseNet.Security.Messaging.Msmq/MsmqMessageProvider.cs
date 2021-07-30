@@ -20,13 +20,19 @@ namespace SenseNet.Security.Messaging.Msmq
         private List<bool> _sendQueuesAvailable;
         private readonly ReaderWriterLockSlim _senderLock = new ReaderWriterLockSlim();
         private readonly BinaryMessageFormatter _formatter = new BinaryMessageFormatter();
-        
+        private readonly MsmqOptions _msmqOptions;
+
         public override string ReceiverName => _receiveQueue.Path;
 
         /* ============================================================================== Initialization */
 
-        public MsmqMessageProvider(IMessageSenderManager messageSenderManager, IOptions<MessagingOptions> messagingOptions) : 
-            base(messageSenderManager, messagingOptions) { }
+        public MsmqMessageProvider(IMessageSenderManager messageSenderManager,
+            IOptions<MessagingOptions> messagingOptions,
+            IOptions<MsmqOptions> msmqOptions) :
+            base(messageSenderManager, messagingOptions)
+        {
+            _msmqOptions = msmqOptions.Value;
+        }
 
         public override void Initialize()
         {
@@ -36,7 +42,7 @@ namespace SenseNet.Security.Messaging.Msmq
         }
         private void BuildQueues()
         {
-            var queuePaths = Configuration.MessageQueueName.Split(';');
+            var queuePaths = _msmqOptions.MessageQueueName.Split(';');
             if (queuePaths.Length < 2)
                 throw new Exception("No queues have been initialized. Please verify you have provided at least 2 queue paths: first for local, the rest for remote queues!");
 
@@ -58,13 +64,13 @@ namespace SenseNet.Security.Messaging.Msmq
             return new MessageQueue(queuePath) {Formatter = new BinaryMessageFormatter()};
         }
 
-        private static MessageQueue RecoverQueue(MessageQueue queue)
+        private MessageQueue RecoverQueue(MessageQueue queue)
         {
             // the queue must be closed and the connection cache cleared before we try to reconnect
             queue.Close();
             MessageQueue.ClearConnectionCache();
 
-            Thread.Sleep(Configuration.MsmqReconnectDelay);
+            Thread.Sleep(_msmqOptions.MsmqReconnectDelay);
 
             // reconnect
             return CreateQueue(queue.Path);
@@ -99,7 +105,7 @@ namespace SenseNet.Security.Messaging.Msmq
         {
             var message = new Message(messageBody)
             {
-                TimeToBeReceived = TimeSpan.FromSeconds(Configuration.MessageRetentionTime),
+                TimeToBeReceived = TimeSpan.FromSeconds(_msmqOptions.MessageRetentionTime),
                 Formatter = _formatter
             };
 

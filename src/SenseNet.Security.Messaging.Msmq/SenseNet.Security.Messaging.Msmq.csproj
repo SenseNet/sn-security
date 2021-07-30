@@ -104,6 +104,7 @@
   <ItemGroup>
     <Compile Include="Configuration.cs" />
     <Compile Include="EventMessage.cs" />
+    <Compile Include="MsmqExtensions.cs" />
     <Compile Include="MsmqMessageProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
