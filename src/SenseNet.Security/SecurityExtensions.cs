@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 using SenseNet.Security;
+using SenseNet.Security.Configuration;
 using SenseNet.Security.Data;
 using SenseNet.Security.Messaging;
 
@@ -11,6 +13,32 @@ namespace SenseNet.Extensions.DependencyInjection
     /// </summary>
     public static class SecurityExtensions
     {
+        /// <summary>
+        /// Adds the security service to the collection.
+        /// </summary>
+        public static IServiceCollection AddSenseNetSecurity(this IServiceCollection services,
+            Action<SecurityConfiguration> configureSecurity = null,
+            Action<MessagingOptions> configureMessaging = null)
+        {
+            // custom or default configuration
+            if (configureSecurity != null)
+                services.Configure(configureSecurity);
+            else
+                services.Configure<SecurityConfiguration>(config => { });
+
+            if (configureMessaging != null)
+                services.Configure(configureMessaging);
+            else
+                services.Configure<MessagingOptions>(config => { });
+
+            services
+                .AddInMemorySecurityDataProvider(DatabaseStorage.CreateEmpty())
+                .AddSecurityMissingEntityHandler<MissingEntityHandler>()
+                .AddDefaultSecurityMessageSenderManager()
+                .AddDefaultSecurityMessageProvider();
+
+            return services;
+        }
         /// <summary>
         /// Registers <see cref="MemoryDataProvider"/> as the security data provider in the service collection.
         /// </summary>
@@ -42,6 +70,31 @@ namespace SenseNet.Extensions.DependencyInjection
             where T: class, IMessageProvider
         {
             return services.AddSingleton<IMessageProvider, T>();
+        }
+
+        /// <summary>
+        /// Registers a missing entity handler in the service collection.
+        /// </summary>
+        public static IServiceCollection AddSecurityMissingEntityHandler<T>(this IServiceCollection services)
+            where T : class, IMissingEntityHandler
+        {
+            return services.AddSingleton<IMissingEntityHandler, T>();
+        }
+
+        /// <summary>
+        /// Registers the default message sender manager in the service collection.
+        /// </summary>
+        public static IServiceCollection AddDefaultSecurityMessageSenderManager(this IServiceCollection services)
+        {
+            return services.AddSecurityMessageSenderManager<MessageSenderManager>();
+        }
+        /// <summary>
+        /// Registers a message sender manager in the service collection.
+        /// </summary>
+        public static IServiceCollection AddSecurityMessageSenderManager<T>(this IServiceCollection services)
+            where T : class, IMessageSenderManager
+        {
+            return services.AddSingleton<IMessageSenderManager, T>();
         }
     }
 }

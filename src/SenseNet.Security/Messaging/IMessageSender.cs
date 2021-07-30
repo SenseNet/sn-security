@@ -23,6 +23,7 @@ namespace SenseNet.Security.Messaging
 
     public class MessageSenderManager : IMessageSenderManager
     {
+        //UNDONE: replace constructor parameters with options object
         public MessageSenderManager(string computerId = null, string instanceId = null)
         {
             ComputerId = computerId ?? Environment.MachineName;
