@@ -1,9 +1,6 @@
-﻿using System;
-using SenseNet.Security.Messaging;
-using System.Diagnostics;
+﻿using SenseNet.Security.Messaging;
 using System.IO;
-using SenseNet.Diagnostics;
-using SenseNet.Tools;
+using SenseNet.Security.Configuration;
 
 namespace SenseNet.Security.Tests.TestPortal
 {
@@ -14,7 +11,8 @@ namespace SenseNet.Security.Tests.TestPortal
         {
             var securitySystem = new SecuritySystem(securityDataProvider, messageProvider,
                 new MissingEntityHandler(),
-                new SecurityConfiguration {CommunicationMonitorRunningPeriodInSeconds = 31});
+                new SecurityConfiguration(),
+                new MessagingOptions { CommunicationMonitorRunningPeriodInSeconds = 31 });
             securitySystem.Start();
 
             return securitySystem;

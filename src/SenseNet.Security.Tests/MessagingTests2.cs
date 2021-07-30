@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks.Dataflow;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SenseNet.Diagnostics;
+using SenseNet.Security.Configuration;
 using SenseNet.Security.Data;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Tests.TestPortal;
@@ -23,7 +22,7 @@ namespace SenseNet.Security.Tests
             private bool _isReceiver;
 
             public TestMessageProvider(IMessageSenderManager messageSenderManager, Queue<byte[]> messageQueue,
-                bool isReceiver) : base(messageSenderManager)
+                bool isReceiver) : base(messageSenderManager, Options.Create(new MessagingOptions()))
             {
                 _messageQueue = messageQueue;
                 _isReceiver = isReceiver;
@@ -112,7 +111,8 @@ namespace SenseNet.Security.Tests
                 new MemoryDataProvider(storage),
                 new TestMessageProvider(messageSenderManager, messageQueue, isReceiver),
                 new MissingEntityHandler(),
-                new SecurityConfiguration());
+                new SecurityConfiguration(),
+                new MessagingOptions());
 
             securitySystem.Start();
 

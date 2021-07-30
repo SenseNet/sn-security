@@ -4,17 +4,21 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.Extensions.Options;
+using SenseNet.Security.Configuration;
 
 namespace SenseNet.Security
 {
     public class DataHandler
     {
         private readonly ISecurityDataProvider _dataProvider;
+        private readonly MessagingOptions _messagingOptions;
         internal SecurityEntityManager EntityManager { get; set; } // Property injection
 
-        public DataHandler(ISecurityDataProvider dataProvider)
+        public DataHandler(ISecurityDataProvider dataProvider, IOptions<MessagingOptions> messagingOptions)
         {
             _dataProvider = dataProvider;
+            _messagingOptions = messagingOptions.Value;
         }
 
         public IDictionary<int, SecurityEntity> LoadSecurityEntities()
@@ -299,7 +303,7 @@ namespace SenseNet.Security
 
         internal void CleanupSecurityActivities()
         {
-            _dataProvider.CleanupSecurityActivities(Configuration.Messaging.SecurityActivityLifetimeInMinutes);
+            _dataProvider.CleanupSecurityActivities(_messagingOptions.SecurityActivityLifetimeInMinutes);
         }
 
 

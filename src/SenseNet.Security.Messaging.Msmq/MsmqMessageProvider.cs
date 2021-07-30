@@ -5,6 +5,8 @@ using System.Messaging;
 using System.Threading;
 using System.IO;
 using SenseNet.Diagnostics;
+using SenseNet.Security.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace SenseNet.Security.Messaging.Msmq
 {
@@ -23,7 +25,8 @@ namespace SenseNet.Security.Messaging.Msmq
 
         /* ============================================================================== Initialization */
 
-        public MsmqMessageProvider(IMessageSenderManager messageSenderManager) : base(messageSenderManager) { }
+        public MsmqMessageProvider(IMessageSenderManager messageSenderManager, IOptions<MessagingOptions> messagingOptions) : 
+            base(messageSenderManager, messagingOptions) { }
 
         public override void Initialize()
         {

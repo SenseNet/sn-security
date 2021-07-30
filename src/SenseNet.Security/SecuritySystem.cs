@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 using SenseNet.Diagnostics;
+using SenseNet.Security.Configuration;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 
@@ -31,6 +33,7 @@ namespace SenseNet.Security
     public class SecuritySystem
     {
         internal SecurityConfiguration Configuration { get; }
+        internal MessagingOptions MessagingOptions { get; }
         public ISecurityDataProvider DataProvider { get; }
         internal DataHandler DataHandler { get; }
         public IMessageProvider MessageProvider { get; }
@@ -56,11 +59,12 @@ namespace SenseNet.Security
 
 
         public SecuritySystem(ISecurityDataProvider dataProvider, IMessageProvider messageProvider,
-            IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration)
+            IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration, MessagingOptions messagingOptions)
         {
             Configuration = configuration;
+            MessagingOptions = messagingOptions;
             dataProvider.ActivitySerializer = new ActivitySerializer(this);
-            DataHandler = new DataHandler(dataProvider);
+            DataHandler = new DataHandler(dataProvider, Options.Create(messagingOptions));
             ActivityHistory = new SecurityActivityHistoryController();
             DataProvider = dataProvider;
             MessageProvider = messageProvider;
@@ -77,11 +81,7 @@ namespace SenseNet.Security
             StartedAt = DateTime.UtcNow;
 
             var uncompleted = DataHandler.LoadCompletionState(out var lastActivityIdFromDb);
-
-            Security.Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds = Configuration.CommunicationMonitorRunningPeriodInSeconds ?? 30;
-            Security.Configuration.Messaging.SecurityActivityLifetimeInMinutes = Configuration.SecurityActivityLifetimeInMinutes ?? 42;
-            Security.Configuration.Messaging.SecurityActivityTimeoutInSeconds = Configuration.SecurityActivityTimeoutInSeconds ?? 120;
-
+            
             PermissionTypeBase.InferForcedRelations();
 
             using (var op = SnTrace.Security.StartOperation("Security initial loading."))
@@ -97,9 +97,7 @@ namespace SenseNet.Security
             DataHandler.EntityManager = EntityManager; // Property injection
 
             PermissionQuery = new PermissionQuery(EntityManager, Cache);
-
-            CommunicationMonitor = new CommunicationMonitor(DataHandler);
-
+            CommunicationMonitor = new CommunicationMonitor(DataHandler, Options.Create(MessagingOptions));
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
 
             SecurityActivityQueue = new SecurityActivityQueue(this, CommunicationMonitor, DataHandler, ActivityHistory);

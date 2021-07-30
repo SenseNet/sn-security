@@ -1,8 +1,9 @@
 ﻿using System;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SenseNet.Security.Configuration;
 using SenseNet.Security.Data;
 using SenseNet.Security.Messaging;
-using SenseNet.Testing;
 
 namespace SenseNet.Security.Tests
 {
@@ -35,27 +36,27 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void CommunicationMonitor_HearthBeat()
         {
-            using (new Swindler<int>(1, () => Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds,
-                value => Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds = value))
+            var testDp = new TestDp(DatabaseStorage.CreateEmpty());
+            var messageProvider = new DefaultMessageProvider(new MessageSenderManager());
+            var missingEntityHandler = new MissingEntityHandler();
+            var messagingOptions = Options.Create(new MessagingOptions()
             {
-                var testDp = new TestDp(DatabaseStorage.CreateEmpty());
-                var messageProvider = new DefaultMessageProvider(new MessageSenderManager());
-                var missingEntityHandler = new MissingEntityHandler();
-                var securitySystem = new SecuritySystem(testDp, messageProvider, missingEntityHandler,
-                    new SecurityConfiguration());
-                var dataHandler = new DataHandler(testDp);
-                var communicationMonitor = new CommunicationMonitor(dataHandler);
-                var activityHistory = new SecurityActivityHistoryController();
-                var securityActivityQueue = new SecurityActivityQueue(securitySystem, communicationMonitor, dataHandler, activityHistory);
+                CommunicationMonitorRunningPeriodInSeconds = 1
+            });
+            var securitySystem = new SecuritySystem(testDp, messageProvider, missingEntityHandler,
+                new SecurityConfiguration(), messagingOptions.Value);
+            var dataHandler = new DataHandler(testDp, messagingOptions);
+            var communicationMonitor = new CommunicationMonitor(dataHandler, messagingOptions);
+            var activityHistory = new SecurityActivityHistoryController();
+            var securityActivityQueue = new SecurityActivityQueue(securitySystem, communicationMonitor, dataHandler, activityHistory);
 
-                // ACTION
-                var communicationMonitorAcc = new ObjectAccessor(communicationMonitor);
-                communicationMonitorAcc.Invoke("Timer_Elapsed");
+            // ACTION
+            var communicationMonitorAcc = new ObjectAccessor(communicationMonitor);
+            communicationMonitorAcc.Invoke("Timer_Elapsed");
 
-                // ASSERT
-                Assert.IsTrue(testDp.IsCleanupSecurityActivitiesCalled);
-                Assert.IsTrue(testDp.IsGetLastSecurityActivityIdCalled);
-            }
+            // ASSERT
+            Assert.IsTrue(testDp.IsCleanupSecurityActivitiesCalled);
+            Assert.IsTrue(testDp.IsGetLastSecurityActivityIdCalled);
         }
     }
 }

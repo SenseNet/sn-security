@@ -1,5 +1,4 @@
 ﻿using System;
-using SenseNet.Security.Messaging;
 
 namespace SenseNet.Security
 {
@@ -21,13 +20,10 @@ namespace SenseNet.Security
         /// <summary>Default: 9</summary>
         public int OwnerGroupId { get; set; } = 9;
 
-        /// <summary>Default: 30</summary>
-        public int? CommunicationMonitorRunningPeriodInSeconds { get; set; }
-
-        /// <summary>Time span before executed activities are cleared from the database. Default: 42</summary>
+        [Obsolete("Use MessagingOptions instead.", true)]
         public int? SecurityActivityLifetimeInMinutes { get; set; }
 
-        /// <summary>Default: 120</summary>
+        [Obsolete("Use MessagingOptions instead.", true)]
         public int? SecurityActivityTimeoutInSeconds { get; set; }
     }
 }

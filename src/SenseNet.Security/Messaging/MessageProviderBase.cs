@@ -5,7 +5,9 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using Microsoft.Extensions.Options;
 using SenseNet.Diagnostics;
+using SenseNet.Security.Configuration;
 
 namespace SenseNet.Security.Messaging
 {
@@ -20,6 +22,7 @@ namespace SenseNet.Security.Messaging
         private int _incomingMessageCount;
         private bool _allowMessageProcessing;
         private DateTime _startingTheSystem = DateTime.MaxValue;
+        private readonly MessagingOptions _options;
 
         public IMessageSenderManager MessageSenderManager { get; }
 
@@ -35,9 +38,10 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         public virtual int IncomingMessageCount => _incomingMessageCount;
 
-        protected MessageProviderBase(IMessageSenderManager messageSenderManager)
+        protected MessageProviderBase(IMessageSenderManager messageSenderManager, IOptions<MessagingOptions> messagingOptions)
         {
             MessageSenderManager = messageSenderManager;
+            _options = messagingOptions.Value;
         }
 
         /// <inheritdoc />
@@ -46,7 +50,7 @@ namespace SenseNet.Security.Messaging
             _incomingMessages = new List<IDistributedMessage>();
 
             // initiate processing threads
-            for (var i = 0; i < Configuration.Messaging.MessageProcessorThreadCount; i++)
+            for (var i = 0; i < _options.MessageProcessorThreadCount; i++)
             {
                 var thStart = new ParameterizedThreadStart(CheckProcessableMessages);
                 var thread = new Thread(thStart) { Name = i.ToString() };
@@ -132,7 +136,7 @@ namespace SenseNet.Security.Messaging
                 if (_incomingMessageCount == 0)
                     return null;
 
-                if (_incomingMessageCount <= Configuration.Messaging.MessageProcessorThreadMaxMessages)
+                if (_incomingMessageCount <= _options.MessageProcessorThreadMaxMessages)
                 {
                     // if total message count is smaller than the maximum allowed, process all of them and empty incoming queue
                     messagesToProcess = _incomingMessages;
@@ -141,8 +145,8 @@ namespace SenseNet.Security.Messaging
                 else
                 {
                     // process the maximum allowed number of messages, leave the rest in the incoming queue
-                    messagesToProcess = _incomingMessages.Take(Configuration.Messaging.MessageProcessorThreadMaxMessages).ToList();
-                    _incomingMessages = _incomingMessages.Skip(Configuration.Messaging.MessageProcessorThreadMaxMessages).ToList();
+                    messagesToProcess = _incomingMessages.Take(_options.MessageProcessorThreadMaxMessages).ToList();
+                    _incomingMessages = _incomingMessages.Skip(_options.MessageProcessorThreadMaxMessages).ToList();
                 }
             }
 

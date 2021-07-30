@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using SenseNet.Security.Configuration;
 using SenseNet.Security.Data;
 
 namespace SenseNet.Security.Tests.Concurrency
@@ -60,10 +61,11 @@ namespace SenseNet.Security.Tests.Concurrency
             //    MessageProvider = new DefaultMessageProvider(messageSenderManager),
             //    CommunicationMonitorRunningPeriodInSeconds = 31
             //});
-            var config = new SecurityConfiguration {CommunicationMonitorRunningPeriodInSeconds = 31};
+            var config = new SecurityConfiguration();
+            var messagingOptions = new MessagingOptions { CommunicationMonitorRunningPeriodInSeconds = 31};
             var securitySystem = new SecuritySystem(securityDataProvider,
                 new DefaultMessageProvider(messageSenderManager),
-                new MissingEntityHandler(), config);
+                new MissingEntityHandler(), config, messagingOptions);
             securitySystem.Start();
 
             // legacy logic

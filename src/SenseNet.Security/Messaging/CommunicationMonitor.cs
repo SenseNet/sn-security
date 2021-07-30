@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 using SenseNet.Diagnostics;
+using SenseNet.Security.Configuration;
 
 namespace SenseNet.Security.Messaging
 {
@@ -11,11 +13,11 @@ namespace SenseNet.Security.Messaging
 
         public event EventHandler HearthBeat;
 
-        internal CommunicationMonitor(DataHandler dataHandler)
+        internal CommunicationMonitor(DataHandler dataHandler, IOptions<MessagingOptions> messagingOptions)
         {
             _dataHandler = dataHandler;
 
-            var interval = Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds * 1000.0;
+            var interval = messagingOptions.Value.CommunicationMonitorRunningPeriodInSeconds * 1000.0;
 
             _timer = new System.Timers.Timer(interval) {Enabled = false};
             _timer.Elapsed += Timer_Elapsed;

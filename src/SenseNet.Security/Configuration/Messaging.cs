@@ -1,78 +1,38 @@
-﻿using System;
-using System.Configuration;
-
-namespace SenseNet.Security.Configuration
+﻿namespace SenseNet.Security.Configuration
 {
-    internal static class Messaging //UNDONE: Has static members (configuration)
+    internal static class Messaging
     {
-        // ReSharper disable once ConvertToConstant.Local
-        private static readonly string DistributableSecurityActivityMaxSizeKey = "DistributableSecurityActivityMaxSize";
-        private static int? _distributableSecurityActivityMaxSize;
-
-        public static int DistributableSecurityActivityMaxSize
-        {
-            get
-            {
-                if (!_distributableSecurityActivityMaxSize.HasValue)
-                {
-                    var value = ConfigurationManager.AppSettings[DistributableSecurityActivityMaxSizeKey];
-                    if (!int.TryParse(value, out var intValue))
-                        intValue = 200000;
-                    _distributableSecurityActivityMaxSize = intValue;
-                }
-
-                return _distributableSecurityActivityMaxSize.Value;
-            }
-        }
-        public static int CommunicationMonitorRunningPeriodInSeconds { get; internal set; }
-
-        public static int SecurityActivityLifetimeInMinutes { get; internal set; }
-
-        public static int SecurityActivityTimeoutInSeconds { get; internal set; }
-
         internal static readonly int SecurityActivityExecutionLockRefreshPeriodInSeconds = 10;
         internal static readonly int SecurityActivityExecutionLockTimeoutInSeconds = 25;
+    }
 
-        // ReSharper disable once ConvertToConstant.Local
-        private static readonly string MessageProcessorThreadCountKey = "MessageProcessorThreadCount";
-        private static int? _messageProcessorThreadCount;
+    public class MessagingOptions
+    {
+        /// <summary>
+        /// Maximum size of a security activity distributed through messaging.
+        /// Activities bigger than this will be loaded from the database
+        /// on the target server. Default is 200000 bytes.
+        /// </summary>
+        public int DistributableSecurityActivityMaxSize { get; set; } = 200000;
+        /// <summary>
+        /// Health check and cleanup monitor execution period. Default: 30 seconds.
+        /// </summary>
+        public int CommunicationMonitorRunningPeriodInSeconds { get; set; } = 30;
+        /// <summary>
+        /// Waiting period after an activity is deleted. Default: 42 minutes.
+        /// </summary>
+        public int SecurityActivityLifetimeInMinutes { get; set; } = 42;
+        /// <summary>
+        /// Waiting period after a long-running activity fails. Default: 120 seconds.
+        /// </summary>
+        public int SecurityActivityTimeoutInSeconds { get; set; } = 120;
         /// <summary>
         /// Number of message processor threads. Default is 3.
         /// </summary>
-        public static int MessageProcessorThreadCount
-        {
-            get
-            {
-                if (!_messageProcessorThreadCount.HasValue)
-                {
-                    var setting = ConfigurationManager.AppSettings[MessageProcessorThreadCountKey];
-                    if (string.IsNullOrEmpty(setting) || !int.TryParse(setting, out var value))
-                        value = 3;
-                    _messageProcessorThreadCount = value;
-                }
-                return _messageProcessorThreadCount.Value;
-            }
-        }
-
-        // ReSharper disable once ConvertToConstant.Local
-        private static readonly string MessageProcessorThreadMaxMessagesKey = "MessageProcessorThreadMaxMessages";
-        private static int? _messageProcessorThreadMaxMessages;
+        public int MessageProcessorThreadCount { get; set; } = 3;
         /// <summary>
-        /// Max number of messages processed by a single message processor thread. Default is 100.
+        /// Maximum number of messages processed by a single message processor thread. Default is 100.
         /// </summary>
-        public static int MessageProcessorThreadMaxMessages
-        {
-            get
-            {
-                if (!_messageProcessorThreadMaxMessages.HasValue)
-                {
-                    var setting = ConfigurationManager.AppSettings[MessageProcessorThreadMaxMessagesKey];
-                    if (string.IsNullOrEmpty(setting) || !int.TryParse(setting, out var value))
-                        value = 100;
-                    _messageProcessorThreadMaxMessages = value;
-                }
-                return _messageProcessorThreadMaxMessages.Value;
-            }
-        }
+        public int MessageProcessorThreadMaxMessages { get; set; } = 100;
     }
 }

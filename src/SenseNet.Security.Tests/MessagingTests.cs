@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
@@ -118,7 +116,7 @@ namespace SenseNet.Security.Tests
             var smallActivityId = smallActivity.Id;
 
             // large activity
-            var largeActivity = new TestActivity { Body = new string('*', Configuration.Messaging.DistributableSecurityActivityMaxSize + 1) };
+            var largeActivity = new TestActivity { Body = new string('*', securitySystem.MessagingOptions.DistributableSecurityActivityMaxSize + 1) };
             largeActivity.Execute(_context.Security);
             var largeActivityId = largeActivity.Id;
 

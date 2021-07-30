@@ -113,7 +113,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         private void Distribute(SecurityContext context)
         {
             DistributedMessage msg = this;
-            if (BodySize > Configuration.Messaging.DistributableSecurityActivityMaxSize)
+            if (BodySize > __context.SecuritySystem.MessagingOptions.DistributableSecurityActivityMaxSize)
                 msg = new BigActivityMessage { DatabaseId = Id };
             context.SecuritySystem.MessageProvider.SendMessage(msg);
         }
@@ -150,7 +150,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             }
             else
             {
-                if (!_finishSignal.WaitOne(Configuration.Messaging.SecurityActivityTimeoutInSeconds * 1000, false))
+                if (!_finishSignal.WaitOne(__context.SecuritySystem.MessagingOptions.SecurityActivityTimeoutInSeconds * 1000, false))
                 {
                     var message = $"SecurityActivity is not finishing on a timely manner (#{Id})";
                     throw new SecurityActivityTimeoutException(message);
