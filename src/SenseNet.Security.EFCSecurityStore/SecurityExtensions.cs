@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using SenseNet.Security;
 using SenseNet.Security.EFCSecurityStore;
 using SenseNet.Security.EFCSecurityStore.Configuration;
 
+// ReSharper disable once CheckNamespace
 namespace SenseNet.Extensions.DependencyInjection
 {
     /// <summary>
@@ -20,7 +20,9 @@ namespace SenseNet.Extensions.DependencyInjection
         {
             if (configure != null)
                 services.Configure(configure);
-
+            else
+                services.Configure<DataOptions>(options => { });
+            
             return services.AddSecurityDataProvider<EFCSecurityDataProvider>();
         }
     }

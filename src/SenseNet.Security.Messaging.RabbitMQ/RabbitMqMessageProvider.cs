@@ -21,12 +21,12 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         /// <summary>
         /// RabbitMQ service url.
         /// </summary>
-        protected string ServiceUrl { get; } = Configuration.RabbitMQ.ServiceUrl;
+        protected string ServiceUrl { get; }
         /// <summary>
         /// Optional exchange name. Mandatory in case the same service is used 
         /// by multiple different environments (e.g. test and live environment).
         /// </summary>
-        protected string MessageExchange { get; } = Configuration.RabbitMQ.MessageExchange;
+        protected string MessageExchange { get; }
 
         //=================================================================================== Constructors
 
@@ -35,22 +35,20 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         /// </summary>
         /// <param name="messageSenderManager">Required IMessageSenderManager instance.</param>
         /// <param name="messagingOptions"></param>
-        public RabbitMQMessageProvider(IMessageSenderManager messageSenderManager, IOptions<MessagingOptions> messagingOptions) : 
-            base(messageSenderManager, messagingOptions) { }
+        /// <param name="rabbitmqOptions"></param>
+        public RabbitMQMessageProvider(IMessageSenderManager messageSenderManager,
+            IOptions<MessagingOptions> messagingOptions,
+            IOptions<RabbitMqOptions> rabbitmqOptions) :
+            base(messageSenderManager, messagingOptions)
+        {
+            ServiceUrl = rabbitmqOptions.Value.ServiceUrl;
+            MessageExchange = rabbitmqOptions.Value.MessageExchange;
+        }
 
-        /// <summary>
-        /// Initializes a new instance of the RabbitMQMessageProvider class.
-        /// </summary>
-        /// <param name="messageSenderManager">Required IMessageSenderManager instance.</param>
-        /// <param name="messagingOptions"></param>
-        /// <param name="serviceUrl">RabbitMQ service url, including user credentials.</param>
-        /// <param name="exchange">Optional exchange name. Mandatory in case the same service is used 
-        /// by multiple different environments (e.g. test and live environment).</param>
-        /// <exception cref="ArgumentNullException"></exception>
+        [Obsolete("Use dependency injection or the constructor with the RabbitMqOptions instance.", true)]
         public RabbitMQMessageProvider(IMessageSenderManager messageSenderManager, IOptions<MessagingOptions> messagingOptions, 
             string serviceUrl, string exchange = null) : base(messageSenderManager, messagingOptions)
         {
-            //UNDONE: rabbit message provider constructor: use options class instead of string parameters
             if (string.IsNullOrEmpty(serviceUrl))
                 throw new ArgumentNullException(nameof(serviceUrl));
 
