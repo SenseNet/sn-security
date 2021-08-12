@@ -19,16 +19,6 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         public IMessageSender Sender { get; set; }
 
-        /// <summary>
-        /// Initializes a new instance.
-        /// 
-        /// </summary>
-        protected DistributedMessage() : this(MessageSender.Create()) { }
-
-        internal DistributedMessage(MessageSender sender)
-        {
-            Sender = sender;
-        }
 
         [NonSerialized]
         private int _bodySize;

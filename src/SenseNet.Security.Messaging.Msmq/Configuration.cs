@@ -1,68 +1,17 @@
-﻿using System.Configuration;
-
-namespace SenseNet.Security.Messaging.Msmq
+﻿namespace SenseNet.Security.Messaging.Msmq
 {
-    internal static class Configuration
+    public class MsmqOptions
     {
-        // ReSharper disable once ConvertToConstant.Local
-        private static readonly string MessageQueueNameKey = "SecurityMsmqChannelQueueName";
-        private static string _messageQueueName;
-        public static string MessageQueueName
-        {
-            get
-            {
-                if (_messageQueueName == null)
-                {
-                    _messageQueueName = ConfigurationManager.AppSettings[MessageQueueNameKey];
-                    if (string.IsNullOrEmpty(_messageQueueName))
-                        _messageQueueName = string.Empty;
-                }
-                return _messageQueueName;
-            }
-        }
+        public string MessageQueueName { get; set; } = string.Empty;
 
-        // ReSharper disable once ConvertToConstant.Local
-        private static readonly string MessageRetentionTimeKey = "MessageRetentionTime";
-        private static int? _messageRetentionTime;
         /// <summary>
-        /// Retention time of messages in the message queue in seconds. Default: 10, minimum: 2
+        /// Retention time of messages in the message queue in seconds. Default: 10, minimum: 2.
         /// </summary>
-        public static int MessageRetentionTime
-        {
-            get
-            {
-                if (_messageRetentionTime == null)
-                {
-                    var setting = ConfigurationManager.AppSettings[MessageRetentionTimeKey];
-                    if (string.IsNullOrEmpty(setting) || !int.TryParse(setting, out var value))
-                        value = 10;
-                    if (value < 2)
-                        value = 2;
-                    _messageRetentionTime = value;
-                }
-                return _messageRetentionTime.Value;
-            }
-        }
-        
-        // ReSharper disable once ConvertToConstant.Local
-        private static readonly string MsmqReconnectDelayKey = "MsmqReconnectDelay";
-        private static int? _msmqReconnectDelay;
+        public int MessageRetentionTime { get; set; } = 10;
+
         /// <summary>
-        /// Defines the time interval between reconnect attempts (in seconds).  Default value: 30 sec.
+        /// Defines the time interval between reconnect attempts in seconds. Default value: 30 seconds.
         /// </summary>
-        internal static int MsmqReconnectDelay
-        {
-            get
-            {
-                if (!_msmqReconnectDelay.HasValue)
-                {
-                    var setting = ConfigurationManager.AppSettings[MsmqReconnectDelayKey];
-                    if (string.IsNullOrEmpty(setting) || !int.TryParse(setting, out var value))
-                        value = 30;
-                    _msmqReconnectDelay = value * 1000;
-                }
-                return _msmqReconnectDelay.Value;
-            }
-        }
+        public int MsmqReconnectDelay { get; set; } = 30;
     }
 }

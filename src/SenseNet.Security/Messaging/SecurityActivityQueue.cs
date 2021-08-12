@@ -10,11 +10,35 @@ using SenseNet.Diagnostics;
 
 namespace SenseNet.Security.Messaging
 {
-    internal static class SecurityActivityQueue
+    internal class SecurityActivityQueue
     {
         internal static int SecurityActivityLoadingBufferSize = 200;
 
-        internal static void HealthCheck()
+        private readonly SecuritySystem _securitySystem;
+        private readonly CommunicationMonitor _communicationMonitor;
+        private readonly DataHandler _dataHandler;
+        private readonly Serializer _serializer;
+        private readonly DependencyManager _dependencyManager;
+        private readonly TerminationHistory _terminationHistory;
+        private readonly Executor _executor;
+
+        public SecurityActivityQueue(SecuritySystem securitySystem, CommunicationMonitor communicationMonitor,
+            DataHandler dataHandler, SecurityActivityHistoryController activityHistory)
+        {
+            _securitySystem = securitySystem;
+            _communicationMonitor = communicationMonitor;
+            _dataHandler = dataHandler;
+            _serializer = new Serializer(this, activityHistory, dataHandler);
+            _executor = new Executor(activityHistory);
+            _terminationHistory = new TerminationHistory();
+            _dependencyManager = new DependencyManager(_serializer, _executor, _terminationHistory, activityHistory);
+            _serializer.DependencyManager = _dependencyManager;
+            _executor.DependencyManager = _dependencyManager;
+
+            communicationMonitor.HearthBeat += (sender, args) => HealthCheck();
+        }
+
+        internal void HealthCheck()
         {
             if (IsWorking())
             {
@@ -23,103 +47,117 @@ namespace SenseNet.Security.Messaging
             }
             SnTrace.Security.Write("SAQ: Health check triggered.");
 
-            var state = TerminationHistory.GetCurrentState();
+            var state = _terminationHistory.GetCurrentState();
             var gapsLength = state.Gaps.Length;
             if (gapsLength > 0)
             {
                 SnTrace.SecurityQueue.Write("SAQ: Health checker is processing {0} gap{1}.", gapsLength, gapsLength > 1 ? "s" : "");
 
                 var notLoaded = state.Gaps.ToList();
-                foreach (var activity in new SecurityActivityLoader(state.Gaps, false))
+                foreach (var activity in new SecurityActivityLoader(state.Gaps, false, _dataHandler))
                 {
-                    SecurityActivityQueue.ExecuteActivity(activity);
+                    ExecuteActivity(activity);
                     // memorize executed
                     notLoaded.Remove(activity.Id);
                 }
                 // forget not loaded activities.
-                TerminationHistory.RemoveFromGaps(notLoaded);
+                _terminationHistory.RemoveFromGaps(notLoaded);
             }
 
-            var lastId = TerminationHistory.GetLastTerminatedId();
-            var lastDbId = DataHandler.GetLastSecurityActivityId(SecurityContext.StartedAt);
+            var lastId = _terminationHistory.GetLastTerminatedId();
+            var lastDbId = _dataHandler.GetLastSecurityActivityId(_securitySystem.StartedAt);
             if (lastId < lastDbId)
             {
                 SnTrace.SecurityQueue.Write("SAQ: Health checker is processing activities from {0} to {1}", lastId + 1, lastDbId);
-                foreach (var activity in new SecurityActivityLoader(lastId + 1, lastDbId, false))
-                    SecurityActivityQueue.ExecuteActivity(activity);
+                foreach (var activity in new SecurityActivityLoader(lastId + 1, lastDbId, false, _dataHandler))
+                    ExecuteActivity(activity);
             }
         }
-        public static bool IsWorking()
+        public bool IsWorking()
         {
-            return !(Serializer.IsEmpty && DependencyManager.IsEmpty);
+            return !(_serializer.IsEmpty && _dependencyManager.IsEmpty);
         }
 
-        internal static void Startup(CompletionState uncompleted, int lastActivityIdFromDb)
+        internal void Startup(CompletionState uncompleted, int lastActivityIdFromDb)
         {
-            CommunicationMonitor.Stop();
+            _communicationMonitor.Stop();
 
-            Serializer.Reset();
-            DependencyManager.Reset();
-            TerminationHistory.Reset(uncompleted.LastActivityId, uncompleted.Gaps);
-            Serializer.Start(lastActivityIdFromDb, uncompleted.LastActivityId, uncompleted.Gaps);
+            _serializer.Reset();
+            _dependencyManager.Reset();
+            _terminationHistory.Reset(uncompleted.LastActivityId, uncompleted.Gaps);
+            _serializer.Start(lastActivityIdFromDb, uncompleted.LastActivityId, uncompleted.Gaps);
 
-            CommunicationMonitor.Start();
+            _communicationMonitor.Start();
         }
 
-        internal static void Shutdown()
+        internal void Shutdown()
         {
-            Serializer.Reset();
-            DependencyManager.Reset();
-            TerminationHistory.Reset(0);
+            _serializer.Reset();
+            _dependencyManager.Reset();
+            _terminationHistory.Reset(0);
         }
 
-        public static CompletionState GetCurrentCompletionState()
+        public CompletionState GetCurrentCompletionState()
         {
-            return TerminationHistory.GetCurrentState();
+            return _terminationHistory.GetCurrentState();
         }
-        public static SecurityActivityQueueState GetCurrentState()
+        public SecurityActivityQueueState GetCurrentState()
         {
             return new SecurityActivityQueueState
             {
-                Serializer = Serializer.GetCurrentState(),
-                DependencyManager = DependencyManager.GetCurrentState(),
-                Termination = TerminationHistory.GetCurrentState()
+                Serializer = _serializer.GetCurrentState(),
+                DependencyManager = _dependencyManager.GetCurrentState(),
+                Termination = _terminationHistory.GetCurrentState()
             };
         }
 
-        public static void ExecuteActivity(SecurityActivity activity)
+        public void ExecuteActivity(SecurityActivity activity)
         {
             if (!activity.FromDatabase && !activity.FromReceiver)
-                DataHandler.SaveActivity(activity);
+                _dataHandler.SaveActivity(activity);
 
-            Serializer.EnqueueActivity(activity);
+            _serializer.EnqueueActivity(activity);
         }
 
         /// <summary>Only for tests</summary>
-        internal static void _setCurrentExecutionState(CompletionState state)
+        internal void _setCurrentExecutionState(CompletionState state)
         {
-            Serializer.Reset(state.LastActivityId);
-            DependencyManager.Reset();
-            TerminationHistory.Reset(state.LastActivityId, state.Gaps);
+            _serializer.Reset(state.LastActivityId);
+            _dependencyManager.Reset();
+            _terminationHistory.Reset(state.LastActivityId, state.Gaps);
         }
-        internal static void __enableExecution()
+        internal void __enableExecution()
         {
-            Executor.__enable();
+            _executor.__enable();
         }
-        internal static void __disableExecution()
+        internal void __disableExecution()
         {
-            Executor.__disable();
+            _executor.__disable();
         }
-        internal static SecurityActivity[] __getWaitingSet()
+        internal SecurityActivity[] __getWaitingSet()
         {
-            return DependencyManager.__getWaitingSet();
+            return _dependencyManager.__getWaitingSet();
         }
 
         //============================================================== subclasses
 
-        private static class Serializer
+        private class Serializer
         {
-            internal static void Reset(int lastQueued = 0)
+            public DependencyManager DependencyManager { get; set; }
+
+            private readonly SecurityActivityQueue _securityActivityQueue;
+            private readonly SecurityActivityHistoryController _activityHistory;
+            private readonly DataHandler _dataHandler;
+
+            public Serializer(SecurityActivityQueue securityActivityQueue, SecurityActivityHistoryController activityHistory,
+                DataHandler dataHandler)
+            {
+                _securityActivityQueue = securityActivityQueue;
+                _activityHistory = activityHistory;
+                _dataHandler = dataHandler;
+            }
+
+            internal void Reset(int lastQueued = 0)
             {
                 lock (_arrivalQueueLock)
                 {
@@ -134,7 +172,7 @@ namespace SenseNet.Security.Messaging
             /// MUST BE SYNCHRONOUS
             /// GAPS MUST BE ORDERED
             /// </summary>
-            internal static void Start(int lastDatabaseId, int lastExecutedId, int[] gaps)
+            internal void Start(int lastDatabaseId, int lastExecutedId, int[] gaps)
             {
                 var hasUnprocessed = gaps.Length > 0 || lastDatabaseId != lastExecutedId;
 
@@ -152,12 +190,12 @@ namespace SenseNet.Security.Messaging
                 var count = 0;
                 if (gaps.Any())
                 {
-                    var loadedActivities = new SecurityActivityLoader(gaps, true);
+                    var loadedActivities = new SecurityActivityLoader(gaps, true, _dataHandler);
                     foreach (var loadedActivity in loadedActivities)
                     {
                         SnTrace.SecurityQueue.Write("SAQ: Startup: SA{0} enqueued from db.", loadedActivity.Id);
 
-                        SecurityActivityHistory.Arrive(loadedActivity);
+                        _activityHistory.Arrive(loadedActivity);
                         _arrivalQueue.Enqueue(loadedActivity);
                         _lastQueued = loadedActivity.Id;
                         count++;
@@ -165,11 +203,11 @@ namespace SenseNet.Security.Messaging
                 }
                 if (lastExecutedId < lastDatabaseId)
                 {
-                    var loadedActivities = new SecurityActivityLoader(lastExecutedId + 1, lastDatabaseId, true);
+                    var loadedActivities = new SecurityActivityLoader(lastExecutedId + 1, lastDatabaseId, true, _dataHandler);
                     foreach (var loadedActivity in loadedActivities)
                     {
                         SnTrace.SecurityQueue.Write("SAQ: Startup: SA{0} enqueued from db.", loadedActivity.Id);
-                        SecurityActivityHistory.Arrive(loadedActivity);
+                        _activityHistory.Arrive(loadedActivity);
                         SnTrace.SecurityQueue.Write("SecurityActivityArrived SA{0}", loadedActivity.Id);
                         _arrivalQueue.Enqueue(loadedActivity);
                         _lastQueued = loadedActivity.Id;
@@ -184,7 +222,7 @@ namespace SenseNet.Security.Messaging
                 DependencyManager.ActivityEnqueued();
 
                 if (lastDatabaseId != 0 || lastExecutedId != 0 || gaps.Any())
-                    while (IsWorking())
+                    while (_securityActivityQueue.IsWorking())
                         Thread.Sleep(200);
 
                 if (hasUnprocessed)
@@ -192,17 +230,17 @@ namespace SenseNet.Security.Messaging
                         EventId.RepositoryLifecycle);
             }
 
-            internal static bool IsEmpty => _arrivalQueue.Count == 0;
+            internal bool IsEmpty => _arrivalQueue.Count == 0;
 
-            private static readonly object _arrivalQueueLock = new object();
-            private static int _lastQueued;
-            private static readonly Queue<SecurityActivity> _arrivalQueue = new Queue<SecurityActivity>();
+            private readonly object _arrivalQueueLock = new object();
+            private int _lastQueued;
+            private readonly Queue<SecurityActivity> _arrivalQueue = new Queue<SecurityActivity>();
 
-            public static void EnqueueActivity(SecurityActivity activity)
+            public void EnqueueActivity(SecurityActivity activity)
             {
                 SnTrace.SecurityQueue.Write("SAQ: SA{0} arrived{1}. {2}", activity.Id, activity.FromReceiver ? " from another computer" : "", activity.TypeName);
 
-                SecurityActivityHistory.Arrive(activity);
+                _activityHistory.Arrive(activity);
 
                 lock (_arrivalQueueLock)
                 {
@@ -240,7 +278,7 @@ namespace SenseNet.Security.Messaging
 
                         foreach (var loadedActivity in loadedActivities)
                         {
-                            SecurityActivityHistory.Arrive(loadedActivity);
+                            _activityHistory.Arrive(loadedActivity);
                             _arrivalQueue.Enqueue(loadedActivity);
                             _lastQueued = loadedActivity.Id;
                             SnTrace.SecurityQueue.Write("SAQ: SA{0} enqueued from db.", loadedActivity.Id);
@@ -253,7 +291,7 @@ namespace SenseNet.Security.Messaging
                     DependencyManager.ActivityEnqueued();
                 }
             }
-            public static SecurityActivity DequeueActivity()
+            public SecurityActivity DequeueActivity()
             {
                 lock (_arrivalQueueLock)
                 {
@@ -265,14 +303,14 @@ namespace SenseNet.Security.Messaging
                 }
             }
 
-            private static IEnumerable<SecurityActivity> LoadActivities(int from, int to)
+            private IEnumerable<SecurityActivity> LoadActivities(int from, int to)
             {
                 SnTrace.SecurityQueue.Write("SAQ: Loading activities {0} - {1}", from, to);
-                return new SecurityActivityLoader(from, to, false);
+                return new SecurityActivityLoader(from, to, false, _dataHandler);
             }
 
             // ReSharper disable once MemberHidesStaticFromOuterClass
-            internal static SecurityActivitySerializerState GetCurrentState()
+            internal SecurityActivitySerializerState GetCurrentState()
             {
                 lock (_arrivalQueueLock)
                     return new SecurityActivitySerializerState
@@ -283,9 +321,23 @@ namespace SenseNet.Security.Messaging
             }
         }
 
-        private static class DependencyManager
+        private class DependencyManager
         {
-            internal static void Reset()
+            private readonly Serializer _serializer;
+            private readonly Executor _executor;
+            private readonly TerminationHistory _terminationHistory;
+            private readonly SecurityActivityHistoryController _activityHistory;
+
+            public DependencyManager(Serializer serializer, Executor executor, TerminationHistory terminationHistory,
+                SecurityActivityHistoryController activityHistory)
+            {
+                _serializer = serializer;
+                _executor = executor;
+                _terminationHistory = terminationHistory;
+                _activityHistory = activityHistory;
+            }
+
+            internal void Reset()
             {
                 // Before call ensure that the arrival queue is empty.
                 lock (_waitingSetLock)
@@ -298,18 +350,18 @@ namespace SenseNet.Security.Messaging
                     _waitingSet.Clear();
                 }
             }
-            internal static void Start()
+            internal void Start()
             {
                 lock (_waitingSetLock)
                     _waitingSet.Clear();
             }
-            internal static bool IsEmpty => _waitingSet.Count == 0;
+            internal bool IsEmpty => _waitingSet.Count == 0;
 
-            private static readonly object _waitingSetLock = new object();
-            private static readonly List<SecurityActivity> _waitingSet = new List<SecurityActivity>();
+            private readonly object _waitingSetLock = new object();
+            private readonly List<SecurityActivity> _waitingSet = new List<SecurityActivity>();
 
-            private static bool _run;
-            public static void ActivityEnqueued()
+            private bool _run;
+            public void ActivityEnqueued()
             {
                 if (_run)
                     return;
@@ -317,11 +369,11 @@ namespace SenseNet.Security.Messaging
                 Task.Run(ProcessActivities);
             }
 
-            private static void ProcessActivities()
+            private void ProcessActivities()
             {
                 while (true)
                 {
-                    var newerActivity = Serializer.DequeueActivity();
+                    var newerActivity = _serializer.DequeueActivity();
                     if (newerActivity == null)
                     {
                         _run = false;
@@ -330,7 +382,7 @@ namespace SenseNet.Security.Messaging
                     MakeDependencies(newerActivity);
                 }
             }
-            private static void MakeDependencies(SecurityActivity newerActivity)
+            private void MakeDependencies(SecurityActivity newerActivity)
             {
                 lock (_waitingSetLock)
                 {
@@ -341,18 +393,18 @@ namespace SenseNet.Security.Messaging
                         {
                             newerActivity.WaitFor(olderActivity);
                             SnTrace.SecurityQueue.Write("SAQ: SA{0} depends from SA{1}", newerActivity.Id, olderActivity.Id);
-                            SecurityActivityHistory.Wait(newerActivity);
+                            _activityHistory.Wait(newerActivity);
                         }
                     }
 
                     _waitingSet.Add(newerActivity);
 
                     if (newerActivity.WaitingFor.Count == 0)
-                        Task.Run(() => Executor.Execute(newerActivity));
+                        Task.Run(() => _executor.Execute(newerActivity));
                 }
             }
 
-            internal static void Finish(SecurityActivity activity)
+            internal void Finish(SecurityActivity activity)
             {
                 lock (_waitingSetLock)
                 {
@@ -363,21 +415,21 @@ namespace SenseNet.Security.Messaging
                     activity.Finish();
 
                     // register activity termination in the log.
-                    SecurityActivityHistory.Finish(activity.Id);
+                    _activityHistory.Finish(activity.Id);
 
                     // register activity termination.
-                    TerminationHistory.FinishActivity(activity);
+                    _terminationHistory.FinishActivity(activity);
 
                     // execute all activities that are completely freed.
                     foreach (var dependentItem in activity.WaitingForMe.ToArray())
                     {
                         dependentItem.FinishWaiting(activity);
                         if (dependentItem.WaitingFor.Count == 0)
-                            Task.Run(() => Executor.Execute(dependentItem));
+                            Task.Run(() => _executor.Execute(dependentItem));
                     }
                 }
             }
-            internal static void AttachOrFinish(SecurityActivity activity)
+            internal void AttachOrFinish(SecurityActivity activity)
             {
                 lock (_waitingSetLock)
                 {
@@ -390,32 +442,32 @@ namespace SenseNet.Security.Messaging
                     }
                 }
                 activity.Finish(); // release blocked thread
-                SecurityActivityHistory.Finish(activity.Id);
+                _activityHistory.Finish(activity.Id);
                 SnTrace.SecurityQueue.Write("SAQ: SA{0} ignored: finished but not executed.", activity.Id);
             }
 
             // ReSharper disable once MemberHidesStaticFromOuterClass
-            public static SecurityActivityDependencyState GetCurrentState()
+            public SecurityActivityDependencyState GetCurrentState()
             {
                 lock (_waitingSetLock)
                     return new SecurityActivityDependencyState { WaitingSet = _waitingSet.Select(x => x.Id).ToArray() };
             }
 
             // ReSharper disable once MemberHidesStaticFromOuterClass
-            internal static SecurityActivity[] __getWaitingSet()
+            internal SecurityActivity[] __getWaitingSet()
             {
                 lock (_waitingSetLock)
                     return _waitingSet.ToArray();
             }
         }
 
-        private static class TerminationHistory
+        private class TerminationHistory
         {
-            private static readonly object _gapsLock = new object();
-            private static int _lastId;
-            private static readonly List<int> _gaps = new List<int>();
+            private readonly object _gapsLock = new object();
+            private int _lastId;
+            private readonly List<int> _gaps = new List<int>();
 
-            internal static void Reset(int lastId, IEnumerable<int> gaps = null)
+            internal void Reset(int lastId, IEnumerable<int> gaps = null)
             {
                 lock (_gapsLock)
                 {
@@ -426,7 +478,7 @@ namespace SenseNet.Security.Messaging
                 }
             }
 
-            internal static void FinishActivity(SecurityActivity activity)
+            internal void FinishActivity(SecurityActivity activity)
             {
                 var id = activity.Id;
                 lock (_gapsLock)
@@ -444,18 +496,17 @@ namespace SenseNet.Security.Messaging
                     SnTrace.SecurityQueue.Write("SAQ: State after finishing SA{0}: {1}", id, GetCurrentState());
                 }
             }
-            public static int GetLastTerminatedId()
+            public int GetLastTerminatedId()
             {
                 return _lastId;
             }
-            // ReSharper disable once MemberHidesStaticFromOuterClass
-            public static CompletionState GetCurrentState()
+            public CompletionState GetCurrentState()
             {
                 lock (_gapsLock)
                     return new CompletionState { LastActivityId = _lastId, Gaps = _gaps.ToArray() };
             }
 
-            internal static void RemoveFromGaps(IEnumerable<int> notLoaded)
+            internal void RemoveFromGaps(IEnumerable<int> notLoaded)
             {
                 lock (_gapsLock)
                     foreach (var item in notLoaded)
@@ -463,23 +514,33 @@ namespace SenseNet.Security.Messaging
             }
         }
 
-        private static class Executor
+        private class Executor
         {
-            private static bool _enabled = true;
-            internal static void __enable()
+            private readonly SecurityActivityHistoryController _activityHistory;
+
+            public DependencyManager DependencyManager { get; set; }
+
+            private bool _enabled = true;
+
+            public Executor(SecurityActivityHistoryController activityHistory)
+            {
+                _activityHistory = activityHistory;
+            }
+
+            internal void __enable()
             {
                 _enabled = true;
             }
-            internal static void __disable()
+            internal void __disable()
             {
                 _enabled = false;
             }
-            public static void Execute(SecurityActivity activity)
+            public void Execute(SecurityActivity activity)
             {
                 if (!_enabled)
                     return;
 
-                SecurityActivityHistory.Start(activity.Id);
+                _activityHistory.Start(activity.Id);
                 try
                 {
                     using (var op = SnTrace.SecurityQueue.StartOperation("SAQ: EXECUTION START SA{0} .", activity.Id))
@@ -491,7 +552,7 @@ namespace SenseNet.Security.Messaging
                 catch (Exception e)
                 {
                     SnTrace.Security.Write("SAQ: EXECUTION ERROR SA{0}: {1}", activity.Id, e.Message);
-                    SecurityActivityHistory.Error(activity.Id, e);
+                    _activityHistory.Error(activity.Id, e);
                 }
                 finally
                 {
@@ -499,32 +560,32 @@ namespace SenseNet.Security.Messaging
                 }
             }
         }
-    }
 
-    internal class Retrier
-    {
-        public static T Retry<T>(int count, int waitMilliseconds, Func<T> callback, Func<T, int, Exception, bool> expectation)
+        private class Retrier
         {
-            var retryCount = count;
-            var result = default(T);
-            while (retryCount > 0)
+            public static T Retry<T>(int count, int waitMilliseconds, Func<T> callback, Func<T, int, Exception, bool> expectation)
             {
-                Exception error = null;
-                try
+                var retryCount = count;
+                var result = default(T);
+                while (retryCount > 0)
                 {
-                    result = callback();
-                }
-                catch (Exception e)
-                {
-                    error = e;
-                }
+                    Exception error = null;
+                    try
+                    {
+                        result = callback();
+                    }
+                    catch (Exception e)
+                    {
+                        error = e;
+                    }
 
-                if (expectation(result, retryCount, error))
-                    break;
-                retryCount--;
-                Thread.Sleep(waitMilliseconds);
+                    if (expectation(result, retryCount, error))
+                        break;
+                    retryCount--;
+                    Thread.Sleep(waitMilliseconds);
+                }
+                return result;
             }
-            return result;
         }
     }
 

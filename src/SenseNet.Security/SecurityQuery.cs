@@ -22,7 +22,7 @@ namespace SenseNet.Security
     /// <summary>
     /// Contains security-related queryable collections.
     /// </summary>
-    public class SecurityQuery
+    public class SecurityQuery //UNDONE: Has static members
     {
         private enum Axis { All, ParentChain, Subtree }
 
@@ -61,9 +61,11 @@ namespace SenseNet.Security
         {
             _context = context;
             _axis = axis;
+            _entityManager = context.SecuritySystem.EntityManager;
         }
         private readonly SecurityContext _context;
         private readonly Axis _axis;
+        private readonly SecurityEntityManager _entityManager;
 
         /// <summary>
         /// Returns all entities in the predefined axis (All, ParentChain, Subtree) of the specified entity.
@@ -76,10 +78,10 @@ namespace SenseNet.Security
         /// <returns>The IEnumerable&lt;SecurityEntity&gt; to further filtering.</returns>
         public IEnumerable<SecurityEntity> GetEntities(int entityId, BreakOptions handleBreaks = BreakOptions.Default)
         {
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
-                var root = SecurityEntity.GetEntitySafe(_context, entityId, false);
+                var root = _entityManager.GetEntitySafe(entityId, false);
 
                 IEnumerable<SecurityEntity> collection;
                 switch (_axis)
@@ -103,7 +105,7 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
         /// <summary>

@@ -63,10 +63,6 @@
       <Project>{67d1c02b-0336-4e35-8ec9-573da304bbef}</Project>
       <Name>SenseNet.Security.Messaging.Msmq</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SenseNet.Security.Tests\SenseNet.Security.Tests.csproj">
-      <Project>{dfb9b64a-566e-40d1-a5f2-b945274937ec}</Project>
-      <Name>SenseNet.Security.Tests</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SenseNet.Security\SenseNet.Security.csproj">
       <Project>{b2b39975-3d5e-4457-b9ce-0fcec20f2f59}</Project>
       <Name>SenseNet.Security</Name>

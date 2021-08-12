@@ -9,14 +9,23 @@ namespace SenseNet.Security
     /// </summary>
     internal class PermissionQuery
     {
-        public static Dictionary<PermissionTypeBase, int> GetExplicitPermissionsInSubtree(SecurityContext context, int entityId, int[] identities, bool includeRoot)
+        private readonly SecurityEntityManager _entityManager;
+        private readonly SecurityCache _cache;
+
+        public PermissionQuery(SecurityEntityManager entityManager, SecurityCache cache)
         {
-            SecurityEntity.EnterReadLock();
+            _entityManager = entityManager;
+            _cache = cache;
+        }
+
+        public Dictionary<PermissionTypeBase, int> GetExplicitPermissionsInSubtree(SecurityContext context, int entityId, int[] identities, bool includeRoot)
+        {
+            _entityManager.EnterReadLock();
             try
             {
                 var counters = new int[PermissionTypeBase.PermissionCount];
 
-                var root = SecurityEntity.GetEntitySafe(context, entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -40,19 +49,19 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
 
         /******************************************************************************************************* Related Identities */
 
-        public static IEnumerable<int> GetRelatedIdentities(SecurityContext context, int entityId, PermissionLevel level)
+        public IEnumerable<int> GetRelatedIdentities(SecurityContext context, int entityId, PermissionLevel level)
         {
             var identities = new List<int>();
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
-                var root = SecurityEntity.GetEntitySafe(context, entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -69,11 +78,11 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
             return identities;
         }
-        private static void CollectIdentitiesFromAces(List<AceInfo> aces, PermissionLevel level, List<int> identities)
+        private void CollectIdentitiesFromAces(List<AceInfo> aces, PermissionLevel level, List<int> identities)
         {
             foreach (var ace in aces)
             {
@@ -91,19 +100,19 @@ namespace SenseNet.Security
 
         /****************************************************************************************************** Related Permissions */
 
-        public static Dictionary<PermissionTypeBase, int> GetRelatedPermissions(SecurityContext context, int entityId, PermissionLevel level, bool explicitOnly, int identityId, Func<int, bool> isEnabled)
+        public Dictionary<PermissionTypeBase, int> GetRelatedPermissions(SecurityContext context, int entityId, PermissionLevel level, bool explicitOnly, int identityId, Func<int, bool> isEnabled)
         {
             if (!explicitOnly)
                 throw new NotSupportedException("Not supported in this version. Use explicitOnly = true");
 
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var counters = new int[PermissionTypeBase.PermissionCount];
 
                 var identities = new[] { identityId };
 
-                var root = SecurityEntity.GetEntitySafe(context, entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -130,10 +139,10 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
-        private static void CollectPermissionsFromLocalAces(List<AceInfo> aces, PermissionBitMask localBits)
+        private void CollectPermissionsFromLocalAces(List<AceInfo> aces, PermissionBitMask localBits)
         {
             foreach (var ace in aces)
             {
@@ -141,7 +150,7 @@ namespace SenseNet.Security
                 localBits.DenyBits |= ace.DenyBits;
             }
         }
-        private static void CollectPermissionsFromAces(List<AceInfo> aces, PermissionLevel level, int[] counters, PermissionBitMask localBits)
+        private void CollectPermissionsFromAces(List<AceInfo> aces, PermissionLevel level, int[] counters, PermissionBitMask localBits)
         {
             // Aggregate aces and switch of the 'used bits' in the local only permission bit set.
             foreach (var ace in aces)
@@ -153,7 +162,7 @@ namespace SenseNet.Security
             // Finally play the rest bits (all broken bits are switched in that is not used in any explicit entry)
             SetPermissionsCountersByPermissionLevel(counters, level, localBits.AllowBits, localBits.DenyBits);
         }
-        private static void SetPermissionsCountersByPermissionLevel(int[] counters, PermissionLevel level, ulong allowBits, ulong denyBits)
+        private void SetPermissionsCountersByPermissionLevel(int[] counters, PermissionLevel level, ulong allowBits, ulong denyBits)
         {
             // ReSharper disable once SwitchStatementMissingSomeCases
             switch (level)
@@ -170,7 +179,7 @@ namespace SenseNet.Security
                     break;
             }
         }
-        private static void IncrementCounters(ulong bits, int[] counters)
+        private void IncrementCounters(ulong bits, int[] counters)
         {
             var mask = 1uL;
             var b = bits;
@@ -184,12 +193,12 @@ namespace SenseNet.Security
 
         /********************************************************************************************************* Related Entities */
 
-        public static IEnumerable<int> GetRelatedEntities(SecurityContext context, int entityId, PermissionLevel level, bool explicitOnly, int identityId, IEnumerable<PermissionTypeBase> permissionTypes)
+        public IEnumerable<int> GetRelatedEntities(SecurityContext context, int entityId, PermissionLevel level, bool explicitOnly, int identityId, IEnumerable<PermissionTypeBase> permissionTypes)
         {
             if (!explicitOnly)
                 throw new NotSupportedException("Not supported in this version. Use explicitOnly = true");
 
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var entityIds = new List<int>();
@@ -197,7 +206,7 @@ namespace SenseNet.Security
                 var mask = PermissionTypeBase.GetPermissionMask(permissionTypes);
                 var identities = new[] { identityId };
 
-                var root = SecurityEntity.GetEntitySafe(context, entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -224,11 +233,11 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
 
         }
-        private static bool HasBitsByEffectiveAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
+        private bool HasBitsByEffectiveAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
         {
             var permBits = new PermissionBitMask();
             foreach (var ace in aces)
@@ -241,7 +250,7 @@ namespace SenseNet.Security
             }
             return HasBits(permBits, level, mask);
         }
-        private static bool HasBitsByExplicitAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
+        private bool HasBitsByExplicitAces(List<AceInfo> aces, PermissionLevel level, ulong mask)
         {
             var permBits = new PermissionBitMask();
             foreach (var ace in aces)
@@ -251,7 +260,7 @@ namespace SenseNet.Security
             }
             return HasBits(permBits, level, mask);
         }
-        private static bool HasBits(PermissionBitMask permBits, PermissionLevel level, ulong permissionMask)
+        private bool HasBits(PermissionBitMask permBits, PermissionLevel level, ulong permissionMask)
         {
             switch (level)
             {
@@ -268,14 +277,14 @@ namespace SenseNet.Security
 
         /**************************************************************************************************** Related Identities #2 */
 
-        public static IEnumerable<int> GetRelatedIdentities(SecurityContext context, int entityId, PermissionLevel level, IEnumerable<PermissionTypeBase> permissionTypes)
+        public IEnumerable<int> GetRelatedIdentities(SecurityContext context, int entityId, PermissionLevel level, IEnumerable<PermissionTypeBase> permissionTypes)
         {
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var identities = new List<int>();
                 var mask = PermissionTypeBase.GetPermissionMask(permissionTypes);
-                var root = SecurityEntity.GetEntitySafe(context, entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var entity in new EntityTreeWalker(root))
                 {
                     // step forward if there is no any setting
@@ -293,10 +302,10 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
-        private static void CollectIdentitiesFromAces(List<AceInfo> aces, PermissionLevel level, ulong mask, List<int> identities)
+        private void CollectIdentitiesFromAces(List<AceInfo> aces, PermissionLevel level, ulong mask, List<int> identities)
         {
             foreach (var ace in aces)
                 if (!identities.Contains(ace.IdentityId))
@@ -304,7 +313,7 @@ namespace SenseNet.Security
                         if(!identities.Contains(ace.IdentityId))
                             identities.Add(ace.IdentityId);
         }
-        private static bool HasBits(ulong allowBits, ulong denyBits, PermissionLevel level, ulong permissionMask)
+        private bool HasBits(ulong allowBits, ulong denyBits, PermissionLevel level, ulong permissionMask)
         {
             switch (level)
             {
@@ -321,15 +330,15 @@ namespace SenseNet.Security
 
         /********************************************************************************************* Related Entities one level#2 */
 
-        public static IEnumerable<int> GetRelatedEntitiesOneLevel(SecurityContext context, int entityId, PermissionLevel level, int identityId, IEnumerable<PermissionTypeBase> permissionTypes)
+        public IEnumerable<int> GetRelatedEntitiesOneLevel(SecurityContext context, int entityId, PermissionLevel level, int identityId, IEnumerable<PermissionTypeBase> permissionTypes)
         {
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 var result = new List<int>();
                 var identities = new[] { identityId };
                 var mask = PermissionTypeBase.GetPermissionMask(permissionTypes);
-                var root = SecurityEntity.GetEntitySafe(context, entityId, true);
+                var root = _entityManager.GetEntitySafe(entityId, true);
                 foreach (var childEntity in root.Children)
                 {
                     var aces = context.Evaluator.GetEffectiveEntriesSafe(childEntity.Id, identities, EntryType.Normal);
@@ -340,13 +349,13 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
 
         /********************************************************************************************* Allowed Users */
 
-        public static IEnumerable<int> GetAllowedUsers(SecurityContext context, int entityId, IEnumerable<PermissionTypeBase> permissions)
+        public IEnumerable<int> GetAllowedUsers(SecurityContext context, int entityId, IEnumerable<PermissionTypeBase> permissions)
         {
             var ownerId = context.GetOwnerId(entityId);
             var permArray = permissions.ToArray();
@@ -358,14 +367,14 @@ namespace SenseNet.Security
                 .ToArray();
             return allowedIdentities;
         }
-        private static IEnumerable<int> GetFlattenedUsers(SecurityContext context, IEnumerable<int> identities)
+        private IEnumerable<int> GetFlattenedUsers(SecurityContext context, IEnumerable<int> identities)
         {
             var flattenedUsers = new List<int>();
 
             var groups = new List<SecurityGroup>();
             foreach (var identity in identities.Distinct())
             {
-                if (context.Cache.Groups.TryGetValue(identity, out var group))
+                if (_cache.Groups.TryGetValue(identity, out var group))
                 {
                     if (!groups.Contains(group))
                         groups.Add(group);
@@ -378,7 +387,7 @@ namespace SenseNet.Security
 
             foreach (var group in groups)
             {
-                var allUsersInGroup = context.Cache.GetAllUsersInGroup(group);
+                var allUsersInGroup = _cache.GetAllUsersInGroup(group);
                 foreach (var userId in allUsersInGroup)
                 {
                     if (!flattenedUsers.Contains(userId))
@@ -390,31 +399,31 @@ namespace SenseNet.Security
 
         /********************************************************************************************* Parent Groups */
 
-        public static IEnumerable<int> GetParentGroups(SecurityContext context, int identityId, bool directOnly)
+        public IEnumerable<int> GetParentGroups(SecurityContext context, int identityId, bool directOnly)
         {
-            if (context.Cache.Groups.TryGetValue(identityId, out var group))
+            if (_cache.Groups.TryGetValue(identityId, out var group))
                 return directOnly ? GetDirectOnlyParentGroups(group) : GetAllParentGroups(context, group);
             return directOnly ? GetDirectOnlyParentGroups(context, identityId) : GetAllParentGroups(context, identityId);
         }
-        private static IEnumerable<int> GetAllParentGroups(SecurityContext context, SecurityGroup group)
+        private IEnumerable<int> GetAllParentGroups(SecurityContext context, SecurityGroup group)
         {
-            return context.Cache.GetAllParentGroupIds(group);
+            return _cache.GetAllParentGroupIds(group);
         }
-        private static IEnumerable<int> GetAllParentGroups(SecurityContext context, int userId)
+        private IEnumerable<int> GetAllParentGroups(SecurityContext context, int userId)
         {
-            if (context.Cache.Membership.TryGetValue(userId, out var groupIds))
+            if (_cache.Membership.TryGetValue(userId, out var groupIds))
                 return groupIds;
             return new int[0];
         }
-        private static IEnumerable<int> GetDirectOnlyParentGroups(SecurityGroup group)
+        private IEnumerable<int> GetDirectOnlyParentGroups(SecurityGroup group)
         {
             return group.ParentGroups
                 .Select(g => g.Id)
                 .ToArray();
         }
-        private static IEnumerable<int> GetDirectOnlyParentGroups(SecurityContext context, int userId)
+        private IEnumerable<int> GetDirectOnlyParentGroups(SecurityContext context, int userId)
         {
-            return context.Cache.Groups.Values
+            return _cache.Groups.Values
                 .Where(g => g.UserMemberIds.Contains(userId))
                 .Select(g=>g.Id)
                 .ToArray();

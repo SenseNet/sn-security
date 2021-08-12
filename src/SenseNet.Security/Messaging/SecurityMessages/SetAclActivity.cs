@@ -20,11 +20,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Initializes a new instance of the SetAclActivity.
         /// </summary>
-        public SetAclActivity(IEnumerable<AclInfo> acls, List<int> breaks, List<int> unbreaks) //TODO:~ TYPO
+        public SetAclActivity(IEnumerable<AclInfo> acls, List<int> breaks, List<int> unBreaks)
         {
             _acls = acls;
             _breaks = breaks;
-            _undoBreaks = unbreaks;
+            _undoBreaks = unBreaks;
         }
 
         /// <summary>
@@ -82,14 +82,15 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.WritePermissionEntries(context, _entries);
-            DataHandler.RemovePermissionEntries(context, _entriesToRemove);
+            var dataHandler = context.SecuritySystem.DataHandler;
+            dataHandler.WritePermissionEntries(_entries);
+            dataHandler.RemovePermissionEntries(_entriesToRemove);
 
             foreach (var entityId in _breaks)
-                DataHandler.BreakInheritance(context, entityId);
+                dataHandler.BreakInheritance(entityId);
 
             foreach (var entityId in _undoBreaks)
-                DataHandler.UnbreakInheritance(context, entityId);
+                dataHandler.UnBreakInheritance(entityId);
         }
 
         /// <summary>
@@ -98,7 +99,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         protected override void Apply(SecurityContext context)
         {
             var relevantAcls = _acls?.Where(x => !_emptyAcls.Contains(x.EntityId)).ToArray() ?? new AclInfo[0];
-            SecurityEntity.ApplyAclEditing(context, relevantAcls, _breaks, _undoBreaks, _entriesToRemove, _emptyAcls);
+            context.SecuritySystem.EntityManager.ApplyAclEditing(relevantAcls, _breaks, _undoBreaks, _entriesToRemove, _emptyAcls);
         }
 
         [NonSerialized]

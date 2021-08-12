@@ -3,6 +3,8 @@ using SenseNet.Security.Tests.TestPortal;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SenseNet.Diagnostics;
+
 // ReSharper disable InconsistentNaming
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable UnusedMember.Local
@@ -10,7 +12,7 @@ using System.Text;
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public class MembershipTests2
+    public class MembershipTests2 : TestBase
     {
         #region G1-G23: initial groups (well known when any test starting)
 
@@ -117,21 +119,31 @@ namespace SenseNet.Security.Tests
         private Context context;
         public TestContext TestContext { get; set; }
 
+        private SnTrace.Operation _snTraceOperation;
         [TestInitialize]
         public void StartTest()
         {
-            context = Tools.GetEmptyContext(TestUser.User1);
-            Tools.InitializeInMemoryMembershipStorage(context,
+            _StartTest(TestContext);
+
+            context = GetEmptyContext(TestUser.User1);
+            InitializeInMemoryMembershipStorage(context,
                 @"G1:G2,G3,G4,G5,G6|G2:U1,U2|G3:U10,G7,G8,G9,G10,G11|G4:U3,U4,U5|G5:G12,G13,G14,G15|
                 G6:U6|G7:|G8:U7,U8,U9|G9:G16,G17,G18,G19|G10:U11|G11:U12,U13|G12:U14,U15,U16,U17,U18,U19,U20|G13:U21|G14:U22,U23|
                 G15:U24|G16:U25|G17:U26|G18:U27,U28|G19:U29|G20:U30,U31,U32,U33,G21,G22,G23|G21:U34,U35|G22:U36|G23:U37,U38");
-            context.Security.Cache.Reset(context.Security.DataProvider);
+            context.Security.Cache.Reset();
             Assert.AreEqual(InitialMembership, DumpMembership(context.Security));
         }
         [TestCleanup]
         public void FinishTest()
         {
-            Tools.CheckIntegrity(TestContext.TestName, context.Security);
+            try
+            {
+                CheckIntegrity(TestContext.TestName, context.Security);
+            }
+            finally
+            {
+                _FinishTest(TestContext);
+            }
         }
 
         /*==================================================================================*/

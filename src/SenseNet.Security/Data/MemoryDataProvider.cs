@@ -13,8 +13,8 @@ namespace SenseNet.Security.Data
     /// </summary>
     public class MemoryDataProvider : ISecurityDataProvider
     {
-        private static readonly object MessageLock = new object();
-        private static readonly object AcesLock = new object();
+        private readonly object _messageLock = new object();
+        private readonly object _acesLock = new object();
 
         internal DatabaseStorage Storage { get; private set; }
 
@@ -23,7 +23,10 @@ namespace SenseNet.Security.Data
             Storage = DatabaseStorage.CreateEmpty();
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Initializes a new instance of the MemoryDataProvider
+        /// </summary>
+        /// <param name="storage"></param>
         public MemoryDataProvider(DatabaseStorage storage)
         {
             Storage = storage;
@@ -31,20 +34,13 @@ namespace SenseNet.Security.Data
 
         /* ===================================================================== interface implementation */
 
-        //it is not used
-        /// <inheritdoc />
+        /// <summary>
+        /// Not used in this case.
+        /// </summary>
         public string ConnectionString { get; set; }
 
-        /// <inheritdoc />
-        public virtual ISecurityDataProvider CreateNew()
-        {
-            return new MemoryDataProvider(Storage);
-        }
-        /// <inheritdoc />
-        public void DeleteEverything()
-        {
-            Storage = DatabaseStorage.CreateEmpty();
-        }
+        public IActivitySerializer ActivitySerializer { get; set; }
+
         /// <inheritdoc />
         public void InstallDatabase()
         {
@@ -63,7 +59,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks()
         {
-            lock (AcesLock)
+            lock (_acesLock)
             {
                 var byEntries = Storage.Aces.Select(a => a.EntityId);
                 var byBreaks = Storage.Entities.Values.Where(e => e.IsInherited == false).Select(e => e.Id);
@@ -91,7 +87,7 @@ namespace SenseNet.Security.Data
             }
             return groups.Values;
         }
-        private static SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
+        private SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
         {
             if (!groups.TryGetValue(groupId, out var group))
             {
@@ -104,7 +100,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public IEnumerable<StoredAce> LoadAllAces()
         {
-            lock (AcesLock)
+            lock (_acesLock)
             {
                 foreach (var dbItem in Storage.Aces)
                 {
@@ -203,20 +199,20 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public IEnumerable<StoredAce> LoadAllPermissionEntries()
         {
-            lock (AcesLock)
+            lock (_acesLock)
                 return Storage.Aces.Select(x => x.Clone()).ToArray();
         }
         /// <inheritdoc />
         public IEnumerable<StoredAce> LoadPermissionEntries(IEnumerable<int> entityIds)
         {
-            lock (AcesLock)
+            lock (_acesLock)
                 return Storage.Aces.Where(a => entityIds.Contains(a.EntityId)).ToArray();
         }
 
         /// <inheritdoc />
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
         {
-            lock (AcesLock)
+            lock (_acesLock)
             {
                 foreach (var ace in aces)
                 {
@@ -231,7 +227,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
-            lock (AcesLock)
+            lock (_acesLock)
             {
                 foreach (var ace in aces)
                 {
@@ -245,20 +241,20 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public void RemovePermissionEntriesByEntity(int entityId)
         {
-            lock (AcesLock)
+            lock (_acesLock)
                 Storage.Aces.RemoveAll(y => y.EntityId == entityId);
         }
 
         internal void RemovePermissionEntriesByGroup(int groupId)
         {
-            lock (AcesLock)
+            lock (_acesLock)
                 Storage.Aces.RemoveAll(x => x.IdentityId == groupId);
         }
 
         /// <inheritdoc />
         public void DeleteEntitiesAndEntries(int entityId)
         {
-            lock (AcesLock)
+            lock (_acesLock)
                 Storage.Aces.RemoveAll(y => y.EntityId == entityId);
 
             var childIds = Storage.Entities.Values.Where(se => se.ParentId == entityId).Select(sec => sec.Id).ToArray();
@@ -275,7 +271,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public void QueryGroupRelatedEntities(int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds)
         {
-            lock (AcesLock)
+            lock (_acesLock)
             {
                 var result = new List<int>();
                 entityIds = Storage.Aces.Where(x => x.IdentityId == groupId).Select(x => x.EntityId).Distinct();
@@ -291,17 +287,15 @@ namespace SenseNet.Security.Data
             }
         }
 
-
-
-        internal static int LastActivityId;
+        internal int LastActivityId;
 
         /// <inheritdoc />
         public int SaveSecurityActivity(SecurityActivity activity, out int bodySize)
         {
-            lock (MessageLock)
+            lock (_messageLock)
             {
                 var id = Interlocked.Increment(ref LastActivityId);
-                var body =  SecurityActivity.SerializeActivity(activity);
+                var body = ActivitySerializer.SerializeActivity(activity);
                 bodySize = body.Length;
                 Storage.Messages.Add(new Tuple<int, DateTime, byte[]>(id, DateTime.UtcNow, body));
                 return id;
@@ -309,9 +303,9 @@ namespace SenseNet.Security.Data
         }
 
         /// <inheritdoc />
-        public int GetLastSecurityActivityId(DateTime startedTime)
+        public virtual int GetLastSecurityActivityId(DateTime startedTime)
         {
-            lock (MessageLock)
+            lock (_messageLock)
             {
                 var lastMessage = Storage.Messages?.OrderByDescending(m => m.Item1).FirstOrDefault();
                 return lastMessage?.Item1 ?? 0;
@@ -327,13 +321,13 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public SecurityActivity[] LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities)
         {
-            lock (MessageLock)
+            lock (_messageLock)
             {
                 var result = new List<SecurityActivity>();
 
                 foreach (var (id, _, body) in Storage.Messages.Where(x => x.Item1 >= from && x.Item1 <= to).Take(count))
                 {
-                    var activity = SecurityActivity.DeserializeActivity(body);
+                    var activity = ActivitySerializer.DeserializeActivity(body);
                     if (activity == null)
                         continue;
                     activity.Id = id;
@@ -349,13 +343,13 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public SecurityActivity[] LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities)
         {
-            lock (MessageLock)
+            lock (_messageLock)
             {
                 var result = new List<SecurityActivity>();
 
                 foreach (var (id, _, body) in Storage.Messages.Where(x => gaps.Contains(x.Item1)))
                 {
-                    var activity = SecurityActivity.DeserializeActivity(body);
+                    var activity = ActivitySerializer.DeserializeActivity(body);
                     if (activity == null)
                         continue;
                     activity.Id = id;
@@ -371,22 +365,22 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public virtual SecurityActivity LoadSecurityActivity(int id)
         {
-            lock (MessageLock)
+            lock (_messageLock)
             {
                 var item = Storage.Messages.FirstOrDefault(x => x.Item1 == id);
                 if (item == null)
                     return null;
 
-                var activity = SecurityActivity.DeserializeActivity(item.Item3);
+                var activity = ActivitySerializer.DeserializeActivity(item.Item3);
                 activity.Id = item.Item1;
                 return activity;
             }
         }
 
         /// <inheritdoc />
-        public void CleanupSecurityActivities(int timeLimitInMinutes)
+        public virtual void CleanupSecurityActivities(int timeLimitInMinutes)
         {
-            lock (MessageLock)
+            lock (_messageLock)
             {
                 var timeLimit = DateTime.UtcNow.AddMinutes(-timeLimitInMinutes);
 
@@ -399,7 +393,7 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public Messaging.SecurityActivityExecutionLock AcquireSecurityActivityExecutionLock(SecurityActivity securityActivity, int timeoutInSeconds)
         {
-            return new Messaging.SecurityActivityExecutionLock(securityActivity, true);
+            return new Messaging.SecurityActivityExecutionLock(securityActivity, this, true);
         }
         /// <inheritdoc />
         public void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)

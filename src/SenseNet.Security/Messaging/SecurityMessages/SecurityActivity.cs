@@ -33,11 +33,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
         private Exception _executionException;
 
-        [NonSerialized] private SecurityContext _context;
+        [NonSerialized] private SecurityContext __context;
         /// <summary>
-        /// Pointer to the current SecurityContext.
+        /// Gets the current SecurityContext.
         /// </summary>
-        public SecurityContext Context => _context ?? SecurityContext.General;
+        public SecurityContext Context { get => __context; internal set => __context = value; }
 
         /// <summary>
         /// Initializes the instance.
@@ -57,8 +57,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// Otherwise the method returns immediately.</param>
         public void Execute(SecurityContext context, bool waitForComplete = true)
         {
-            _context = context;
-            SecurityActivityQueue.ExecuteActivity(this);
+            Context = context;
+            if (Sender == null)
+                Sender = context.SecuritySystem.MessageSenderManager.CreateMessageSender();
+
+            context.SecuritySystem.SecurityActivityQueue.ExecuteActivity(this);
 
             if(waitForComplete)
                 WaitForComplete();
@@ -74,7 +77,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         {
             try
             {
-                using (var execLock = DataHandler.AcquireSecurityActivityExecutionLock(this))
+                using (var execLock = Context.SecuritySystem.DataHandler.AcquireSecurityActivityExecutionLock(this))
                 {
                     if (execLock.FullExecutionEnabled)
                     {
@@ -98,14 +101,6 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             }
         }
 
-        /// <summary>
-        /// WARNING! Do not use this method in your code.
-        /// Called by the message receiver.
-        /// </summary>
-        public static void Apply(SecurityActivity activity)
-        {
-            activity.Execute(SecurityContext.General, false);
-        }
 
         /// <summary>
         /// Extension point for initializing the activity data before executing any operations.
@@ -118,9 +113,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         private void Distribute(SecurityContext context)
         {
             DistributedMessage msg = this;
-            if (BodySize > Configuration.Messaging.DistributableSecurityActivityMaxSize)
+            if (BodySize > __context.SecuritySystem.MessagingOptions.DistributableSecurityActivityMaxSize)
                 msg = new BigActivityMessage { DatabaseId = Id };
-            context.MessageProvider.SendMessage(msg);
+            context.SecuritySystem.MessageProvider.SendMessage(msg);
         }
 
         /// <summary>
@@ -155,7 +150,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             }
             else
             {
-                if (!_finishSignal.WaitOne(Configuration.Messaging.SecuritActivityTimeoutInSeconds * 1000, false))
+                if (!_finishSignal.WaitOne(__context.SecuritySystem.MessagingOptions.SecurityActivityTimeoutInSeconds * 1000, false))
                 {
                     var message = $"SecurityActivity is not finishing on a timely manner (#{Id})";
                     throw new SecurityActivityTimeoutException(message);
@@ -200,54 +195,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             _finishSignal?.Set();
         }
 
-        /// <summary>
-        /// Serializes an activity for persisting to database.
-        /// </summary>
-        public static byte[] SerializeActivity(SecurityActivity activity)
-        {
-            try
-            {
-                var ms = new MemoryStream();
-                var bf = new BinaryFormatter();
-                bf.Serialize(ms, activity);
-                ms.Flush();
-                ms.Position = 0;
-                return ms.GetBuffer();
-            }
-            catch (Exception e) // logged and rethrown
-            {
-                SnLog.WriteException(e, EventMessage.Error.Serialization, EventId.Serialization);
-                throw;
-            }
-        }
-        /// <summary>
-        /// Deserializes an activity that comes from the to database.
-        /// </summary>
-        /// <param name="bytes"></param>
-        /// <returns></returns>
-        public static SecurityActivity DeserializeActivity(byte[] bytes)
-        {
-            Stream data = new MemoryStream(bytes);
-
-            var bf = new BinaryFormatter();
-            SecurityActivity activity = null;
-            try
-            {
-                activity = (SecurityActivity)bf.Deserialize(data);
-            }
-            catch (SerializationException e) // logged
-            {
-                SnLog.WriteException(e, EventMessage.Error.Deserialization, EventId.Serialization);
-            }
-            return activity;
-        }
-
-
         internal static class DependencyTools
         {
             internal static bool HasAncestorRelation(SecurityContext ctx, int entityId1, int entityId2)
             {
-                var entities = SecurityEntity.PeekEntities(ctx, entityId1, entityId2);
+                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(entityId1, entityId2);
                 return HasAncestorRelation(ctx, entities[0], entities[1]);
             }
             internal static bool HasAncestorRelation(SecurityContext ctx, SecurityEntity entity1, SecurityEntity entity2)
@@ -260,7 +212,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             internal static bool IsInTree(SecurityContext ctx, int descendantId, int ancestorId)
             {
-                var entities = SecurityEntity.PeekEntities(ctx, descendantId);
+                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(descendantId);
                 return IsInTree(ctx, entities[0], ancestorId);
             }
             internal static bool IsInTree(SecurityContext ctx, SecurityEntity descendant, int ancestorId)
@@ -270,7 +222,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             internal static bool AnyIsInTree(SecurityContext ctx, IEnumerable<int> descendantIds, int ancestorId)
             {
-                var entities = SecurityEntity.PeekEntities(ctx, descendantIds.ToArray());
+                var entities = ctx.SecuritySystem.EntityManager.PeekEntities(descendantIds.ToArray());
                 return entities.Any(entity => ctx.IsEntityInTree(entity, ancestorId));
             }
         }
@@ -342,7 +294,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             RemoveDependency(WaitingFor, olderActivity);
             RemoveDependency(olderActivity.WaitingForMe, this);
         }
-        private static void RemoveDependency(List<SecurityActivity> dependencyList, SecurityActivity activity)
+        private void RemoveDependency(List<SecurityActivity> dependencyList, SecurityActivity activity)
         {
             // this method must called from thread safe block.
             dependencyList.RemoveAll(x => x.Id == activity.Id);

@@ -11,18 +11,78 @@ using SenseNet.Security.Messaging.SecurityMessages;
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public class MessagingTests
+    public class MessagingTests : TestBase
     {
         private Context _context;
         public TestContext TestContext { get; set; }
 
+        private SnTrace.Operation _snTraceOperation;
+        [TestInitialize]
+        public void StartTest()
+        {
+            _StartTest(TestContext);
+        }
         [TestCleanup]
         public void FinishTest()
         {
-            Tools.CheckIntegrity(TestContext.TestName, _context.Security);
+            try
+            {
+                CheckIntegrity(TestContext.TestName, _context.Security);
+            }
+            finally
+            {
+                _FinishTest(TestContext);
+            }
         }
 
         //===================================================================
+
+        [TestMethod]
+        public void Messaging_MessageSender()
+        {
+            SnLog.Instance = new TestLogger();
+
+            //---- Ensure test data
+            var entities = CreateTestEntities();
+            var groups = SystemStartTests.CreateTestGroups();
+            var memberships = Tools.CreateInMemoryMembershipTable(groups);
+            var aces = CreateTestAces();
+            var storage = new DatabaseStorage
+            {
+                Aces = aces,
+                Memberships = memberships,
+                Entities = entities,
+                Messages = new List<Tuple<int, DateTime, byte[]>>()
+            };
+
+            //---- Start the system
+            var messageSenderManager = new MessageSenderManager();
+            var msgProvider = new TestMessageProvider(messageSenderManager);
+            msgProvider.MessageReceived += MsgProvider_MessageReceived;
+            msgProvider.Initialize();
+
+            var securitySystem = Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
+
+            _context = new Context(TestUser.User1, securitySystem);
+
+            // small activity from me
+            var activity1 = new TestActivity();
+            activity1.Execute(_context.Security);
+
+            // small activity from another
+            var activity2 = new TestActivity
+            {
+                Sender = new TestMessageSender {ComputerID = Environment.MachineName, InstanceID = "AnotherAppDomain"}
+            };
+            activity2.Execute(_context.Security);
+
+            Assert.AreEqual("true, false", string.Join(", ", msgProvider.ReceiverMessages));
+        }
+        private void MsgProvider_MessageReceived(object sender, MessageReceivedEventArgs args)
+        {
+            var msgProvider = (TestMessageProvider) sender;
+            msgProvider.ReceiverMessages.Add(msgProvider.MessageSenderManager.IsMe(args.Message.Sender).ToString().ToLower());
+        }
 
         [TestMethod]
         public void Messaging_BigActivity()
@@ -43,11 +103,12 @@ namespace SenseNet.Security.Tests
             };
 
             //---- Start the system
-            var msgProvider = new TestMessageProvider();
+            var messageSenderManager = new MessageSenderManager();
+            var msgProvider = new TestMessageProvider(messageSenderManager);
             msgProvider.Initialize();
-            Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
+            var securitySystem = Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
 
-            _context = new Context(TestUser.User1);
+            _context = new Context(TestUser.User1, securitySystem);
 
             // small activity
             var smallActivity = new TestActivity();
@@ -55,7 +116,7 @@ namespace SenseNet.Security.Tests
             var smallActivityId = smallActivity.Id;
 
             // large activity
-            var largeActivity = new TestActivity { Body = new string('*', Configuration.Messaging.DistributableSecurityActivityMaxSize + 1) };
+            var largeActivity = new TestActivity { Body = new string('*', securitySystem.MessagingOptions.DistributableSecurityActivityMaxSize + 1) };
             largeActivity.Execute(_context.Security);
             var largeActivityId = largeActivity.Id;
 
@@ -226,10 +287,26 @@ namespace SenseNet.Security.Tests
                 }
             }
         }
+        [Serializable]
+        private class TestMessageSender : IMessageSender
+        {
+            public string ComputerID { get; set; }
+            public string InstanceID { get;  set; }
+        }
+
         private class TestMessageProvider : IMessageProvider
         {
             public string ReceiverName => "TestMessageProvider";
             public int IncomingMessageCount => 0;
+
+            public IMessageSenderManager MessageSenderManager { get; }
+
+            public List<string> ReceiverMessages { get; } = new List<string>();
+
+            public TestMessageProvider(IMessageSenderManager messageSenderManager)
+            {
+                MessageSenderManager = messageSenderManager;
+            }
 
             public void Initialize() {}
 
@@ -268,10 +345,6 @@ namespace SenseNet.Security.Tests
         private class MemoryDataProviderForMessagingTests : MemoryDataProvider
         {
             public MemoryDataProviderForMessagingTests(DatabaseStorage storage) : base(storage) { }
-            public override ISecurityDataProvider CreateNew()
-            {
-                return new MemoryDataProviderForMessagingTests(Storage);
-            }
             public override SecurityActivity LoadSecurityActivity(int id)
             {
                 var activity =  base.LoadSecurityActivity(id);

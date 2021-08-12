@@ -32,12 +32,13 @@ namespace SenseNet.Security.Tests
             };
             var results = new LoadingTimeTestResult[testCases.Length];
             var i = 0;
+            SecuritySystem securitySystem = null;
             foreach (var testCase in testCases)
-                results[i++] = TestLoadingBigStructure(testCase.eLevel, testCase.eWidth);
+                results[i++] = TestLoadingBigStructure(testCase.eLevel, testCase.eWidth, out securitySystem);
 
-            var _ = new Context(TestUser.User1);
+            var _ = new Context(TestUser.User1, securitySystem);
         }
-        private static LoadingTimeTestResult TestLoadingBigStructure(int entityMaxLevel, int entityLevelWidth)
+        private LoadingTimeTestResult TestLoadingBigStructure(int entityMaxLevel, int entityLevelWidth, out SecuritySystem securitySystem)
         {
             //---- Ensure test data
             var entities = CreateTestEntities_Big(entityMaxLevel, entityLevelWidth);
@@ -47,7 +48,7 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             var timer = Stopwatch.StartNew();
-            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider());
+            securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
             timer.Stop();
             var elapsed = timer.Elapsed;
 

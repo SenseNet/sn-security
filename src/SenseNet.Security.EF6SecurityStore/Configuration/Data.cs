@@ -9,7 +9,7 @@ namespace SenseNet.Security.EF6SecurityStore.Configuration
     /// let us access sensenet-specific configuration values.
     /// </summary>
     [Obsolete("Use the DataOptions class instead.")]
-    internal class Data : SnConfig
+    internal class Data : SnConfig //UNDONE: Has static members (configuration)
     {
         private const string DataSectionName = "sensenet/data";
         private const string SecuritySectionName = "sensenet/security";

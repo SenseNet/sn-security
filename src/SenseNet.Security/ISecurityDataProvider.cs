@@ -15,14 +15,9 @@ namespace SenseNet.Security
         string ConnectionString { get; set; }
 
         /// <summary>
-        /// Creator method. Returns a brand new ISecurityDataProvider instance
+        /// Gets or sets the ActivitySerializer for loading activities.
         /// </summary>
-        ISecurityDataProvider CreateNew();
-
-        /// <summary>
-        /// Empties the entire database (clears all records from all tables).
-        /// </summary>
-        void DeleteEverything();
+        IActivitySerializer ActivitySerializer { get; set; }
 
         /// <summary>
         /// Creates the database schema and other components (tables, etc.). It requires an existing database.

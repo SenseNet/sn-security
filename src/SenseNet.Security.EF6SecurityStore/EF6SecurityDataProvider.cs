@@ -81,24 +81,6 @@ namespace SenseNet.Security.EF6SecurityStore
         }
 
         /// <summary>
-        /// Creator method. Returns a brand new ISecurityDataProvider instance.
-        /// </summary>
-        public ISecurityDataProvider CreateNew()
-        {
-            return new EF6SecurityDataProvider(Options.Create(_options), _logger);
-        }
-        /// <summary>
-        /// Empties the entire database (clears all records from all tables).
-        /// </summary>
-        public void DeleteEverything()
-        {
-            using (var db = Db())
-            {
-                db.CleanupDatabase();
-            }
-        }
-
-        /// <summary>
         /// Creates the database schema and other components (tables, etc.). It requires an existing database.
         /// </summary>
         public void InstallDatabase()
@@ -500,7 +482,7 @@ namespace SenseNet.Security.EF6SecurityStore
                 result = db.EFMessages.Add(new EFMessage
                 {
                     ExecutionState = ExecutionState.Wait,
-                    SavedBy = activity.Context.MessageProvider.ReceiverName,
+                    SavedBy = activity.Context.SecuritySystem.MessageProvider.ReceiverName,
                     SavedAt = DateTime.UtcNow,
                     Body = body
                 });
@@ -527,7 +509,8 @@ namespace SenseNet.Security.EF6SecurityStore
             {
                 string result;
                 using (var db = Db())
-                    result = db.AcquireSecurityActivityExecutionLock(securityActivity.Id, securityActivity.Context.MessageProvider.ReceiverName, timeoutInSeconds);
+                    result = db.AcquireSecurityActivityExecutionLock(securityActivity.Id, 
+                        securityActivity.Context.SecuritySystem.MessageProvider.ReceiverName, timeoutInSeconds);
 
                 // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (result)

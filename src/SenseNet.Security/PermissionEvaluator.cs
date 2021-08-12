@@ -33,9 +33,27 @@ namespace SenseNet.Security
     internal class PermissionEvaluator
     {
         private readonly SecurityContext _securityContext;
+        private readonly SecurityEntityManager _entityManager;
+        private readonly SecurityCache _cache;
+        private readonly PermissionQuery _permissionQuery;
+
+        private readonly int _systemUserId;
+        private readonly int _visitorUserId;
+        private readonly int _everyoneGroupId;
+        private readonly int _ownerGroupId;
+
         internal PermissionEvaluator(SecurityContext securityContext)
         {
             _securityContext = securityContext;
+            _cache = securityContext.SecuritySystem.Cache;
+            _entityManager = securityContext.SecuritySystem.EntityManager;
+            _permissionQuery = securityContext.SecuritySystem.PermissionQuery;
+
+            var config = securityContext.SecuritySystem.Configuration;
+            _systemUserId = config.SystemUserId;
+            _visitorUserId = config.VisitorUserId;
+            _everyoneGroupId = config.EveryoneGroupId;
+            _ownerGroupId = config.OwnerGroupId;
         }
 
         internal void Initialize()
@@ -57,17 +75,17 @@ namespace SenseNet.Security
         }
         internal PermissionValue GetPermission(int userId, int entityId, int ownerId, EntryType? entryType, params PermissionTypeBase[] permissions)
         {
-            if (userId == Configuration.Identities.SystemUserId)
+            if (userId == _securityContext.SecuritySystem.Configuration.SystemUserId)
                 return PermissionValue.Allowed;
 
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 return GetPermissionSafe(userId, entityId, ownerId, entryType, permissions);
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
         internal PermissionValue GetPermissionSafe(int userId, int entityId, int ownerId, params PermissionTypeBase[] permissions)
@@ -77,7 +95,7 @@ namespace SenseNet.Security
         [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
         internal PermissionValue GetPermissionSafe(int userId, int entityId, int ownerId, EntryType? entryType, params PermissionTypeBase[] permissions)
         {
-            if (userId == Configuration.Identities.SystemUserId)
+            if (userId == _systemUserId)
                 return PermissionValue.Allowed;
 
             //==>
@@ -85,7 +103,7 @@ namespace SenseNet.Security
             var allow = 0ul;
             var deny = 0ul;
 
-            var firstAcl = SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true);
+            var firstAcl = _entityManager.GetFirstAclSafe(entityId, true);
 
             if (firstAcl == null)
                 return PermissionValue.Undefined;
@@ -121,15 +139,15 @@ namespace SenseNet.Security
         }
         internal PermissionValue GetSubtreePermission(int userId, int entityId, int ownerId, params PermissionTypeBase[] permissions)
         {
-            if (userId == Configuration.Identities.SystemUserId)
+            if (userId == _systemUserId)
                 return PermissionValue.Allowed;
 
             var identities = GetIdentities(userId, ownerId, entityId);
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
-                var entity = SecurityEntity.GetEntitySafe(_securityContext, entityId, true);
-                var firstAcl = SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true);
+                var entity = _entityManager.GetEntitySafe(entityId, true);
+                var firstAcl = _entityManager.GetFirstAclSafe(entityId, true);
 
                 //======== #1: start bits: get permission bits
                 //==>
@@ -222,21 +240,21 @@ namespace SenseNet.Security
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
             return PermissionValue.Allowed;
         }
 
         internal List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            SecurityEntity.EnterReadLock();
+            _entityManager.EnterReadLock();
             try
             {
                 return GetEffectiveEntriesSafe(entityId, relatedIdentities, entryType);
             }
             finally
             {
-                SecurityEntity.ExitReadLock();
+                _entityManager.ExitReadLock();
             }
         }
         internal List<AceInfo> GetEffectiveEntriesSafe(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
@@ -244,7 +262,7 @@ namespace SenseNet.Security
             var aces = new List<AceInfo>();
 
             //==>
-            var firstAcl = SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true);
+            var firstAcl = _entityManager.GetFirstAclSafe(entityId, true);
             if (firstAcl != null)
             {
                 relatedIdentities = relatedIdentities?.ToArray();
@@ -260,13 +278,13 @@ namespace SenseNet.Security
 
         internal List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return GetExplicitEntriesSafe(entityId, SecurityEntity.GetFirstAcl(_securityContext, entityId, true), relatedIdentities, entryType);
+            return GetExplicitEntriesSafe(entityId, _entityManager.GetFirstAcl(entityId, true), relatedIdentities, entryType);
         }
         internal List<AceInfo> GetExplicitEntriesSafe(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
-            return GetExplicitEntriesSafe(entityId, SecurityEntity.GetFirstAclSafe(_securityContext, entityId, true), relatedIdentities, entryType);
+            return GetExplicitEntriesSafe(entityId, _entityManager.GetFirstAclSafe(entityId, true), relatedIdentities, entryType);
         }
-        private static List<AceInfo> GetExplicitEntriesSafe(int entityId, AclInfo acl, IEnumerable<int> relatedIdentities, EntryType? entryType)
+        private List<AceInfo> GetExplicitEntriesSafe(int entityId, AclInfo acl, IEnumerable<int> relatedIdentities, EntryType? entryType)
         {
             IEnumerable<AceInfo> aces = null;
 
@@ -301,14 +319,14 @@ namespace SenseNet.Security
         }
         private void CollectIdentities(int userId, int ownerId, int entityId, List<int> collection)
         {
-            if (_securityContext.Cache.Membership.TryGetValue(userId, out var flattenedGroups))
+            if (_cache.Membership.TryGetValue(userId, out var flattenedGroups))
                 collection.AddRange(flattenedGroups);
 
-            if (userId != Configuration.Identities.VisitorUserId)
-                collection.Add(Configuration.Identities.EveryoneGroupId);
+            if (userId != _visitorUserId)
+                collection.Add(_everyoneGroupId);
 
             if (userId == ownerId)
-                collection.Add(Configuration.Identities.OwnerGroupId);
+                collection.Add(_ownerGroupId);
 
             var extension = _securityContext.GetDynamicGroups(entityId);
             if(extension==null)
@@ -325,7 +343,7 @@ namespace SenseNet.Security
             {
                 if (!flattened.Contains(groupId))
                     flattened.Add(groupId);
-                foreach (var id in PermissionQuery.GetParentGroups(_securityContext, groupId, false))
+                foreach (var id in _permissionQuery.GetParentGroups(_securityContext, groupId, false))
                     if (!flattened.Contains(id))
                         flattened.Add(id);
             }
@@ -355,7 +373,7 @@ namespace SenseNet.Security
         internal string _traceMembership()
         {
             var sb = new StringBuilder();
-            foreach (var item in _securityContext.Cache.Membership)
+            foreach (var item in _cache.Membership)
             {
                 sb.Append("(" + item.Key + ")").Append(": [");
                 sb.Append(string.Join(", ", item.Value.Select(g => "(" + g + ")")));

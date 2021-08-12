@@ -1,14 +1,21 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using SenseNet.Security.Tests.TestPortal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SenseNet.Diagnostics;
 using SenseNet.Security.Messaging;
 
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public abstract partial class TestCases
+    public abstract partial class TestCases : TestBase
     {
+        public TestContext TestContext { get; set; }
+
         protected Context CurrentContext { get; private set; }
+        protected DataHandler DataHandler { get; private set; }
+        protected ISecurityDataProvider DataProvider { get; private set; }
+        protected SecuritySystem SecuritySystem { get; private set; }
 
         protected abstract ISecurityDataProvider GetDataProvider();
         protected abstract void CleanupMemberships();
@@ -16,11 +23,24 @@ namespace SenseNet.Security.Tests
         [TestInitialize]
         public void StartTest()
         {
+            _StartTest(TestContext);
+
             var dataProvider = GetDataProvider();
-            dataProvider.DeleteEverything();
-            SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
-            Context.StartTheSystem(dataProvider, new DefaultMessageProvider());
-            CurrentContext = new Context(TestUser.User1);
+            //dataProvider.DeleteEverything();
+            dataProvider.InstallDatabase();
+
+            var securitySystem = Context.StartTheSystem(dataProvider, new DefaultMessageProvider(new MessageSenderManager()));
+            securitySystem.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
+            CurrentContext = new Context(TestUser.User1, securitySystem);
+
+            DataHandler = securitySystem.DataHandler;
+            DataProvider = securitySystem.DataProvider;
+            SecuritySystem = securitySystem;
+        }
+        [TestCleanup]
+        public void FinishTest()
+        {
+            _FinishTest(TestContext);
         }
 
         /* ======================================================================= Tools */
@@ -32,7 +52,7 @@ namespace SenseNet.Security.Tests
 
         private void SetAcl(string src)
         {
-            Tools.SetAcl(CurrentContext.Security, src);
+            SetAcl(CurrentContext.Security, src);
         }
 
 
@@ -150,7 +170,7 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
-            CurrentContext.Security.CreateSecurityEntity(entity);
+            CurrentContext.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
         }
 
         private TestEntity GetRepositoryEntity(int id)

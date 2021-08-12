@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using SenseNet.Diagnostics;
+using SenseNet.Security.Configuration;
 
 namespace SenseNet.Security.Messaging.RabbitMQ
 {
@@ -19,27 +21,33 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         /// <summary>
         /// RabbitMQ service url.
         /// </summary>
-        protected string ServiceUrl { get; } = Configuration.RabbitMQ.ServiceUrl;
+        protected string ServiceUrl { get; }
         /// <summary>
         /// Optional exchange name. Mandatory in case the same service is used 
         /// by multiple different environments (e.g. test and live environment).
         /// </summary>
-        protected string MessageExchange { get; } = Configuration.RabbitMQ.MessageExchange;
+        protected string MessageExchange { get; }
 
         //=================================================================================== Constructors
 
         /// <summary>
         /// Initializes a new instance of the RabbitMQMessageProvider class with default parameters.
         /// </summary>
-        public RabbitMQMessageProvider() { }
-        /// <summary>
-        /// Initializes a new instance of the RabbitMQMessageProvider class.
-        /// </summary>
-        /// <param name="serviceUrl">RabbitMQ service url, including user credentials.</param>
-        /// <param name="exchange">Optional exchange name. Mandatory in case the same service is used 
-        /// by multiple different environments (e.g. test and live environment).</param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public RabbitMQMessageProvider(string serviceUrl, string exchange = null)
+        /// <param name="messageSenderManager">Required IMessageSenderManager instance.</param>
+        /// <param name="messagingOptions"></param>
+        /// <param name="rabbitmqOptions"></param>
+        public RabbitMQMessageProvider(IMessageSenderManager messageSenderManager,
+            IOptions<MessagingOptions> messagingOptions,
+            IOptions<RabbitMqOptions> rabbitmqOptions) :
+            base(messageSenderManager, messagingOptions)
+        {
+            ServiceUrl = rabbitmqOptions.Value.ServiceUrl;
+            MessageExchange = rabbitmqOptions.Value.MessageExchange;
+        }
+
+        [Obsolete("Use dependency injection or the constructor with the RabbitMqOptions instance.", true)]
+        public RabbitMQMessageProvider(IMessageSenderManager messageSenderManager, IOptions<MessagingOptions> messagingOptions, 
+            string serviceUrl, string exchange = null) : base(messageSenderManager, messagingOptions)
         {
             if (string.IsNullOrEmpty(serviceUrl))
                 throw new ArgumentNullException(nameof(serviceUrl));

@@ -1,13 +1,8 @@
-﻿using SenseNet.Configuration;
-
-namespace SenseNet.Security.Messaging.RabbitMQ.Configuration
+﻿namespace SenseNet.Security.Messaging.RabbitMQ
 {
-    // ReSharper disable once InconsistentNaming
-    internal class RabbitMQ : SnConfig
+    public class RabbitMqOptions
     {
-        private const string SectionName = "sensenet/rabbitmq";
-
-        public static string ServiceUrl { get; internal set; } = GetString(SectionName, "ServiceUrl", "amqp://localhost:5672");
-        public static string MessageExchange { get; internal set; } = GetString(SectionName, "SecurityExchange", "snsecurity");
+        public string ServiceUrl { get; set; } = "amqp://localhost:5672";
+        public string MessageExchange { get; set; } = "snsecurity";
     }
 }

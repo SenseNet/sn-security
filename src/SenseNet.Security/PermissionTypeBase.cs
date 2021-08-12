@@ -8,7 +8,7 @@ namespace SenseNet.Security
     /// Represents one permission in the system. 3rd party developers may inherit from this base class and 
     /// provide others with named permissions.
     /// </summary>
-    public abstract class PermissionTypeBase
+    public abstract class PermissionTypeBase //UNDONE: Has static members
     {
         /// <summary>Permission type capacity.</summary>
         public static readonly int PermissionMaxCount = sizeof(long) * 8;

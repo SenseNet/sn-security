@@ -2,29 +2,41 @@
 using SenseNet.Security.Tests.TestPortal;
 using System.Collections.Generic;
 using System.Linq;
+using SenseNet.Diagnostics;
+
 // ReSharper disable JoinDeclarationAndInitializer
 // ReSharper disable UnusedMethodReturnValue.Local
 
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public class PermissionQueryTests
+    public class PermissionQueryTests : TestBase
     {
         private Context CurrentContext { get; set; }
 
         public TestContext TestContext { get; set; }
 
+        private SnTrace.Operation _snTraceOperation;
         [TestInitialize]
         public void StartTest()
         {
-            CurrentContext = Tools.GetEmptyContext(TestUser.User1);
+            _StartTest(TestContext);
+
+            CurrentContext = GetEmptyContext(TestUser.User1);
             CreatePlayground();
         }
 
         [TestCleanup]
         public void FinishTest()
         {
-            Tools.CheckIntegrity(TestContext.TestName, CurrentContext.Security);
+            try
+            {
+                CheckIntegrity(TestContext.TestName, CurrentContext.Security);
+            }
+            finally
+            {
+                _FinishTest(TestContext);
+            }
         }
 
         //---------------------------------------------------------------
@@ -192,10 +204,10 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(HasNormalPermission(id12, Id("E66"), _permissions["P6"]));
             Assert.IsFalse(HasNormalPermission(id13, Id("E66"), _permissions["P6"]));
         }
-        private static bool HasNormalPermission(int userId, int entityId, PermissionType permission)
+        private bool HasNormalPermission(int userId, int entityId, PermissionType permission)
         {
-            return new TestSecurityContext(TestUser.User1).Evaluator.GetPermission(userId, entityId, 0, EntryType.Normal,
-                permission) == PermissionValue.Allowed;
+            return new SecurityContext(TestUser.User1, CurrentContext.Security.SecuritySystem)
+                .Evaluator.GetPermission(userId, entityId, 0, EntryType.Normal, permission) == PermissionValue.Allowed;
         }
 
         [TestMethod]
@@ -217,7 +229,7 @@ namespace SenseNet.Security.Tests
             var entityId = Id(entityName);
             var permTypes = permissions.Select(p => _permissions[p]).ToArray();
             var result = CurrentContext.Security.GetAllowedUsers(entityId, permTypes);
-            return string.Join(", ", result.Select(Tools.IdToName).OrderBy(s => s));
+            return string.Join(", ", result.Select(IdToName).OrderBy(s => s));
         }
 
         [TestMethod]
@@ -250,7 +262,7 @@ namespace SenseNet.Security.Tests
         {
             var identityId = Id(identityName);
             var result = CurrentContext.Security.GetParentGroups(identityId, directOnly);
-            return string.Join(", ", result.Select(Tools.IdToName).OrderBy(s => s));
+            return string.Join(", ", result.Select(IdToName).OrderBy(s => s));
         }
 
         #region Helper methods
@@ -449,7 +461,7 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
-            CurrentContext.Security.CreateSecurityEntity(entity);
+            CurrentContext.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
             return entity;
         }
 

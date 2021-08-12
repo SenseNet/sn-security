@@ -3,24 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SenseNet.Diagnostics;
 using SenseNet.Security.Tests.TestPortal;
 
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public class SecurityQueryTests
+    public class SecurityQueryTests : TestBase
     {
         #region Infrastructure
         private Context CurrentContext { get; set; }
 
         public TestContext TestContext { get; set; }
 
+        private SnTrace.Operation _snTraceOperation;
         [TestInitialize]
         public void StartTest()
         {
-            CurrentContext = Tools.GetEmptyContext(TestUser.User1);
+            _StartTest(TestContext);
+
+            CurrentContext = GetEmptyContext(TestUser.User1);
             CreatePlayground();
         }
+        [TestCleanup]
+        public void FinishTest()
+        {
+            _FinishTest(TestContext);
+        }
+
         #endregion
 
         [TestMethod]
@@ -559,7 +569,7 @@ namespace SenseNet.Security.Tests
         {
             var ctx = CurrentContext.Security;
 
-            Tools.SetMembership(CurrentContext.Security, "U4:G4");
+            SetMembership(CurrentContext.Security, "U4:G4");
             ctx.CreateAclEditor()
                 .Allow(Id("E1"), Id("G4"), false, PermissionType.Custom04)
                 .Allow(Id("E42"), Id("G4"), false, PermissionType.Custom04)
@@ -655,7 +665,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expectedAllPermCounts, allPermCountsByIdentities);
         }
         private Dictionary<PermissionTypeBase, int> PermissionQueryWithLinq_GetRelatedPermissions(
-            TestSecurityContext ctx, int entityId, int identityId, PermissionLevel level)
+            SecurityContext ctx, int entityId, int identityId, PermissionLevel level)
         {
             var counters = new int[PermissionTypeBase.PermissionCount];
             var permissionTypes = PermissionTypeBase.GetPermissionTypes();
@@ -699,68 +709,9 @@ namespace SenseNet.Security.Tests
 
             return result;
         }
-        private Dictionary<PermissionTypeBase, int> PermissionQueryWithLinq_GetRelatedPermissions_OLD(
-            TestSecurityContext ctx, int entityId, int identityId, PermissionLevel level)
-        {
-            var counters = new int[PermissionTypeBase.PermissionCount];
-            var permissionTypes = PermissionTypeBase.GetPermissionTypes();
-            void CountBits(ulong bits)
-            {
-                var mask = 1uL;
-                var b = bits;
-                foreach (var pt in permissionTypes)
-                {
-                    if ((b & mask) > 0)
-                        counters[pt.Index]++;
-                    mask <<= 1;
-                }
-            }
-
-            //var identities = new TestSecurityContext(new TestUser { Id = identityId }).GetGroups();
-            //identities.Add(identityId);
-            var identities = new[] {identityId};
-
-            var aces = SecurityQuery.ParentChain(ctx).GetEntities(entityId, BreakOptions.StopAtParentBreak)
-                .Where(e => e.Acl != null)                              // relevant entities
-                .SelectMany(e => e.Acl.Entries)                         // join
-                .Where(e => identities.Contains(e.IdentityId) &&        // identity filter
-                            !e.LocalOnly &&                             // local only entry is not affected on the parent chain
-                            e.EntryType == EntryType.Normal)            // only the normal entries are relevant
-                .Union(SecurityQuery.Subtree(ctx).GetEntities(entityId) // do not stop at breaks
-                    .Where(e => e.Acl != null)                          // relevant entities
-                    .SelectMany(e => e.Acl.Entries)                     // join
-                    .Where(e => identities.Contains(e.IdentityId) &&    // identity filter
-                                e.EntryType == EntryType.Normal)        // only the normal entries are relevant
-                );
-
-            foreach (var ace in aces)
-            {
-                switch (level)
-                {
-                    case PermissionLevel.Allowed:
-                        CountBits(ace.AllowBits);
-                        break;
-                    case PermissionLevel.Denied:
-                        CountBits(ace.DenyBits);
-                        break;
-                    case PermissionLevel.AllowedOrDenied:
-                        CountBits(ace.AllowBits);
-                        CountBits(ace.DenyBits);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(level), level, null);
-                }
-            }
-
-            var result = new Dictionary<PermissionTypeBase, int>();
-            for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
-                result.Add(PermissionTypeBase.GetPermissionTypeByIndex(i), counters[i]);
-
-            return result;
-        }
 
         /* ============================================================================= Tools */
-        private static void AddPermissionsForIdentityTests(TestSecurityContext ctx)
+        private static void AddPermissionsForIdentityTests(SecurityContext ctx)
         {
             ctx.CreateAclEditor()
                 // additions for easy checking of differences between parent-chain and the subtree
@@ -771,7 +722,7 @@ namespace SenseNet.Security.Tests
                 .Allow(Id("E38"), Id("G7"), true, PermissionType.Custom04)
                 .Apply();
         }
-        private static void AddPermissionsForCategorySelectionTests(TestSecurityContext ctx)
+        private static void AddPermissionsForCategorySelectionTests(SecurityContext ctx)
         {
             ctx.CreateAclEditor()
                 // additions for easy checking of differences between parent-chain and the subtree
@@ -790,7 +741,7 @@ namespace SenseNet.Security.Tests
                 .Allow(Id("E39"), Id("G9"), false, PermissionType.Custom04)
                 .Apply();
         }
-        private static void AddPermissionsForIdentityByPermissionTests(TestSecurityContext ctx)
+        private static void AddPermissionsForIdentityByPermissionTests(SecurityContext ctx)
         {
             var p1 = PermissionType.Custom11;
             var p2 = PermissionType.Custom12;
@@ -1009,7 +960,7 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
-            CurrentContext.Security.CreateSecurityEntity(entity);
+            CurrentContext.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
         }
 
         private static int Id(string name)

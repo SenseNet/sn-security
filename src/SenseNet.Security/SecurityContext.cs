@@ -13,182 +13,30 @@ namespace SenseNet.Security
     /// </summary>
     public partial class SecurityContext
     {
-        private static IMessageProvider _messageProvider;
-        private static ISecurityDataProvider _securityDataProviderPrototype;
-        private static SecurityCache _cacheHolder;
+        public SecuritySystem SecuritySystem { get; }
 
         /// <summary>
         /// Gets the associated user instance.
         /// </summary>
-        protected internal ISecurityUser CurrentUser { get; }
-        /// <summary>
-        /// Gets the configured ISecurityDataProvider instance
-        /// </summary>
-        protected internal ISecurityDataProvider DataProvider { get; }
-        /// <summary>
-        /// Gets the configured IMessageProvider instance
-        /// </summary>
-        public IMessageProvider MessageProvider => _messageProvider;
+        public ISecurityUser CurrentUser { get; }
 
-        internal SecurityCache Cache { get; }
+        internal SecurityCache Cache => SecuritySystem.Cache; //UNDONE: Remove unnecessary dependency: Cache
 
-        // ReSharper disable once InconsistentNaming
-        private PermissionEvaluator __evaluator;
-        private readonly object _evaluatorSync = new object();
-        internal PermissionEvaluator Evaluator
-        {
-            get
-            {
-                if (__evaluator == null)
-                {
-                    lock (_evaluatorSync)
-                    {
-                        if (__evaluator == null)
-                        {
-                            var evaluator = new PermissionEvaluator(this);
-                            evaluator.Initialize();
-                            __evaluator = evaluator;
-                        }
-                    }
-                }
-                return __evaluator;
-            }
-        }
+        internal PermissionEvaluator Evaluator { get; }
+
+        private readonly PermissionQuery _permissionQuery;
 
         /***************************** Context **************************/
 
-        internal static DateTime StartedAt { get; private set; }
-
         /// <summary>
-        /// Creates a new instance of the SecurityContext using the passed user instance
-        /// and pointers to the ISecurityDataProvider, IMessageProvider and SecurityCache global objects.
+        /// Creates a new instance of the SecurityContext using the passed user instance and the SecuritySystem.
         /// </summary>
-        public SecurityContext(ISecurityUser currentUser)
+        public SecurityContext(ISecurityUser currentUser, SecuritySystem securitySystem)
         {
             CurrentUser = currentUser;
-            DataProvider = _securityDataProviderPrototype.CreateNew();
-            Cache = _cacheHolder;
-        }
-
-        /// <summary>
-        /// Starts the security subsystem using the passed configuration.
-        /// Call this method only once in your application's startup sequence.
-        /// The method prepares and memorizes the main components for 
-        /// creating SecurityContext instances in a fastest possible way.
-        /// The main components are global objects: 
-        /// ISecurityDataProvider instance, IMessageProvider instance and SecurityCache instance.
-        /// </summary>
-        protected static void StartTheSystem(SecurityConfiguration configuration)
-        {
-            General = null;
-
-            // The message provider must receive ongoing activities at this time.
-            StartedAt = DateTime.UtcNow;
-
-            var uncompleted = DataHandler.LoadCompletionState(configuration.SecurityDataProvider, out var lastActivityIdFromDb);
-
-            _messageProvider = configuration.MessageProvider;
-            _messageProvider.MessageReceived += MessageProvider_MessageReceived;
-
-            Configuration.Identities.SystemUserId = configuration.SystemUserId ?? - 1;
-            Configuration.Identities.VisitorUserId = configuration.VisitorUserId ?? 6;
-            Configuration.Identities.EveryoneGroupId = configuration.EveryoneGroupId ?? 8;
-            Configuration.Identities.OwnerGroupId = configuration.OwnerGroupId ?? 9;
-
-            Configuration.Messaging.CommunicationMonitorRunningPeriodInSeconds = configuration.CommunicationMonitorRunningPeriodInSeconds ?? 30;
-            Configuration.Messaging.SecuritActivityLifetimeInMinutes = configuration.SecuritActivityLifetimeInMinutes ?? 42;
-            Configuration.Messaging.SecuritActivityTimeoutInSeconds = configuration.SecuritActivityTimeoutInSeconds ?? 120;
-
-            _securityDataProviderPrototype = configuration.SecurityDataProvider;
-            PermissionTypeBase.InferForcedRelations();
-
-            using (var op = SnTrace.Security.StartOperation("Security initial loading."))
-            {
-                _cacheHolder = SecurityCache.Initialize(configuration.SecurityDataProvider);
-                op.Successful = true;
-            }
-
-            CommunicationMonitor.Initialize();
-
-            General = new SecurityContext(SystemUser);
-            SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
-
-            _killed = false;
-        }
-
-        private static void MessageProvider_MessageReceived(object sender, MessageReceivedEventArgs args)
-        {
-            var message = args.Message;
-
-            // debug game
-            if (message is PingMessage)
-            {
-                _messageProvider.SendMessage(new PongMessage());
-                return;
-            }
-
-            SecurityActivity activity = null;
-
-            // load from database if it was too big to distribute
-            if (message is BigActivityMessage bigActivityMessage)
-            {
-                activity = DataHandler.LoadBigSecurityActivity(bigActivityMessage.DatabaseId);
-                if (activity == null)
-                    SnTrace.Security.WriteError("Cannot load body of a BigActivity. Id: {0}", bigActivityMessage.DatabaseId);
-            }
-
-            // trying to interpret
-            if (activity == null)
-                activity = message as SecurityActivity;
-
-            // Apply if everything is good
-            if (activity != null)
-            {
-                activity.FromReceiver = true;
-                SecurityActivity.Apply(activity);
-            }
-        }
-
-        /// <summary>
-        /// Empties the database and memory.
-        /// WARNING! Do not use this method in your code except in installing or developing scenarios.
-        /// </summary>
-        protected void DeleteAllAndRestart()
-        {
-            DataProvider.DeleteEverything();
-            Cache.Reset(DataProvider);
-        }
-
-        /// <summary>
-        /// Collects security-related information about an entity and returns true if the entity with 
-        /// the specified id exists in the host application's database.
-        /// This method is used by the security component when an entity seems to be missing because of
-        /// concurrency reasons. The host application must provide the correct entity information here 
-        /// otherwise <see cref="EntityNotFoundException"/> may occur in some scenarios under heavy load 
-        /// in load balanced multi-threaded environments.
-        /// </summary>
-        /// <param name="entityId">Id of the missing entity.</param>
-        /// <param name="parentId">Id of the missing entity's parent or 0.</param>
-        /// <param name="ownerId">Id of the missing entity's owner or 0.</param>
-        protected internal virtual bool GetMissingEntity(int entityId, out int parentId, out int ownerId)
-        {
-            parentId = ownerId = 0;
-            return false;
-        }
-
-        private static bool _killed;
-        /// <summary>
-        /// Stops the security subsystem.
-        /// </summary>
-        public static void Shutdown()
-        {
-            if (_killed)
-                return;
-            _killed = true;
-            _messageProvider.ShutDown();
-            _messageProvider.MessageReceived -= MessageProvider_MessageReceived;
-            CommunicationMonitor.Shutdown();
-            SecurityActivityQueue.Shutdown();
+            SecuritySystem = securitySystem;
+            Evaluator = new PermissionEvaluator(this);
+            _permissionQuery = SecuritySystem.PermissionQuery;
         }
 
         /*********************** ACL API **********************/
@@ -196,17 +44,17 @@ namespace SenseNet.Security
         /// Creates a new instance of the AclEditor class for modifying access control data.
         /// Editor handles only one type of entries. Default EntryType is Normal.
         /// </summary>
-        protected AclEditor CreateAclEditor(EntryType entryType = EntryType.Normal)
+        public virtual AclEditor CreateAclEditor(EntryType entryType = EntryType.Normal)
         {
-            return AclEditor.Create(this, entryType);
+            return new AclEditor(this, entryType);
         }
         /// <summary>
         /// Returns the AccessControlList of the passed entity to help building a rich GUI for modifications.
         /// The entity must exist. Entity resolution can compensate the entity integrity error.
         /// </summary>
-        protected AccessControlList GetAcl(int entityId, EntryType entryType = EntryType.Normal)
+        public virtual AccessControlList GetAcl(int entityId, EntryType entryType = EntryType.Normal)
         {
-            return SecurityEntity.GetAccessControlList(this, entityId, entryType);
+            return SecuritySystem.EntityManager.GetAccessControlList(entityId, entryType);
         }
 
         /// <summary>
@@ -220,7 +68,7 @@ namespace SenseNet.Security
         /// Empty collection means nobody, so in case of passing empty,
         /// the method will return an empty list.</param>
         /// <param name="entryType">Optional filter parameter.</param>
-        protected List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
+        public virtual List<AceInfo> GetEffectiveEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
             return Evaluator.GetEffectiveEntries(entityId, relatedIdentities, entryType);
         }
@@ -235,7 +83,7 @@ namespace SenseNet.Security
         /// Empty collection means nobody, so in case of passing empty,
         /// the method will return an empty list.</param>
         /// <param name="entryType">Optional filter parameter.</param>
-        protected List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
+        public virtual List<AceInfo> GetExplicitEntries(int entityId, IEnumerable<int> relatedIdentities = null, EntryType? entryType = null)
         {
             return Evaluator.GetExplicitEntries(entityId, relatedIdentities, entryType);
         }
@@ -243,7 +91,7 @@ namespace SenseNet.Security
         // for tests
         internal AclInfo GetAclInfo(int finalEntityId, bool throwOnError = false)
         {
-            var entity = SecurityEntity.GetEntity(this, finalEntityId, throwOnError);
+            var entity = SecuritySystem.EntityManager.GetEntity(finalEntityId, throwOnError);
             var acl = entity?.Acl;
             return acl;
         }
@@ -269,7 +117,7 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null.
         /// Empty set means "allowed nothing" so SenseNetSecurityException will be thrown.</param>
-        protected void AssertPermission(int entityId, params PermissionTypeBase[] permissions)
+        public virtual void AssertPermission(int entityId, params PermissionTypeBase[] permissions)
         {
             if (!HasPermission(entityId, permissions))
                 throw new AccessDeniedException(null, null, entityId, null, permissions);
@@ -283,7 +131,7 @@ namespace SenseNet.Security
         /// <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null.
         /// Empty set means "allowed nothing" so SenseNetSecurityException will be thrown.</param>
-        protected void AssertPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
+        public virtual void AssertPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
         {
             if (!HasPermission(entityId, entryType, permissions))
                 throw new AccessDeniedException(null, null, entityId, null, permissions);
@@ -296,7 +144,7 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null.
         /// Empty set means "allowed nothing" so AccessDeniedException will be thrown.</param>
-        protected void AssertSubtreePermission(int entityId, params PermissionTypeBase[] permissions)
+        public virtual void AssertSubtreePermission(int entityId, params PermissionTypeBase[] permissions)
         {
             if (!HasSubtreePermission(entityId, permissions))
                 throw new AccessDeniedException(null, null, entityId, null, permissions);
@@ -306,7 +154,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
-        protected bool HasPermission(int entityId, params PermissionTypeBase[] permissions)
+        public virtual bool HasPermission(int entityId, params PermissionTypeBase[] permissions)
         {
             return Evaluator.HasPermission(CurrentUser.Id, entityId, GetOwnerId(entityId), permissions);
         }
@@ -316,7 +164,7 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         /// <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
-        protected bool HasPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
+        public virtual bool HasPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
         {
             return Evaluator.HasPermission(CurrentUser.Id, entityId, GetOwnerId(entityId), null, permissions);
         }
@@ -325,7 +173,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
-        protected bool HasSubtreePermission(int entityId, params PermissionTypeBase[] permissions)
+        public virtual bool HasSubtreePermission(int entityId, params PermissionTypeBase[] permissions)
         {
             return Evaluator.HasSubTreePermission(CurrentUser.Id, entityId, GetOwnerId(entityId), permissions);
         }
@@ -337,7 +185,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
-        protected PermissionValue GetPermission(int entityId, params PermissionTypeBase[] permissions)
+        public virtual PermissionValue GetPermission(int entityId, params PermissionTypeBase[] permissions)
         {
             return Evaluator.GetPermission(CurrentUser.Id, entityId, GetOwnerId(entityId), permissions);
         }
@@ -350,7 +198,7 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         /// <param name="entryType">Permission entry filter. Only these types of entries will be taken into account in the evaluation process.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
-        protected PermissionValue GetPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
+        public virtual PermissionValue GetPermission(int entityId, EntryType entryType, params PermissionTypeBase[] permissions)
         {
             return Evaluator.GetPermission(CurrentUser.Id, entityId, GetOwnerId(entityId), entryType, permissions);
         }
@@ -362,7 +210,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         /// <param name="permissions">Set of related permissions. Cannot be null. Empty set means "allowed nothing".</param>
-        protected PermissionValue GetSubtreePermission(int entityId, params PermissionTypeBase[] permissions)
+        public virtual PermissionValue GetSubtreePermission(int entityId, params PermissionTypeBase[] permissions)
         {
             return Evaluator.GetSubtreePermission(CurrentUser.Id, entityId, GetOwnerId(entityId), permissions);
         }
@@ -375,7 +223,7 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the created entity. Cannot be 0.</param>
         /// <param name="parentEntityId">Id of the parent entity. Cannot be 0.</param>
         /// <param name="ownerId">Id of the entity's owner identity.</param>
-        protected void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId)
+        public virtual void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId)
         {
             if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
@@ -387,7 +235,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         /// <param name="ownerId">Id of the entity's owner identity.</param>
-        protected void ModifyEntityOwner(int entityId, int ownerId)
+        public virtual void ModifyEntityOwner(int entityId, int ownerId)
         {
             if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
@@ -398,7 +246,7 @@ namespace SenseNet.Security
         /// Deletes the entity, it's whole subtree and all related ACLs.
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
-        protected void DeleteEntity(int entityId)
+        public virtual void DeleteEntity(int entityId)
         {
             if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
@@ -411,7 +259,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="sourceId">Id of the source entity. Cannot be 0.</param>
         /// <param name="targetId">Id of the target entity that will contain the source. Cannot be 0.</param>
-        protected void MoveEntity(int sourceId, int targetId)
+        public virtual void MoveEntity(int sourceId, int targetId)
         {
             if (sourceId == default)
                 throw new ArgumentException("Id of the source Entity cannot be " + default(int));
@@ -424,7 +272,7 @@ namespace SenseNet.Security
         /// Returns false if the entity inherits permissions from it's parent.
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
-        protected bool IsEntityInherited(int entityId)
+        public virtual bool IsEntityInherited(int entityId)
         {
             if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
@@ -437,9 +285,9 @@ namespace SenseNet.Security
         /// that can repair a data integrity error (which may occur in case of a distributed system).
         /// The compensation works on two level:
         /// 1 - loads the entity from the security database to the memory.
-        /// 2 - executes a callback to the host application (<see cref="GetMissingEntity"/>) and saves the entity if it is needed.
+        /// 2 - executes a callback to the host application (<see cref="IMissingEntityHandler"/>) and saves the entity if it is needed.
         /// </summary>
-        protected bool IsEntityExist(int entityId)
+        public virtual bool IsEntityExist(int entityId)
         {
             return GetSecurityEntity(entityId) != null;
         }
@@ -447,7 +295,7 @@ namespace SenseNet.Security
         /*********************** Internal in memory entity structure **********************/
         internal SecurityEntity GetSecurityEntity(int entityId, bool throwError = false)
         {
-            return SecurityEntity.GetEntity(this, entityId, throwError);
+            return SecuritySystem.EntityManager.GetEntity(entityId, throwError);
         }
         internal bool HasAncestorRelation(SecurityEntity entity1, SecurityEntity entity2)
         {
@@ -493,9 +341,9 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the entity.</param>
         /// <param name="identities">Id of the groups or users.</param>
         /// <param name="includeRoot">Determines whether the provided root entity's permissions should be included in the result set.</param>
-        protected Dictionary<PermissionTypeBase, int> GetExplicitPermissionsInSubtree(int entityId, int[] identities, bool includeRoot)
+        public virtual Dictionary<PermissionTypeBase, int> GetExplicitPermissionsInSubtree(int entityId, int[] identities, bool includeRoot)
         {
-            return PermissionQuery.GetExplicitPermissionsInSubtree(this, entityId, identities, includeRoot);
+            return _permissionQuery.GetExplicitPermissionsInSubtree(this, entityId, identities, includeRoot);
         }
 
         /// <summary>
@@ -503,9 +351,9 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="entityId">Id of the entity.</param>
         /// <param name="level">Filtering by the permission value. It can be Allowed, Denied, AllowedOrDenied.</param>
-        protected IEnumerable<int> GetRelatedIdentities(int entityId, PermissionLevel level)
+        public virtual IEnumerable<int> GetRelatedIdentities(int entityId, PermissionLevel level)
         {
-            return PermissionQuery.GetRelatedIdentities(this, entityId, level);
+            return _permissionQuery.GetRelatedIdentities(this, entityId, level);
         }
         /// <summary>
         /// Collects all permission settings on the given entity and its subtree related to the specified user or group.
@@ -516,9 +364,9 @@ namespace SenseNet.Security
         /// <param name="explicitOnly">Filter parameter for future use only. Allowed value is true.</param>
         /// <param name="identityId">Id of the group or user.</param>
         /// <param name="isEnabled">Filter method that can enable or disable any entity.</param>
-        protected Dictionary<PermissionTypeBase, int> GetRelatedPermissions(int entityId, PermissionLevel level, bool explicitOnly, int identityId, Func<int, bool> isEnabled)
+        public virtual Dictionary<PermissionTypeBase, int> GetRelatedPermissions(int entityId, PermissionLevel level, bool explicitOnly, int identityId, Func<int, bool> isEnabled)
         {
-           return PermissionQuery.GetRelatedPermissions(this, entityId, level, explicitOnly, identityId, isEnabled);
+           return _permissionQuery.GetRelatedPermissions(this, entityId, level, explicitOnly, identityId, isEnabled);
         }
         /// <summary>
         /// Returns all entity ids in the requested entity's subtree that have any permission setting
@@ -529,9 +377,9 @@ namespace SenseNet.Security
         /// <param name="explicitOnly">Filter parameter for future use only. The currently allowed value is true.</param>
         /// <param name="identityId">Id of the group or user.</param>
         /// <param name="permissions">Only those entities appear in the output that have permission settings in connection with the given permissions.</param>
-        protected IEnumerable<int> GetRelatedEntities(int entityId, PermissionLevel level, bool explicitOnly, int identityId, IEnumerable<PermissionTypeBase> permissions)
+        public virtual IEnumerable<int> GetRelatedEntities(int entityId, PermissionLevel level, bool explicitOnly, int identityId, IEnumerable<PermissionTypeBase> permissions)
         {
-            return PermissionQuery.GetRelatedEntities(this, entityId, level, explicitOnly, identityId, permissions);
+            return _permissionQuery.GetRelatedEntities(this, entityId, level, explicitOnly, identityId, permissions);
         }
 
         /// <summary>
@@ -540,9 +388,9 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the entity.</param>
         /// <param name="level">Filtering by the permission value. It can be Allowed, Denied, AllowedOrDenied.</param>
         /// <param name="permissions">Only that entities appear in the output that have permission settings in connection with the given permissions.</param>
-        protected IEnumerable<int> GetRelatedIdentities(int entityId, PermissionLevel level, IEnumerable<PermissionTypeBase> permissions)
+        public virtual IEnumerable<int> GetRelatedIdentities(int entityId, PermissionLevel level, IEnumerable<PermissionTypeBase> permissions)
         {
-            return PermissionQuery.GetRelatedIdentities(this, entityId, level, permissions);
+            return _permissionQuery.GetRelatedIdentities(this, entityId, level, permissions);
         }
         /// <summary>
         /// Returns all entity ids in the requested entity's direct children that have any permission setting
@@ -552,9 +400,9 @@ namespace SenseNet.Security
         /// <param name="level">Filtering by the permission value. It can be Allowed, Denied, AllowedOrDenied.</param>
         /// <param name="identityId">Id of the group or user.</param>
         /// <param name="permissions">Only those entities appear in the output that have permission settings in connection with the given permissions.</param>
-        protected IEnumerable<int> GetRelatedEntitiesOneLevel(int entityId, PermissionLevel level, int identityId, IEnumerable<PermissionTypeBase> permissions)
+        public virtual IEnumerable<int> GetRelatedEntitiesOneLevel(int entityId, PermissionLevel level, int identityId, IEnumerable<PermissionTypeBase> permissions)
         {
-            return PermissionQuery.GetRelatedEntitiesOneLevel(this, entityId, level, identityId, permissions);
+            return _permissionQuery.GetRelatedEntitiesOneLevel(this, entityId, level, identityId, permissions);
         }
 
         /// <summary>
@@ -563,9 +411,9 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="entityId">Id of the entity.</param>
         /// <param name="permissions">Only those users appear in the output that have permission settings in connection with the given permissions.</param>
-        protected IEnumerable<int> GetAllowedUsers(int entityId, IEnumerable<PermissionTypeBase> permissions)
+        public virtual IEnumerable<int> GetAllowedUsers(int entityId, IEnumerable<PermissionTypeBase> permissions)
         {
-            return PermissionQuery.GetAllowedUsers(this, entityId, permissions);
+            return _permissionQuery.GetAllowedUsers(this, entityId, permissions);
         }
 
         /// <summary>
@@ -573,34 +421,31 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="identityId">Id of the group or user.</param>
         /// <param name="directOnly">Switch of the direct or indirect membership.</param>
-        protected IEnumerable<int> GetParentGroups(int identityId, bool directOnly)
+        public virtual IEnumerable<int> GetParentGroups(int identityId, bool directOnly)
         {
-            return PermissionQuery.GetParentGroups(this, identityId, directOnly);
+            return _permissionQuery.GetParentGroups(this, identityId, directOnly);
         }
-
-        /***************** General context for built in system user ***************/
-        internal static SecurityContext General { get; private set; }
 
         /***************** Debug info ***************/
         /// <summary>
         /// Returns an object that contains information about the execution of the last few SecurityActivities.
         /// </summary>
-        protected SecurityActivityHistory GetRecentActivities()
+        public virtual SecurityActivityHistory GetRecentActivities()
         {
-            return SecurityActivityHistory.GetHistory();
+            return SecuritySystem.ActivityHistory.GetHistory();
         }
         /// <summary>WARNING! Do not use this method in your code. Used in consistency checker tool.</summary>
-        protected IEnumerable<long> GetCachedMembershipForConsistencyCheck()
+        public virtual IEnumerable<long> GetCachedMembershipForConsistencyCheck()
         {
             return Cache.GetMembershipForConsistencyCheck();
         }
         /// <summary>WARNING! Do not use this method in your code. Used in consistency checker tool.</summary>
-        protected void GetFlatteningForConsistencyCheck(out IEnumerable<long> missingInFlattening, out IEnumerable<long> unknownInFlattening)
+        public virtual void GetFlatteningForConsistencyCheck(out IEnumerable<long> missingInFlattening, out IEnumerable<long> unknownInFlattening)
         {
             Cache.GetFlatteningForConsistencyCheck(out missingInFlattening, out unknownInFlattening);
         }
         /// <summary>WARNING! Do not use this method in your code. Used in consistency checker tool.</summary>
-        protected IDictionary<int, SecurityEntity> GetCachedEntitiesForConsistencyCheck()
+        public virtual IDictionary<int, SecurityEntity> GetCachedEntitiesForConsistencyCheck()
         {
             return Cache.Entities;
         }

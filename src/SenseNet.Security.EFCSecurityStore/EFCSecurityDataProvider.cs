@@ -24,16 +24,19 @@ namespace SenseNet.Security.EFCSecurityStore
     {
         private readonly DataOptions _options;
         private readonly ILogger<EFCSecurityDataProvider> _logger;
+        private readonly IMessageSenderManager _messageSenderManager;
 
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
         [Obsolete("Use the constructor with IOptions and dependency injection instead.")]
-        public EFCSecurityDataProvider() : this(0, null)
+        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager) : this(messageSenderManager, 0, null)
         {
         }
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
         [Obsolete("Use the constructor with IOptions and dependency injection instead.")]
-        public EFCSecurityDataProvider(int commandTimeout, string connectionString)
+        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager, int commandTimeout, string connectionString)
         {
+            _messageSenderManager = messageSenderManager;
+
             // fallback to configuration
             if (commandTimeout == 0)
                 commandTimeout = Configuration.Data.SecurityDatabaseCommandTimeoutInSeconds;
@@ -51,8 +54,10 @@ namespace SenseNet.Security.EFCSecurityStore
             _logger = NullLogger<EFCSecurityDataProvider>.Instance;
         }
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
-        public EFCSecurityDataProvider(IOptions<DataOptions> options, ILogger<EFCSecurityDataProvider> logger)
+        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager, IOptions<DataOptions> options, ILogger<EFCSecurityDataProvider> logger)
         {
+            _messageSenderManager = messageSenderManager;
+
             _options = options?.Value ?? new DataOptions();
             _logger = logger;
 
@@ -83,21 +88,7 @@ namespace SenseNet.Security.EFCSecurityStore
             set => _options.ConnectionString = value;
         }
 
-        /// <summary>
-        /// Creator method. Returns a brand new ISecurityDataProvider instance.
-        /// </summary>
-        public ISecurityDataProvider CreateNew()
-        {
-            return new EFCSecurityDataProvider(Options.Create(_options), _logger);
-        }
-        /// <summary>
-        /// Empties the entire database (clears all records from all tables).
-        /// </summary>
-        public void DeleteEverything()
-        {
-            using var db = Db();
-            db.CleanupDatabase();
-        }
+        public IActivitySerializer ActivitySerializer { get; set; }
 
         /// <summary>
         /// Creates the database schema and other components (tables, etc.). It requires an existing database.
@@ -418,7 +409,7 @@ namespace SenseNet.Security.EFCSecurityStore
             {
                 foreach (var item in db.EFMessages.Where(x => x.Id >= from && x.Id <= to).OrderBy(x => x.Id).Take(count))
                 {
-                    var activity = SecurityActivity.DeserializeActivity(item.Body);
+                    var activity = ActivitySerializer.DeserializeActivity(item.Body);
                     if (activity == null)
                         continue;
                     activity.Id = item.Id;
@@ -445,7 +436,7 @@ namespace SenseNet.Security.EFCSecurityStore
             {
                 foreach (var item in db.EFMessages.Where(x => gaps.Contains(x.Id)).OrderBy(x => x.Id))
                 {
-                    var activity = SecurityActivity.DeserializeActivity(item.Body);
+                    var activity = ActivitySerializer.DeserializeActivity(item.Body);
                     if (activity == null)
                         continue;
                     activity.Id = item.Id;
@@ -466,7 +457,7 @@ namespace SenseNet.Security.EFCSecurityStore
             if (item == null)
                 return null;
 
-            var activity = SecurityActivity.DeserializeActivity(item.Body);
+            var activity = ActivitySerializer.DeserializeActivity(item.Body);
             activity.Id = item.Id;
             return activity;
         }
@@ -480,7 +471,7 @@ namespace SenseNet.Security.EFCSecurityStore
         /// <returns>The generated activity id.</returns>
         public int SaveSecurityActivity(SecurityActivity activity, out int bodySize)
         {
-            var body = SecurityActivity.SerializeActivity(activity);
+            var body = ActivitySerializer.SerializeActivity(activity);
             bodySize = body.Length;
             EntityEntry<EFMessage> result;
             using (var db = Db())
@@ -488,7 +479,7 @@ namespace SenseNet.Security.EFCSecurityStore
                 result = db.EFMessages.Add(new EFMessage
                 {
                     ExecutionState = ExecutionState.Wait,
-                    SavedBy = activity.Context.MessageProvider.ReceiverName,
+                    SavedBy = _messageSenderManager.InstanceId,
                     SavedAt = DateTime.UtcNow,
                     Body = body
                 });
@@ -517,18 +508,18 @@ namespace SenseNet.Security.EFCSecurityStore
                 string result;
                 using (var db = Db())
                     result = db.AcquireSecurityActivityExecutionLock(
-                        securityActivity.Id, securityActivity.Context.MessageProvider.ReceiverName, timeoutInSeconds);
+                        securityActivity.Id, _messageSenderManager.InstanceId, timeoutInSeconds);
 
                 // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (result)
                 {
                     case ExecutionState.LockedForYou:
                         // enable full executing
-                        return new SecurityActivityExecutionLock(securityActivity, true);
+                        return new SecurityActivityExecutionLock(securityActivity, this, true);
                     case ExecutionState.Executing:
                     case ExecutionState.Done:
                         // enable partially executing
-                        return new SecurityActivityExecutionLock(securityActivity, false);
+                        return new SecurityActivityExecutionLock(securityActivity, this, false);
                 }
             }
             throw new SecurityActivityTimeoutException(

@@ -12,13 +12,13 @@ namespace SenseNet.Security.Tests
     {
         protected override ISecurityDataProvider GetDataProvider()
         {
-            MemoryDataProvider.LastActivityId = 0;
+            //MemoryDataProvider.LastActivityId = 0;
             return new MemoryDataProvider(DatabaseStorage.CreateEmpty());
         }
 
         protected override void CleanupMemberships()
         {
-            var memoryDataProvider = (MemoryDataProvider)CurrentContext.Security.DataProvider;
+            var memoryDataProvider = (MemoryDataProvider)CurrentContext.Security.SecuritySystem.DataProvider;
             memoryDataProvider.Storage.Memberships.Clear();
         }
 

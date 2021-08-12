@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Tests.TestPortal;
@@ -9,15 +10,28 @@ using SenseNet.Security.Tests.TestPortal;
 namespace SenseNet.Security.Tests
 {
     [TestClass]
-    public class SystemStartTests
+    public class SystemStartTests : TestBase
     {
         private Context _context;
         public TestContext TestContext { get; set; }
 
+        private SnTrace.Operation _snTraceOperation;
+        [TestInitialize]
+        public void StartTest()
+        {
+            _StartTest(TestContext);
+        }
         [TestCleanup]
         public void FinishTest()
         {
-            Tools.CheckIntegrity(TestContext.TestName, _context.Security);
+            try
+            {
+                CheckIntegrity(TestContext.TestName, _context.Security);
+            }
+            finally
+            {
+                _FinishTest(TestContext);
+            }
         }
 
         //===================================================================
@@ -34,13 +48,13 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             //---- Start the system
-            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider());
+            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
 
             //---- Start the request
-            _context = new Context(TestUser.User1);
+            _context = new Context(TestUser.User1, securitySystem);
 
             //---- check cache
-            var dbAcc = new MemoryDataProviderAccessor((MemoryDataProvider)_context.Security.DataProvider);
+            var dbAcc = new MemoryDataProviderAccessor((MemoryDataProvider)_context.Security.SecuritySystem.DataProvider);
             Assert.AreEqual(entities.Count, _context.Security.Cache.Entities.Count);
             Assert.AreEqual(entities.Count, dbAcc.Storage.Entities.Count);
             Assert.AreEqual(groups.Count, _context.Security.Cache.Groups.Count);
@@ -48,7 +62,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(aces.Count, storage.Aces.Count);
 
             //---- check membership in the evaluator
-            var s = Tools.ReplaceIds(_context.Security.Evaluator._traceMembership());
+            var s = ReplaceIds(_context.Security.Evaluator._traceMembership());
             const string expected = @"U1:[G1,G3]U2:[G1]U3:[G2,G3]U4:[G2,G4]U5:[G5]";
             Assert.AreEqual(expected, s.Replace(Environment.NewLine, "").Replace(" ", ""));
 
@@ -76,7 +90,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(id50, entityTable[Id("E53")].GetFirstAclId());
 
             //---- check ACLs in the evaluator
-            var allAcls = Tools.CollectAllAcls(_context.Security);
+            var allAcls = CollectAllAcls(_context.Security);
             Assert.AreEqual(4, allAcls.Count);
             var acl1 = GetAcl(allAcls, id1);
             var acl3 = GetAcl(allAcls, id3);
@@ -239,22 +253,22 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             //---- Start the system
-            Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider());
-            var ctxAcc = new PrivateType(typeof(SecurityContext));
-            var killed = (bool)ctxAcc.GetStaticField("_killed");
+            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
+            var ctxAcc = new ObjectAccessor(securitySystem);
+            var killed = (bool)ctxAcc.GetField("_killed");
             Assert.IsFalse(killed);
 
             //---- Start the request
-            _context = new Context(TestUser.User1);
+            _context = new Context(TestUser.User1, securitySystem);
 
             //---- operation
             _context.Security.HasPermission(entities.First().Value.Id, PermissionType.Open);
 
             //---- kill the system
-            SecurityContext.Shutdown();
+            _context.Security.SecuritySystem.Shutdown();
 
             //---- check killed state
-            killed = (bool)ctxAcc.GetStaticField("_killed");
+            killed = (bool)ctxAcc.GetField("_killed");
             Assert.IsTrue(killed);
         }
     }

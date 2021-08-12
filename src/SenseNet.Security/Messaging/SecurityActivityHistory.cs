@@ -16,11 +16,13 @@ namespace SenseNet.Security.Messaging
         /// <summary>
         /// Contains momentary state information about the security activity execution.
         /// </summary>
-        public SecurityActivityQueueState State { get; private set; }
+        public SecurityActivityQueueState State { get; internal set; }
+
         /// <summary>
         /// It is empty or contains a message about any error in connection with the SecurityActivityHistory feature.
         /// </summary>
-        public string Message => _unfinished < 1 ? null : "RECENT ARRAY TOO SHORT. Cannot register the full activity lifecycle. Unfinished items: " + _unfinished;
+        public string Message { get; internal set; }
+
 
         /// <summary>
         /// Length of the Recent
@@ -30,9 +32,7 @@ namespace SenseNet.Security.Messaging
         /// <summary>
         /// Array of the recently executed activities.
         /// </summary>
-        public SecurityActivityHistoryItem[] Recent { get; private set; }
-
-        private SecurityActivityHistory() { }
+        public SecurityActivityHistoryItem[] Recent { get; internal set; }
 
         internal string GetJson()
         {
@@ -56,8 +56,13 @@ namespace SenseNet.Security.Messaging
             })
             .Serialize(writer, this);
         }
+    }
 
-        internal static SecurityActivityHistory GetHistory()
+    public class SecurityActivityHistoryController
+    {
+        internal SecurityActivityQueue SecurityActivityQueue { get; set; } // Property injection
+
+        internal SecurityActivityHistory GetHistory()
         {
             SecurityActivityHistory result;
             var list = new List<SecurityActivityHistoryItem>(_history.Length);
@@ -73,12 +78,13 @@ namespace SenseNet.Security.Messaging
                 result = new SecurityActivityHistory
                 {
                     State = SecurityActivityQueue.GetCurrentState(),
-                    Recent = list.ToArray()
+                    Recent = list.ToArray(),
+                    Message = _unfinished < 1 ? null : "RECENT ARRAY TOO SHORT. Cannot register the full activity lifecycle. Unfinished items: " + _unfinished
                 };
             }
             return result;
         }
-        internal static SecurityActivityHistory Reset()
+        internal SecurityActivityHistory Reset()
         {
             SecurityActivityHistory result;
             lock (_lock)
@@ -98,13 +104,13 @@ namespace SenseNet.Security.Messaging
             return result;
         }
 
-        private static readonly object _lock = new object();
+        private readonly object _lock = new object();
         private const int HistoryLength = 1023;
-        private static readonly SecurityActivityHistoryItem[] _history = new SecurityActivityHistoryItem[HistoryLength];
-        private static int _position;
-        private static int _unfinished;
+        private readonly SecurityActivityHistoryItem[] _history = new SecurityActivityHistoryItem[HistoryLength];
+        private int _position;
+        private int _unfinished;
 
-        internal static void Arrive(SecurityActivity activity)
+        internal void Arrive(SecurityActivity activity)
         {
             lock (_lock)
             {
@@ -134,7 +140,7 @@ namespace SenseNet.Security.Messaging
                     _position = 0;
             }
         }
-        internal static void Wait(SecurityActivity activity)
+        internal void Wait(SecurityActivity activity)
         {
             lock (_lock)
             {
@@ -148,7 +154,7 @@ namespace SenseNet.Security.Messaging
                 }
             }
         }
-        internal static void Start(int activityId)
+        internal void Start(int activityId)
         {
             lock (_lock)
             {
@@ -163,7 +169,7 @@ namespace SenseNet.Security.Messaging
                 SnTrace.SecurityQueue.Write("SAQ: SA{0} DOES NOT FOUND IN HISTORY. Cannot register the 'start' event.", activityId);
             }
         }
-        internal static void Finish(int activityId)
+        internal void Finish(int activityId)
         {
             lock (_lock)
             {
@@ -178,7 +184,7 @@ namespace SenseNet.Security.Messaging
             }
             SnTrace.SecurityQueue.Write("SAQ: SA{0} DOES NOT FOUND IN HISTORY. Cannot register the 'stop' event.", activityId);
         }
-        internal static void Error(int activityId, Exception e)
+        internal void Error(int activityId, Exception e)
         {
             lock (_lock)
             {
@@ -193,7 +199,6 @@ namespace SenseNet.Security.Messaging
             }
             SnTrace.SecurityQueue.Write("SAQ: SA{0} DOES NOT FOUND IN HISTORY. Cannot register an 'error' on it.", activityId);
         }
-
     }
 
     /// <summary>
@@ -257,11 +262,6 @@ namespace SenseNet.Security.Messaging
             Gaps = new int[0];
         }
 
-        internal static CompletionState GetCurrent()
-        {
-            return SecurityActivityQueue.GetCurrentCompletionState();
-        }
-
         /// <summary>
         /// Returns a string that represents the current object.
         /// </summary>
@@ -270,7 +270,7 @@ namespace SenseNet.Security.Messaging
             return $"{LastActivityId}({GapsToString(Gaps, 50, 10)})";
         }
 
-        internal static object GapsToString(int[] gaps, int maxCount, int growth)
+        internal string GapsToString(int[] gaps, int maxCount, int growth)
         {
             if (gaps.Length < maxCount + growth)
                 maxCount = gaps.Length;

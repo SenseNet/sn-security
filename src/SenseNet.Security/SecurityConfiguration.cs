@@ -1,4 +1,4 @@
-﻿using SenseNet.Security.Messaging;
+﻿using System;
 
 namespace SenseNet.Security
 {
@@ -8,34 +8,22 @@ namespace SenseNet.Security
     /// </summary>
     public class SecurityConfiguration
     {
-        /// <summary>
-        /// An IMessageProvider implementation instance that will be used during the lifetime of the application.
-        /// </summary>
-        public IMessageProvider MessageProvider { get; set; }
-        /// <summary>
-        /// An ISecurityDataProvider implementation instance that will be used during the lifetime of the application.
-        /// </summary>
-        public ISecurityDataProvider SecurityDataProvider { get; set; }
-
         /// <summary>Default: -1</summary>
-        public int? SystemUserId { get; set; }
+        public int SystemUserId { get; set; } = -1;
 
         /// <summary>Default: 6</summary>
-        public int? VisitorUserId { get; set; }
+        public int VisitorUserId { get; set; } = 6;
 
         /// <summary>Default: 8</summary>
-        public int? EveryoneGroupId { get; set; }
+        public int EveryoneGroupId { get; set; } = 8;
 
         /// <summary>Default: 9</summary>
-        public int? OwnerGroupId { get; set; }
+        public int OwnerGroupId { get; set; } = 9;
 
-        /// <summary>Default: 30</summary>
-        public int? CommunicationMonitorRunningPeriodInSeconds { get; set; }
+        [Obsolete("Use MessagingOptions instead.", true)]
+        public int? SecurityActivityLifetimeInMinutes { get; set; }
 
-        /// <summary>Time span before executed activities are cleared from the database. Default: 42</summary>
-        public int? SecuritActivityLifetimeInMinutes { get; set; } //TODO:~ TYPO
-
-        /// <summary>Default: 120</summary>
-        public int? SecuritActivityTimeoutInSeconds { get; set; } //TODO:~ TYPO
+        [Obsolete("Use MessagingOptions instead.", true)]
+        public int? SecurityActivityTimeoutInSeconds { get; set; }
     }
 }

@@ -33,21 +33,12 @@ namespace SenseNet.Security
         /// Id set of the entities where inheritance was restored.
         /// </summary>
         // ReSharper disable once InconsistentNaming
-        protected List<int> _unbreaks = new List<int>(); //TODO:~ TYPO
+        protected List<int> _unBreaks = new List<int>();
 
         /// <summary>
         /// Gets the current SecurityContext
         /// </summary>
         public SecurityContext Context { get; }
-
-        /// <summary>
-        /// Shortcut of the constructor.
-        /// Returns with a new instance of the AclEditor with a SecurityContext as the current context.
-        /// </summary>
-        public static AclEditor Create(SecurityContext context, EntryType entryType = EntryType.Normal)
-        {
-            return new AclEditor(context, entryType);
-        }
 
         /// <summary>
         /// Initializes a new instance of the AclEditor with a SecurityContext as the current context.
@@ -195,7 +186,7 @@ namespace SenseNet.Security
         [Obsolete("Use the BreakInheritance(int entityId, EntryType[] categoriesToCopy) method instead")]
         public AclEditor BreakInheritance(int entityId, bool convertToExplicit = true)
         {
-            _unbreaks.Remove(entityId);
+            _unBreaks.Remove(entityId);
             if (!_breaks.Contains(entityId))
                 _breaks.Add(entityId);
 
@@ -213,7 +204,7 @@ namespace SenseNet.Security
         /// <returns>A reference to this instance for calling more operations.</returns>
         public AclEditor BreakInheritance(int entityId, EntryType[] categoriesToCopy)
         {
-            _unbreaks.Remove(entityId);
+            _unBreaks.Remove(entityId);
             if (!_breaks.Contains(entityId))
                 _breaks.Add(entityId);
             CopyEffectivePermissions(entityId, categoriesToCopy);
@@ -226,17 +217,22 @@ namespace SenseNet.Security
         /// <param name="normalize">If true (default is false), the unnecessary explicit entries will be removed.
         /// WARNING: Only the Normal category will be copied.</param>
         /// <returns>A reference to this instance for calling more operations.</returns>
-        [Obsolete("Use the UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize) method instead")] //TODO:~ TYPO
+        [Obsolete("Use the UnBreakInheritance(int entityId, EntryType[] categoriesToNormalize) method instead", true)]
         public AclEditor UnbreakInheritance(int entityId, bool normalize = false)
         {
             _breaks.Remove(entityId);
-            if (!_unbreaks.Contains(entityId))
-                _unbreaks.Add(entityId);
+            if (!_unBreaks.Contains(entityId))
+                _unBreaks.Add(entityId);
 
             if (normalize)
                 NormalizeExplicitPermissions(entityId, new[] { EntryType.Normal });
 
             return this;
+        }
+        [Obsolete("Use the overload with correct name.", true)]
+        public AclEditor UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize)
+        {
+            return UnBreakInheritance(entityId, categoriesToNormalize);
         }
         /// <summary>
         /// Restores the permission inheritance on the requested entity.
@@ -245,11 +241,11 @@ namespace SenseNet.Security
         /// <param name="categoriesToNormalize">Unnecessary explicit entries
         /// that match these categories will be removed.</param>
         /// <returns>A reference to this instance for calling more operations.</returns>
-        public AclEditor UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize) //TODO:~ TYPO
+        public AclEditor UnBreakInheritance(int entityId, EntryType[] categoriesToNormalize)
         {
             _breaks.Remove(entityId);
-            if (!_unbreaks.Contains(entityId))
-                _unbreaks.Add(entityId);
+            if (!_unBreaks.Contains(entityId))
+                _unBreaks.Add(entityId);
             if (categoriesToNormalize != null && categoriesToNormalize.Length > 0)
                 NormalizeExplicitPermissions(entityId, categoriesToNormalize);
             return this;
@@ -260,7 +256,7 @@ namespace SenseNet.Security
         /// </summary>
         public virtual void Apply()
         {
-            var activity = new SetAclActivity(_acls.Values.ToArray(), _breaks, _unbreaks);
+            var activity = new SetAclActivity(_acls.Values.ToArray(), _breaks, _unBreaks);
             activity.Execute(this.Context);
         }
 
@@ -288,7 +284,7 @@ namespace SenseNet.Security
         /// </summary>
         internal AclEditor NormalizeExplicitPermissions(int entityId, EntryType[] entryTypes)
         {
-            var firstAcl = SecurityEntity.GetFirstAcl(this.Context, entityId, false);
+            var firstAcl = Context.SecuritySystem.EntityManager.GetFirstAcl(entityId, false);
             if (firstAcl == null)
                 return this; // there is no settings.
             if (entityId != firstAcl.EntityId)
@@ -348,7 +344,7 @@ namespace SenseNet.Security
         {
             if (!_acls.TryGetValue(entityId, out var aclInfo))
             {
-                aclInfo = SecurityEntity.GetAclInfoCopy(this.Context, entityId, this.EntryType);
+                aclInfo = Context.SecuritySystem.EntityManager.GetAclInfoCopy(entityId, this.EntryType);
                 if (aclInfo == null)
                 {
                     // creating an empty acl

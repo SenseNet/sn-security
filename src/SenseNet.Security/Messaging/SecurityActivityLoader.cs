@@ -15,28 +15,31 @@ namespace SenseNet.Security.Messaging
         private readonly int _pageSize;
         private readonly int[] _gaps;
         private readonly bool _executingUnprocessedActivities;
+        private readonly DataHandler _dataHandler;
 
-        public SecurityActivityLoader(int from, int to, bool executingUnprocessedActivities)
+        public SecurityActivityLoader(int from, int to, bool executingUnprocessedActivities, DataHandler dataHandler)
         {
             _gapLoader = false;
             _from = from;
             _to = to;
             _executingUnprocessedActivities = executingUnprocessedActivities;
+            _dataHandler = dataHandler;
             _pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
         }
         // ReSharper disable once UnusedParameter.Local
-        public SecurityActivityLoader(int[] gaps, bool executingUnprocessedActivities)
+        public SecurityActivityLoader(int[] gaps, bool executingUnprocessedActivities, DataHandler dataHandler)
         {
             _gapLoader = true;
             _gaps = gaps;
+            _dataHandler = dataHandler;
             _pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
         }
 
         public IEnumerator<SecurityActivity> GetEnumerator()
         {
             if (_gapLoader)
-                return new GapLoader(_gaps, _pageSize, _executingUnprocessedActivities);
-            return new SectionLoader(_from, _to, _pageSize, _executingUnprocessedActivities);
+                return new GapLoader(_gaps, _pageSize, _executingUnprocessedActivities, _dataHandler);
+            return new SectionLoader(_from, _to, _pageSize, _executingUnprocessedActivities, _dataHandler);
         }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
@@ -54,13 +57,15 @@ namespace SenseNet.Security.Messaging
             private bool _isLastPage;
             private int _loadedPageSize;
             private readonly bool _executingUnprocessedActivities;
+            private readonly DataHandler _dataHandler;
 
-            public SectionLoader(int from, int to, int pageSize, bool executingUnprocessedActivities)
+            public SectionLoader(int from, int to, int pageSize, bool executingUnprocessedActivities, DataHandler dataHandler)
             {
                 _from = from;
                 _to = to;
                 _pageSize = pageSize;
                 _executingUnprocessedActivities = executingUnprocessedActivities;
+                _dataHandler = dataHandler;
 
                 _buffer = new SecurityActivity[pageSize];
                 _loadedPageSize = _buffer.Length;
@@ -117,13 +122,13 @@ namespace SenseNet.Security.Messaging
             {
                 using (var op = SnTrace.SecurityQueue.StartOperation("SAQ: Loading segment: from: {0}, to: {1}, count: {2}.", from, to, count))
                 {
-                    var segment = DataHandler.LoadSecurityActivities(from, to, count, _executingUnprocessedActivities);
+                    var segment = _dataHandler.LoadSecurityActivities(from, to, count, _executingUnprocessedActivities);
                     op.Successful = true;
                     return segment;
                 }
             }
-
         }
+
         private class GapLoader : IEnumerator<SecurityActivity>
         {
             private readonly int[] _gaps;
@@ -132,13 +137,15 @@ namespace SenseNet.Security.Messaging
             private int _bufferIndex;
             private readonly int _pageSize;
             private readonly bool _executingUnprocessedActivities;
+            private readonly DataHandler _dataHandler;
 
-            public GapLoader(int[] gaps, int pageSize, bool executingUnprocessedActivities)
+            public GapLoader(int[] gaps, int pageSize, bool executingUnprocessedActivities, DataHandler dataHandler)
             {
                 _gaps = gaps;
                 _pageSize = pageSize;
                 _bufferIndex = pageSize;
                 _executingUnprocessedActivities = executingUnprocessedActivities;
+                _dataHandler = dataHandler;
             }
 
             public SecurityActivity Current => _buffer[_bufferIndex];
@@ -183,7 +190,7 @@ namespace SenseNet.Security.Messaging
             private IEnumerable<SecurityActivity> LoadGaps(int[] gaps)
             {
                 SnTrace.SecurityQueue.Write("SAQ: Loading gaps (count: {0}): [{1}]", gaps.Length, string.Join(", ", gaps));
-                return DataHandler.LoadSecurityActivities(gaps, _executingUnprocessedActivities);
+                return _dataHandler.LoadSecurityActivities(gaps, _executingUnprocessedActivities);
             }
 
         }

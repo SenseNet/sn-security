@@ -8,6 +8,7 @@ namespace SenseNet.Security.Messaging
     /// </summary>
     public class DefaultMessageProvider : IMessageProvider
     {
+
         /// <summary>
         /// Gets the name of the receiver (or channel)
         /// </summary>
@@ -17,6 +18,13 @@ namespace SenseNet.Security.Messaging
         /// Gets a total count of received messages
         /// </summary>
         public int IncomingMessageCount => 0;
+
+        public IMessageSenderManager MessageSenderManager { get; }
+
+        public DefaultMessageProvider(IMessageSenderManager messageSenderManager)
+        {
+            MessageSenderManager = messageSenderManager;
+        }
 
         /// <summary>
         /// Initializes the provider instance.

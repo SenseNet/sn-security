@@ -27,7 +27,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            DataHandler.CreateSecurityEntity(context, EntityId, ParentEntityId, OwnerId);
+            context.SecuritySystem.DataHandler.CreateSecurityEntity(EntityId, ParentEntityId, OwnerId);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            SecurityEntity.CreateEntity(context, EntityId, ParentEntityId, OwnerId);
+            context.SecuritySystem.EntityManager.CreateEntity(EntityId, ParentEntityId, OwnerId);
         }
 
         internal override bool MustWaitFor(SecurityActivity olderActivity)
