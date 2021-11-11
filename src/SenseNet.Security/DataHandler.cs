@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Extensions.Options;
 using SenseNet.Security.Configuration;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace SenseNet.Security
 {
@@ -21,8 +23,26 @@ namespace SenseNet.Security
             _messagingOptions = messagingOptions.Value;
         }
 
+        private bool _isDatabaseReady;
+        public async Task<bool> IsDatabaseReadyAsync(CancellationToken cancel)
+        {
+            if (_isDatabaseReady)
+                return true;
+
+            var isReady = await _dataProvider.IsDatabaseReadyAsync(cancel).ConfigureAwait(false);
+
+            // memorize only the positive value
+            if (isReady)
+                _isDatabaseReady = true;
+
+            return isReady;
+        }
+
         public IDictionary<int, SecurityEntity> LoadSecurityEntities()
         {
+            if (!IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())
+                return new Dictionary<int, SecurityEntity>();
+
             var count = _dataProvider.GetEstimatedEntityCount();
             var capacity = count + count / 10;
 
@@ -58,11 +78,17 @@ namespace SenseNet.Security
 
         public IDictionary<int, SecurityGroup> LoadAllGroups()
         {
+            if (!IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())
+                return new Dictionary<int, SecurityGroup>();
+
             var groups = _dataProvider.LoadAllGroups();
             return groups.ToDictionary(x => x.Id);
         }
         public Dictionary<int, AclInfo> LoadAcls()
         {
+            if (!IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())
+                return new Dictionary<int, AclInfo>();
+
             var acls = new Dictionary<int, AclInfo>();
 
             foreach (var storedAce in _dataProvider.LoadAllAces())
@@ -225,7 +251,8 @@ namespace SenseNet.Security
 
         internal Messaging.CompletionState LoadCompletionState(out int lastDatabaseId)
         {
-            var ids = _dataProvider.GetUnprocessedActivityIds();
+            var isDbReady = IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult();
+            var ids = isDbReady ? _dataProvider.GetUnprocessedActivityIds() : Array.Empty<int>();
             lastDatabaseId = ids.LastOrDefault();
 
             var result = new Messaging.CompletionState();
@@ -303,6 +330,9 @@ namespace SenseNet.Security
 
         internal void CleanupSecurityActivities()
         {
+            if (!IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())
+                return;
+
             _dataProvider.CleanupSecurityActivities(_messagingOptions.SecurityActivityLifetimeInMinutes);
         }
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SenseNet.Security
 {
@@ -24,6 +26,13 @@ namespace SenseNet.Security
         /// </summary>
         // ReSharper disable once UnusedMemberInSuper.Global
         void InstallDatabase();
+
+        /// <summary>
+        /// Checks if the database exists and is ready to accept new items.
+        /// If this method returns false, the client should install the database first.
+        /// </summary>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
+        Task<bool> IsDatabaseReadyAsync(CancellationToken cancel);
 
         /******************************************* structure pre-loaders */
 

@@ -13,6 +13,7 @@ using SenseNet.Security.EFCSecurityStore.Configuration;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 // ReSharper disable InconsistentNaming
 namespace SenseNet.Security.EFCSecurityStore
@@ -98,6 +99,39 @@ namespace SenseNet.Security.EFCSecurityStore
             using var db = Db();
             db.InstallDatabase();
         }
+        public async Task<bool> IsDatabaseReadyAsync(CancellationToken cancel)
+        {
+            const string schemaCheckSql = @"
+SELECT CASE WHEN EXISTS (
+    SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'EFEntries'
+)
+THEN CAST(1 AS BIT)
+ELSE CAST(0 AS BIT) END";
+
+            try
+            {
+                using var db = Db();
+                using var conn = db.Database.GetDbConnection();
+                await conn.OpenAsync(cancel).ConfigureAwait(false);
+
+                using var cmd = conn.CreateCommand();
+                cmd.CommandType = System.Data.CommandType.Text;
+                cmd.CommandText = schemaCheckSql;
+
+                var result = await cmd.ExecuteScalarAsync(cancel).ConfigureAwait(false);
+
+                return Convert.ToBoolean(result);
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Message.Contains("Invalid object name"))
+                    return false;
+
+                _logger.LogTrace($"Error when accessing the database: {ex.Message}");
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Returns with the estimated security entity count as fast as possible.
@@ -106,7 +140,7 @@ namespace SenseNet.Security.EFCSecurityStore
         public int GetEstimatedEntityCount()
         {
             using var db = Db();
-            return db.GetEstimatedEntityCount();
+                return db.GetEstimatedEntityCount();
         }
 
         /// <summary>
