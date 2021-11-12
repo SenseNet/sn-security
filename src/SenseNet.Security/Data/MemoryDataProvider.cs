@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using SenseNet.Security.Messaging.SecurityMessages;
 // ReSharper disable InconsistentlySynchronizedField
 
@@ -45,6 +46,10 @@ namespace SenseNet.Security.Data
         public void InstallDatabase()
         {
             // do nothing
+        }
+        public Task<bool> IsDatabaseReadyAsync(CancellationToken cancel)
+        {
+            return Task.FromResult(true);
         }
         /// <inheritdoc />
         public int GetEstimatedEntityCount()

@@ -40,6 +40,11 @@ namespace SenseNet.Security.Messaging
 
         internal void HealthCheck()
         {
+            if (!_dataHandler.IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())
+            {
+                SnTrace.Security.Write("SAQ: Health check triggered but database does not exist yet.");
+                return;
+            }
             if (IsWorking())
             {
                 SnTrace.Security.Write("SAQ: Health check triggered but ignored.");
