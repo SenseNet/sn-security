@@ -122,11 +122,8 @@ ELSE CAST(0 AS BIT) END";
 
                 return Convert.ToBoolean(result);
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
-                if (ex.Message.Contains("Invalid object name"))
-                    return false;
-
                 _logger.LogTrace($"Error when accessing the database: {ex.Message}");
             }
 
