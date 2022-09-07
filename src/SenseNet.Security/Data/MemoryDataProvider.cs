@@ -401,6 +401,7 @@ namespace SenseNet.Security.Data
         }
 
         /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public virtual int GetLastSecurityActivityId(DateTime startedTime)
         {
             return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None)
