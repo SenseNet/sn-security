@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
 {
@@ -25,7 +26,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            context.SecuritySystem.DataHandler.ModifySecurityEntityOwner(EntityId, OwnerId);
+            context.SecuritySystem.DataHandler.ModifySecurityEntityOwnerAsync(EntityId, OwnerId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>

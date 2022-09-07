@@ -123,6 +123,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         /// <param name="context">Current SecurityContext to use any security related thing.</param>
         protected abstract void Store(SecurityContext context);
+        //UNDONE:x: Async SecurityActivity.Store (abstract)
         /// <summary>
         /// Customization point for the memory operations based on the activity data.
         /// </summary>

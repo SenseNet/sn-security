@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Extensions.DependencyInjection;
@@ -33,9 +34,11 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             //db.Database.ExecuteSqlCommand("DELETE FROM [EFMemberships]");
 
             var dp = CurrentContext.Security.SecuritySystem.DataProvider;
-            foreach (var group in dp.LoadAllGroups())
+            foreach (var group in dp.LoadAllGroupsAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult())
             {
-                dp.RemoveMembers(group.Id, group.UserMemberIds, group.Groups.Select(g => g.Id));
+                dp.RemoveMembersAsync(group.Id, group.UserMemberIds,
+                        group.Groups.Select(g => g.Id), CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
             }
         }
 

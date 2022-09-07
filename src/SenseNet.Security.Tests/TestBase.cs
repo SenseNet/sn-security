@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
@@ -338,8 +339,10 @@ namespace SenseNet.Security.Tests
         internal void CheckIntegrity(string testName, SecurityContext context)
         {
             CheckIntegrity(testName, context,
-                context.SecuritySystem.DataProvider.LoadSecurityEntities(),
-                context.SecuritySystem.DataProvider.LoadAllGroups());
+                context.SecuritySystem.DataProvider.LoadSecurityEntitiesAsync(CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult(),
+                context.SecuritySystem.DataProvider.LoadAllGroupsAsync(CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult());
         }
         internal void CheckIntegrity(string testName, SecurityContext context, IEnumerable<StoredSecurityEntity> entities, IEnumerable<SecurityGroup> groups)
         {

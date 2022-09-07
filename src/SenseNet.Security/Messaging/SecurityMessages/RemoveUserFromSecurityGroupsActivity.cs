@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
 {
@@ -26,7 +27,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            context.SecuritySystem.DataHandler.RemoveUserFromGroups(UserId, ParentGroups);
+            context.SecuritySystem.DataHandler.RemoveUserFromGroupsAsync(UserId, ParentGroups, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>

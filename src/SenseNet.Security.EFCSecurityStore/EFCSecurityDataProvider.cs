@@ -140,29 +140,35 @@ ELSE CAST(0 AS BIT) END";
                 return db.GetEstimatedEntityCount();
         }
 
-        /// <summary>
-        /// Pre-loader method for retrieving all stored SecurityEntity. Called during system start.
-        /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public IEnumerable<StoredSecurityEntity> LoadSecurityEntities()
         {
-            using var db = Db();
-            return db.EFEntities.Select(x => new StoredSecurityEntity
+            return LoadSecurityEntitiesAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<IEnumerable<StoredSecurityEntity>> LoadSecurityEntitiesAsync(CancellationToken cancel)
+        {
+            await using var db = Db();
+            return await db.EFEntities.Select(x => new StoredSecurityEntity
             {
                 Id = x.Id,
                 nullableOwnerId = x.OwnerId,
                 nullableParentId = x.ParentId,
                 IsInherited = x.IsInherited
-            }).ToArray();
+            }).ToArrayAsync(cancel);
         }
-        /// <summary>
-        /// Loads the set of security holder entity ids.
-        /// This is a distinct int list of entities in entries plus entities that are not inherited (IsInherited = false).
-        /// </summary>
+
+        [Obsolete("Use async version instead.", true)]
         public IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks()
         {
-            using var db = Db();
-            return db.LoadAffectedEntityIdsByEntriesAndBreaks();
+            return LoadAffectedEntityIdsByEntriesAndBreaksAsync(CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
+        public async Task<IEnumerable<int>> LoadAffectedEntityIdsByEntriesAndBreaksAsync(CancellationToken cancel)
+        {
+            await using var db = Db();
+            return await db.LoadAffectedEntityIdsByEntriesAndBreaksAsync(cancel);
+        }
+
         /// <summary>
         /// Loader method for retrieving all ACE-s. Called during system start.
         /// </summary>
@@ -176,21 +182,27 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        /// <summary>
-        /// Retrieves the SecurityEntity by the passed identifier. Returns with null if the entity was not found.
-        /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public StoredSecurityEntity LoadStoredSecurityEntity(int entityId)
         {
-            using var db = Db();
-            return db.LoadStoredSecurityEntityById(entityId);
+            return LoadStoredSecurityEntityAsync(entityId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
-        /// <summary>
-        /// Writes the given entity to the database. If it exists before writing, the operation will be skipped.
-        /// </summary>
+        public async Task<StoredSecurityEntity> LoadStoredSecurityEntityAsync(int entityId, CancellationToken cancel)
+        {
+            await using var db = Db();
+            return await db.LoadStoredSecurityEntityByIdAsync(entityId, cancel);
+        }
+
+        [Obsolete("Use async version instead.", true)]
         public void InsertSecurityEntity(StoredSecurityEntity entity)
         {
+            InsertSecurityEntityAsync(entity, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task InsertSecurityEntityAsync(StoredSecurityEntity entity, CancellationToken cancel)
+        {
             using var db = Db();
-            var origEntity = LoadEFEntity(entity.Id, db);
+            var origEntity = await LoadEFEntityAsync(entity.Id, db, cancel);
             if (origEntity != null)
                 return;
 
@@ -203,18 +215,20 @@ ELSE CAST(0 AS BIT) END";
             });
             try
             {
-                db.SaveChanges();
+                await db.SaveChangesAsync(cancel);
             }
             catch (DbUpdateException)
             {
                 // entity already exists, that's ok
             }
         }
-        /// <summary>
-        /// Updates the given entity to the database. If it does not exist before updating, 
-        /// a SecurityStructureException must be thrown.
-        /// </summary>
+
+        [Obsolete("Use async version instead.", true)]
         public void UpdateSecurityEntity(StoredSecurityEntity entity)
+        {
+            UpdateSecurityEntityAsync(entity, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task UpdateSecurityEntityAsync(StoredSecurityEntity entity, CancellationToken cancel)
         {
             var exceptions = new List<Exception>();
 
@@ -222,8 +236,8 @@ ELSE CAST(0 AS BIT) END";
             {
                 try
                 {
-                    using var db = Db();
-                    var oldEntity = LoadEFEntity(entity.Id, db);
+                    await using var db = Db();
+                    var oldEntity = await LoadEFEntityAsync(entity.Id, db, cancel);
                     if (oldEntity == null)
                         throw new EntityNotFoundException("Cannot update entity because it does not exist: " + entity.Id);
 
@@ -231,7 +245,7 @@ ELSE CAST(0 AS BIT) END";
                     oldEntity.ParentId = entity.nullableParentId;
                     oldEntity.IsInherited = entity.IsInherited;
 
-                    db.SaveChanges();
+                    await db.SaveChangesAsync(cancel);
                     return;
                 }
                 catch (DbUpdateConcurrencyException ex)
@@ -257,19 +271,22 @@ ELSE CAST(0 AS BIT) END";
                 throw new SecurityStructureException(
                     "Cannot update entity because of concurrency: " + entity.Id, new AggregateException(exceptions));
         }
-        /// <summary>
-        /// Deletes an entity by the given identifier. If the entity does not exist before deleting, this method does nothing.
-        /// </summary>
+
+        [Obsolete("Use async version instead.", true)]
         public void DeleteSecurityEntity(int entityId)
         {
-            using var db = Db();
+            DeleteSecurityEntityAsync(entityId, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task DeleteSecurityEntityAsync(int entityId, CancellationToken cancel)
+        {
+            await using var db = Db();
             var oldEntity = db.EFEntities.FirstOrDefault(x => x.Id == entityId);
             if (oldEntity == null)
                 return;
             db.EFEntities.Remove(oldEntity);
             try
             {
-                db.SaveChanges();
+                await db.SaveChangesAsync(cancel);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -280,39 +297,46 @@ ELSE CAST(0 AS BIT) END";
                 throw new SecurityStructureException("Cannot delete entity because of a database error: " + entityId, ex);
             }
         }
-        /// <summary>
-        /// Moves the source entity to the target entity. Only a parent relink is needed. All other operations call 
-        /// other data provider methods.
-        /// </summary>
+
+        [Obsolete("Use async version instead.", true)]
         public void MoveSecurityEntity(int sourceId, int targetId) // always called with SetSecurityHolder method
         {
-            using var db = Db();
-            var source = LoadEFEntity(sourceId, db);
+            MoveSecurityEntityAsync(sourceId, targetId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task MoveSecurityEntityAsync(int sourceId, int targetId, CancellationToken cancel) // always called with SetSecurityHolder method
+        {
+            await using var db = Db();
+            var source = await LoadEFEntityAsync(sourceId, db, cancel);
             if (source == null)
                 throw new EntityNotFoundException(
                     "Cannot execute the move operation because source does not exist: " + sourceId);
-            var target = LoadEFEntity(targetId, db);
+            var target = await LoadEFEntityAsync(targetId, db, cancel);
             if (target == null)
                 throw new EntityNotFoundException(
                     "Cannot execute the move operation because target does not exist: " + targetId);
 
             source.ParentId = target.Id;
 
-            db.SaveChanges();
+            await db.SaveChangesAsync(cancel);
         }
 
-        /// <summary>
-        /// This method must return with all stored ACEs that exist in the database in an unordered list.
-        /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public IEnumerable<StoredAce> LoadAllPermissionEntries()
         {
-            using var db = Db();
-            return db.EFEntries
-                .ToArray()  // entity framework does not know the ulong because it is dumb :(
-                .Select(a => new StoredAce
+            return LoadAllPermissionEntriesAsync(CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<IEnumerable<StoredAce>> LoadAllPermissionEntriesAsync(CancellationToken cancel)
+        {
+            await using var db = Db();
+            var dbResult = await db.EFEntries.ToArrayAsync(cancel);
+
+            // entity framework does not know the ulong because it is dumb :(
+            return dbResult.Select(a => new StoredAce
                 {
                     EntityId = a.EFEntityId,
-                    EntryType = (EntryType)a.EntryType,
+                    EntryType = (EntryType) a.EntryType,
                     IdentityId = a.IdentityId,
                     LocalOnly = a.LocalOnly,
                     AllowBits = a.AllowBits.ToUInt64(),
@@ -320,21 +344,25 @@ ELSE CAST(0 AS BIT) END";
                 })
                 .ToArray();
         }
-        /// <summary>
-        /// Loads an ACL-chain. Caller provides the parent chain of an entity.
-        /// This method must return with all stored ACEs that belong to any of the passed entity ids.
-        /// Order is irrelevant.
-        /// </summary>
+
+        [Obsolete("Use async version instead.", true)]
         public IEnumerable<StoredAce> LoadPermissionEntries(IEnumerable<int> entityIds)
         {
-            using var db = Db();
-            return db.EFEntries
+            return LoadPermissionEntriesAsync(entityIds, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<IEnumerable<StoredAce>> LoadPermissionEntriesAsync(IEnumerable<int> entityIds, CancellationToken cancel)
+        {
+            await using var db = Db();
+            var dbResult = await db.EFEntries
                 .Where(x => entityIds.Contains(x.EFEntityId))
-                .ToArray()  // entity framework does not know the ulong because it is dumb :(
-                .Select(a => new StoredAce
+                .ToArrayAsync(cancel);
+
+            // entity framework does not know the ulong because it is dumb :(
+            return dbResult.Select(a => new StoredAce
                 {
                     EntityId = a.EFEntityId,
-                    EntryType = (EntryType)a.EntryType,
+                    EntryType = (EntryType) a.EntryType,
                     IdentityId = a.IdentityId,
                     LocalOnly = a.LocalOnly,
                     AllowBits = a.AllowBits.ToUInt64(),
@@ -342,6 +370,7 @@ ELSE CAST(0 AS BIT) END";
                 })
                 .ToArray();
         }
+
         /// <summary>
         /// Inserts or updates one or more StoredACEs.
         /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
@@ -575,9 +604,9 @@ ELSE CAST(0 AS BIT) END";
 
         //===================================================================== Tools
 
-        private static EFEntity LoadEFEntity(int entityId, SecurityStorage db)
+        private static Task<EFEntity> LoadEFEntityAsync(int entityId, SecurityStorage db, CancellationToken cancel)
         {
-            return db.EFEntities.FirstOrDefault(x => x.Id == entityId);
+            return db.EFEntities.FirstOrDefaultAsync(x => x.Id == entityId, cancel);
         }
 
         /* ===================================================================== */
@@ -612,10 +641,12 @@ ELSE CAST(0 AS BIT) END";
 
         /******************************************* membership storage */
 
-        /// <summary>
-        /// Pre-loader method for retrieving all stored SecurityGroups. Called during system start.
-        /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public IEnumerable<SecurityGroup> LoadAllGroups()
+        {
+            return LoadAllGroupsAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public Task<IEnumerable<SecurityGroup>> LoadAllGroupsAsync(CancellationToken cancel)
         {
             var groups = new Dictionary<int, SecurityGroup>();
             using (var db = Db())
@@ -635,8 +666,9 @@ ELSE CAST(0 AS BIT) END";
                     }
                 }
             }
-            return groups.Values;
+            return Task.FromResult((IEnumerable<SecurityGroup>)groups.Values); //UNDONE:x: async ???
         }
+
         private static SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
         {
             if (groups.TryGetValue(groupId, out var group))
@@ -646,17 +678,20 @@ ELSE CAST(0 AS BIT) END";
             return group;
         }
 
-        /// <summary>
-        /// Loads a SecurityGroup from the database.
-        /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public SecurityGroup LoadSecurityGroup(int groupId)
+        {
+            return LoadSecurityGroupAsync(groupId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<SecurityGroup> LoadSecurityGroupAsync(int groupId, CancellationToken cancel)
         {
             var group = new SecurityGroup(groupId);
             var groups = new Dictionary<int, SecurityGroup> { { group.Id, group } };
             var rows = 0;
-            using (var db = Db())
+            await using (var db = Db())
             {
-                foreach (var membership in db.EFMemberships.Where(x => x.GroupId == groupId))
+                foreach (var membership in await db.EFMemberships.Where(x => x.GroupId == groupId).ToArrayAsync(cancel))
                 {
                     rows++;
                     if (membership.IsUser)
@@ -674,41 +709,47 @@ ELSE CAST(0 AS BIT) END";
             return rows == 0 ? null : group;
         }
 
-        /// <summary>
-        /// Deletes memberships and entries related to an identity.
-        /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public void DeleteIdentityAndRelatedEntries(int identityId)
         {
-            using var db = Db();
-            db.DeleteIdentity(identityId);
+            DeleteIdentityAndRelatedEntriesAsync(identityId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task DeleteIdentityAndRelatedEntriesAsync(int identityId, CancellationToken cancel)
+        {
+            await using var db = Db();
+            await db.DeleteIdentityAsync(identityId, cancel);
         }
 
-        /// <summary>
-        /// Deletes memberships and entries related to the provided identities.
-        /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public void DeleteIdentitiesAndRelatedEntries(IEnumerable<int> ids)
         {
-            using var db = Db();
-            db.DeleteIdentities(ids);
+            DeleteIdentitiesAndRelatedEntriesAsync(ids, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task DeleteIdentitiesAndRelatedEntriesAsync(IEnumerable<int> ids, CancellationToken cancel)
+        {
+            await using var db = Db();
+            await db.DeleteIdentitiesAsync(ids, cancel);
         }
 
-        /// <summary>
-        /// Adds one or more users and groups to the specified group.
-        /// </summary>
-        /// <param name="groupId">Id of the group that will have new members.</param>
-        /// <param name="userMembers">Contains the ids of new users. Can be null or an empty list too.</param>
-        /// <param name="groupMembers">Contains the ids of new groups. Can be null or an empty list too.</param>
+        [Obsolete("Use async version instead.", true)]
         [SuppressMessage("ReSharper", "ConvertToNullCoalescingCompoundAssignment")]
         public void AddMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
-            groupMembers = groupMembers ?? new int[0];
-            userMembers = userMembers ?? new int[0];
+            AddMembersAsync(groupId, userMembers, groupMembers, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task AddMembersAsync(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, CancellationToken cancel)
+        {
+            groupMembers = groupMembers ?? Array.Empty<int>();
+            userMembers = userMembers ?? Array.Empty<int>();
 
             var groupArray = groupMembers as int[] ?? groupMembers.ToArray();
             var userArray = userMembers as int[] ?? userMembers.ToArray();
 
             var allNewMembers = groupArray.Union(userArray);
-            using var db = Db();
+            await using var db = Db();
             var origMemberIds = db.EFMemberships
                 .Where(m => m.GroupId == groupId && allNewMembers.Contains(m.MemberId))
                 .Select(m => m.MemberId)
@@ -721,23 +762,19 @@ ELSE CAST(0 AS BIT) END";
             db.EFMemberships.AddRange(newGroups);
             db.EFMemberships.AddRange(newUsers);
 
-            db.SaveChanges();
+            await db.SaveChangesAsync(cancel);
         }
 
-        /// <summary>
-        /// Removes one or more users and groups from the specified group.
-        /// </summary>
-        /// <param name="groupId">Id of a group.</param>
-        /// <param name="userMembers">
-        /// Contains the ids of users that will be removed. Can be null or an empty list too.</param>
-        /// <param name="groupMembers">
-        /// Contains the ids of groups that will be removed. Can be null or an empty list too.</param>
         public void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
-            using var db = Db();
-            db.RemoveMembers(groupId, userMembers ?? new int[0], groupMembers ?? new int[0]);
+            RemoveMembersAsync(groupId, userMembers, groupMembers, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
-
+        public async Task RemoveMembersAsync(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, CancellationToken cancel)
+        {
+            await using var db = Db();
+            await db.RemoveMembersAsync(groupId, userMembers ?? Array.Empty<int>(), groupMembers ?? Array.Empty<int>(), cancel);
+        }
 
         //============================================================
 

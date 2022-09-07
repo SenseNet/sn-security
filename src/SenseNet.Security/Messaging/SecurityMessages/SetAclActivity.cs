@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
 {
@@ -84,13 +85,14 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         {
             var dataHandler = context.SecuritySystem.DataHandler;
             dataHandler.WritePermissionEntries(_entries);
+
             dataHandler.RemovePermissionEntries(_entriesToRemove);
 
             foreach (var entityId in _breaks)
-                dataHandler.BreakInheritance(entityId);
+                dataHandler.BreakInheritanceAsync(entityId, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
             foreach (var entityId in _undoBreaks)
-                dataHandler.UnBreakInheritance(entityId);
+                dataHandler.UnBreakInheritanceAsync(entityId, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>

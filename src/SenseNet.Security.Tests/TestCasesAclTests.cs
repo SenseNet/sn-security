@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
 // ReSharper disable JoinDeclarationAndInitializer
@@ -957,8 +958,10 @@ namespace SenseNet.Security.Tests
             var db = CurrentContext.Security.SecuritySystem.DataProvider;
 
             Assert.AreEqual("_________________________________________________+-+-+-+-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default));
-            var dbEntries1 = db.LoadPermissionEntries(new[] { Id("E1") }).ToArray();
-            var dbEntries2 = db.LoadPermissionEntries(new[] { Id("E2") }).ToArray();
+            var dbEntries1 = db.LoadPermissionEntriesAsync(new[] { Id("E1") }, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult().ToArray();
+            var dbEntries2 = db.LoadPermissionEntriesAsync(new[] { Id("E2") }, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult().ToArray();
             Assert.AreEqual(1, dbEntries1.Length);
             Assert.AreEqual(1, dbEntries2.Length);
 
@@ -968,8 +971,10 @@ namespace SenseNet.Security.Tests
             ed.Apply();
 
             Assert.AreEqual("________________________________________________________-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), u1, default));
-            dbEntries1 = db.LoadPermissionEntries(new[] { Id("E1") }).ToArray();
-            dbEntries2 = db.LoadPermissionEntries(new[] { Id("E2") }).ToArray();
+            dbEntries1 = db.LoadPermissionEntriesAsync(new[] { Id("E1") }, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult().ToArray();
+            dbEntries2 = db.LoadPermissionEntriesAsync(new[] { Id("E2") }, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult().ToArray();
             Assert.AreEqual(1, dbEntries1.Length);
             Assert.AreEqual(0, dbEntries2.Length);
         }

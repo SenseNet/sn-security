@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using SenseNet.Security.Data;
 
 namespace SenseNet.Security.Tests
@@ -220,7 +221,8 @@ namespace SenseNet.Security.Tests
             var entities = new ConcurrentDictionary<int, SecurityEntity>();
             var relations = new List<Tuple<int, int>>(); // first is Id, second is ParentId
 
-            foreach (var storedEntity in dataProvider.LoadSecurityEntities())
+            foreach (var storedEntity in dataProvider.LoadSecurityEntitiesAsync(CancellationToken.None)
+                         .ConfigureAwait(false).GetAwaiter().GetResult())
             {
                 var entity = new SecurityEntity
                 {
@@ -253,7 +255,8 @@ namespace SenseNet.Security.Tests
             var entities = new Dictionary<int, SecurityEntity>(6400000);
             var relations = new List<Tuple<SecurityEntity, int>>(6400000); // first is Id, second is ParentId
 
-            foreach (var storedEntity in dataProvider.LoadSecurityEntities())
+            foreach (var storedEntity in dataProvider.LoadSecurityEntitiesAsync(CancellationToken.None)
+                         .ConfigureAwait(false).GetAwaiter().GetResult())
             {
                 var entity = new SecurityEntity
                 {
@@ -299,7 +302,8 @@ namespace SenseNet.Security.Tests
             var entities = new Dictionary<int, SecurityEntity>(capacity);
             var relations = new List<Tuple<SecurityEntity, int>>(capacity); // first is Id, second is ParentId
 
-            foreach (var storedEntity in dataProvider.LoadSecurityEntities())
+            foreach (var storedEntity in dataProvider.LoadSecurityEntitiesAsync(CancellationToken.None)
+                         .ConfigureAwait(false).GetAwaiter().GetResult())
             {
                 var entity = new SecurityEntity
                 {

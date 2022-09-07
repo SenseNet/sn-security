@@ -38,9 +38,14 @@ namespace SenseNet.Security
             return isReady;
         }
 
+        [Obsolete("Use async version instead.", true)]
         public IDictionary<int, SecurityEntity> LoadSecurityEntities()
         {
-            if (!IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())
+            return LoadSecurityEntitiesAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<IDictionary<int, SecurityEntity>> LoadSecurityEntitiesAsync(CancellationToken cancel)
+        {
+            if (!await IsDatabaseReadyAsync(cancel))
                 return new Dictionary<int, SecurityEntity>();
 
             var count = _dataProvider.GetEstimatedEntityCount();
@@ -49,7 +54,7 @@ namespace SenseNet.Security
             var entities = new Dictionary<int, SecurityEntity>(capacity);
             var relations = new List<Tuple<SecurityEntity, int>>(capacity); // first is Id, second is ParentId
 
-            foreach (var storedEntity in _dataProvider.LoadSecurityEntities())
+            foreach (var storedEntity in await _dataProvider.LoadSecurityEntitiesAsync(cancel))
             {
                 var entity = new SecurityEntity
                 {
@@ -76,17 +81,28 @@ namespace SenseNet.Security
             return new ConcurrentDictionary<int, SecurityEntity>(entities);
         }
 
+        [Obsolete("Use async version instead.", true)]
         public IDictionary<int, SecurityGroup> LoadAllGroups()
         {
-            if (!IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())
+            return LoadAllGroupsAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<IDictionary<int, SecurityGroup>> LoadAllGroupsAsync(CancellationToken cancel)
+        {
+            if (!await IsDatabaseReadyAsync(CancellationToken.None))
                 return new Dictionary<int, SecurityGroup>();
 
-            var groups = _dataProvider.LoadAllGroups();
+            var groups = await _dataProvider.LoadAllGroupsAsync(cancel);
             return groups.ToDictionary(x => x.Id);
         }
+
+        [Obsolete("Use async version instead.", true)]
         public Dictionary<int, AclInfo> LoadAcls()
         {
-            if (!IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())
+            return LoadAclsAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<Dictionary<int, AclInfo>> LoadAclsAsync(CancellationToken cancel)
+        {
+            if (!await IsDatabaseReadyAsync(CancellationToken.None))
                 return new Dictionary<int, AclInfo>();
 
             var acls = new Dictionary<int, AclInfo>();
@@ -104,20 +120,26 @@ namespace SenseNet.Security
             return acls;
         }
 
+        [Obsolete("Use async version instead.", true)]
         public StoredSecurityEntity GetStoredSecurityEntity(int entityId)
         {
-            return _dataProvider.LoadStoredSecurityEntity(entityId);
+            return GetStoredSecurityEntityAsync(entityId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<StoredSecurityEntity> GetStoredSecurityEntityAsync(int entityId, CancellationToken cancel)
+        {
+            return await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
         }
 
-        public void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId)
+        public Task CreateSecurityEntityAsync(int entityId, int parentEntityId, int ownerId, CancellationToken cancel)
         {
-            CreateSecurityEntity(entityId, parentEntityId, ownerId, false);
+            return CreateSecurityEntityAsync(entityId, parentEntityId, ownerId, false, cancel);
         }
-        public void CreateSecurityEntitySafe(int entityId, int parentEntityId, int ownerId)
+        public Task CreateSecurityEntitySafeAsync(int entityId, int parentEntityId, int ownerId, CancellationToken cancel)
         {
-            CreateSecurityEntity(entityId, parentEntityId, ownerId, true);
+            return CreateSecurityEntityAsync(entityId, parentEntityId, ownerId, true, cancel);
         }
-        private void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId, bool safe)
+        private async Task CreateSecurityEntityAsync(int entityId, int parentEntityId, int ownerId, bool safe, CancellationToken cancel)
         {
             if (entityId == default)
                 throw new ArgumentException("entityId cannot be default(int)");
@@ -141,16 +163,16 @@ namespace SenseNet.Security
                 OwnerId = ownerId
             };
 
-            _dataProvider.InsertSecurityEntity(entity);
+            await _dataProvider.InsertSecurityEntityAsync(entity, cancel);
         }
 
-        public void ModifySecurityEntityOwner(int entityId, int ownerId)
+        public async Task ModifySecurityEntityOwnerAsync(int entityId, int ownerId, CancellationToken cancel)
         {
-            var entity = _dataProvider.LoadStoredSecurityEntity(entityId);
+            var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
             if (entity == null)
                 throw new EntityNotFoundException("Cannot update a SecurityEntity beacuse it does not exist: " + entityId);
             entity.OwnerId = ownerId;
-            _dataProvider.UpdateSecurityEntity(entity);
+            await _dataProvider.UpdateSecurityEntityAsync(entity, cancel);
         }
         
         public void DeleteSecurityEntity(int entityId)
@@ -158,40 +180,40 @@ namespace SenseNet.Security
             _dataProvider.DeleteEntitiesAndEntries(entityId);
         }
 
-        public void MoveSecurityEntity(int sourceId, int targetId)
+        public async Task MoveSecurityEntityAsync(int sourceId, int targetId, CancellationToken cancel)
         {
-            var source = _dataProvider.LoadStoredSecurityEntity(sourceId);
+            var source = await _dataProvider.LoadStoredSecurityEntityAsync(sourceId, cancel);
             if (source == null)
                 throw new EntityNotFoundException("Cannot move the entity because it does not exist: " + sourceId);
-            var target = _dataProvider.LoadStoredSecurityEntity(targetId);
+            var target = await _dataProvider.LoadStoredSecurityEntityAsync(targetId, cancel);
             if (target == null)
                 throw new EntityNotFoundException("Cannot move the entity because the target does not exist: " + targetId);
 
             // moving
-            _dataProvider.MoveSecurityEntity(sourceId, targetId);
+            await _dataProvider.MoveSecurityEntityAsync(sourceId, targetId, cancel);
         }
 
-        public void BreakInheritance(int entityId)
+        public async Task BreakInheritanceAsync(int entityId, CancellationToken cancel)
         {
-            var entity = _dataProvider.LoadStoredSecurityEntity(entityId);
+            var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
             if (entity == null)
                 throw new EntityNotFoundException("Cannot break inheritance because the entity does not exist: " + entityId);
             entity.IsInherited = false;
-            _dataProvider.UpdateSecurityEntity(entity);
+            await _dataProvider.UpdateSecurityEntityAsync(entity, cancel);
         }
 
-        public void UnBreakInheritance(int entityId)
+        public async Task UnBreakInheritanceAsync(int entityId, CancellationToken cancel)
         {
-            var entity = _dataProvider.LoadStoredSecurityEntity(entityId);
+            var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
             if (entity == null)
                 throw new EntityNotFoundException("Cannot undo break inheritance because the entity does not exist: " + entityId);
             entity.IsInherited = true;
-            _dataProvider.UpdateSecurityEntity(entity);
+            await _dataProvider.UpdateSecurityEntityAsync(entity, cancel);
         }
 
-        public IEnumerable<StoredAce> LoadPermissionEntries(IEnumerable<int> entityIds)
+        public Task<IEnumerable<StoredAce>> LoadPermissionEntriesAsync(IEnumerable<int> entityIds, CancellationToken cancel)
         {
-            return _dataProvider.LoadPermissionEntries(entityIds);
+            return _dataProvider.LoadPermissionEntriesAsync(entityIds, cancel);
         }
 
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
@@ -357,52 +379,60 @@ namespace SenseNet.Security
 
         /*============================================================================================== Membership */
 
+        [Obsolete("Use async version instead.", true)]
         public SecurityGroup GetSecurityGroup(int groupId)
         {
-            return _dataProvider.LoadSecurityGroup(groupId);
+            return _dataProvider.LoadSecurityGroupAsync(groupId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public Task<SecurityGroup> GetSecurityGroupAsync(int groupId, CancellationToken cancel)
+        {
+            return _dataProvider.LoadSecurityGroupAsync(groupId, cancel);
         }
 
-        internal void DeleteUser(int userId)
+        internal Task DeleteUserAsync(int userId, CancellationToken cancel)
         {
-            _dataProvider.DeleteIdentityAndRelatedEntries(userId);
+            return _dataProvider.DeleteIdentityAndRelatedEntriesAsync(userId, cancel);
         }
 
-        public void DeleteSecurityGroup(int groupId)
+        public Task DeleteSecurityGroupAsync(int groupId, CancellationToken cancel)
         {
-            _dataProvider.DeleteIdentityAndRelatedEntries(groupId);
+            return _dataProvider.DeleteIdentityAndRelatedEntriesAsync(groupId, cancel);
         }
 
-        internal void DeleteIdentities(IEnumerable<int> ids)
+        internal Task DeleteIdentitiesAsync(IEnumerable<int> ids, CancellationToken cancel)
         {
-            _dataProvider.DeleteIdentitiesAndRelatedEntries(ids);
+            return _dataProvider.DeleteIdentitiesAndRelatedEntriesAsync(ids, cancel);
         }
 
-        internal void AddMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups)
+        internal async Task AddMembersAsync(int groupId, IEnumerable<int> userMembers,
+            IEnumerable<int> groupMembers, IEnumerable<int> parentGroups, CancellationToken cancel)
         {
-            _dataProvider.AddMembers(groupId, userMembers, groupMembers);
+            await _dataProvider.AddMembersAsync(groupId, userMembers, groupMembers, cancel);
             if (parentGroups != null)
                 foreach (var parentGroupId in parentGroups.Distinct())
-                    _dataProvider.AddMembers(parentGroupId, null, new[] { groupId });
+                    await _dataProvider.AddMembersAsync(parentGroupId, null, new[] { groupId }, cancel);
         }
 
-        internal void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups)
+        internal async Task RemoveMembersAsync(int groupId, IEnumerable<int> userMembers,
+            IEnumerable<int> groupMembers, IEnumerable<int> parentGroups, CancellationToken cancel)
         {
-            _dataProvider.RemoveMembers(groupId, userMembers, groupMembers);
+            await _dataProvider.RemoveMembersAsync(groupId, userMembers, groupMembers, cancel);
             if (parentGroups != null)
                 foreach (var parentGroupId in parentGroups.Distinct())
-                    _dataProvider.RemoveMembers(parentGroupId, null, new[] { groupId });
+                    await _dataProvider.RemoveMembersAsync(parentGroupId, null, new[] { groupId }, cancel);
         }
 
-        internal void AddUserToGroups(int userId, IEnumerable<int> parentGroups)
+        internal async Task AddUserToGroupsAsync(int userId, IEnumerable<int> parentGroups, CancellationToken cancel)
         {
             foreach (var parentGroupId in parentGroups.Distinct())
-                _dataProvider.AddMembers(parentGroupId, new[] { userId }, null);
+                await _dataProvider.AddMembersAsync(parentGroupId, new[] { userId }, null, cancel);
         }
 
-        internal void RemoveUserFromGroups(int userId, IEnumerable<int> parentGroups)
+        internal async Task RemoveUserFromGroupsAsync(int userId, IEnumerable<int> parentGroups, CancellationToken cancel)
         {
             foreach (var parentGroupId in parentGroups.Distinct())
-                _dataProvider.RemoveMembers(parentGroupId, new[] { userId }, null);
+                await _dataProvider.RemoveMembersAsync(parentGroupId, new[] { userId }, null, cancel);
         }
     }
 }

@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace SenseNet.Security.EFCSecurityStore
@@ -154,9 +156,9 @@ SELECT 0, CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN 0 ELSE @ident END 
 SELECT TOP 1 E.Id, E.OwnerId nullableOwnerId, E.ParentId nullableParentId, E.IsInherited, convert(bit, case when E2.EFEntityId is null then 0 else 1 end) as HasExplicitEntry 
 FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.Id = @EntityId";
 
-        internal StoredSecurityEntity LoadStoredSecurityEntityById(int entityId)
+        internal async Task<StoredSecurityEntity> LoadStoredSecurityEntityByIdAsync(int entityId, CancellationToken cancel)
         {
-            var result = EfcStoredSecurityEntitySet
+            var result = await EfcStoredSecurityEntitySet
                 // ReSharper disable once FormatStringProblem
                 .FromSqlRaw(LoadStoredSecurityEntityByIdScript, new SqlParameter("@EntityId", entityId))
                 .Select(x => new StoredSecurityEntity
@@ -167,18 +169,18 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
                     nullableParentId = x.nullableParentId,
                     nullableOwnerId = x.nullableOwnerId
                 })
-                .FirstOrDefault();
+                .FirstOrDefaultAsync(cancel);
             return result;
         }
 
         private const string LoadAffectedEntityIdsByEntriesAndBreaksScript = @"SELECT DISTINCT Id AS Value FROM (SELECT DISTINCT EFEntityId Id FROM [EFEntries] UNION ALL SELECT Id FROM [EFEntities] WHERE IsInherited = 0) AS x";
-        internal IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks()
+        internal async Task<IEnumerable<int>> LoadAffectedEntityIdsByEntriesAndBreaksAsync(CancellationToken cancel)
         {
-            var result = EfcIntSet
+            var result = await EfcIntSet
                 .FromSqlRaw(LoadAffectedEntityIdsByEntriesAndBreaksScript)
                 .Select(x => x.Value)
-                .ToArray();
-            return result;
+                .ToArrayAsync(cancel);
+            return (IEnumerable<int>)result;
         }
 
 
@@ -329,9 +331,10 @@ ELSE
 
         private const string DeleteIdentityScript = @"DELETE FROM EFMemberships WHERE GroupId = @IdentityId OR MemberId = @IdentityId
 DELETE FROM EFEntries WHERE IdentityId = @IdentityId";
-        internal void DeleteIdentity(int identityId)
+        internal Task DeleteIdentityAsync(int identityId, CancellationToken cancel)
         {
-            Database.ExecuteSqlRaw(DeleteIdentityScript, new SqlParameter("@IdentityId", identityId));
+            return Database.ExecuteSqlRawAsync(DeleteIdentityScript,
+                new[] {new SqlParameter("@IdentityId", identityId)}, cancel);
         }
 
         private const string DeleteIdentitiesScript = @"
@@ -349,7 +352,7 @@ DELETE E1 FROM EFEntries E1 INNER JOIN @Identities I1 ON E1.IdentityId = I1.Id
 DELETE M1 FROM EFMemberships M1 INNER JOIN @Identities I1 ON M1.GroupId = I1.Id OR M1.MemberId = I1.Id
 
 COMMIT TRANSACTION";
-        internal void DeleteIdentities(IEnumerable<int> ids)
+        internal async Task DeleteIdentitiesAsync(IEnumerable<int> ids, CancellationToken cancel)
         {
             // construct an xml from the given id list for the sql command to make an id list on the SQL Server side
             var param = new SqlParameter("@IdentityList", SqlDbType.Xml)
@@ -357,14 +360,15 @@ COMMIT TRANSACTION";
                 Value = string.Format(IdListXmlTemplate, string.Join(string.Empty, ids.Select(identityId => string.Format(IdListItemXmlTemplate, identityId))))
             };
 
-            Database.ExecuteSqlRaw(DeleteIdentitiesScript, param);
+            await Database.ExecuteSqlRawAsync(DeleteIdentitiesScript, new[] {param}, cancel);
         }
 
         private const string RemoveMembersScript = @"DELETE FROM EFMemberships WHERE GroupId = @GroupId AND MemberId IN ({0})";
-        internal void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
+        internal async Task RemoveMembersAsync(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers,
+            CancellationToken cancel)
         {
             var sql = string.Format(RemoveMembersScript, string.Join(", ", groupMembers.Union(userMembers)));
-            Database.ExecuteSqlRaw(sql, new SqlParameter("@GroupId", groupId));
+            await Database.ExecuteSqlRawAsync(sql, new[] {new SqlParameter("@GroupId", groupId)}, cancel);
         }
 
 

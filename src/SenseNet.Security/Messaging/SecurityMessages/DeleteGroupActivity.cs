@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
 {
@@ -23,7 +24,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            context.SecuritySystem.DataHandler.DeleteSecurityGroup(GroupId); }
+            context.SecuritySystem.DataHandler.DeleteSecurityGroupAsync(GroupId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
 
         /// <summary>
         /// Applies the modifications in the memory structures.

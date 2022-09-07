@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
 {
@@ -36,7 +37,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Store(SecurityContext context)
         {
-            context.SecuritySystem.DataHandler.AddMembers(GroupId, UserMembers, GroupMembers, ParentGroups);
+            context.SecuritySystem.DataHandler.AddMembersAsync(GroupId, UserMembers, GroupMembers, ParentGroups,
+                CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>
