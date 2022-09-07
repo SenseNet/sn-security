@@ -48,7 +48,7 @@ namespace SenseNet.Security
             if (!await IsDatabaseReadyAsync(cancel))
                 return new Dictionary<int, SecurityEntity>();
 
-            var count = _dataProvider.GetEstimatedEntityCount();
+            var count = await _dataProvider.GetEstimatedEntityCountAsync(cancel);
             var capacity = count + count / 10;
 
             var entities = new Dictionary<int, SecurityEntity>(capacity);
@@ -175,9 +175,9 @@ namespace SenseNet.Security
             await _dataProvider.UpdateSecurityEntityAsync(entity, cancel);
         }
         
-        public void DeleteSecurityEntity(int entityId)
+        public Task DeleteSecurityEntityAsync(int entityId, CancellationToken cancel)
         {
-            _dataProvider.DeleteEntitiesAndEntries(entityId);
+            return _dataProvider.DeleteEntitiesAndEntriesAsync(entityId, cancel);
         }
 
         public async Task MoveSecurityEntityAsync(int sourceId, int targetId, CancellationToken cancel)
@@ -216,7 +216,7 @@ namespace SenseNet.Security
             return _dataProvider.LoadPermissionEntriesAsync(entityIds, cancel);
         }
 
-        public void WritePermissionEntries(IEnumerable<StoredAce> aces)
+        public async Task WritePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
             var softReload = false;
             var hardReload = false;
@@ -226,7 +226,7 @@ namespace SenseNet.Security
                 try
                 {
                     // ReSharper disable once PossibleMultipleEnumeration
-                    _dataProvider.WritePermissionEntries(aces);
+                    await _dataProvider.WritePermissionEntriesAsync(aces, cancel);
                     return;
                 }
                 catch (SecurityStructureException)
@@ -264,9 +264,9 @@ namespace SenseNet.Security
             }
         }
 
-        public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
+        public Task RemovePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
-            _dataProvider.RemovePermissionEntries(aces);
+            return _dataProvider.RemovePermissionEntriesAsync(aces, cancel);
         }
 
         //==============================================================================================
@@ -330,9 +330,9 @@ namespace SenseNet.Security
             activity.Id = id;
         }
 
-        internal int GetLastSecurityActivityId(DateTime startedTime)
+        internal Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
         {
-            return _dataProvider.GetLastSecurityActivityId(startedTime);
+            return _dataProvider.GetLastSecurityActivityIdAsync(startedTime, cancel);
         }
 
         internal IEnumerable<SecurityActivity> LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities)

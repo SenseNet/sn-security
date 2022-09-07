@@ -144,7 +144,7 @@ namespace SenseNet.Security
         /// <param name="entityIds">Entities that have one or more group related ACEs. These ACEs will be removed from the ACLs.</param>
         /// <param name="exclusiveEntityIds">Entities that have only the given group related ACEs. These ACLs will be removed.</param>
         void QueryGroupRelatedEntities(int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds);
-        //UNDONE:x: Async version (uses out params) (uses lock)
+        //UNDONE:x: Async version (uses out params)
 
         /*--------------------------------------------------------------*/
 
@@ -229,37 +229,60 @@ namespace SenseNet.Security
         Task<IEnumerable<StoredAce>> LoadPermissionEntriesAsync(IEnumerable<int> entityIds, CancellationToken cancel);
 
         /// <summary>
-        /// Returns with the estimated security entity count as fast as possible.
+        /// Returns the estimated security entity count as fast as possible.
         /// System start sequence uses this method.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         int GetEstimatedEntityCount();
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously returns the estimated security entity count as fast as possible.
+        /// System start sequence uses this method.
+        /// </summary>
+        Task<int> GetEstimatedEntityCountAsync(CancellationToken cancel);
 
         /// <summary>
         /// Inserts or updates one or more StoredACEs.
         /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         void WritePermissionEntries(IEnumerable<StoredAce> aces);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously inserts or updates one or more StoredACEs.
+        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
+        /// </summary>
+        Task WritePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel);
 
         /// <summary>
         /// Deletes the given ACEs.  If an ACE does not exist before deleting, it must be skipped.
         /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         void RemovePermissionEntries(IEnumerable<StoredAce> aces);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously deletes the given ACEs.  If an ACE does not exist before deleting, it must be skipped.
+        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
+        /// </summary>
+        Task RemovePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel);
 
         /// <summary>
         /// Deletes all ACEs related to the given entity id.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         void RemovePermissionEntriesByEntity(int entityId);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously deletes all ACEs related to the given entity id.
+        /// </summary>
+        Task RemovePermissionEntriesByEntityAsync(int entityId, CancellationToken cancel);
 
         /// <summary>
         /// Deletes all ACEs related to any of the entities in a subtree defined by the provided root id, then deletes all the entities too.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         void DeleteEntitiesAndEntries(int entityId);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously deletes all ACEs related to any of the entities in a subtree defined by the provided root id, then deletes all the entities too.
+        /// </summary>
+        Task DeleteEntitiesAndEntriesAsync(int entityId, CancellationToken cancel);
 
         /// <summary>
         /// Stores the full data of the passed activity.
@@ -270,14 +293,19 @@ namespace SenseNet.Security
         /// <param name="bodySize">Activity size in bytes.</param>
         /// <returns>The generated activity id.</returns>
         int SaveSecurityActivity(Messaging.SecurityMessages.SecurityActivity activity, out int bodySize);
-        //UNDONE:x: Async version.
+        //UNDONE:x: Async version (uses out params)
 
         /// <summary>
         /// Returns the biggest activity id that was saved before the provided time if there is any.
         /// Otherwise returns with 0.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         int GetLastSecurityActivityId(DateTime startedTime);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously returns the biggest activity id that was saved before the provided time if there is any.
+        /// Otherwise returns with 0.
+        /// </summary>
+        Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel);
 
         /// <summary>
         /// Returns an array of all unprocessed activity ids supplemented with the last stored activity id.

@@ -53,10 +53,13 @@ namespace SenseNet.Security.Data
             return Task.FromResult(true);
         }
 
-        /// <inheritdoc />
         public int GetEstimatedEntityCount()
         {
-            return Storage.Entities.Count;
+            return GetEstimatedEntityCountAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public Task<int> GetEstimatedEntityCountAsync(CancellationToken cancel)
+        {
+            return Task.FromResult(Storage.Entities.Count);
         }
 
         [Obsolete("Use async version instead.", true)]
@@ -282,8 +285,12 @@ namespace SenseNet.Security.Data
                 return Task.FromResult((IEnumerable<StoredAce>)Storage.Aces.Where(a => entityIds.Contains(a.EntityId)).ToArray());
         }
 
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
+        {
+            WritePermissionEntriesAsync(aces, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public Task WritePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
             lock (_acesLock)
             {
@@ -295,10 +302,16 @@ namespace SenseNet.Security.Data
                     Storage.Aces.Add(ace);
                 }
             }
+            return Task.CompletedTask;
         }
 
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
+        {
+            RemovePermissionEntriesAsync(aces, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public Task RemovePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
             lock (_acesLock)
             {
@@ -309,13 +322,20 @@ namespace SenseNet.Security.Data
                         Storage.Aces.Remove(old);
                 }
             }
+            return Task.CompletedTask;
         }
 
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public void RemovePermissionEntriesByEntity(int entityId)
+        {
+            RemovePermissionEntriesByEntityAsync(entityId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public Task RemovePermissionEntriesByEntityAsync(int entityId, CancellationToken cancel)
         {
             lock (_acesLock)
                 Storage.Aces.RemoveAll(y => y.EntityId == entityId);
+            return Task.CompletedTask;
         }
 
         internal void RemovePermissionEntriesByGroup(int groupId)
@@ -324,8 +344,13 @@ namespace SenseNet.Security.Data
                 Storage.Aces.RemoveAll(x => x.IdentityId == groupId);
         }
 
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public void DeleteEntitiesAndEntries(int entityId)
+        {
+            DeleteEntitiesAndEntriesAsync(entityId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task DeleteEntitiesAndEntriesAsync(int entityId, CancellationToken cancel)
         {
             lock (_acesLock)
                 Storage.Aces.RemoveAll(y => y.EntityId == entityId);
@@ -335,11 +360,12 @@ namespace SenseNet.Security.Data
             // delete children recursively
             foreach (var childEntityId in childIds)
             {
-                DeleteEntitiesAndEntries(childEntityId);
+                await DeleteEntitiesAndEntriesAsync(childEntityId, cancel);
             }
 
             // remove the entity itself
-            Storage.Entities.Remove(entityId);}
+            Storage.Entities.Remove(entityId);
+        }
 
         public void QueryGroupRelatedEntities(int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds)
         {
@@ -377,10 +403,15 @@ namespace SenseNet.Security.Data
         /// <inheritdoc />
         public virtual int GetLastSecurityActivityId(DateTime startedTime)
         {
+            return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public virtual Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
+        {
             lock (_messageLock)
             {
                 var lastMessage = Storage.Messages?.OrderByDescending(m => m.Item1).FirstOrDefault();
-                return lastMessage?.Item1 ?? 0;
+                return Task.FromResult(lastMessage?.Item1 ?? 0);
             }
         }
 

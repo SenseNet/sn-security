@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace SenseNet.Security.EFCSecurityStore
 {
@@ -101,13 +102,12 @@ DELETE FROM EFMessages
             throw new NotSupportedException();
         }
 
-        internal int GetEstimatedEntityCount()
+        internal async Task<int> GetEstimatedEntityCountAsync(CancellationToken cancel)
         {
-            var result = EfcIntSet
+            var result = await EfcIntSet
                 .FromSqlRaw("SELECT 1 AS Id, COUNT(1) AS Value FROM EFEntities")
-                .Single()
-                .Value;
-            return result;
+                .SingleAsync(cancel);
+            return result.Value;
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
 
 
         private const string RemovePermissionEntriesScript = @"DELETE FROM EFEntries WHERE EFEntityId = {0} AND EntryType = {1} AND IdentityId = {2} AND LocalOnly = {3}";
-        internal void RemovePermissionEntries(IEnumerable<StoredAce> aces)
+        internal async Task RemovePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
             var storedAces = aces as StoredAce[] ?? aces.ToArray();
             var count = storedAces.Length;
@@ -210,11 +210,11 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
                 sb.AppendLine("COMMIT TRANSACTION");
             }
 
-            Database.ExecuteSqlRaw(sb.ToString());
+            await Database.ExecuteSqlRawAsync(sb.ToString(), cancel);
         }
 
         private const string InsertPermissionEntriesScript = @"INSERT INTO EFEntries SELECT {0}, {1}, {2}, {3}, {4}, {5}";
-        internal void WritePermissionEntries(IEnumerable<StoredAce> aces)
+        internal async Task WritePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
             var storedAces = aces as StoredAce[] ?? aces.ToArray();
             var count = storedAces.Length;
@@ -238,14 +238,15 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
             sb.AppendLine();
             sb.AppendLine("COMMIT TRANSACTION");
 
-            Database.ExecuteSqlRaw(sb.ToString());
+            await Database.ExecuteSqlRawAsync(sb.ToString(), cancel);
         }
 
 
         private const string RemovePermissionEntriesByEntityScript = @"DELETE FROM EFEntries WHERE EFEntityId = @EntityId";
-        internal void RemovePermissionEntriesByEntity(int entityId)
+        internal Task RemovePermissionEntriesByEntityAsync(int entityId, CancellationToken cancel)
         {
-            Database.ExecuteSqlRaw(RemovePermissionEntriesByEntityScript, new SqlParameter("@EntityId", entityId));
+            return Database.ExecuteSqlRawAsync(RemovePermissionEntriesByEntityScript,
+                new[] {new SqlParameter("@EntityId", entityId)}, cancel);
         }
 
         private const string DeleteEntitiesAndEntriesScript = @"DECLARE @EntityIdTable TABLE (EntityId int)
@@ -264,11 +265,12 @@ SELECT Id FROM EntityCTE
 DELETE E1 FROM EFEntries E1 INNER JOIN @EntityIdTable E2 ON E2.EntityId = E1.EFEntityId
 DELETE E1 FROM EFEntities E1 INNER JOIN @EntityIdTable E2 ON E2.EntityId = E1.Id";
 
-        internal void DeleteEntitiesAndEntries(int entityId)
+        internal Task DeleteEntitiesAndEntriesAsync(int entityId, CancellationToken cancel)
         {
             // This script collects all entity ids in a subtree (including the provided root),
             // deletes all security entries related to them, then deletes all entities.
-            Database.ExecuteSqlRaw(DeleteEntitiesAndEntriesScript, new SqlParameter("@EntityId", entityId));
+            return Database.ExecuteSqlRawAsync(DeleteEntitiesAndEntriesScript,
+                new[] { new SqlParameter("@EntityId", entityId) }, cancel);
         }
 
         private const string CleanupSecurityActivitiesScript = @"DELETE FROM EFMessages WHERE SavedAt < DATEADD(minute, -@TimeLimit, GETUTCDATE()) AND ExecutionState = 'Done'";

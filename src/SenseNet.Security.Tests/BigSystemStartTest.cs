@@ -296,7 +296,8 @@ namespace SenseNet.Security.Tests
         {
             var timer = Stopwatch.StartNew();
 
-            var count = dataProvider.GetEstimatedEntityCount();
+            var count = dataProvider.GetEstimatedEntityCountAsync(CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
             var capacity = count + count / 10;
 
             var entities = new Dictionary<int, SecurityEntity>(capacity);

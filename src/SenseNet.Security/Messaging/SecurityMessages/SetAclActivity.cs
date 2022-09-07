@@ -84,15 +84,20 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         protected override void Store(SecurityContext context)
         {
             var dataHandler = context.SecuritySystem.DataHandler;
-            dataHandler.WritePermissionEntries(_entries);
 
-            dataHandler.RemovePermissionEntries(_entriesToRemove);
+            dataHandler.WritePermissionEntriesAsync(_entries, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+
+            dataHandler.RemovePermissionEntriesAsync(_entriesToRemove, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
 
             foreach (var entityId in _breaks)
-                dataHandler.BreakInheritanceAsync(entityId, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                dataHandler.BreakInheritanceAsync(entityId, CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
 
             foreach (var entityId in _undoBreaks)
-                dataHandler.UnBreakInheritanceAsync(entityId, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                dataHandler.UnBreakInheritanceAsync(entityId, CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>

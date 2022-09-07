@@ -130,14 +130,14 @@ ELSE CAST(0 AS BIT) END";
             return false;
         }
 
-        /// <summary>
-        /// Returns with the estimated security entity count as fast as possible.
-        /// System start sequence uses this method.
-        /// </summary>
         public int GetEstimatedEntityCount()
         {
-            using var db = Db();
-                return db.GetEstimatedEntityCount();
+            return GetEstimatedEntityCountAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<int> GetEstimatedEntityCountAsync(CancellationToken cancel)
+        {
+            await using var db = Db();
+            return await db.GetEstimatedEntityCountAsync(cancel);
         }
 
         [Obsolete("Use async version instead.", true)]
@@ -371,17 +371,18 @@ ELSE CAST(0 AS BIT) END";
                 .ToArray();
         }
 
-        /// <summary>
-        /// Inserts or updates one or more StoredACEs.
-        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
-        /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
+        {
+            WritePermissionEntriesAsync(aces, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task WritePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
             var storedAces = aces as StoredAce[] ?? aces.ToArray();
             try
             {
-                using var db = Db();
-                db.WritePermissionEntries(storedAces);
+                await using var db = Db();
+                await db.WritePermissionEntriesAsync(storedAces, cancel);
             }
             catch (SqlException ex)
             {
@@ -395,43 +396,54 @@ ELSE CAST(0 AS BIT) END";
                 throw new SecurityStructureException(message, ex);
             }
         }
-        /// <summary>
-        /// Deletes the given ACEs.  If an ACE does not exist before deleting, it must be skipped.
-        /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
-        /// </summary>
+
         public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
-            using var db = Db();
-            db.RemovePermissionEntries(aces);
+            RemovePermissionEntriesAsync(aces, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
-        /// <summary>
-        /// Deletes all ACEs related to the given entity id.
-        /// </summary>
+        public async Task RemovePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
+        {
+            await using var db = Db();
+            await db.RemovePermissionEntriesAsync(aces, cancel);
+        }
+
+        [Obsolete("Use async version instead.", true)]
         public void RemovePermissionEntriesByEntity(int entityId)
         {
-            using var db = Db();
-            db.RemovePermissionEntriesByEntity(entityId);
+            RemovePermissionEntriesByEntityAsync(entityId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
-        /// <summary>
-        /// Deletes all ACEs related to any of the entities in a subtree defined by the provided root id, then 
-        /// deletes all the entities too.
-        /// </summary>
+        public async Task RemovePermissionEntriesByEntityAsync(int entityId, CancellationToken cancel)
+        {
+            await using var db = Db();
+            await db.RemovePermissionEntriesByEntityAsync(entityId, cancel);
+        }
+
+        [Obsolete("Use async version instead.", true)]
         public void DeleteEntitiesAndEntries(int entityId)
         {
-            using var db = Db();
-            db.DeleteEntitiesAndEntries(entityId);
+            DeleteEntitiesAndEntriesAsync(entityId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task DeleteEntitiesAndEntriesAsync(int entityId, CancellationToken cancel)
+        {
+            await using var db = Db();
+            await db.DeleteEntitiesAndEntriesAsync(entityId, cancel);
         }
 
         //===================================================================== SecurityActivity
 
-        /// <summary>
-        /// Returns the biggest activity id that was saved before the provided time if there is any.
-        /// Otherwise returns with 0.
-        /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public int GetLastSecurityActivityId(DateTime startedTime)
         {
-            using var db = Db();
-            var lastMsg = db.EFMessages.OrderByDescending(e => e.Id).FirstOrDefault();
+            return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
+        {
+            await using var db = Db();
+            var lastMsg = await db.EFMessages.OrderByDescending(e => e.Id).FirstOrDefaultAsync(cancel);
             return lastMsg?.Id ?? 0;
         }
 
