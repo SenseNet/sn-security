@@ -131,9 +131,22 @@ namespace SenseNet.Security
             return await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
         }
 
+        [Obsolete("Use async version instead.", true)]
+        public void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId)
+        {
+            CreateSecurityEntityAsync(entityId, parentEntityId, ownerId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
         public Task CreateSecurityEntityAsync(int entityId, int parentEntityId, int ownerId, CancellationToken cancel)
         {
             return CreateSecurityEntityAsync(entityId, parentEntityId, ownerId, false, cancel);
+        }
+
+        [Obsolete("Use async version instead.", true)]
+        public void CreateSecurityEntitySafe(int entityId, int parentEntityId, int ownerId)
+        {
+            CreateSecurityEntitySafeAsync(entityId, parentEntityId, ownerId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
         public Task CreateSecurityEntitySafeAsync(int entityId, int parentEntityId, int ownerId, CancellationToken cancel)
         {
@@ -166,6 +179,12 @@ namespace SenseNet.Security
             await _dataProvider.InsertSecurityEntityAsync(entity, cancel);
         }
 
+        [Obsolete("Use async version instead.", true)]
+        public void ModifySecurityEntityOwner(int entityId, int ownerId)
+        {
+            ModifySecurityEntityOwnerAsync(entityId, ownerId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
         public async Task ModifySecurityEntityOwnerAsync(int entityId, int ownerId, CancellationToken cancel)
         {
             var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
@@ -174,12 +193,24 @@ namespace SenseNet.Security
             entity.OwnerId = ownerId;
             await _dataProvider.UpdateSecurityEntityAsync(entity, cancel);
         }
-        
+
+        [Obsolete("Use async version instead.", true)]
+        public void DeleteSecurityEntity(int entityId)
+        {
+            DeleteSecurityEntityAsync(entityId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
         public Task DeleteSecurityEntityAsync(int entityId, CancellationToken cancel)
         {
             return _dataProvider.DeleteEntitiesAndEntriesAsync(entityId, cancel);
         }
 
+        [Obsolete("Use async version instead.", true)]
+        public void MoveSecurityEntity(int sourceId, int targetId)
+        {
+            MoveSecurityEntityAsync(sourceId, targetId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
         public async Task MoveSecurityEntityAsync(int sourceId, int targetId, CancellationToken cancel)
         {
             var source = await _dataProvider.LoadStoredSecurityEntityAsync(sourceId, cancel);
@@ -193,6 +224,11 @@ namespace SenseNet.Security
             await _dataProvider.MoveSecurityEntityAsync(sourceId, targetId, cancel);
         }
 
+        [Obsolete("Use async version instead.", true)]
+        public void BreakInheritance(int entityId)
+        {
+            BreakInheritanceAsync(entityId, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
         public async Task BreakInheritanceAsync(int entityId, CancellationToken cancel)
         {
             var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
@@ -202,6 +238,12 @@ namespace SenseNet.Security
             await _dataProvider.UpdateSecurityEntityAsync(entity, cancel);
         }
 
+        [Obsolete("Use async version instead.", true)]
+        public void UnBreakInheritance(int entityId)
+        {
+            UnBreakInheritanceAsync(entityId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
         public async Task UnBreakInheritanceAsync(int entityId, CancellationToken cancel)
         {
             var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
@@ -211,11 +253,23 @@ namespace SenseNet.Security
             await _dataProvider.UpdateSecurityEntityAsync(entity, cancel);
         }
 
+        [Obsolete("Use async version instead.", true)]
+        public IEnumerable<StoredAce> LoadPermissionEntries(IEnumerable<int> entityIds)
+        {
+            return LoadPermissionEntriesAsync(entityIds, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
         public Task<IEnumerable<StoredAce>> LoadPermissionEntriesAsync(IEnumerable<int> entityIds, CancellationToken cancel)
         {
             return _dataProvider.LoadPermissionEntriesAsync(entityIds, cancel);
         }
 
+        [Obsolete("Use async version instead.", true)]
+        public void WritePermissionEntries(IEnumerable<StoredAce> aces)
+        {
+            WritePermissionEntriesAsync(aces, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
         public async Task WritePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
             var softReload = false;
@@ -264,6 +318,12 @@ namespace SenseNet.Security
             }
         }
 
+        [Obsolete("Use async version instead.", true)]
+        public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
+        {
+            RemovePermissionEntriesAsync(aces, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
         public Task RemovePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
             return _dataProvider.RemovePermissionEntriesAsync(aces, cancel);
@@ -399,6 +459,12 @@ namespace SenseNet.Security
             return _dataProvider.DeleteIdentityAndRelatedEntriesAsync(userId, cancel);
         }
 
+        [Obsolete("Use async version instead.", true)]
+        public void DeleteSecurityGroup(int groupId)
+        {
+            DeleteSecurityGroupAsync(groupId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
         public Task DeleteSecurityGroupAsync(int groupId, CancellationToken cancel)
         {
             return _dataProvider.DeleteIdentityAndRelatedEntriesAsync(groupId, cancel);
