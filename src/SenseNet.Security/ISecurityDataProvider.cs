@@ -337,8 +337,23 @@ namespace SenseNet.Security
         /// <param name="to">Largest allowed id.</param>
         /// <param name="count">Fragment size.</param>
         /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
+        [Obsolete("Use async version instead.", true)] 
         Messaging.SecurityMessages.SecurityActivity[] LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously loads a SecurityActivity fragment within the specified limits.
+        /// If the count of activities in the id boundary ("from", "to") is bigger
+        /// than the given fragment size ("count"), the largest id could not reach.
+        /// Activities in the result array are sorted by id.
+        /// Value of the IsUnprocessedActivity property of every loaded object
+        /// will be the value of the given "executingUnprocessedActivities" parameter.
+        /// </summary>
+        /// <param name="from">Least expected id.</param>
+        /// <param name="to">Largest allowed id.</param>
+        /// <param name="count">Fragment size.</param>
+        /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
+        Task<Messaging.SecurityMessages.SecurityActivity[]> LoadSecurityActivitiesAsync(int from, int to, int count,
+            bool executingUnprocessedActivities, CancellationToken cancel);
 
         /// <summary>
         /// Loads a SecurityActivity fragment by the individual id array.
@@ -348,8 +363,18 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="gaps">Individual id array</param>
         /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
+        [Obsolete("Use async version instead.", true)]
         Messaging.SecurityMessages.SecurityActivity[] LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously loads a SecurityActivity fragment by the individual id array.
+        /// Activities in the result array are sorted by id.
+        /// Value of the IsUnprocessedActivity property of every loaded object
+        /// will be the value of the given "executingUnprocessedActivities" parameter.
+        /// </summary>
+        /// <param name="gaps">Individual id array</param>
+        /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
+        Task<Messaging.SecurityMessages.SecurityActivity[]> LoadSecurityActivitiesAsync(int[] gaps,
+            bool executingUnprocessedActivities, CancellationToken cancel);
 
         /// <summary>
         /// Returns a SecurityActivity.

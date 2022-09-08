@@ -426,8 +426,14 @@ namespace SenseNet.Security.Data
             return Task.FromResult(new[] { 0 });
         }
 
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public SecurityActivity[] LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities)
+        {
+            return LoadSecurityActivitiesAsync(from, to, count, executingUnprocessedActivities, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public Task<SecurityActivity[]> LoadSecurityActivitiesAsync(int from, int to, int count,
+            bool executingUnprocessedActivities, CancellationToken cancel)
         {
             lock (_messageLock)
             {
@@ -444,12 +450,17 @@ namespace SenseNet.Security.Data
                     result.Add(activity);
                 }
 
-                return result.ToArray();
+                return Task.FromResult(result.ToArray());
             }
         }
 
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public SecurityActivity[] LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities)
+        {
+            return LoadSecurityActivitiesAsync(gaps, executingUnprocessedActivities, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public Task<SecurityActivity[]> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities, CancellationToken cancel)
         {
             lock (_messageLock)
             {
@@ -466,7 +477,7 @@ namespace SenseNet.Security.Data
                     result.Add(activity);
                 }
 
-                return result.ToArray();
+                return Task.FromResult(result.ToArray());
             }
         }
 

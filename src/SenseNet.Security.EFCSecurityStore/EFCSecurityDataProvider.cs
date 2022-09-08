@@ -459,52 +459,25 @@ ELSE CAST(0 AS BIT) END";
             return await db.GetUnprocessedActivityIdsAsync(cancel);
         }
 
-        /// <summary>
-        /// Loads a SecurityActivity fragment within the specified limits.
-        /// If the count of activities in the id boundary ("from", "to") is bigger
-        /// than the given fragment size ("count"), the largest id could not reach.
-        /// Activities in the result array are sorted by id.
-        /// Value of the IsUnprocessedActivity property of every loaded object
-        /// will be the value of the given "executingUnprocessedActivities" parameter.
-        /// </summary>
-        /// <param name="from">Least expected id.</param>
-        /// <param name="to">Largest allowed id.</param>
-        /// <param name="count">Fragment size.</param>
-        /// <param name="executingUnprocessedActivities">
-        /// Value of the IsUnprocessedActivity property of every loaded object.</param>
+        [Obsolete("Use async version instead.", true)]
         public SecurityActivity[] LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities)
         {
-            var result = new List<SecurityActivity>();
-            using (var db = Db())
-            {
-                foreach (var item in db.EFMessages.Where(x => x.Id >= from && x.Id <= to).OrderBy(x => x.Id).Take(count))
-                {
-                    var activity = ActivitySerializer.DeserializeActivity(item.Body);
-                    if (activity == null)
-                        continue;
-                    activity.Id = item.Id;
-                    activity.FromDatabase = true;
-                    activity.IsUnprocessedActivity = executingUnprocessedActivities;
-                    result.Add(activity);
-                }
-            }
-            return result.ToArray();
+            return LoadSecurityActivitiesAsync(from, to, count, executingUnprocessedActivities, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
-        /// <summary>
-        /// Loads a SecurityActivity fragment by the individual id array.
-        /// Activities in the result array are sorted by id.
-        /// Value of the IsUnprocessedActivity property of every loaded object
-        /// will be the value of the given "executingUnprocessedActivities" parameter.
-        /// </summary>
-        /// <param name="gaps">Individual id array</param>
-        /// <param name="executingUnprocessedActivities">
-        /// Value of the IsUnprocessedActivity property of every loaded object.</param>
-        public SecurityActivity[] LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities)
+        public async Task<SecurityActivity[]> LoadSecurityActivitiesAsync(int from, int to, int count, bool executingUnprocessedActivities,
+            CancellationToken cancel)
         {
             var result = new List<SecurityActivity>();
-            using (var db = Db())
+            await using (var db = Db())
             {
-                foreach (var item in db.EFMessages.Where(x => gaps.Contains(x.Id)).OrderBy(x => x.Id))
+                var items = await db.EFMessages
+                    .Where(x => x.Id >= from && x.Id <= to)
+                    .OrderBy(x => x.Id)
+                    .Take(count)
+                    .ToArrayAsync(cancel);
+
+                foreach (var item in items)
                 {
                     var activity = ActivitySerializer.DeserializeActivity(item.Body);
                     if (activity == null)
@@ -517,6 +490,37 @@ ELSE CAST(0 AS BIT) END";
             }
             return result.ToArray();
         }
+
+        [Obsolete("Use async version instead.", true)]
+        public SecurityActivity[] LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities)
+        {
+            return LoadSecurityActivitiesAsync(gaps, executingUnprocessedActivities, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<SecurityActivity[]> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities, CancellationToken cancel)
+        {
+            var result = new List<SecurityActivity>();
+            await using (var db = Db())
+            {
+                var items = await db.EFMessages
+                    .Where(x => gaps.Contains(x.Id))
+                    .OrderBy(x => x.Id)
+                    .ToArrayAsync(cancel);
+
+                foreach (var item in items)
+                {
+                    var activity = ActivitySerializer.DeserializeActivity(item.Body);
+                    if (activity == null)
+                        continue;
+                    activity.Id = item.Id;
+                    activity.FromDatabase = true;
+                    activity.IsUnprocessedActivity = executingUnprocessedActivities;
+                    result.Add(activity);
+                }
+            }
+            return result.ToArray();
+        }
+
         /// <summary>
         /// Returns a SecurityActivity.
         /// </summary>

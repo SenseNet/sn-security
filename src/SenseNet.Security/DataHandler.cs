@@ -399,14 +399,18 @@ namespace SenseNet.Security
             return _dataProvider.GetLastSecurityActivityIdAsync(startedTime, cancel);
         }
 
-        internal IEnumerable<SecurityActivity> LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities)
+        internal async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int from, int to, int count,
+            bool executingUnprocessedActivities, CancellationToken cancel)
         {
-            return _dataProvider.LoadSecurityActivities(from, to, count, executingUnprocessedActivities);
+            var result = await _dataProvider.LoadSecurityActivitiesAsync(from, to, count, executingUnprocessedActivities, cancel);
+            return result;
         }
 
-        internal IEnumerable<SecurityActivity> LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities)
+        internal async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities,
+            CancellationToken cancel)
         {
-            return _dataProvider.LoadSecurityActivities(gaps, executingUnprocessedActivities);
+            var result = await _dataProvider.LoadSecurityActivitiesAsync(gaps, executingUnprocessedActivities, cancel);
+            return result;
         }
 
         internal SecurityActivity LoadBigSecurityActivity(int id)
