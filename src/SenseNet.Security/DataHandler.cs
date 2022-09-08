@@ -274,7 +274,10 @@ namespace SenseNet.Security
         internal Messaging.CompletionState LoadCompletionState(out int lastDatabaseId)
         {
             var isDbReady = IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult();
-            var ids = isDbReady ? _dataProvider.GetUnprocessedActivityIds() : Array.Empty<int>();
+            var ids = isDbReady 
+                ? _dataProvider.GetUnprocessedActivityIdsAsync(CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult()
+                : Array.Empty<int>();
             lastDatabaseId = ids.LastOrDefault();
 
             var result = new Messaging.CompletionState();
@@ -322,6 +325,7 @@ namespace SenseNet.Security
 
             return result;
         }
+        //UNDONE:x: Async version (uses out params)
 
         internal void SaveActivity(SecurityActivity activity)
         {

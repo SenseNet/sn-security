@@ -314,8 +314,16 @@ namespace SenseNet.Security
         /// Two or more element means that the array contains one or more unprocessed activity id and the last element is the last stored activity id.
         /// </summary>
         /// <returns>Zero or more id of unprocessed elements supplemented with the last stored activity id.</returns>
+        [Obsolete("Use async version instead.", true)]
         int[] GetUnprocessedActivityIds();
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously returns an array of all unprocessed activity ids supplemented with the last stored activity id.
+        /// Empty array means that the database does not contain any activities.
+        /// Array with only one element means that the database does not contain any unprocessed element and the last stored activity id is the returned item.
+        /// Two or more element means that the array contains one or more unprocessed activity id and the last element is the last stored activity id.
+        /// </summary>
+        /// <returns>Zero or more id of unprocessed elements supplemented with the last stored activity id.</returns>
+        Task<int[]> GetUnprocessedActivityIdsAsync(CancellationToken cancel);
 
         /// <summary>
         /// Loads a SecurityActivity fragment within the specified limits.

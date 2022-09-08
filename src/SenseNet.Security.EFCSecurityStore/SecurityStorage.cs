@@ -140,12 +140,13 @@ UNION ALL
 SELECT 0, CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN 0 ELSE @ident END [Value]
 --ORDER BY Id
 ";
-        internal int[] GetUnprocessedActivityIds()
+        internal async Task<int[]> GetUnprocessedActivityIdsAsync(CancellationToken cancel)
         {
-            var result = EfcIntSet
+            var dbResult = await EfcIntSet
                 .FromSqlRaw(SelectUnprocessedActivityIds)
                 .Select(x => x.Value)
-                .AsEnumerable()
+                .ToArrayAsync(cancel);
+            var result = dbResult
                 .OrderBy(x => x)
                 .ToArray();
             return result;

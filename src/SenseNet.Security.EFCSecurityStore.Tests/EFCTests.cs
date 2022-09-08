@@ -140,7 +140,8 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             uncompleted = DataHandler.LoadCompletionState(out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs1 = SecurityActivityQueue.GetCurrentState().Termination;
-            var idsFromDb1 = string.Join(", ", Db().GetUnprocessedActivityIds());
+            var idsFromDb1 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult());
             Assert.AreEqual(expectedCs.ToString(), cs1.ToString());
             Assert.AreEqual(expectedIsFromDb1, idsFromDb1);
 
@@ -158,7 +159,8 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             uncompleted = DataHandler.LoadCompletionState(out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs2 = SecurityActivityQueue.GetCurrentState().Termination;
-            var idsFromDb2 = string.Join(", ", Db().GetUnprocessedActivityIds());
+            var idsFromDb2 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult());
             Assert.AreEqual(expectedCs.ToString(), cs2.ToString());
             Assert.AreEqual(expectedIsFromDb2, idsFromDb2);
         }

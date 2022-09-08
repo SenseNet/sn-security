@@ -400,7 +400,6 @@ namespace SenseNet.Security.Data
             }
         }
 
-        /// <inheritdoc />
         [Obsolete("Use async version instead.", true)]
         public virtual int GetLastSecurityActivityId(DateTime startedTime)
         {
@@ -416,10 +415,15 @@ namespace SenseNet.Security.Data
             }
         }
 
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public int[] GetUnprocessedActivityIds()
         {
-            return new[] { 0 };
+            return GetUnprocessedActivityIdsAsync(CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public Task<int[]> GetUnprocessedActivityIdsAsync(CancellationToken cancel)
+        {
+            return Task.FromResult(new[] { 0 });
         }
 
         /// <inheritdoc />
