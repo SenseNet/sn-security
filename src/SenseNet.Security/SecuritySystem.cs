@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Extensions.Options;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Configuration;
@@ -142,7 +143,8 @@ namespace SenseNet.Security
             // load from database if it was too big to distribute
             if (message is BigActivityMessage bigActivityMessage)
             {
-                activity = DataHandler.LoadBigSecurityActivity(bigActivityMessage.DatabaseId);
+                activity = DataHandler.LoadBigSecurityActivityAsync(bigActivityMessage.DatabaseId, CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
                 if (activity == null)
                     SnTrace.Security.WriteError("Cannot load body of a BigActivity. Id: {0}", bigActivityMessage.DatabaseId);
             }

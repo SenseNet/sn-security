@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
@@ -345,12 +347,16 @@ namespace SenseNet.Security.Tests
         private class MemoryDataProviderForMessagingTests : MemoryDataProvider
         {
             public MemoryDataProviderForMessagingTests(DatabaseStorage storage) : base(storage) { }
+            [Obsolete("Use async version instead.", true)]
             public override SecurityActivity LoadSecurityActivity(int id)
             {
-                var activity =  base.LoadSecurityActivity(id);
-
+                return LoadSecurityActivityAsync(id, CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+            public override async Task<SecurityActivity> LoadSecurityActivityAsync(int id, CancellationToken cancel)
+            {
+                var activity = await base.LoadSecurityActivityAsync(id, cancel);
                 SnLog.WriteInformation($"LoadMessage: {activity.GetType().Name}#{id}");
-
                 return activity;
             }
         }

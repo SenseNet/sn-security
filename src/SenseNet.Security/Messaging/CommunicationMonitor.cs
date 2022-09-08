@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using Microsoft.Extensions.Options;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Configuration;
@@ -53,7 +54,8 @@ namespace SenseNet.Security.Messaging
 
             try
             {
-                _dataHandler.CleanupSecurityActivities();
+                _dataHandler.CleanupSecurityActivitiesAsync(CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
             }
             catch (Exception ex) //logged
             {

@@ -21,9 +21,15 @@ namespace SenseNet.Security.Tests
             {
             }
 
+            [Obsolete("Use async version instead.", true)]
             public override void CleanupSecurityActivities(int timeLimitInMinutes)
             {
-                base.CleanupSecurityActivities(timeLimitInMinutes);
+                CleanupSecurityActivitiesAsync(timeLimitInMinutes, CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+            public override async Task CleanupSecurityActivitiesAsync(int timeLimitInMinutes, CancellationToken cancel)
+            {
+                await base.CleanupSecurityActivitiesAsync(timeLimitInMinutes, cancel);
                 IsCleanupSecurityActivitiesCalled = true;
             }
 

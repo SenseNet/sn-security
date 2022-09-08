@@ -521,13 +521,16 @@ ELSE CAST(0 AS BIT) END";
             return result.ToArray();
         }
 
-        /// <summary>
-        /// Returns a SecurityActivity.
-        /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public SecurityActivity LoadSecurityActivity(int id)
         {
-            using var db = Db();
-            var item = db.EFMessages.FirstOrDefault(x => x.Id == id);
+            return LoadSecurityActivityAsync(id, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<SecurityActivity> LoadSecurityActivityAsync(int id, CancellationToken cancel)
+        {
+            await using var db = Db();
+            var item = await db.EFMessages.FirstOrDefaultAsync(x => x.Id == id, cancel);
             if (item == null)
                 return null;
 
@@ -535,6 +538,7 @@ ELSE CAST(0 AS BIT) END";
             activity.Id = item.Id;
             return activity;
         }
+
         /// <summary>
         /// Stores the full data of the passed activity.
         /// Returns with the generated activity id and the size of the activity's body. 
@@ -561,28 +565,41 @@ ELSE CAST(0 AS BIT) END";
             }
             return result.Entity.Id;
         }
-        /// <summary>
-        /// Deletes all the activities that were saved before the given time limit.
-        /// </summary>
+
+        [Obsolete("Use async version instead.", true)]
         public void CleanupSecurityActivities(int timeLimitInMinutes)
         {
-            using var db = Db();
-            db.CleanupSecurityActivities(timeLimitInMinutes);
+            CleanupSecurityActivitiesAsync(timeLimitInMinutes, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task CleanupSecurityActivitiesAsync(int timeLimitInMinutes, CancellationToken cancel)
+        {
+            await using var db = Db();
+            await db.CleanupSecurityActivitiesAsync(timeLimitInMinutes, cancel);
         }
 
         /// <summary>
         /// Ensures an exclusive (only one) object for the activity. Returns the new lock object or null.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public SecurityActivityExecutionLock AcquireSecurityActivityExecutionLock(
             SecurityActivity securityActivity, int timeoutInSeconds)
         {
-            var maxTime = timeoutInSeconds == int.MaxValue ? DateTime.MaxValue : DateTime.UtcNow.AddSeconds(timeoutInSeconds);
+            return AcquireSecurityActivityExecutionLockAsync(securityActivity, timeoutInSeconds, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<SecurityActivityExecutionLock> AcquireSecurityActivityExecutionLockAsync(
+            SecurityActivity securityActivity, int timeoutInSeconds, CancellationToken cancel)
+        {
+            var maxTime = timeoutInSeconds == int.MaxValue
+                ? DateTime.MaxValue
+                : DateTime.UtcNow.AddSeconds(timeoutInSeconds);
             while (DateTime.UtcNow < maxTime)
             {
                 string result;
-                using (var db = Db())
-                    result = db.AcquireSecurityActivityExecutionLock(
-                        securityActivity.Id, _messageSenderManager.InstanceId, timeoutInSeconds);
+                await using (var db = Db())
+                    result = await db.AcquireSecurityActivityExecutionLockAsync(
+                        securityActivity.Id, _messageSenderManager.InstanceId, timeoutInSeconds, cancel);
 
                 // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (result)
@@ -596,24 +613,39 @@ ELSE CAST(0 AS BIT) END";
                         return new SecurityActivityExecutionLock(securityActivity, this, false);
                 }
             }
+
             throw new SecurityActivityTimeoutException(
                 $"Waiting for a SecurityActivityExecutionLock timed out: #{securityActivity.Id}/{securityActivity.TypeName}");
         }
+
         /// <summary>
         /// Refreshes the lock object to avoid its timeout.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)
         {
-            using var db = Db();
-            db.RefreshSecurityActivityExecutionLock(securityActivity.Id);
+            RefreshSecurityActivityExecutionLockAsync(securityActivity, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
+        public async Task RefreshSecurityActivityExecutionLockAsync(SecurityActivity securityActivity, CancellationToken cancel)
+        {
+            await using var db = Db();
+            await db.RefreshSecurityActivityExecutionLockAsync(securityActivity.Id, cancel);
+        }
+
         /// <summary>
         /// Releases the lock and prevents locking that activity again by setting its state to Executed.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public void ReleaseSecurityActivityExecutionLock(SecurityActivity securityActivity)
         {
-            using var db = Db();
-            db.ReleaseSecurityActivityExecutionLock(securityActivity.Id);
+            ReleaseSecurityActivityExecutionLockAsync(securityActivity, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task ReleaseSecurityActivityExecutionLockAsync(SecurityActivity securityActivity, CancellationToken cancel)
+        {
+            await using var db = Db();
+            await db.ReleaseSecurityActivityExecutionLockAsync(securityActivity.Id, cancel);
         }
 
         //===================================================================== Tools
@@ -797,8 +829,15 @@ ELSE CAST(0 AS BIT) END";
         /// </summary>
         public IEnumerable<long> GetMembershipForConsistencyCheck()
         {
-            using var db = Db();
-            return db.EFMemberships.AsEnumerable().Select(m => (Convert.ToInt64(m.GroupId) << 32) + m.MemberId).ToArray();
+            return GetMembershipForConsistencyCheckAsync(CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task<IEnumerable<long>> GetMembershipForConsistencyCheckAsync(CancellationToken cancel)
+        {
+            await using var db = Db();
+            var dbResult = await db.EFMemberships.ToArrayAsync(cancel);
+            return dbResult.Select(m => (Convert.ToInt64(m.GroupId) << 32) + m.MemberId)
+                .ToArray();
         }
     }
 }

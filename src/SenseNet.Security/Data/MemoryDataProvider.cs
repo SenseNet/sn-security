@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 // ReSharper disable InconsistentlySynchronizedField
 
@@ -481,8 +482,13 @@ namespace SenseNet.Security.Data
             }
         }
 
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public virtual SecurityActivity LoadSecurityActivity(int id)
+        {
+            return LoadSecurityActivityAsync(id, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public virtual Task<SecurityActivity> LoadSecurityActivityAsync(int id, CancellationToken cancel)
         {
             lock (_messageLock)
             {
@@ -492,12 +498,17 @@ namespace SenseNet.Security.Data
 
                 var activity = ActivitySerializer.DeserializeActivity(item.Item3);
                 activity.Id = item.Item1;
-                return activity;
+                return Task.FromResult(activity);
             }
         }
 
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public virtual void CleanupSecurityActivities(int timeLimitInMinutes)
+        {
+            CleanupSecurityActivitiesAsync(timeLimitInMinutes, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public virtual Task CleanupSecurityActivitiesAsync(int timeLimitInMinutes, CancellationToken cancel)
         {
             lock (_messageLock)
             {
@@ -506,23 +517,44 @@ namespace SenseNet.Security.Data
                 foreach (var item in Storage.Messages.Where(x => x.Item2 < timeLimit).ToArray())
                     Storage.Messages.Remove(item);
             }
+            return Task.CompletedTask;
         }
 
-
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public Messaging.SecurityActivityExecutionLock AcquireSecurityActivityExecutionLock(SecurityActivity securityActivity, int timeoutInSeconds)
         {
-            return new Messaging.SecurityActivityExecutionLock(securityActivity, this, true);
+            return AcquireSecurityActivityExecutionLockAsync(securityActivity, timeoutInSeconds, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
-        /// <inheritdoc />
+        public Task<SecurityActivityExecutionLock> AcquireSecurityActivityExecutionLockAsync(SecurityActivity securityActivity, int timeoutInSeconds,
+            CancellationToken cancel)
+        {
+            var result = new Messaging.SecurityActivityExecutionLock(securityActivity, this, true);
+            return Task.FromResult(result);
+        }
+
+        [Obsolete("Use async version instead.", true)]
         public void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)
         {
-            // do nothing
+            RefreshSecurityActivityExecutionLockAsync(securityActivity, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
-        /// <inheritdoc />
-        public void ReleaseSecurityActivityExecutionLock(SecurityActivity securityActivity)
+        public Task RefreshSecurityActivityExecutionLockAsync(SecurityActivity securityActivity, CancellationToken cancel)
         {
             // do nothing
+            return Task.CompletedTask;
+        }
+
+        [Obsolete("Use async version instead.", true)]
+        public void ReleaseSecurityActivityExecutionLock(SecurityActivity securityActivity)
+        {
+            ReleaseSecurityActivityExecutionLockAsync(securityActivity, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public Task ReleaseSecurityActivityExecutionLockAsync(SecurityActivity securityActivity, CancellationToken cancel)
+        {
+            // do nothing
+            return Task.CompletedTask;
         }
 
 
@@ -599,10 +631,16 @@ namespace SenseNet.Security.Data
 
         //============================================================
 
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public IEnumerable<long> GetMembershipForConsistencyCheck()
         {
-            return Storage.Memberships.Select(m => (Convert.ToInt64(m.GroupId) << 32) + m.MemberId).ToArray();
+            return GetMembershipForConsistencyCheckAsync(CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public Task<IEnumerable<long>> GetMembershipForConsistencyCheckAsync(CancellationToken cancel)
+        {
+            var result = Storage.Memberships.Select(m => (Convert.ToInt64(m.GroupId) << 32) + m.MemberId).ToArray();
+            return Task.FromResult((IEnumerable<long>)result);
         }
     }
 }

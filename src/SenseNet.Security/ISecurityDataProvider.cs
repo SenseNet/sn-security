@@ -379,37 +379,62 @@ namespace SenseNet.Security
         /// <summary>
         /// Returns a SecurityActivity.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         Messaging.SecurityMessages.SecurityActivity LoadSecurityActivity(int id);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously returns a SecurityActivity.
+        /// </summary>
+        Task<Messaging.SecurityMessages.SecurityActivity> LoadSecurityActivityAsync(int id, CancellationToken cancel);
 
         /// <summary>
         /// Deletes all the activities that were saved before the given time limit.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         void CleanupSecurityActivities(int timeLimitInMinutes);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously deletes all the activities that were saved before the given time limit.
+        /// </summary>
+        Task CleanupSecurityActivitiesAsync(int timeLimitInMinutes, CancellationToken cancel);
 
         /// <summary>
         /// Ensures an exclusive (only one) object for the activity. Returns the new lock object or null.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         Messaging.SecurityActivityExecutionLock AcquireSecurityActivityExecutionLock(Messaging.SecurityMessages.SecurityActivity securityActivity, int timeoutInSeconds);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously ensures an exclusive (only one) object for the activity. Returns the new lock object or null.
+        /// </summary>
+        Task<Messaging.SecurityActivityExecutionLock> AcquireSecurityActivityExecutionLockAsync(
+            Messaging.SecurityMessages.SecurityActivity securityActivity, int timeoutInSeconds, CancellationToken cancel);
 
         /// <summary>
         /// Refreshes the lock object to avoid its timeout.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         void RefreshSecurityActivityExecutionLock(Messaging.SecurityMessages.SecurityActivity securityActivity);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously refreshes the lock object to avoid its timeout.
+        /// </summary>
+        Task RefreshSecurityActivityExecutionLockAsync(Messaging.SecurityMessages.SecurityActivity securityActivity, CancellationToken cancel);
 
         /// <summary>
         /// Releases the lock and prevents locking that activity again by setting its state to Executed.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         void ReleaseSecurityActivityExecutionLock(Messaging.SecurityMessages.SecurityActivity securityActivity);
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously releases the lock and prevents locking that activity again by setting its state to Executed.
+        /// </summary>
+        Task ReleaseSecurityActivityExecutionLockAsync(Messaging.SecurityMessages.SecurityActivity securityActivity, CancellationToken cancel);
 
         /// <summary>
         /// Returns with information for consistency check: a compound number containing the group's and the member's id.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         IEnumerable<long> GetMembershipForConsistencyCheck();
-        //UNDONE:x: Async version.
+        /// <summary>
+        /// Asynchronously returns with information for consistency check: a compound number containing the group's and the member's id.
+        /// </summary>
+        Task<IEnumerable<long>> GetMembershipForConsistencyCheckAsync(CancellationToken cancel);
     }
 }

@@ -275,13 +275,14 @@ DELETE E1 FROM EFEntities E1 INNER JOIN @EntityIdTable E2 ON E2.EntityId = E1.Id
         }
 
         private const string CleanupSecurityActivitiesScript = @"DELETE FROM EFMessages WHERE SavedAt < DATEADD(minute, -@TimeLimit, GETUTCDATE()) AND ExecutionState = 'Done'";
-        internal void CleanupSecurityActivities(int timeLimitInMinutes)
+        internal Task CleanupSecurityActivitiesAsync(int timeLimitInMinutes, CancellationToken cancel)
         {
-            Database.ExecuteSqlRaw(CleanupSecurityActivitiesScript, new SqlParameter("@TimeLimit", timeLimitInMinutes));
+            return Database.ExecuteSqlRawAsync(CleanupSecurityActivitiesScript, 
+                new[]{new SqlParameter("@TimeLimit", timeLimitInMinutes)}, cancel);
         }
 
         // ReSharper disable once ConvertToConstant.Local
-        private static readonly string _acquireSecurityActivityExecutionLockScript = @"UPDATE EFMessages
+        private static readonly string AcquireSecurityActivityExecutionLockScript = @"UPDATE EFMessages
 	SET ExecutionState = '" + ExecutionState.Executing + @"', LockedBy = @LockedBy, LockedAt = GETUTCDATE()
 	WHERE Id = @ActivityId AND ((ExecutionState = '" + ExecutionState.Wait + @"') OR (ExecutionState = '" + ExecutionState.Executing + @"' AND LockedAt < DATEADD(second, -@TimeLimit, GETUTCDATE())))
 IF (@@rowcount > 0)
@@ -289,20 +290,22 @@ IF (@@rowcount > 0)
 ELSE
 	SELECT Id, ExecutionState AS Value FROM EFMessages WHERE Id = @ActivityId
 ";
-        public string AcquireSecurityActivityExecutionLock(int securityActivityId, string lockedBy, int timeoutInSeconds)
+        public async Task<string> AcquireSecurityActivityExecutionLockAsync(int securityActivityId, string lockedBy, int timeoutInSeconds,
+            CancellationToken cancel)
         {
-            var query = EfcStringSet
-                .FromSqlRaw(_acquireSecurityActivityExecutionLockScript,
+            var dbResult = await EfcStringSet
+                .FromSqlRaw(AcquireSecurityActivityExecutionLockScript,
                         new SqlParameter("@ActivityId", securityActivityId),
                         new SqlParameter("@LockedBy", lockedBy ?? ""),
-                        new SqlParameter("@TimeLimit", timeoutInSeconds));
+                        new SqlParameter("@TimeLimit", timeoutInSeconds))
+                .ToArrayAsync(cancel);
 
             var result = string.Empty;
 
             // We use foreach here instead of Single or First, because Entity Framework
             // generates an outer SELECT for those methods that result in an incorrect
             // SQL syntax.
-            foreach (var item in query)
+            foreach (var item in dbResult)
             {
                 // read the first and only item and return immediately
                 result = item.Value;
@@ -313,23 +316,19 @@ ELSE
         }
 
         // ReSharper disable once ConvertToConstant.Local
-        private static readonly string _refreshSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";
-        public void RefreshSecurityActivityExecutionLock(int securityActivityId)
+        private static readonly string RefreshSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";
+        public Task RefreshSecurityActivityExecutionLockAsync(int securityActivityId, CancellationToken cancel)
         {
-            Database
-                .ExecuteSqlRaw(
-                    _refreshSecurityActivityExecutionLockScript,
-                    new SqlParameter("@ActivityId", securityActivityId));
+            return Database.ExecuteSqlRawAsync(RefreshSecurityActivityExecutionLockScript,
+                new[] {new SqlParameter("@ActivityId", securityActivityId)}, cancel);
         }
 
         // ReSharper disable once ConvertToConstant.Local
-        private static readonly string _releaseSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET ExecutionState = '" + ExecutionState.Done + @"' WHERE Id = @ActivityId";
-        public void ReleaseSecurityActivityExecutionLock(int securityActivityId)
+        private static readonly string ReleaseSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET ExecutionState = '" + ExecutionState.Done + @"' WHERE Id = @ActivityId";
+        public Task ReleaseSecurityActivityExecutionLockAsync(int securityActivityId, CancellationToken cancel)
         {
-            Database
-                .ExecuteSqlRaw(
-                    _releaseSecurityActivityExecutionLockScript,
-                    new SqlParameter("@ActivityId", securityActivityId));
+            return Database.ExecuteSqlRawAsync(ReleaseSecurityActivityExecutionLockScript,
+                new[] {new SqlParameter("@ActivityId", securityActivityId)}, cancel);
         }
 
         private const string DeleteIdentityScript = @"DELETE FROM EFMemberships WHERE GroupId = @IdentityId OR MemberId = @IdentityId

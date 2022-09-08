@@ -413,27 +413,27 @@ namespace SenseNet.Security
             return result;
         }
 
-        internal SecurityActivity LoadBigSecurityActivity(int id)
+        internal Task<SecurityActivity> LoadBigSecurityActivityAsync(int id, CancellationToken cancel)
         {
-            return _dataProvider.LoadSecurityActivity(id);
+            return _dataProvider.LoadSecurityActivityAsync(id, cancel);
         }
 
-        internal void CleanupSecurityActivities()
+        internal async Task CleanupSecurityActivitiesAsync(CancellationToken cancel)
         {
-            if (!IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())
+            if (!await IsDatabaseReadyAsync(cancel))
                 return;
-
-            _dataProvider.CleanupSecurityActivities(_messagingOptions.SecurityActivityLifetimeInMinutes);
+            await _dataProvider.CleanupSecurityActivitiesAsync(_messagingOptions.SecurityActivityLifetimeInMinutes, cancel);
         }
 
 
-        internal Messaging.SecurityActivityExecutionLock AcquireSecurityActivityExecutionLock(SecurityActivity securityActivity)
+        internal async Task<Messaging.SecurityActivityExecutionLock> AcquireSecurityActivityExecutionLockAsync(SecurityActivity securityActivity,
+            CancellationToken cancel)
         {
             var timeout = Debugger.IsAttached
                 ? int.MaxValue
                 : Configuration.Messaging.SecurityActivityExecutionLockTimeoutInSeconds;
 
-            return _dataProvider.AcquireSecurityActivityExecutionLock(securityActivity, timeout);
+            return await _dataProvider.AcquireSecurityActivityExecutionLockAsync(securityActivity, timeout, cancel);
         }
         //internal void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)
         //{

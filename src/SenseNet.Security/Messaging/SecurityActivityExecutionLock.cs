@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Timers;
+using System.Threading;
 using SenseNet.Security.Messaging.SecurityMessages;
+using Timer = System.Timers.Timer;
 
 namespace SenseNet.Security.Messaging
 {
@@ -42,7 +43,8 @@ namespace SenseNet.Security.Messaging
 
         private void Refresh(object sender, EventArgs args)
         {
-            _dataProvider.RefreshSecurityActivityExecutionLock(_activity);
+            _dataProvider.RefreshSecurityActivityExecutionLockAsync(_activity, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
         private void Release()
         {
@@ -51,7 +53,8 @@ namespace SenseNet.Security.Messaging
             _timer.Elapsed -= Refresh;
             _timer.Disposed -= Refresh;
             if (FullExecutionEnabled)
-                _dataProvider.ReleaseSecurityActivityExecutionLock(_activity);
+                _dataProvider.ReleaseSecurityActivityExecutionLockAsync(_activity, CancellationToken.None)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         private bool _disposed;
