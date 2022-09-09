@@ -6,6 +6,33 @@ using System.Threading.Tasks;
 namespace SenseNet.Security
 {
     /// <summary>
+    /// Represents a query result of the query group-related entities.
+    /// </summary>
+    public class GroupRelatedEntitiesQueryResult
+    {
+        /// <summary>
+        /// Gets or sets a collection of entity ids that have a group-related access control entry.
+        /// </summary>
+        public IEnumerable<int> EntityIds { get; set; }
+        /// <summary>
+        /// Entities that have only the given group related ACEs. These ACLs will be removed.
+        /// </summary>
+        public IEnumerable<int> ExclusiveEntityIds { get; set; }
+    }
+
+    public class SaveSecurityActivityResult
+    {
+        /// <summary>
+        /// Gets or sets the id of the saved activity.
+        /// </summary>
+        public int ActivityId { get; set; }
+        /// <summary>
+        /// Gets or sets the size of the activity body in bytes.
+        /// </summary>
+        public int BodySize { get; set; }
+    }
+
+    /// <summary>
     /// Describes a customizable storage layer interface of the Security Component.
     /// </summary>
     public interface ISecurityDataProvider
@@ -144,7 +171,12 @@ namespace SenseNet.Security
         /// <param name="entityIds">Entities that have one or more group related ACEs. These ACEs will be removed from the ACLs.</param>
         /// <param name="exclusiveEntityIds">Entities that have only the given group related ACEs. These ACLs will be removed.</param>
         void QueryGroupRelatedEntities(int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds);
-        //UNDONE:x: Async version (uses out params)
+        /// <summary>
+        /// Asynchronously provides a collection of entity ids that have a group-related access control entry.
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
+        Task<GroupRelatedEntitiesQueryResult> QueryGroupRelatedEntitiesAsync(int groupId, CancellationToken cancel);
 
         /*--------------------------------------------------------------*/
 
@@ -292,8 +324,18 @@ namespace SenseNet.Security
         /// <param name="activity">Activity to save.</param>
         /// <param name="bodySize">Activity size in bytes.</param>
         /// <returns>The generated activity id.</returns>
+        [Obsolete("Use async version instead.", true)]
         int SaveSecurityActivity(Messaging.SecurityMessages.SecurityActivity activity, out int bodySize);
-        //UNDONE:x: Async version (uses out params)
+        /// <summary>
+        /// Asynchronously stores the full data of the passed activity.
+        /// Returns with the generated activity id and the size of the activity's body. 
+        /// Activity ids in the database must be a consecutive list of numbers.
+        /// </summary>
+        /// <param name="activity">Activity to save.</param>
+        /// <param name="cancel">Activity size in bytes.</param>
+        /// <returns>The generated activity id and its size in one <see cref="SaveSecurityActivityResult"/> instance.</returns>
+        Task<SaveSecurityActivityResult> SaveSecurityActivityAsync(Messaging.SecurityMessages.SecurityActivity activity,
+            CancellationToken cancel);
 
         /// <summary>
         /// Returns the biggest activity id that was saved before the provided time if there is any.
@@ -365,6 +407,7 @@ namespace SenseNet.Security
         /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
         [Obsolete("Use async version instead.", true)]
         Messaging.SecurityMessages.SecurityActivity[] LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities);
+
         /// <summary>
         /// Asynchronously loads a SecurityActivity fragment by the individual id array.
         /// Activities in the result array are sorted by id.
@@ -373,6 +416,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="gaps">Individual id array</param>
         /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
         Task<Messaging.SecurityMessages.SecurityActivity[]> LoadSecurityActivitiesAsync(int[] gaps,
             bool executingUnprocessedActivities, CancellationToken cancel);
 

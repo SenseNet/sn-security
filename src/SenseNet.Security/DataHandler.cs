@@ -387,11 +387,11 @@ namespace SenseNet.Security
         }
         //UNDONE:x: Async version (uses out params)
 
-        internal void SaveActivity(SecurityActivity activity)
+        internal async Task SaveActivityAsync(SecurityActivity activity, CancellationToken cancel)
         {
-            var id = _dataProvider.SaveSecurityActivity(activity, out var bodySize);
-            activity.BodySize = bodySize;
-            activity.Id = id;
+            var result = await _dataProvider.SaveSecurityActivityAsync(activity, cancel);
+            activity.BodySize = result.BodySize;
+            activity.Id = result.ActivityId;
         }
 
         internal Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)

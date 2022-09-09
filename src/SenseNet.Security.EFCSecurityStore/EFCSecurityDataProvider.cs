@@ -130,6 +130,7 @@ ELSE CAST(0 AS BIT) END";
             return false;
         }
 
+        [Obsolete("Use async version instead.", true)]
         public int GetEstimatedEntityCount()
         {
             return GetEstimatedEntityCountAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -397,6 +398,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
+        [Obsolete("Use async version instead.", true)]
         public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
             RemovePermissionEntriesAsync(aces, CancellationToken.None)
@@ -539,20 +541,19 @@ ELSE CAST(0 AS BIT) END";
             return activity;
         }
 
-        /// <summary>
-        /// Stores the full data of the passed activity.
-        /// Returns with the generated activity id and the size of the activity's body. 
-        /// Activity ids in the database must be a consecutive list of numbers.
-        /// </summary>
-        /// <param name="activity">Activity to save.</param>
-        /// <param name="bodySize">Activity size in bytes.</param>
-        /// <returns>The generated activity id.</returns>
+        [Obsolete("Use async version instead.", true)]
         public int SaveSecurityActivity(SecurityActivity activity, out int bodySize)
         {
+            var result = SaveSecurityActivityAsync(activity, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+            bodySize = result.BodySize;
+            return result.ActivityId;
+        }
+        public async Task<SaveSecurityActivityResult> SaveSecurityActivityAsync(SecurityActivity activity, CancellationToken cancel)
+        {
             var body = ActivitySerializer.SerializeActivity(activity);
-            bodySize = body.Length;
             EntityEntry<EFMessage> result;
-            using (var db = Db())
+            await using (var db = Db())
             {
                 result = db.EFMessages.Add(new EFMessage
                 {
@@ -561,10 +562,11 @@ ELSE CAST(0 AS BIT) END";
                     SavedAt = DateTime.UtcNow,
                     Body = body
                 });
-                db.SaveChanges();
+                await db.SaveChangesAsync(cancel);
             }
-            return result.Entity.Id;
+            return new SaveSecurityActivityResult {ActivityId = result.Entity.Id, BodySize = body.Length};
         }
+
 
         [Obsolete("Use async version instead.", true)]
         public void CleanupSecurityActivities(int timeLimitInMinutes)
@@ -657,31 +659,38 @@ ELSE CAST(0 AS BIT) END";
 
         /* ===================================================================== */
 
-        /// <summary>
-        /// This method provides a collection of entity ids that have a group-related access control entry.
-        /// </summary>
-        /// <param name="groupId"></param>
-        /// <param name="entityIds">
-        /// Entities that have one or more group related ACEs. These ACEs will be removed from the ACLs. </param>
-        /// <param name="exclusiveEntityIds">
-        /// Entities that have only the given group related ACEs. These ACLs will be removed. </param>
+        [Obsolete("Use async version instead.", true)]
         public void QueryGroupRelatedEntities(
             int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds)
         {
-            var result = new List<int>();
-            using (var db = Db())
+            var result = QueryGroupRelatedEntitiesAsync(groupId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+            entityIds = result.EntityIds;
+            exclusiveEntityIds = result.ExclusiveEntityIds;
+        }
+        public async Task<GroupRelatedEntitiesQueryResult> QueryGroupRelatedEntitiesAsync(int groupId, CancellationToken cancel)
+        {
+            var exclusiveEntityIds = new List<int>();
+            await using var db = Db();
+
+            var entityIds = await db.EFEntries
+                .Where(x => x.IdentityId == groupId)
+                .Select(x => x.EFEntityId).Distinct()
+                .ToArrayAsync(cancel);
+
+            foreach (var relatedEntityId in entityIds)
             {
-                entityIds = db.EFEntries.Where(x => x.IdentityId == groupId).Select(x => x.EFEntityId).Distinct().ToArray();
-                // ReSharper disable once LoopCanBeConvertedToQuery
-                foreach (var relatedEntityId in entityIds)
-                {
-                    var aces = db.EFEntries.Where(x => x.EFEntityId == relatedEntityId).ToArray();
-                    var groupRelatedCount = aces.Count(x => x.IdentityId == groupId);
-                    if (aces.Length == groupRelatedCount)
-                        result.Add(relatedEntityId);
-                }
+                var aces = db.EFEntries.Where(x => x.EFEntityId == relatedEntityId).ToArray();
+                var groupRelatedCount = aces.Count(x => x.IdentityId == groupId);
+                if (aces.Length == groupRelatedCount)
+                    exclusiveEntityIds.Add(relatedEntityId);
             }
-            exclusiveEntityIds = result;
+
+            return new GroupRelatedEntitiesQueryResult
+            {
+                EntityIds = entityIds,
+                ExclusiveEntityIds = exclusiveEntityIds
+            };
         }
 
 

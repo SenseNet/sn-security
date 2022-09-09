@@ -156,7 +156,6 @@ SELECT 0, CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN 0 ELSE @ident END 
         private const string LoadStoredSecurityEntityByIdScript = @"
 SELECT TOP 1 E.Id, E.OwnerId nullableOwnerId, E.ParentId nullableParentId, E.IsInherited, convert(bit, case when E2.EFEntityId is null then 0 else 1 end) as HasExplicitEntry 
 FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.Id = @EntityId";
-
         internal async Task<StoredSecurityEntity> LoadStoredSecurityEntityByIdAsync(int entityId, CancellationToken cancel)
         {
             var result = await EfcStoredSecurityEntitySet

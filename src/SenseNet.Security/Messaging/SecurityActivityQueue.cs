@@ -121,7 +121,7 @@ namespace SenseNet.Security.Messaging
         public void ExecuteActivity(SecurityActivity activity)
         {
             if (!activity.FromDatabase && !activity.FromReceiver)
-                _dataHandler.SaveActivity(activity);
+                _dataHandler.SaveActivityAsync(activity, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
             _serializer.EnqueueActivity(activity);
         }

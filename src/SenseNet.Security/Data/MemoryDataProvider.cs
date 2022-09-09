@@ -368,36 +368,59 @@ namespace SenseNet.Security.Data
             Storage.Entities.Remove(entityId);
         }
 
+        [Obsolete("Use async version instead.", true)]
         public void QueryGroupRelatedEntities(int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds)
+        {
+            var result = QueryGroupRelatedEntitiesAsync(groupId, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+            entityIds = result.EntityIds;
+            exclusiveEntityIds = result.ExclusiveEntityIds;
+        }
+        public Task<GroupRelatedEntitiesQueryResult> QueryGroupRelatedEntitiesAsync(int groupId, CancellationToken cancel)
         {
             lock (_acesLock)
             {
-                var result = new List<int>();
-                entityIds = Storage.Aces.Where(x => x.IdentityId == groupId).Select(x => x.EntityId).Distinct();
-                // ReSharper disable once LoopCanBeConvertedToQuery
+                var exclusiveEntityIds = new List<int>();
+                var entityIds = Storage.Aces
+                    .Where(x => x.IdentityId == groupId)
+                    .Select(x => x.EntityId)
+                    .Distinct()
+                    .ToArray();
+
                 foreach (var relatedEntityId in entityIds)
                 {
                     var aces = Storage.Aces.Where(x => x.EntityId == relatedEntityId).ToArray();
                     var groupRelatedCount = aces.Count(x => x.IdentityId == groupId);
                     if (aces.Length == groupRelatedCount)
-                        result.Add(relatedEntityId);
+                        exclusiveEntityIds.Add(relatedEntityId);
                 }
-                exclusiveEntityIds = result;
+
+                return Task.FromResult(new GroupRelatedEntitiesQueryResult
+                {
+                    EntityIds = entityIds,
+                    ExclusiveEntityIds = exclusiveEntityIds
+                });
             }
         }
 
         internal int LastActivityId;
 
-        /// <inheritdoc />
+        [Obsolete("Use async version instead.", true)]
         public int SaveSecurityActivity(SecurityActivity activity, out int bodySize)
+        {
+            var result = SaveSecurityActivityAsync(activity, CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+            bodySize = result.BodySize;
+            return result.ActivityId;
+        }
+        public Task<SaveSecurityActivityResult> SaveSecurityActivityAsync(SecurityActivity activity, CancellationToken cancel)
         {
             lock (_messageLock)
             {
                 var id = Interlocked.Increment(ref LastActivityId);
                 var body = ActivitySerializer.SerializeActivity(activity);
-                bodySize = body.Length;
                 Storage.Messages.Add(new Tuple<int, DateTime, byte[]>(id, DateTime.UtcNow, body));
-                return id;
+                return Task.FromResult(new SaveSecurityActivityResult {ActivityId = id, BodySize = body.Length});
             }
         }
 
@@ -613,6 +636,7 @@ namespace SenseNet.Security.Data
             return Task.CompletedTask;;
         }
 
+        [Obsolete("Use async version instead.", true)]
         public void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
             RemoveMembersAsync(groupId, userMembers, groupMembers, CancellationToken.None)
