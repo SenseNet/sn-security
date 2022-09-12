@@ -701,12 +701,13 @@ ELSE CAST(0 AS BIT) END";
         {
             return LoadAllGroupsAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
         }
-        public Task<IEnumerable<SecurityGroup>> LoadAllGroupsAsync(CancellationToken cancel)
+        public async Task<IEnumerable<SecurityGroup>> LoadAllGroupsAsync(CancellationToken cancel)
         {
+
             var groups = new Dictionary<int, SecurityGroup>();
-            using (var db = Db())
+            await using (var db = Db())
             {
-                foreach (var membership in db.EFMemberships)
+                await db.EFMemberships.ForEachAsync(membership =>
                 {
                     var group = EnsureGroup(membership.GroupId, groups);
                     if (membership.IsUser)
@@ -719,9 +720,9 @@ ELSE CAST(0 AS BIT) END";
                         group.Groups.Add(memberGroup);
                         memberGroup.ParentGroups.Add(group);
                     }
-                }
+                }, cancel);
             }
-            return Task.FromResult((IEnumerable<SecurityGroup>)groups.Values); //UNDONE:x: async ???
+            return groups.Values;
         }
 
         private static SecurityGroup EnsureGroup(int groupId, Dictionary<int, SecurityGroup> groups)
@@ -820,6 +821,7 @@ ELSE CAST(0 AS BIT) END";
             await db.SaveChangesAsync(cancel);
         }
 
+        [Obsolete("Use async version instead.", true)]
         public void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
             RemoveMembersAsync(groupId, userMembers, groupMembers, CancellationToken.None)
@@ -836,6 +838,7 @@ ELSE CAST(0 AS BIT) END";
         /// <summary>
         /// Returns with information for consistency check: a compound number containing the group's and the member's id.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public IEnumerable<long> GetMembershipForConsistencyCheck()
         {
             return GetMembershipForConsistencyCheckAsync(CancellationToken.None)
