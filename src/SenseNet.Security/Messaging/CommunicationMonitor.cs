@@ -35,7 +35,7 @@ namespace SenseNet.Security.Messaging
             Timer_Elapsed();
         }
         // for testing purposes we need a parameterless method because ElapsedEventArgs has only internal constructor
-        private void Timer_Elapsed()
+        private void Timer_Elapsed() //TODO: should be async (async timer).
         {
             if (Debugger.IsAttached)
                 return;
