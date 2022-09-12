@@ -28,7 +28,7 @@ namespace SenseNet.Security
         {
             Load();
         }
-        internal void Load()
+        internal void Load() //UNDONE:x: async-await.
         {
             var entities = _dataHandler.LoadSecurityEntitiesAsync(CancellationToken.None)
                 .ConfigureAwait(false).GetAwaiter().GetResult();

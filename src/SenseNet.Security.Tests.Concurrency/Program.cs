@@ -66,7 +66,7 @@ namespace SenseNet.Security.Tests.Concurrency
             var securitySystem = new SecuritySystem(securityDataProvider,
                 new DefaultMessageProvider(messageSenderManager),
                 new MissingEntityHandler(), config, messagingOptions);
-            securitySystem.Start();
+            securitySystem.StartAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
             // legacy logic
             // original line: MessageSender.Initialize("asdf");

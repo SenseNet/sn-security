@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Configuration;
@@ -74,14 +75,21 @@ namespace SenseNet.Security
             SystemUser = new SecuritySystemUser(configuration.SystemUserId);
         }
 
+        [Obsolete("Use async version instead.", true)]
         public void Start()
+        {
+            StartAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        public async Task StartAsync(CancellationToken cancel)
         {
             GeneralSecurityContext = null;
 
             // The message provider must receive ongoing activities at this time.
             StartedAt = DateTime.UtcNow;
 
-            var uncompleted = DataHandler.LoadCompletionState(out var lastActivityIdFromDb);
+            var dbResult = await DataHandler.LoadCompletionStateAsync(cancel);
+            var uncompleted = dbResult.CompletionState;
+            var lastActivityIdFromDb = dbResult.LastDatabaseId;
             
             PermissionTypeBase.InferForcedRelations();
 

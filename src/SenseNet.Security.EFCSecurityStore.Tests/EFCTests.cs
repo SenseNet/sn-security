@@ -61,7 +61,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
 
             // test0: initial
             var expectedCs0 = new CompletionState { LastActivityId = lastId };
-            var cs0 = DataHandler.LoadCompletionState(out var dbId0);
+            var cs0 = DataHandler_LoadCompletionState(out var dbId0);
 
             Assert.AreEqual(lastId, dbId0);
             Assert.AreEqual(expectedCs0.ToString(), cs0.ToString());
@@ -79,7 +79,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                 LastActivityId = lastId,
                 Gaps = new[] { lastId - 9, lastId - 6, lastId - 4, lastId - 3, lastId - 2, lastId - 1 }
             };
-            var cs1 = DataHandler.LoadCompletionState(out var dbId1);
+            var cs1 = DataHandler_LoadCompletionState(out var dbId1);
 
             Assert.AreEqual(dbId1, lastId);
             Assert.AreEqual(expectedCs1.ToString(), cs1.ToString());
@@ -97,7 +97,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                 LastActivityId = lastId - 5,
                 Gaps = new[] { lastId - 9, lastId - 6 }
             };
-            var cs2 = DataHandler.LoadCompletionState(out var dbId2);
+            var cs2 = DataHandler_LoadCompletionState(out var dbId2);
 
             Assert.AreEqual(dbId2, lastId);
             Assert.AreEqual(expectedCs2.ToString(), cs2.ToString());
@@ -120,7 +120,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
 
             // test0: initial state
             var expectedCs = new CompletionState { LastActivityId = lastId };
-            var uncompleted = DataHandler.LoadCompletionState(out var lastActivityIdFromDb);
+            var uncompleted = DataHandler_LoadCompletionState(out var lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs0 = SecurityActivityQueue.GetCurrentState().Termination;
             Assert.AreEqual(expectedCs.ToString(), cs0.ToString());
@@ -137,7 +137,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                 ");
 
             var expectedIsFromDb1 = string.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId });
-            uncompleted = DataHandler.LoadCompletionState(out lastActivityIdFromDb);
+            uncompleted = DataHandler_LoadCompletionState(out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs1 = SecurityActivityQueue.GetCurrentState().Termination;
             var idsFromDb1 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None)
@@ -156,7 +156,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                 ");
 
             var expectedIsFromDb2 = string.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId, lastId });
-            uncompleted = DataHandler.LoadCompletionState(out lastActivityIdFromDb);
+            uncompleted = DataHandler_LoadCompletionState(out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs2 = SecurityActivityQueue.GetCurrentState().Termination;
             var idsFromDb2 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None)
@@ -267,7 +267,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             Db().ExecuteTestScript("UPDATE EFMessages set ExecutionState = 'Wait', LockedBy = null, LockedAt = null");
 
             sb.Clear();
-            var uncompleted = DataHandler.LoadCompletionState(out var lastActivityIdFromDb);
+            var uncompleted = DataHandler_LoadCompletionState(out var lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
 
             var cs1 = SecurityActivityQueue.GetCurrentCompletionState();
@@ -341,6 +341,16 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             Assert.IsTrue(sdp is EFCSecurityDataProvider);
             Assert.AreEqual("test123", sdp.ConnectionString);
             Assert.IsNotNull(new ObjectAccessor(sdp).GetField("_messageSenderManager"));
+        }
+
+        /* ======================================================================== */
+
+        private CompletionState DataHandler_LoadCompletionState(out int lastDbId)
+        {
+            var dbResult = DataHandler.LoadCompletionStateAsync(CancellationToken.None)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+            lastDbId = dbResult.LastDatabaseId;
+            return dbResult.CompletionState;
         }
     }
 }

@@ -11,6 +11,21 @@ using System.Threading;
 
 namespace SenseNet.Security
 {
+    /// <summary>
+    /// Contains information about the executed activities and last activity id in the database.
+    /// </summary>
+    public class LoadCompletionStateResult
+    {
+        /// <summary>
+        /// Gets or sets the current CompletionState containing information about the executed activities.
+        /// </summary>
+        public Messaging.CompletionState CompletionState { get; set; }
+        /// <summary>
+        /// Gets or sets the last executed activity id in the database.
+        /// </summary>
+        public int LastDatabaseId { get; set; }
+    }
+
     public class DataHandler
     {
         private readonly ISecurityDataProvider _dataProvider;
@@ -331,30 +346,29 @@ namespace SenseNet.Security
 
         //==============================================================================================
 
-        internal Messaging.CompletionState LoadCompletionState(out int lastDatabaseId)
+        internal async Task<LoadCompletionStateResult> LoadCompletionStateAsync(CancellationToken cancel)
         {
-            var isDbReady = IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult();
+            var isDbReady = await IsDatabaseReadyAsync(CancellationToken.None);
             var ids = isDbReady 
-                ? _dataProvider.GetUnprocessedActivityIdsAsync(CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult()
+                ? await _dataProvider.GetUnprocessedActivityIdsAsync(CancellationToken.None)
                 : Array.Empty<int>();
-            lastDatabaseId = ids.LastOrDefault();
+            var lastDatabaseId = ids.LastOrDefault();
 
-            var result = new Messaging.CompletionState();
+            var completionState = new Messaging.CompletionState();
 
             // there is no unprocessed: last item is the last database id
             if (ids.Length <= 1)
             {
-                result.LastActivityId = lastDatabaseId;
-                return result;
+                completionState.LastActivityId = lastDatabaseId;
+                return new LoadCompletionStateResult{CompletionState = completionState, LastDatabaseId = lastDatabaseId};
             }
 
             // there is only one unprocessed element
             if (ids.Length == 2)
             {
-                result.LastActivityId = lastDatabaseId;
-                result.Gaps = new[] { ids[ids.Length - 2] };
-                return result;
+                completionState.LastActivityId = lastDatabaseId;
+                completionState.Gaps = new[] { ids[ids.Length - 2] };
+                return new LoadCompletionStateResult { CompletionState = completionState, LastDatabaseId = lastDatabaseId };
             }
 
             // if last unprocessed and last database id does not equal,
@@ -363,9 +377,9 @@ namespace SenseNet.Security
             {
                 //                     i-2     -1
                 // _,_,3,_,_,6,_,8,9,10,11    ,12
-                result.LastActivityId = lastDatabaseId;
-                result.Gaps = ids.Take(ids.Length - 1).ToArray();
-                return result;
+                completionState.LastActivityId = lastDatabaseId;
+                completionState.Gaps = ids.Take(ids.Length - 1).ToArray();
+                return new LoadCompletionStateResult { CompletionState = completionState, LastDatabaseId = lastDatabaseId };
             }
 
             //                        i-2     -1
@@ -380,12 +394,11 @@ namespace SenseNet.Security
                 }
             }
 
-            result.LastActivityId = ids[continuousFrom] - 1;
-            result.Gaps = ids.Take(continuousFrom).ToArray();
+            completionState.LastActivityId = ids[continuousFrom] - 1;
+            completionState.Gaps = ids.Take(continuousFrom).ToArray();
 
-            return result;
+            return new LoadCompletionStateResult { CompletionState = completionState, LastDatabaseId = lastDatabaseId };
         }
-        //UNDONE:x: Async version (uses out params)
 
         internal async Task SaveActivityAsync(SecurityActivity activity, CancellationToken cancel)
         {
