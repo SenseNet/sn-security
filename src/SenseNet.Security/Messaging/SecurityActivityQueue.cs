@@ -21,6 +21,7 @@ namespace SenseNet.Security.Messaging
         private readonly DependencyManager _dependencyManager;
         private readonly TerminationHistory _terminationHistory;
         private readonly Executor _executor;
+        private readonly CancellationTokenSource _cancellation;
 
         public SecurityActivityQueue(SecuritySystem securitySystem, CommunicationMonitor communicationMonitor,
             DataHandler dataHandler, SecurityActivityHistoryController activityHistory)
@@ -34,6 +35,7 @@ namespace SenseNet.Security.Messaging
             _dependencyManager = new DependencyManager(_serializer, _executor, _terminationHistory, activityHistory);
             _serializer.DependencyManager = _dependencyManager;
             _executor.DependencyManager = _dependencyManager;
+            _cancellation = new CancellationTokenSource();
 
             communicationMonitor.HearthBeat += (sender, args) => HealthCheck();
         }
@@ -61,7 +63,7 @@ namespace SenseNet.Security.Messaging
                 var notLoaded = state.Gaps.ToList();
                 foreach (var activity in new SecurityActivityLoader(state.Gaps, false, _dataHandler))
                 {
-                    ExecuteActivity(activity);
+                    ExecuteActivityAsync(activity).ConfigureAwait(false).GetAwaiter().GetResult();
                     // memorize executed
                     notLoaded.Remove(activity.Id);
                 }
@@ -77,7 +79,7 @@ namespace SenseNet.Security.Messaging
             {
                 SnTrace.SecurityQueue.Write("SAQ: Health checker is processing activities from {0} to {1}", lastId + 1, lastDbId);
                 foreach (var activity in new SecurityActivityLoader(lastId + 1, lastDbId, false, _dataHandler))
-                    ExecuteActivity(activity);
+                    ExecuteActivityAsync(activity).ConfigureAwait(false).GetAwaiter().GetResult();
             }
         }
         public bool IsWorking()
@@ -102,6 +104,7 @@ namespace SenseNet.Security.Messaging
             _serializer.Reset();
             _dependencyManager.Reset();
             _terminationHistory.Reset(0);
+            _cancellation.Cancel();
         }
 
         public CompletionState GetCurrentCompletionState()
@@ -118,10 +121,13 @@ namespace SenseNet.Security.Messaging
             };
         }
 
-        public void ExecuteActivity(SecurityActivity activity) //UNDONE:x: async-await !
+        // No CancellationToken parameter is required
+        public async Task ExecuteActivityAsync(SecurityActivity activity)
         {
+            // At this point, the SecurityActivityQueue has taken over the activity,
+            // and only it can abort the execution with its own cancellation source.
             if (!activity.FromDatabase && !activity.FromReceiver)
-                _dataHandler.SaveActivityAsync(activity, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                await _dataHandler.SaveActivityAsync(activity, _cancellation.Token);
 
             _serializer.EnqueueActivity(activity);
         }

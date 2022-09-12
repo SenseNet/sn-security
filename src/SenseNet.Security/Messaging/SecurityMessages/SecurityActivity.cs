@@ -55,13 +55,14 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <param name="waitForComplete">If the value is true (default),
         /// the current thread waits for the full execution on this computer.
         /// Otherwise the method returns immediately.</param>
-        public void Execute(SecurityContext context, bool waitForComplete = true)
+        public void Execute(SecurityContext context, bool waitForComplete = true) //UNDONE:x: async-await?
         {
             Context = context;
             if (Sender == null)
                 Sender = context.SecuritySystem.MessageSenderManager.CreateMessageSender();
 
-            context.SecuritySystem.SecurityActivityQueue.ExecuteActivity(this);
+            context.SecuritySystem.SecurityActivityQueue.ExecuteActivityAsync(this)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
 
             if(waitForComplete)
                 WaitForComplete();
@@ -113,7 +114,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         {
             // default implementation does nothing
         }
-        private void Distribute(SecurityContext context)
+        private void Distribute(SecurityContext context) //UNDONE:x: async-await?
         {
             DistributedMessage msg = this;
             if (BodySize > __context.SecuritySystem.MessagingOptions.DistributableSecurityActivityMaxSize)
