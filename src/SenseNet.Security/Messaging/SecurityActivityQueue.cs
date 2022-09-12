@@ -118,7 +118,7 @@ namespace SenseNet.Security.Messaging
             };
         }
 
-        public void ExecuteActivity(SecurityActivity activity)
+        public void ExecuteActivity(SecurityActivity activity) //UNDONE:x: async-await?
         {
             if (!activity.FromDatabase && !activity.FromReceiver)
                 _dataHandler.SaveActivityAsync(activity, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();

@@ -73,6 +73,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Called by an internal component in right order.
         /// </summary>
+        //UNDONE:x: Async SecurityActivity.ExecuteInternal (call abstract methods)
         internal void ExecuteInternal()
         {
             try
