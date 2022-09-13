@@ -114,7 +114,7 @@ namespace SenseNet.Security.Tests
                 new SecurityConfiguration(),
                 new MessagingOptions());
 
-            securitySystem.StartAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             return securitySystem;
         }

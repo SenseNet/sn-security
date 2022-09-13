@@ -44,7 +44,7 @@ namespace SenseNet.Security.Messaging
         private void Refresh(object sender, EventArgs args)
         {
             _dataProvider.RefreshSecurityActivityExecutionLockAsync(_activity, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
         }
         private void Release()
         {
@@ -54,7 +54,7 @@ namespace SenseNet.Security.Messaging
             _timer.Disposed -= Refresh;
             if (FullExecutionEnabled)
                 _dataProvider.ReleaseSecurityActivityExecutionLockAsync(_activity, CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                    .GetAwaiter().GetResult();
         }
 
         private bool _disposed;

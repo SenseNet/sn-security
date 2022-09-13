@@ -56,7 +56,7 @@ namespace SenseNet.Security.Data
 
         public int GetEstimatedEntityCount()
         {
-            return GetEstimatedEntityCountAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            return GetEstimatedEntityCountAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task<int> GetEstimatedEntityCountAsync(CancellationToken cancel)
         {
@@ -66,7 +66,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public IEnumerable<StoredSecurityEntity> LoadSecurityEntities()
         {
-            return LoadSecurityEntitiesAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            return LoadSecurityEntitiesAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task<IEnumerable<StoredSecurityEntity>> LoadSecurityEntitiesAsync(CancellationToken cancel)
         {
@@ -98,7 +98,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public IEnumerable<SecurityGroup> LoadAllGroups()
         {
-            return LoadAllGroupsAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            return LoadAllGroupsAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task<IEnumerable<SecurityGroup>> LoadAllGroupsAsync(CancellationToken cancel)
         {
@@ -154,8 +154,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public StoredSecurityEntity LoadStoredSecurityEntity(int entityId)
         {
-            return LoadStoredSecurityEntityAsync(entityId, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            return LoadStoredSecurityEntityAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task<StoredSecurityEntity> LoadStoredSecurityEntityAsync(int entityId, CancellationToken cancel)
         {
@@ -166,7 +165,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void InsertSecurityEntity(StoredSecurityEntity entity)
         {
-            InsertSecurityEntityAsync(entity, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            InsertSecurityEntityAsync(entity, CancellationToken.None).GetAwaiter().GetResult();
         }
         public async Task InsertSecurityEntityAsync(StoredSecurityEntity entity, CancellationToken cancel)
         {
@@ -180,7 +179,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void UpdateSecurityEntity(StoredSecurityEntity entity)
         {
-            UpdateSecurityEntityAsync(entity, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            UpdateSecurityEntityAsync(entity, CancellationToken.None).GetAwaiter().GetResult();
         }
         public async Task UpdateSecurityEntityAsync(StoredSecurityEntity entity, CancellationToken cancel)
         {
@@ -193,7 +192,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void DeleteSecurityEntity(int entityId)
         {
-            DeleteSecurityEntityAsync(entityId, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            DeleteSecurityEntityAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task DeleteSecurityEntityAsync(int entityId, CancellationToken cancel)
         {
@@ -204,8 +203,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void MoveSecurityEntity(int sourceId, int targetId)
         {
-            MoveSecurityEntityAsync(sourceId, targetId, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            MoveSecurityEntityAsync(sourceId, targetId, CancellationToken.None).GetAwaiter().GetResult();
         }
         public async Task MoveSecurityEntityAsync(int sourceId, int targetId, CancellationToken cancel)
         {
@@ -221,8 +219,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public SecurityGroup LoadSecurityGroup(int groupId)
         {
-            return LoadSecurityGroupAsync(groupId, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            return LoadSecurityGroupAsync(groupId, CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task<SecurityGroup> LoadSecurityGroupAsync(int groupId, CancellationToken cancel)
         {
@@ -265,8 +262,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public IEnumerable<StoredAce> LoadAllPermissionEntries()
         {
-            return LoadAllPermissionEntriesAsync(CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            return LoadAllPermissionEntriesAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task<IEnumerable<StoredAce>> LoadAllPermissionEntriesAsync(CancellationToken cancel)
         {
@@ -277,8 +273,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public IEnumerable<StoredAce> LoadPermissionEntries(IEnumerable<int> entityIds)
         {
-            return LoadPermissionEntriesAsync(entityIds, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            return LoadPermissionEntriesAsync(entityIds, CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task<IEnumerable<StoredAce>> LoadPermissionEntriesAsync(IEnumerable<int> entityIds, CancellationToken cancel)
         {
@@ -289,7 +284,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
         {
-            WritePermissionEntriesAsync(aces, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            WritePermissionEntriesAsync(aces, CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task WritePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
@@ -309,8 +304,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
-            RemovePermissionEntriesAsync(aces, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            RemovePermissionEntriesAsync(aces, CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task RemovePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
@@ -329,8 +323,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void RemovePermissionEntriesByEntity(int entityId)
         {
-            RemovePermissionEntriesByEntityAsync(entityId, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            RemovePermissionEntriesByEntityAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task RemovePermissionEntriesByEntityAsync(int entityId, CancellationToken cancel)
         {
@@ -348,8 +341,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void DeleteEntitiesAndEntries(int entityId)
         {
-            DeleteEntitiesAndEntriesAsync(entityId, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            DeleteEntitiesAndEntriesAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
         }
         public async Task DeleteEntitiesAndEntriesAsync(int entityId, CancellationToken cancel)
         {
@@ -371,8 +363,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void QueryGroupRelatedEntities(int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds)
         {
-            var result = QueryGroupRelatedEntitiesAsync(groupId, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            var result = QueryGroupRelatedEntitiesAsync(groupId, CancellationToken.None).GetAwaiter().GetResult();
             entityIds = result.EntityIds;
             exclusiveEntityIds = result.ExclusiveEntityIds;
         }
@@ -408,8 +399,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public int SaveSecurityActivity(SecurityActivity activity, out int bodySize)
         {
-            var result = SaveSecurityActivityAsync(activity, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            var result = SaveSecurityActivityAsync(activity, CancellationToken.None).GetAwaiter().GetResult();
             bodySize = result.BodySize;
             return result.ActivityId;
         }
@@ -427,8 +417,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public virtual int GetLastSecurityActivityId(DateTime startedTime)
         {
-            return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None).GetAwaiter().GetResult();
         }
         public virtual Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
         {
@@ -442,8 +431,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public int[] GetUnprocessedActivityIds()
         {
-            return GetUnprocessedActivityIdsAsync(CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            return GetUnprocessedActivityIdsAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task<int[]> GetUnprocessedActivityIdsAsync(CancellationToken cancel)
         {
@@ -454,7 +442,7 @@ namespace SenseNet.Security.Data
         public SecurityActivity[] LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities)
         {
             return LoadSecurityActivitiesAsync(from, to, count, executingUnprocessedActivities, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
         }
         public Task<SecurityActivity[]> LoadSecurityActivitiesAsync(int from, int to, int count,
             bool executingUnprocessedActivities, CancellationToken cancel)
@@ -482,7 +470,7 @@ namespace SenseNet.Security.Data
         public SecurityActivity[] LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities)
         {
             return LoadSecurityActivitiesAsync(gaps, executingUnprocessedActivities, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
         }
         public Task<SecurityActivity[]> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities, CancellationToken cancel)
         {
@@ -508,8 +496,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public virtual SecurityActivity LoadSecurityActivity(int id)
         {
-            return LoadSecurityActivityAsync(id, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            return LoadSecurityActivityAsync(id, CancellationToken.None).GetAwaiter().GetResult();
         }
         public virtual Task<SecurityActivity> LoadSecurityActivityAsync(int id, CancellationToken cancel)
         {
@@ -528,8 +515,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public virtual void CleanupSecurityActivities(int timeLimitInMinutes)
         {
-            CleanupSecurityActivitiesAsync(timeLimitInMinutes, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            CleanupSecurityActivitiesAsync(timeLimitInMinutes, CancellationToken.None).GetAwaiter().GetResult();
         }
         public virtual Task CleanupSecurityActivitiesAsync(int timeLimitInMinutes, CancellationToken cancel)
         {
@@ -547,7 +533,7 @@ namespace SenseNet.Security.Data
         public Messaging.SecurityActivityExecutionLock AcquireSecurityActivityExecutionLock(SecurityActivity securityActivity, int timeoutInSeconds)
         {
             return AcquireSecurityActivityExecutionLockAsync(securityActivity, timeoutInSeconds, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
         }
         public Task<SecurityActivityExecutionLock> AcquireSecurityActivityExecutionLockAsync(SecurityActivity securityActivity, int timeoutInSeconds,
             CancellationToken cancel)
@@ -559,8 +545,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)
         {
-            RefreshSecurityActivityExecutionLockAsync(securityActivity, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            RefreshSecurityActivityExecutionLockAsync(securityActivity, CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task RefreshSecurityActivityExecutionLockAsync(SecurityActivity securityActivity, CancellationToken cancel)
         {
@@ -571,8 +556,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void ReleaseSecurityActivityExecutionLock(SecurityActivity securityActivity)
         {
-            ReleaseSecurityActivityExecutionLockAsync(securityActivity, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            ReleaseSecurityActivityExecutionLockAsync(securityActivity, CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task ReleaseSecurityActivityExecutionLockAsync(SecurityActivity securityActivity, CancellationToken cancel)
         {
@@ -586,8 +570,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void DeleteIdentityAndRelatedEntries(int identityId)
         {
-            DeleteIdentityAndRelatedEntriesAsync(identityId, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            DeleteIdentityAndRelatedEntriesAsync(identityId, CancellationToken.None).GetAwaiter().GetResult();
         }
         //TODO: thread safety
         public Task DeleteIdentityAndRelatedEntriesAsync(int identityId, CancellationToken cancel)
@@ -600,8 +583,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void DeleteIdentitiesAndRelatedEntries(IEnumerable<int> ids)
         {
-            DeleteIdentitiesAndRelatedEntriesAsync(ids, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            DeleteIdentitiesAndRelatedEntriesAsync(ids, CancellationToken.None).GetAwaiter().GetResult();
         }
         public async Task DeleteIdentitiesAndRelatedEntriesAsync(IEnumerable<int> ids, CancellationToken cancel)
         {
@@ -612,8 +594,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void AddMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
-            AddMembersAsync(groupId, userMembers, groupMembers, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            AddMembersAsync(groupId, userMembers, groupMembers, CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task AddMembersAsync(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, CancellationToken cancel)
         {
@@ -639,8 +620,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
-            RemoveMembersAsync(groupId, userMembers, groupMembers, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            RemoveMembersAsync(groupId, userMembers, groupMembers, CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task RemoveMembersAsync(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, CancellationToken cancel)
         {
@@ -658,8 +638,7 @@ namespace SenseNet.Security.Data
         [Obsolete("Use async version instead.", true)]
         public IEnumerable<long> GetMembershipForConsistencyCheck()
         {
-            return GetMembershipForConsistencyCheckAsync(CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            return GetMembershipForConsistencyCheckAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         public Task<IEnumerable<long>> GetMembershipForConsistencyCheckAsync(CancellationToken cancel)
         {

@@ -15,7 +15,7 @@ namespace SenseNet.Security.Tests.TestPortal
                 new MissingEntityHandler(),
                 new SecurityConfiguration(),
                 new MessagingOptions { CommunicationMonitorRunningPeriodInSeconds = 31 });
-            securitySystem.StartAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             return securitySystem;
         }

@@ -78,7 +78,7 @@ namespace SenseNet.Security
         [Obsolete("Use async version instead.", true)]
         public void Start()
         {
-            StartAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            StartAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         public async Task StartAsync(CancellationToken cancel)
         {
@@ -152,7 +152,7 @@ namespace SenseNet.Security
             if (message is BigActivityMessage bigActivityMessage)
             {
                 activity = DataHandler.LoadBigSecurityActivityAsync(bigActivityMessage.DatabaseId, CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                    .GetAwaiter().GetResult();
                 if (activity == null)
                     SnTrace.Security.WriteError("Cannot load body of a BigActivity. Id: {0}", bigActivityMessage.DatabaseId);
             }

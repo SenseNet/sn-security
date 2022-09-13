@@ -77,15 +77,15 @@ namespace SenseNet.Security
             {
                 // compensation: try to load the entity and its aces from the db
                 var storedEntity = _dataHandler.GetStoredSecurityEntityAsync(entityId, CancellationToken.None)
-                    .ConfigureAwait(true).GetAwaiter().GetResult(); //UNDONE:x: rewrite to .ConfigureAwait(false)
+                    .GetAwaiter().GetResult();
 
                 if (storedEntity != null)
                 {
                     entity = CreateEntitySafe(entityId, storedEntity.ParentId, storedEntity.OwnerId, storedEntity.IsInherited, storedEntity.HasExplicitEntry);
 
                     var acl = new AclInfo(entityId);
-                    var entries = _dataHandler.LoadPermissionEntriesAsync(new[] { entityId }, CancellationToken.None)
-                        .ConfigureAwait(true).GetAwaiter().GetResult(); //UNDONE:x: rewrite to .ConfigureAwait(false)
+                    var entries = _dataHandler.LoadPermissionEntriesAsync(new[] {entityId}, CancellationToken.None)
+                        .GetAwaiter().GetResult();
                     foreach (var entry in entries)
                         acl.Entries.Add(new AceInfo { EntryType = entry.EntryType, IdentityId = entry.IdentityId, LocalOnly = entry.LocalOnly, AllowBits = entry.AllowBits, DenyBits = entry.DenyBits });
                     if (acl.Entries.Count > 0)
@@ -96,7 +96,7 @@ namespace SenseNet.Security
                     if (_missingEntityHandler.GetMissingEntity(entityId, out var parentId, out var ownerId))
                     {
                         _dataHandler.CreateSecurityEntitySafeAsync(entityId, parentId, ownerId, CancellationToken.None)
-                            .ConfigureAwait(true).GetAwaiter().GetResult(); //UNDONE:x: rewrite to .ConfigureAwait(false)
+                            .GetAwaiter().GetResult();
                         entity = CreateEntitySafe(entityId, parentId, ownerId);
                     }
                 }

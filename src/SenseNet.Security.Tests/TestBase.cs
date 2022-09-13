@@ -340,9 +340,9 @@ namespace SenseNet.Security.Tests
         {
             CheckIntegrity(testName, context,
                 context.SecuritySystem.DataProvider.LoadSecurityEntitiesAsync(CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult(),
+                    .GetAwaiter().GetResult(),
                 context.SecuritySystem.DataProvider.LoadAllGroupsAsync(CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult());
+                    .GetAwaiter().GetResult());
         }
         internal void CheckIntegrity(string testName, SecurityContext context, IEnumerable<StoredSecurityEntity> entities, IEnumerable<SecurityGroup> groups)
         {

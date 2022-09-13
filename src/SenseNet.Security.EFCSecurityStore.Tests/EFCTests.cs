@@ -34,11 +34,10 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             //db.Database.ExecuteSqlCommand("DELETE FROM [EFMemberships]");
 
             var dp = CurrentContext.Security.SecuritySystem.DataProvider;
-            foreach (var group in dp.LoadAllGroupsAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult())
+            foreach (var group in dp.LoadAllGroupsAsync(CancellationToken.None).GetAwaiter().GetResult())
             {
                 dp.RemoveMembersAsync(group.Id, group.UserMemberIds,
-                        group.Groups.Select(g => g.Id), CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                    group.Groups.Select(g => g.Id), CancellationToken.None).GetAwaiter().GetResult();
             }
         }
 
@@ -140,8 +139,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             uncompleted = DataHandler_LoadCompletionState(out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs1 = SecurityActivityQueue.GetCurrentState().Termination;
-            var idsFromDb1 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult());
+            var idsFromDb1 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None).GetAwaiter().GetResult());
             Assert.AreEqual(expectedCs.ToString(), cs1.ToString());
             Assert.AreEqual(expectedIsFromDb1, idsFromDb1);
 
@@ -159,8 +157,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             uncompleted = DataHandler_LoadCompletionState(out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
             var cs2 = SecurityActivityQueue.GetCurrentState().Termination;
-            var idsFromDb2 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult());
+            var idsFromDb2 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None).GetAwaiter().GetResult());
             Assert.AreEqual(expectedCs.ToString(), cs2.ToString());
             Assert.AreEqual(expectedIsFromDb2, idsFromDb2);
         }
@@ -347,8 +344,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
 
         private CompletionState DataHandler_LoadCompletionState(out int lastDbId)
         {
-            var dbResult = DataHandler.LoadCompletionStateAsync(CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            var dbResult = DataHandler.LoadCompletionStateAsync(CancellationToken.None).GetAwaiter().GetResult();
             lastDbId = dbResult.LastDatabaseId;
             return dbResult.CompletionState;
         }

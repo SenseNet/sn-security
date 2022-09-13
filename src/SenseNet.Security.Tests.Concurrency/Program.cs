@@ -66,7 +66,7 @@ namespace SenseNet.Security.Tests.Concurrency
             var securitySystem = new SecuritySystem(securityDataProvider,
                 new DefaultMessageProvider(messageSenderManager),
                 new MissingEntityHandler(), config, messagingOptions);
-            securitySystem.StartAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // legacy logic
             // original line: MessageSender.Initialize("asdf");
@@ -234,8 +234,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
                 var _ = new SecurityContext(TestUser.User2, securitySystem);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
-                securitySystem.DataHandler.SaveActivityAsync(activity, CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                securitySystem.DataHandler.SaveActivityAsync(activity, CancellationToken.None).GetAwaiter().GetResult();
 
                 var method = typeof(SecuritySystem).GetMethod("MessageProvider_MessageReceived", BindingFlags.Instance | BindingFlags.NonPublic);
                 if (method == null)
@@ -259,8 +258,7 @@ namespace SenseNet.Security.Tests.Concurrency
 
                 var _ = new SecurityContext(TestUser.User2, securitySystem);
                 var activity = new TestWaitActivity(_rnd.Next(1, 3));
-                securitySystem.DataHandler.SaveActivityAsync(activity, CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                securitySystem.DataHandler.SaveActivityAsync(activity, CancellationToken.None).GetAwaiter().GetResult();
 
                 count++;
             }

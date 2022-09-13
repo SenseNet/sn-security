@@ -124,7 +124,7 @@ namespace SenseNet.Security.Messaging
                 using (var op = SnTrace.SecurityQueue.StartOperation("SAQ: Loading segment: from: {0}, to: {1}, count: {2}.", from, to, count))
                 {
                     var segment = _dataHandler.LoadSecurityActivitiesAsync(from, to, count,
-                        _executingUnprocessedActivities, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                        _executingUnprocessedActivities, CancellationToken.None).GetAwaiter().GetResult();
                     op.Successful = true;
                     return segment;
                 }
@@ -193,7 +193,7 @@ namespace SenseNet.Security.Messaging
             {
                 SnTrace.SecurityQueue.Write("SAQ: Loading gaps (count: {0}): [{1}]", gaps.Length, string.Join(", ", gaps));
                 return _dataHandler.LoadSecurityActivitiesAsync(gaps, _executingUnprocessedActivities, CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                    .GetAwaiter().GetResult();
             }
 
         }

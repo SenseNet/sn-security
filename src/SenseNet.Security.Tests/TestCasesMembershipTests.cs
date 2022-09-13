@@ -24,7 +24,7 @@ namespace SenseNet.Security.Tests
             CurrentContext.Security.AddMembersToSecurityGroup(101, new[] { TestUser.User1.Id, TestUser.User2.Id }, new int[0], new int[0]);
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
@@ -56,14 +56,14 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1|U3:G1,G2|U4:G1,G2", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
@@ -92,21 +92,21 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1,G2,G3|U2:G1,G2,G3|U3:G1,G2,G3|U4:G1,G2,G3|U5:G1,G2,G3", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User5.Id));
@@ -132,11 +132,11 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U3:G2|U4:G2", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.IsNull(loaded);
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
@@ -162,14 +162,14 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.IsNull(loaded);
         }
         [TestMethod]
@@ -194,14 +194,14 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.IsNull(loaded);
         }
         [TestMethod]
@@ -230,21 +230,21 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1|U3:G1,G2|U4:G1,G2", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.IsNull(loaded);
         }
         [TestMethod]
@@ -285,14 +285,14 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
@@ -317,13 +317,13 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1,G2", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
@@ -355,7 +355,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1,G2,G3|U2:G1,G2,G3|U3:G1,G2,G3|U4:G1,G2,G3|U5:G1,G2,G3|U6:G1,G2,G3", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(3, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
@@ -363,14 +363,14 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User6.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User5.Id));
@@ -396,13 +396,13 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U3:G1,G2|U4:G1,G2", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
@@ -428,14 +428,14 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1|U3:G1,G2", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
@@ -465,20 +465,20 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1,G2,G3|U3:G1,G2,G3|U4:G1,G2,G3|U5:G1,G2,G3", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(2, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User5.Id));
@@ -511,19 +511,19 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1,G3", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
@@ -554,19 +554,19 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1,G2,G3", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
@@ -609,25 +609,25 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1,G2,G3|U2:G1,G2,G3|U3:G1,G2,G3|U4:G1,G2,G3,G4", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId4, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId4, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
@@ -658,19 +658,19 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G3", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
@@ -700,19 +700,19 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G3", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
@@ -749,25 +749,25 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1,G2,G3|U2:G1,G2,G3|U3:G1,G2,G3|U4:G4", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId4, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId4, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
@@ -803,25 +803,25 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1,G3|U4:G1,G3,G4", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId4, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId4, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
@@ -856,25 +856,25 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1,G2,G3|U4:G1,G2,G3,G4", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId4, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId4, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
@@ -914,31 +914,31 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1,G2,G3|U2:G1,G2,G3|U3:G1,G2,G3|U4:G1,G2,G3,G4|U5:G1,G2,G3,G4,G5", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId4, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId4, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId5, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId5, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User5.Id));
@@ -973,25 +973,25 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G3|U4:G3,G4", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId4, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId4, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
@@ -1025,25 +1025,25 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G3|U4:G3,G4", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId4, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId4, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
@@ -1086,31 +1086,31 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1,G2,G3|U2:G1,G2,G3|U3:G1,G2,G3|U4:G4|U5:G4,G5", DumpMembership(CurrentContext.Security));
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId1, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId1, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User1.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId2, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId2, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User2.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId3, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId3, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User3.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId4, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId4, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User4.Id));
 
             loaded = DataHandler.GetSecurityGroupAsync(groupId5, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Assert.AreEqual(groupId5, loaded.Id);
             Assert.AreEqual(1, loaded.UserMemberIds.Count);
             Assert.IsTrue(loaded.UserMemberIds.Contains(TestUser.User5.Id));

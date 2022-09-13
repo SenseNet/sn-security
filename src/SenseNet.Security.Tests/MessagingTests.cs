@@ -350,8 +350,7 @@ namespace SenseNet.Security.Tests
             [Obsolete("Use async version instead.", true)]
             public override SecurityActivity LoadSecurityActivity(int id)
             {
-                return LoadSecurityActivityAsync(id, CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                return LoadSecurityActivityAsync(id, CancellationToken.None).GetAwaiter().GetResult();
             }
             public override async Task<SecurityActivity> LoadSecurityActivityAsync(int id, CancellationToken cancel)
             {

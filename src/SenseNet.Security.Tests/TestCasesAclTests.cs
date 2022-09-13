@@ -959,9 +959,9 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual("_________________________________________________+-+-+-+-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E5"), u1, default));
             var dbEntries1 = db.LoadPermissionEntriesAsync(new[] { Id("E1") }, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult().ToArray();
+                .GetAwaiter().GetResult().ToArray();
             var dbEntries2 = db.LoadPermissionEntriesAsync(new[] { Id("E2") }, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult().ToArray();
+                .GetAwaiter().GetResult().ToArray();
             Assert.AreEqual(1, dbEntries1.Length);
             Assert.AreEqual(1, dbEntries2.Length);
 
@@ -972,9 +972,9 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual("________________________________________________________-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), u1, default));
             dbEntries1 = db.LoadPermissionEntriesAsync(new[] { Id("E1") }, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult().ToArray();
+                .GetAwaiter().GetResult().ToArray();
             dbEntries2 = db.LoadPermissionEntriesAsync(new[] { Id("E2") }, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult().ToArray();
+                .GetAwaiter().GetResult().ToArray();
             Assert.AreEqual(1, dbEntries1.Length);
             Assert.AreEqual(0, dbEntries2.Length);
         }

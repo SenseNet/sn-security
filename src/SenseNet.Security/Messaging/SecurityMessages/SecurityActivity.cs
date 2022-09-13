@@ -79,8 +79,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             try
             {
                 using (var execLock = Context.SecuritySystem.DataHandler
-                           .AcquireSecurityActivityExecutionLockAsync(this, CancellationToken.None)
-                           .ConfigureAwait(false).GetAwaiter().GetResult())
+                           .AcquireSecurityActivityExecutionLockAsync(this, CancellationToken.None).GetAwaiter().GetResult())
                 {
                     if (execLock.FullExecutionEnabled)
                     {

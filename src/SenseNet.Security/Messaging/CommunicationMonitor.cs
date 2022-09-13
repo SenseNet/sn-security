@@ -54,8 +54,7 @@ namespace SenseNet.Security.Messaging
 
             try
             {
-                _dataHandler.CleanupSecurityActivitiesAsync(CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                _dataHandler.CleanupSecurityActivitiesAsync(CancellationToken.None).GetAwaiter().GetResult();
             }
             catch (Exception ex) //logged
             {

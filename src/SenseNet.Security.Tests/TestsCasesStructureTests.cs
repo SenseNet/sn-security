@@ -814,7 +814,7 @@ namespace SenseNet.Security.Tests
         private StoredSecurityEntity GetStoredSecurityEntity(int entityId)
         {
             return SecuritySystem.DataProvider.LoadStoredSecurityEntityAsync(entityId, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
         }
 
         private void CreateSecurityEntity(TestEntity entity)

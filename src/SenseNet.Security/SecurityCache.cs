@@ -31,14 +31,14 @@ namespace SenseNet.Security
         internal void Load() //UNDONE:x: async-await.
         {
             var entities = _dataHandler.LoadSecurityEntitiesAsync(CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             var aclTable = _dataHandler.LoadAclsAsync(CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             BuildAcls(entities, aclTable);
 
             Entities = entities;
             Groups = _dataHandler.LoadAllGroupsAsync(CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+                .GetAwaiter().GetResult();
             Membership = FlattenUserMembership(Groups);
         }
 
