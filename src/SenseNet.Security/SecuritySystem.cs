@@ -75,7 +75,7 @@ namespace SenseNet.Security
             SystemUser = new SecuritySystemUser(configuration.SystemUserId);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void Start()
         {
             StartAsync(CancellationToken.None).GetAwaiter().GetResult();

@@ -347,7 +347,7 @@ namespace SenseNet.Security.Tests
         private class MemoryDataProviderForMessagingTests : MemoryDataProvider
         {
             public MemoryDataProviderForMessagingTests(DatabaseStorage storage) : base(storage) { }
-            [Obsolete("Use async version instead.", true)]
+            [Obsolete("Use async version instead.")]
             public override SecurityActivity LoadSecurityActivity(int id)
             {
                 return LoadSecurityActivityAsync(id, CancellationToken.None).GetAwaiter().GetResult();

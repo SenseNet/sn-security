@@ -66,7 +66,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Pre-loader method for retrieving all stored SecurityEntity. Called during system start.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         IEnumerable<StoredSecurityEntity> LoadSecurityEntities();
         /// <summary>
         /// Async pre-loader method for retrieving all stored SecurityEntity. Called during system start.
@@ -95,7 +95,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Retrieves the SecurityEntity by the passed identifier. Returns with null if the entity was not found.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         StoredSecurityEntity LoadStoredSecurityEntity(int entityId);
         /// <summary>
         /// Asynchronously retrieves the SecurityEntity by the passed identifier. Returns with null if the entity was not found.
@@ -105,7 +105,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Writes the given entity to the database. If it exists before writing, the operation will be skipped.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void InsertSecurityEntity(StoredSecurityEntity entity);
         /// <summary>
         /// Asynchronously writes the given entity to the database. If it exists before writing, the operation will be skipped.
@@ -115,7 +115,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Updates the given entity to the database. If it does not exist before updating, a SecurityStructureException must be thrown.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void UpdateSecurityEntity(StoredSecurityEntity entity);
         /// <summary>
         /// Asynchronously updates the given entity to the database. If it does not exist before updating, a SecurityStructureException must be thrown.
@@ -125,7 +125,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes an entity by the given identifier. If the entity does not exist before deleting, this method does nothing.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void DeleteSecurityEntity(int entityId);
         /// <summary>
         /// Asynchronously deletes an entity by the given identifier. If the entity does not exist before deleting, this method does nothing.
@@ -135,7 +135,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Moves the source entity to the target entity. Only a parent relink is needed. All other operations call other data provider methods.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void MoveSecurityEntity(int sourceId, int targetId);
         /// <summary>
         /// Asynchronously moves the source entity to the target entity. Only a parent relink is needed. All other operations call other data provider methods.
@@ -147,7 +147,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Pre-loader method for retrieving all stored SecurityGroups. Called during system start.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         IEnumerable<SecurityGroup> LoadAllGroups();
         /// <summary>
         /// Async pre-loader method for retrieving all stored SecurityGroups. Called during system start.
@@ -157,7 +157,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Loads a SecurityGroup from the database.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         SecurityGroup LoadSecurityGroup(int groupId);
         /// <summary>
         /// Asynchronously loads a SecurityGroup from the database.
@@ -183,7 +183,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes memberships and entries related to an identity.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void DeleteIdentityAndRelatedEntries(int identityId);
         /// <summary>
         /// Asynchronously deletes memberships and entries related to an identity.
@@ -193,7 +193,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes memberships and entries related to the provided identities.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void DeleteIdentitiesAndRelatedEntries(IEnumerable<int> ids);
         /// <summary>
         /// Asynchronously deletes memberships and entries related to the provided identities.
@@ -206,7 +206,7 @@ namespace SenseNet.Security
         /// <param name="groupId">Id of the group that will have new members.</param>
         /// <param name="userMembers">Contains the ids of new users. Can be null or an empty list too.</param>
         /// <param name="groupMembers">Contains the ids of new groups. Can be null or an empty list too.</param>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void AddMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers);
         /// <summary>
         /// Asynchronously adds one or more users and groups to the specified group.
@@ -223,7 +223,7 @@ namespace SenseNet.Security
         /// <param name="groupId">Id of a group.</param>
         /// <param name="userMembers">Contains the ids of users that will be removed. Can be null or an empty list too.</param>
         /// <param name="groupMembers">Contains the ids of groups that will be removed. Can be null or an empty list too.</param>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers);
         /// <summary>
         /// Asynchronously removes one or more users and groups from the specified group.
@@ -239,7 +239,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Returns all stored ACEs that exist in the database in an unordered list.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         IEnumerable<StoredAce> LoadAllPermissionEntries();
         /// <summary>
         /// Asynchronously returns all stored ACEs that exist in the database in an unordered list.
@@ -251,7 +251,7 @@ namespace SenseNet.Security
         /// This method must return with all stored ACEs that belong to any of the passed entity ids.
         /// Order is irrelevant.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         IEnumerable<StoredAce> LoadPermissionEntries(IEnumerable<int> entityIds);
         /// <summary>
         /// Asynchronously loads an ACL-chain. Caller provides the parent chain of an entity.
@@ -264,7 +264,7 @@ namespace SenseNet.Security
         /// Returns the estimated security entity count as fast as possible.
         /// System start sequence uses this method.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         int GetEstimatedEntityCount();
         /// <summary>
         /// Asynchronously returns the estimated security entity count as fast as possible.
@@ -276,7 +276,7 @@ namespace SenseNet.Security
         /// Inserts or updates one or more StoredACEs.
         /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void WritePermissionEntries(IEnumerable<StoredAce> aces);
         /// <summary>
         /// Asynchronously inserts or updates one or more StoredACEs.
@@ -288,7 +288,7 @@ namespace SenseNet.Security
         /// Deletes the given ACEs.  If an ACE does not exist before deleting, it must be skipped.
         /// An ACE is identified by a compound key: EntityId, EntryType, IdentityId, LocalOnly
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void RemovePermissionEntries(IEnumerable<StoredAce> aces);
         /// <summary>
         /// Asynchronously deletes the given ACEs.  If an ACE does not exist before deleting, it must be skipped.
@@ -299,7 +299,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes all ACEs related to the given entity id.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void RemovePermissionEntriesByEntity(int entityId);
         /// <summary>
         /// Asynchronously deletes all ACEs related to the given entity id.
@@ -309,7 +309,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes all ACEs related to any of the entities in a subtree defined by the provided root id, then deletes all the entities too.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void DeleteEntitiesAndEntries(int entityId);
         /// <summary>
         /// Asynchronously deletes all ACEs related to any of the entities in a subtree defined by the provided root id, then deletes all the entities too.
@@ -324,7 +324,7 @@ namespace SenseNet.Security
         /// <param name="activity">Activity to save.</param>
         /// <param name="bodySize">Activity size in bytes.</param>
         /// <returns>The generated activity id.</returns>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         int SaveSecurityActivity(Messaging.SecurityMessages.SecurityActivity activity, out int bodySize);
         /// <summary>
         /// Asynchronously stores the full data of the passed activity.
@@ -341,7 +341,7 @@ namespace SenseNet.Security
         /// Returns the biggest activity id that was saved before the provided time if there is any.
         /// Otherwise returns with 0.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         int GetLastSecurityActivityId(DateTime startedTime);
         /// <summary>
         /// Asynchronously returns the biggest activity id that was saved before the provided time if there is any.
@@ -356,7 +356,7 @@ namespace SenseNet.Security
         /// Two or more element means that the array contains one or more unprocessed activity id and the last element is the last stored activity id.
         /// </summary>
         /// <returns>Zero or more id of unprocessed elements supplemented with the last stored activity id.</returns>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         int[] GetUnprocessedActivityIds();
         /// <summary>
         /// Asynchronously returns an array of all unprocessed activity ids supplemented with the last stored activity id.
@@ -379,7 +379,7 @@ namespace SenseNet.Security
         /// <param name="to">Largest allowed id.</param>
         /// <param name="count">Fragment size.</param>
         /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
-        [Obsolete("Use async version instead.", true)] 
+        [Obsolete("Use async version instead.")] 
         Messaging.SecurityMessages.SecurityActivity[] LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities);
         /// <summary>
         /// Asynchronously loads a SecurityActivity fragment within the specified limits.
@@ -405,7 +405,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="gaps">Individual id array</param>
         /// <param name="executingUnprocessedActivities">Value of the IsUnprocessedActivity property of every loaded object.</param>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         Messaging.SecurityMessages.SecurityActivity[] LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities);
 
         /// <summary>
@@ -423,7 +423,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Returns a SecurityActivity.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         Messaging.SecurityMessages.SecurityActivity LoadSecurityActivity(int id);
         /// <summary>
         /// Asynchronously returns a SecurityActivity.
@@ -433,7 +433,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes all the activities that were saved before the given time limit.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void CleanupSecurityActivities(int timeLimitInMinutes);
         /// <summary>
         /// Asynchronously deletes all the activities that were saved before the given time limit.
@@ -443,7 +443,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Ensures an exclusive (only one) object for the activity. Returns the new lock object or null.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         Messaging.SecurityActivityExecutionLock AcquireSecurityActivityExecutionLock(Messaging.SecurityMessages.SecurityActivity securityActivity, int timeoutInSeconds);
         /// <summary>
         /// Asynchronously ensures an exclusive (only one) object for the activity. Returns the new lock object or null.
@@ -454,7 +454,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Refreshes the lock object to avoid its timeout.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void RefreshSecurityActivityExecutionLock(Messaging.SecurityMessages.SecurityActivity securityActivity);
         /// <summary>
         /// Asynchronously refreshes the lock object to avoid its timeout.
@@ -464,7 +464,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Releases the lock and prevents locking that activity again by setting its state to Executed.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         void ReleaseSecurityActivityExecutionLock(Messaging.SecurityMessages.SecurityActivity securityActivity);
         /// <summary>
         /// Asynchronously releases the lock and prevents locking that activity again by setting its state to Executed.
@@ -474,7 +474,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Returns with information for consistency check: a compound number containing the group's and the member's id.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         IEnumerable<long> GetMembershipForConsistencyCheck();
         /// <summary>
         /// Asynchronously returns with information for consistency check: a compound number containing the group's and the member's id.

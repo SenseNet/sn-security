@@ -130,7 +130,7 @@ ELSE CAST(0 AS BIT) END";
             return false;
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public int GetEstimatedEntityCount()
         {
             return GetEstimatedEntityCountAsync(CancellationToken.None).GetAwaiter().GetResult();
@@ -142,7 +142,7 @@ ELSE CAST(0 AS BIT) END";
                 return await db.GetEstimatedEntityCountAsync(cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public IEnumerable<StoredSecurityEntity> LoadSecurityEntities()
         {
             return LoadSecurityEntitiesAsync(CancellationToken.None).GetAwaiter().GetResult();
@@ -163,7 +163,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks()
         {
             return LoadAffectedEntityIdsByEntriesAndBreaksAsync(CancellationToken.None).GetAwaiter().GetResult();
@@ -188,7 +188,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public StoredSecurityEntity LoadStoredSecurityEntity(int entityId)
         {
             return LoadStoredSecurityEntityAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
@@ -200,7 +200,7 @@ ELSE CAST(0 AS BIT) END";
                 return await db.LoadStoredSecurityEntityByIdAsync(entityId, cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void InsertSecurityEntity(StoredSecurityEntity entity)
         {
             InsertSecurityEntityAsync(entity, CancellationToken.None).GetAwaiter().GetResult();
@@ -229,7 +229,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void UpdateSecurityEntity(StoredSecurityEntity entity)
         {
             UpdateSecurityEntityAsync(entity, CancellationToken.None).GetAwaiter().GetResult();
@@ -281,7 +281,7 @@ ELSE CAST(0 AS BIT) END";
                     "Cannot update entity because of concurrency: " + entity.Id, new AggregateException(exceptions));
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void DeleteSecurityEntity(int entityId)
         {
             DeleteSecurityEntityAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
@@ -310,7 +310,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void MoveSecurityEntity(int sourceId, int targetId) // always called with SetSecurityHolder method
         {
             MoveSecurityEntityAsync(sourceId, targetId, CancellationToken.None).GetAwaiter().GetResult();
@@ -335,7 +335,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public IEnumerable<StoredAce> LoadAllPermissionEntries()
         {
             return LoadAllPermissionEntriesAsync(CancellationToken.None).GetAwaiter().GetResult();
@@ -361,7 +361,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public IEnumerable<StoredAce> LoadPermissionEntries(IEnumerable<int> entityIds)
         {
             return LoadPermissionEntriesAsync(entityIds, CancellationToken.None).GetAwaiter().GetResult();
@@ -389,7 +389,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
         {
             WritePermissionEntriesAsync(aces, CancellationToken.None).GetAwaiter().GetResult();
@@ -416,7 +416,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
             RemovePermissionEntriesAsync(aces, CancellationToken.None).GetAwaiter().GetResult();
@@ -428,7 +428,7 @@ ELSE CAST(0 AS BIT) END";
                 await db.RemovePermissionEntriesAsync(aces, cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void RemovePermissionEntriesByEntity(int entityId)
         {
             RemovePermissionEntriesByEntityAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
@@ -440,7 +440,7 @@ ELSE CAST(0 AS BIT) END";
                 await db.RemovePermissionEntriesByEntityAsync(entityId, cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void DeleteEntitiesAndEntries(int entityId)
         {
             DeleteEntitiesAndEntriesAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
@@ -454,7 +454,7 @@ ELSE CAST(0 AS BIT) END";
 
         //===================================================================== SecurityActivity
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public int GetLastSecurityActivityId(DateTime startedTime)
         {
             return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None).GetAwaiter().GetResult();
@@ -469,7 +469,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public int[] GetUnprocessedActivityIds()
         {
             return GetUnprocessedActivityIdsAsync(CancellationToken.None).GetAwaiter().GetResult();
@@ -481,7 +481,7 @@ ELSE CAST(0 AS BIT) END";
                 return await db.GetUnprocessedActivityIdsAsync(cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public SecurityActivity[] LoadSecurityActivities(int from, int to, int count, bool executingUnprocessedActivities)
         {
             return LoadSecurityActivitiesAsync(from, to, count, executingUnprocessedActivities, CancellationToken.None)
@@ -514,7 +514,7 @@ ELSE CAST(0 AS BIT) END";
             return result.ToArray();
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public SecurityActivity[] LoadSecurityActivities(int[] gaps, bool executingUnprocessedActivities)
         {
             return LoadSecurityActivitiesAsync(gaps, executingUnprocessedActivities, CancellationToken.None)
@@ -545,7 +545,7 @@ ELSE CAST(0 AS BIT) END";
             return result.ToArray();
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public SecurityActivity LoadSecurityActivity(int id)
         {
             return LoadSecurityActivityAsync(id, CancellationToken.None).GetAwaiter().GetResult();
@@ -565,7 +565,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public int SaveSecurityActivity(SecurityActivity activity, out int bodySize)
         {
             var result = SaveSecurityActivityAsync(activity, CancellationToken.None).GetAwaiter().GetResult();
@@ -592,7 +592,7 @@ ELSE CAST(0 AS BIT) END";
         }
 
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void CleanupSecurityActivities(int timeLimitInMinutes)
         {
             CleanupSecurityActivitiesAsync(timeLimitInMinutes, CancellationToken.None).GetAwaiter().GetResult();
@@ -607,7 +607,7 @@ ELSE CAST(0 AS BIT) END";
         /// <summary>
         /// Ensures an exclusive (only one) object for the activity. Returns the new lock object or null.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public SecurityActivityExecutionLock AcquireSecurityActivityExecutionLock(
             SecurityActivity securityActivity, int timeoutInSeconds)
         {
@@ -648,7 +648,7 @@ ELSE CAST(0 AS BIT) END";
         /// <summary>
         /// Refreshes the lock object to avoid its timeout.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)
         {
             RefreshSecurityActivityExecutionLockAsync(securityActivity, CancellationToken.None).GetAwaiter().GetResult();
@@ -663,7 +663,7 @@ ELSE CAST(0 AS BIT) END";
         /// <summary>
         /// Releases the lock and prevents locking that activity again by setting its state to Executed.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void ReleaseSecurityActivityExecutionLock(SecurityActivity securityActivity)
         {
             ReleaseSecurityActivityExecutionLockAsync(securityActivity, CancellationToken.None).GetAwaiter().GetResult();
@@ -684,7 +684,7 @@ ELSE CAST(0 AS BIT) END";
 
         /* ===================================================================== */
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void QueryGroupRelatedEntities(
             int groupId, out IEnumerable<int> entityIds, out IEnumerable<int> exclusiveEntityIds)
         {
@@ -722,7 +722,7 @@ ELSE CAST(0 AS BIT) END";
 
         /******************************************* membership storage */
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public IEnumerable<SecurityGroup> LoadAllGroups()
         {
             return LoadAllGroupsAsync(CancellationToken.None).GetAwaiter().GetResult();
@@ -761,7 +761,7 @@ ELSE CAST(0 AS BIT) END";
             return group;
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public SecurityGroup LoadSecurityGroup(int groupId)
         {
             return LoadSecurityGroupAsync(groupId, CancellationToken.None).GetAwaiter().GetResult();
@@ -792,7 +792,7 @@ ELSE CAST(0 AS BIT) END";
             return rows == 0 ? null : group;
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void DeleteIdentityAndRelatedEntries(int identityId)
         {
             DeleteIdentityAndRelatedEntriesAsync(identityId, CancellationToken.None).GetAwaiter().GetResult();
@@ -804,7 +804,7 @@ ELSE CAST(0 AS BIT) END";
                 await db.DeleteIdentityAsync(identityId, cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void DeleteIdentitiesAndRelatedEntries(IEnumerable<int> ids)
         {
             DeleteIdentitiesAndRelatedEntriesAsync(ids, CancellationToken.None).GetAwaiter().GetResult();
@@ -816,7 +816,7 @@ ELSE CAST(0 AS BIT) END";
                 await db.DeleteIdentitiesAsync(ids, cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         [SuppressMessage("ReSharper", "ConvertToNullCoalescingCompoundAssignment")]
         public void AddMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
@@ -854,7 +854,7 @@ ELSE CAST(0 AS BIT) END";
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
         {
             RemoveMembersAsync(groupId, userMembers, groupMembers, CancellationToken.None).GetAwaiter().GetResult();
@@ -871,7 +871,7 @@ ELSE CAST(0 AS BIT) END";
         /// <summary>
         /// Returns with information for consistency check: a compound number containing the group's and the member's id.
         /// </summary>
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public IEnumerable<long> GetMembershipForConsistencyCheck()
         {
             return GetMembershipForConsistencyCheckAsync(CancellationToken.None).GetAwaiter().GetResult();

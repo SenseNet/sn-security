@@ -21,7 +21,7 @@ namespace SenseNet.Security.Tests
             {
             }
 
-            [Obsolete("Use async version instead.", true)]
+            [Obsolete("Use async version instead.")]
             public override void CleanupSecurityActivities(int timeLimitInMinutes)
             {
                 CleanupSecurityActivitiesAsync(timeLimitInMinutes, CancellationToken.None)
@@ -33,7 +33,7 @@ namespace SenseNet.Security.Tests
                 IsCleanupSecurityActivitiesCalled = true;
             }
 
-            [Obsolete("Use async version instead.", true)]
+            [Obsolete("Use async version instead.")]
             public override int GetLastSecurityActivityId(DateTime startedTime)
             {
                 return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None)

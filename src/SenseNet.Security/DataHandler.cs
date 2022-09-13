@@ -53,7 +53,7 @@ namespace SenseNet.Security
             return isReady;
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public IDictionary<int, SecurityEntity> LoadSecurityEntities()
         {
             return LoadSecurityEntitiesAsync(CancellationToken.None).GetAwaiter().GetResult();
@@ -96,7 +96,7 @@ namespace SenseNet.Security
             return new ConcurrentDictionary<int, SecurityEntity>(entities);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public IDictionary<int, SecurityGroup> LoadAllGroups()
         {
             return LoadAllGroupsAsync(CancellationToken.None).GetAwaiter().GetResult();
@@ -110,7 +110,7 @@ namespace SenseNet.Security
             return groups.ToDictionary(x => x.Id);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public Dictionary<int, AclInfo> LoadAcls()
         {
             return LoadAclsAsync(CancellationToken.None).GetAwaiter().GetResult();
@@ -135,7 +135,7 @@ namespace SenseNet.Security
             return acls;
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public StoredSecurityEntity GetStoredSecurityEntity(int entityId)
         {
             return GetStoredSecurityEntityAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
@@ -145,7 +145,7 @@ namespace SenseNet.Security
             return await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId)
         {
             CreateSecurityEntityAsync(entityId, parentEntityId, ownerId, CancellationToken.None).GetAwaiter().GetResult();
@@ -155,7 +155,7 @@ namespace SenseNet.Security
             return CreateSecurityEntityAsync(entityId, parentEntityId, ownerId, false, cancel);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void CreateSecurityEntitySafe(int entityId, int parentEntityId, int ownerId)
         {
             CreateSecurityEntitySafeAsync(entityId, parentEntityId, ownerId, CancellationToken.None).GetAwaiter().GetResult();
@@ -191,7 +191,7 @@ namespace SenseNet.Security
             await _dataProvider.InsertSecurityEntityAsync(entity, cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void ModifySecurityEntityOwner(int entityId, int ownerId)
         {
             ModifySecurityEntityOwnerAsync(entityId, ownerId, CancellationToken.None).GetAwaiter().GetResult();
@@ -205,7 +205,7 @@ namespace SenseNet.Security
             await _dataProvider.UpdateSecurityEntityAsync(entity, cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void DeleteSecurityEntity(int entityId)
         {
             DeleteSecurityEntityAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
@@ -215,7 +215,7 @@ namespace SenseNet.Security
             return _dataProvider.DeleteEntitiesAndEntriesAsync(entityId, cancel);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void MoveSecurityEntity(int sourceId, int targetId)
         {
             MoveSecurityEntityAsync(sourceId, targetId, CancellationToken.None).GetAwaiter().GetResult();
@@ -233,7 +233,7 @@ namespace SenseNet.Security
             await _dataProvider.MoveSecurityEntityAsync(sourceId, targetId, cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void BreakInheritance(int entityId)
         {
             BreakInheritanceAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
@@ -247,7 +247,7 @@ namespace SenseNet.Security
             await _dataProvider.UpdateSecurityEntityAsync(entity, cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void UnBreakInheritance(int entityId)
         {
             UnBreakInheritanceAsync(entityId, CancellationToken.None).GetAwaiter().GetResult();
@@ -261,7 +261,7 @@ namespace SenseNet.Security
             await _dataProvider.UpdateSecurityEntityAsync(entity, cancel).ConfigureAwait(false);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public IEnumerable<StoredAce> LoadPermissionEntries(IEnumerable<int> entityIds)
         {
             return LoadPermissionEntriesAsync(entityIds, CancellationToken.None).GetAwaiter().GetResult();
@@ -271,7 +271,7 @@ namespace SenseNet.Security
             return _dataProvider.LoadPermissionEntriesAsync(entityIds, cancel);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void WritePermissionEntries(IEnumerable<StoredAce> aces)
         {
             WritePermissionEntriesAsync(aces, CancellationToken.None).GetAwaiter().GetResult();
@@ -324,7 +324,7 @@ namespace SenseNet.Security
             }
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void RemovePermissionEntries(IEnumerable<StoredAce> aces)
         {
             RemovePermissionEntriesAsync(aces, CancellationToken.None).GetAwaiter().GetResult();
@@ -441,7 +441,7 @@ namespace SenseNet.Security
 
         /*============================================================================================== Membership */
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public SecurityGroup GetSecurityGroup(int groupId)
         {
             return _dataProvider.LoadSecurityGroupAsync(groupId, CancellationToken.None).GetAwaiter().GetResult();
@@ -456,7 +456,7 @@ namespace SenseNet.Security
             return _dataProvider.DeleteIdentityAndRelatedEntriesAsync(userId, cancel);
         }
 
-        [Obsolete("Use async version instead.", true)]
+        [Obsolete("Use async version instead.")]
         public void DeleteSecurityGroup(int groupId)
         {
             DeleteSecurityGroupAsync(groupId, CancellationToken.None).GetAwaiter().GetResult();
