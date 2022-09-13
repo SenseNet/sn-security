@@ -86,15 +86,15 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         {
             var dataHandler = context.SecuritySystem.DataHandler;
 
-            await dataHandler.WritePermissionEntriesAsync(_entries, cancel);
+            await dataHandler.WritePermissionEntriesAsync(_entries, cancel).ConfigureAwait(false);
 
-            await dataHandler.RemovePermissionEntriesAsync(_entriesToRemove, cancel);
+            await dataHandler.RemovePermissionEntriesAsync(_entriesToRemove, cancel).ConfigureAwait(false);
 
             foreach (var entityId in _breaks)
-                await dataHandler.BreakInheritanceAsync(entityId, cancel);
+                await dataHandler.BreakInheritanceAsync(entityId, cancel).ConfigureAwait(false);
 
             foreach (var entityId in _undoBreaks)
-                await dataHandler.UnBreakInheritanceAsync(entityId, cancel);
+                await dataHandler.UnBreakInheritanceAsync(entityId, cancel).ConfigureAwait(false);
         }
 
         /// <summary>

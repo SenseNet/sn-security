@@ -63,13 +63,13 @@ namespace SenseNet.Security
             if (!await IsDatabaseReadyAsync(cancel))
                 return new Dictionary<int, SecurityEntity>();
 
-            var count = await _dataProvider.GetEstimatedEntityCountAsync(cancel);
+            var count = await _dataProvider.GetEstimatedEntityCountAsync(cancel).ConfigureAwait(false);
             var capacity = count + count / 10;
 
             var entities = new Dictionary<int, SecurityEntity>(capacity);
             var relations = new List<Tuple<SecurityEntity, int>>(capacity); // first is Id, second is ParentId
 
-            foreach (var storedEntity in await _dataProvider.LoadSecurityEntitiesAsync(cancel))
+            foreach (var storedEntity in await _dataProvider.LoadSecurityEntitiesAsync(cancel).ConfigureAwait(false))
             {
                 var entity = new SecurityEntity
                 {
@@ -106,7 +106,7 @@ namespace SenseNet.Security
             if (!await IsDatabaseReadyAsync(CancellationToken.None))
                 return new Dictionary<int, SecurityGroup>();
 
-            var groups = await _dataProvider.LoadAllGroupsAsync(cancel);
+            var groups = await _dataProvider.LoadAllGroupsAsync(cancel).ConfigureAwait(false);
             return groups.ToDictionary(x => x.Id);
         }
 
@@ -142,7 +142,7 @@ namespace SenseNet.Security
         }
         public async Task<StoredSecurityEntity> GetStoredSecurityEntityAsync(int entityId, CancellationToken cancel)
         {
-            return await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
+            return await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel).ConfigureAwait(false);
         }
 
         [Obsolete("Use async version instead.", true)]
@@ -188,7 +188,7 @@ namespace SenseNet.Security
                 OwnerId = ownerId
             };
 
-            await _dataProvider.InsertSecurityEntityAsync(entity, cancel);
+            await _dataProvider.InsertSecurityEntityAsync(entity, cancel).ConfigureAwait(false);
         }
 
         [Obsolete("Use async version instead.", true)]
@@ -198,11 +198,11 @@ namespace SenseNet.Security
         }
         public async Task ModifySecurityEntityOwnerAsync(int entityId, int ownerId, CancellationToken cancel)
         {
-            var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
+            var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel).ConfigureAwait(false);
             if (entity == null)
                 throw new EntityNotFoundException("Cannot update a SecurityEntity beacuse it does not exist: " + entityId);
             entity.OwnerId = ownerId;
-            await _dataProvider.UpdateSecurityEntityAsync(entity, cancel);
+            await _dataProvider.UpdateSecurityEntityAsync(entity, cancel).ConfigureAwait(false);
         }
 
         [Obsolete("Use async version instead.", true)]
@@ -222,15 +222,15 @@ namespace SenseNet.Security
         }
         public async Task MoveSecurityEntityAsync(int sourceId, int targetId, CancellationToken cancel)
         {
-            var source = await _dataProvider.LoadStoredSecurityEntityAsync(sourceId, cancel);
+            var source = await _dataProvider.LoadStoredSecurityEntityAsync(sourceId, cancel).ConfigureAwait(false);
             if (source == null)
                 throw new EntityNotFoundException("Cannot move the entity because it does not exist: " + sourceId);
-            var target = await _dataProvider.LoadStoredSecurityEntityAsync(targetId, cancel);
+            var target = await _dataProvider.LoadStoredSecurityEntityAsync(targetId, cancel).ConfigureAwait(false);
             if (target == null)
                 throw new EntityNotFoundException("Cannot move the entity because the target does not exist: " + targetId);
 
             // moving
-            await _dataProvider.MoveSecurityEntityAsync(sourceId, targetId, cancel);
+            await _dataProvider.MoveSecurityEntityAsync(sourceId, targetId, cancel).ConfigureAwait(false);
         }
 
         [Obsolete("Use async version instead.", true)]
@@ -240,11 +240,11 @@ namespace SenseNet.Security
         }
         public async Task BreakInheritanceAsync(int entityId, CancellationToken cancel)
         {
-            var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
+            var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel).ConfigureAwait(false);
             if (entity == null)
                 throw new EntityNotFoundException("Cannot break inheritance because the entity does not exist: " + entityId);
             entity.IsInherited = false;
-            await _dataProvider.UpdateSecurityEntityAsync(entity, cancel);
+            await _dataProvider.UpdateSecurityEntityAsync(entity, cancel).ConfigureAwait(false);
         }
 
         [Obsolete("Use async version instead.", true)]
@@ -254,11 +254,11 @@ namespace SenseNet.Security
         }
         public async Task UnBreakInheritanceAsync(int entityId, CancellationToken cancel)
         {
-            var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel);
+            var entity = await _dataProvider.LoadStoredSecurityEntityAsync(entityId, cancel).ConfigureAwait(false);
             if (entity == null)
                 throw new EntityNotFoundException("Cannot undo break inheritance because the entity does not exist: " + entityId);
             entity.IsInherited = true;
-            await _dataProvider.UpdateSecurityEntityAsync(entity, cancel);
+            await _dataProvider.UpdateSecurityEntityAsync(entity, cancel).ConfigureAwait(false);
         }
 
         [Obsolete("Use async version instead.", true)]
@@ -286,7 +286,7 @@ namespace SenseNet.Security
                 try
                 {
                     // ReSharper disable once PossibleMultipleEnumeration
-                    await _dataProvider.WritePermissionEntriesAsync(aces, cancel);
+                    await _dataProvider.WritePermissionEntriesAsync(aces, cancel).ConfigureAwait(false);
                     return;
                 }
                 catch (SecurityStructureException)
@@ -338,9 +338,9 @@ namespace SenseNet.Security
 
         internal async Task<LoadCompletionStateResult> LoadCompletionStateAsync(CancellationToken cancel)
         {
-            var isDbReady = await IsDatabaseReadyAsync(CancellationToken.None);
+            var isDbReady = await IsDatabaseReadyAsync(CancellationToken.None).ConfigureAwait(false);
             var ids = isDbReady 
-                ? await _dataProvider.GetUnprocessedActivityIdsAsync(CancellationToken.None)
+                ? await _dataProvider.GetUnprocessedActivityIdsAsync(CancellationToken.None).ConfigureAwait(false)
                 : Array.Empty<int>();
             var lastDatabaseId = ids.LastOrDefault();
 
@@ -392,7 +392,7 @@ namespace SenseNet.Security
 
         internal async Task SaveActivityAsync(SecurityActivity activity, CancellationToken cancel)
         {
-            var result = await _dataProvider.SaveSecurityActivityAsync(activity, cancel);
+            var result = await _dataProvider.SaveSecurityActivityAsync(activity, cancel).ConfigureAwait(false);
             activity.BodySize = result.BodySize;
             activity.Id = result.ActivityId;
         }
@@ -405,14 +405,14 @@ namespace SenseNet.Security
         internal async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int from, int to, int count,
             bool executingUnprocessedActivities, CancellationToken cancel)
         {
-            var result = await _dataProvider.LoadSecurityActivitiesAsync(from, to, count, executingUnprocessedActivities, cancel);
+            var result = await _dataProvider.LoadSecurityActivitiesAsync(from, to, count, executingUnprocessedActivities, cancel).ConfigureAwait(false);
             return result;
         }
 
         internal async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities,
             CancellationToken cancel)
         {
-            var result = await _dataProvider.LoadSecurityActivitiesAsync(gaps, executingUnprocessedActivities, cancel);
+            var result = await _dataProvider.LoadSecurityActivitiesAsync(gaps, executingUnprocessedActivities, cancel).ConfigureAwait(false);
             return result;
         }
 
@@ -425,7 +425,7 @@ namespace SenseNet.Security
         {
             if (!await IsDatabaseReadyAsync(cancel))
                 return;
-            await _dataProvider.CleanupSecurityActivitiesAsync(_messagingOptions.SecurityActivityLifetimeInMinutes, cancel);
+            await _dataProvider.CleanupSecurityActivitiesAsync(_messagingOptions.SecurityActivityLifetimeInMinutes, cancel).ConfigureAwait(false);
         }
 
 
@@ -436,17 +436,8 @@ namespace SenseNet.Security
                 ? int.MaxValue
                 : Configuration.Messaging.SecurityActivityExecutionLockTimeoutInSeconds;
 
-            return await _dataProvider.AcquireSecurityActivityExecutionLockAsync(securityActivity, timeout, cancel);
+            return await _dataProvider.AcquireSecurityActivityExecutionLockAsync(securityActivity, timeout, cancel).ConfigureAwait(false);
         }
-        //internal void RefreshSecurityActivityExecutionLock(SecurityActivity securityActivity)
-        //{
-        //    _dataProvider.RefreshSecurityActivityExecutionLock(securityActivity);
-        //}
-        //internal void ReleaseSecurityActivityExecutionLock(SecurityActivity securityActivity, bool fullExecutionEnabled)
-        //{
-        //    if(fullExecutionEnabled)
-        //        _dataProvider.ReleaseSecurityActivityExecutionLock(securityActivity);
-        //}
 
         /*============================================================================================== Membership */
 
@@ -483,31 +474,31 @@ namespace SenseNet.Security
         internal async Task AddMembersAsync(int groupId, IEnumerable<int> userMembers,
             IEnumerable<int> groupMembers, IEnumerable<int> parentGroups, CancellationToken cancel)
         {
-            await _dataProvider.AddMembersAsync(groupId, userMembers, groupMembers, cancel);
+            await _dataProvider.AddMembersAsync(groupId, userMembers, groupMembers, cancel).ConfigureAwait(false);
             if (parentGroups != null)
                 foreach (var parentGroupId in parentGroups.Distinct())
-                    await _dataProvider.AddMembersAsync(parentGroupId, null, new[] { groupId }, cancel);
+                    await _dataProvider.AddMembersAsync(parentGroupId, null, new[] { groupId }, cancel).ConfigureAwait(false);
         }
 
         internal async Task RemoveMembersAsync(int groupId, IEnumerable<int> userMembers,
             IEnumerable<int> groupMembers, IEnumerable<int> parentGroups, CancellationToken cancel)
         {
-            await _dataProvider.RemoveMembersAsync(groupId, userMembers, groupMembers, cancel);
+            await _dataProvider.RemoveMembersAsync(groupId, userMembers, groupMembers, cancel).ConfigureAwait(false);
             if (parentGroups != null)
                 foreach (var parentGroupId in parentGroups.Distinct())
-                    await _dataProvider.RemoveMembersAsync(parentGroupId, null, new[] { groupId }, cancel);
+                    await _dataProvider.RemoveMembersAsync(parentGroupId, null, new[] { groupId }, cancel).ConfigureAwait(false);
         }
 
         internal async Task AddUserToGroupsAsync(int userId, IEnumerable<int> parentGroups, CancellationToken cancel)
         {
             foreach (var parentGroupId in parentGroups.Distinct())
-                await _dataProvider.AddMembersAsync(parentGroupId, new[] { userId }, null, cancel);
+                await _dataProvider.AddMembersAsync(parentGroupId, new[] { userId }, null, cancel).ConfigureAwait(false);
         }
 
         internal async Task RemoveUserFromGroupsAsync(int userId, IEnumerable<int> parentGroups, CancellationToken cancel)
         {
             foreach (var parentGroupId in parentGroups.Distinct())
-                await _dataProvider.RemoveMembersAsync(parentGroupId, new[] { userId }, null, cancel);
+                await _dataProvider.RemoveMembersAsync(parentGroupId, new[] { userId }, null, cancel).ConfigureAwait(false);
         }
     }
 }

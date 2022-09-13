@@ -354,7 +354,7 @@ namespace SenseNet.Security.Tests
             }
             public override async Task<SecurityActivity> LoadSecurityActivityAsync(int id, CancellationToken cancel)
             {
-                var activity = await base.LoadSecurityActivityAsync(id, cancel);
+                var activity = await base.LoadSecurityActivityAsync(id, cancel).ConfigureAwait(false);
                 SnLog.WriteInformation($"LoadMessage: {activity.GetType().Name}#{id}");
                 return activity;
             }

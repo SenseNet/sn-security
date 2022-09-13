@@ -29,7 +29,7 @@ namespace SenseNet.Security.Tests
             }
             public override async Task CleanupSecurityActivitiesAsync(int timeLimitInMinutes, CancellationToken cancel)
             {
-                await base.CleanupSecurityActivitiesAsync(timeLimitInMinutes, cancel);
+                await base.CleanupSecurityActivitiesAsync(timeLimitInMinutes, cancel).ConfigureAwait(false);
                 IsCleanupSecurityActivitiesCalled = true;
             }
 
@@ -41,7 +41,7 @@ namespace SenseNet.Security.Tests
             }
             public override async Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
             {
-                var result = await base.GetLastSecurityActivityIdAsync(startedTime, cancel);
+                var result = await base.GetLastSecurityActivityIdAsync(startedTime, cancel).ConfigureAwait(false);
                 IsGetLastSecurityActivityIdCalled = true;
                 return result;
             }

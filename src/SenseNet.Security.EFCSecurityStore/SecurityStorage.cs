@@ -106,7 +106,7 @@ DELETE FROM EFMessages
         {
             var result = await EfcIntSet
                 .FromSqlRaw("SELECT 1 AS Id, COUNT(1) AS Value FROM EFEntities")
-                .SingleAsync(cancel);
+                .SingleAsync(cancel).ConfigureAwait(false);
             return result.Value;
         }
 
@@ -145,7 +145,7 @@ SELECT 0, CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN 0 ELSE @ident END 
             var dbResult = await EfcIntSet
                 .FromSqlRaw(SelectUnprocessedActivityIds)
                 .Select(x => x.Value)
-                .ToArrayAsync(cancel);
+                .ToArrayAsync(cancel).ConfigureAwait(false);
             var result = dbResult
                 .OrderBy(x => x)
                 .ToArray();
@@ -169,7 +169,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
                     nullableParentId = x.nullableParentId,
                     nullableOwnerId = x.nullableOwnerId
                 })
-                .FirstOrDefaultAsync(cancel);
+                .FirstOrDefaultAsync(cancel).ConfigureAwait(false);
             return result;
         }
 
@@ -179,7 +179,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
             var result = await EfcIntSet
                 .FromSqlRaw(LoadAffectedEntityIdsByEntriesAndBreaksScript)
                 .Select(x => x.Value)
-                .ToArrayAsync(cancel);
+                .ToArrayAsync(cancel).ConfigureAwait(false);
             return (IEnumerable<int>)result;
         }
 
@@ -210,7 +210,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
                 sb.AppendLine("COMMIT TRANSACTION");
             }
 
-            await Database.ExecuteSqlRawAsync(sb.ToString(), cancel);
+            await Database.ExecuteSqlRawAsync(sb.ToString(), cancel).ConfigureAwait(false);
         }
 
         private const string InsertPermissionEntriesScript = @"INSERT INTO EFEntries SELECT {0}, {1}, {2}, {3}, {4}, {5}";
@@ -238,7 +238,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
             sb.AppendLine();
             sb.AppendLine("COMMIT TRANSACTION");
 
-            await Database.ExecuteSqlRawAsync(sb.ToString(), cancel);
+            await Database.ExecuteSqlRawAsync(sb.ToString(), cancel).ConfigureAwait(false);
         }
 
 
@@ -297,7 +297,7 @@ ELSE
                         new SqlParameter("@ActivityId", securityActivityId),
                         new SqlParameter("@LockedBy", lockedBy ?? ""),
                         new SqlParameter("@TimeLimit", timeoutInSeconds))
-                .ToArrayAsync(cancel);
+                .ToArrayAsync(cancel).ConfigureAwait(false);
 
             var result = string.Empty;
 
@@ -361,7 +361,7 @@ COMMIT TRANSACTION";
                 Value = string.Format(IdListXmlTemplate, string.Join(string.Empty, ids.Select(identityId => string.Format(IdListItemXmlTemplate, identityId))))
             };
 
-            await Database.ExecuteSqlRawAsync(DeleteIdentitiesScript, new[] {param}, cancel);
+            await Database.ExecuteSqlRawAsync(DeleteIdentitiesScript, new[] {param}, cancel).ConfigureAwait(false);
         }
 
         private const string RemoveMembersScript = @"DELETE FROM EFMemberships WHERE GroupId = @GroupId AND MemberId IN ({0})";
@@ -369,7 +369,7 @@ COMMIT TRANSACTION";
             CancellationToken cancel)
         {
             var sql = string.Format(RemoveMembersScript, string.Join(", ", groupMembers.Union(userMembers)));
-            await Database.ExecuteSqlRawAsync(sql, new[] {new SqlParameter("@GroupId", groupId)}, cancel);
+            await Database.ExecuteSqlRawAsync(sql, new[] {new SqlParameter("@GroupId", groupId)}, cancel).ConfigureAwait(false);
         }
 
 

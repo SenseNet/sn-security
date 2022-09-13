@@ -169,7 +169,7 @@ namespace SenseNet.Security.Data
         }
         public async Task InsertSecurityEntityAsync(StoredSecurityEntity entity, CancellationToken cancel)
         {
-            var origEntity = await LoadStoredSecurityEntityAsync(entity.Id, cancel);
+            var origEntity = await LoadStoredSecurityEntityAsync(entity.Id, cancel).ConfigureAwait(false);
             if (origEntity != null)
                 return;
 
@@ -183,7 +183,7 @@ namespace SenseNet.Security.Data
         }
         public async Task UpdateSecurityEntityAsync(StoredSecurityEntity entity, CancellationToken cancel)
         {
-            var oldEntity = await LoadStoredSecurityEntityAsync(entity.Id, cancel);
+            var oldEntity = await LoadStoredSecurityEntityAsync(entity.Id, cancel).ConfigureAwait(false);
             if (oldEntity == null)
                 throw new EntityNotFoundException("Cannot update entity because it does not exist: " + entity.Id);
             Storage.Entities[entity.Id] = entity;
@@ -207,10 +207,10 @@ namespace SenseNet.Security.Data
         }
         public async Task MoveSecurityEntityAsync(int sourceId, int targetId, CancellationToken cancel)
         {
-            var source = await LoadStoredSecurityEntityAsync(sourceId, cancel);
+            var source = await LoadStoredSecurityEntityAsync(sourceId, cancel).ConfigureAwait(false);
             if (source == null)
                 throw new EntityNotFoundException("Cannot execute the move operation because source does not exist: " + sourceId);
-            var target = await LoadStoredSecurityEntityAsync(targetId, cancel);
+            var target = await LoadStoredSecurityEntityAsync(targetId, cancel).ConfigureAwait(false);
             if (target == null)
                 throw new EntityNotFoundException("Cannot execute the move operation because target does not exist: " + targetId);
             source.ParentId = target.Id;
@@ -353,7 +353,7 @@ namespace SenseNet.Security.Data
             // delete children recursively
             foreach (var childEntityId in childIds)
             {
-                await DeleteEntitiesAndEntriesAsync(childEntityId, cancel);
+                await DeleteEntitiesAndEntriesAsync(childEntityId, cancel).ConfigureAwait(false);
             }
 
             // remove the entity itself
@@ -588,7 +588,7 @@ namespace SenseNet.Security.Data
         public async Task DeleteIdentitiesAndRelatedEntriesAsync(IEnumerable<int> ids, CancellationToken cancel)
         {
             foreach (var id in ids)
-                await DeleteIdentityAndRelatedEntriesAsync(id, cancel);
+                await DeleteIdentityAndRelatedEntriesAsync(id, cancel).ConfigureAwait(false);
         }
 
         [Obsolete("Use async version instead.", true)]

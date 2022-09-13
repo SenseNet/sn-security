@@ -87,7 +87,7 @@ namespace SenseNet.Security
             // The message provider must receive ongoing activities at this time.
             StartedAt = DateTime.UtcNow;
 
-            var dbResult = await DataHandler.LoadCompletionStateAsync(cancel);
+            var dbResult = await DataHandler.LoadCompletionStateAsync(cancel).ConfigureAwait(false);
             var uncompleted = dbResult.CompletionState;
             var lastActivityIdFromDb = dbResult.LastDatabaseId;
             
