@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
 {
@@ -81,23 +82,19 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Stores the modifications in the database.
         /// </summary>
-        protected override void Store(SecurityContext context)
+        protected override async Task StoreAsync(SecurityContext context, CancellationToken cancel) //UNDONE:x: async: Task.WhenAll?
         {
             var dataHandler = context.SecuritySystem.DataHandler;
 
-            dataHandler.WritePermissionEntriesAsync(_entries, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            await dataHandler.WritePermissionEntriesAsync(_entries, cancel);
 
-            dataHandler.RemovePermissionEntriesAsync(_entriesToRemove, CancellationToken.None)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            await dataHandler.RemovePermissionEntriesAsync(_entriesToRemove, cancel);
 
             foreach (var entityId in _breaks)
-                dataHandler.BreakInheritanceAsync(entityId, CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                await dataHandler.BreakInheritanceAsync(entityId, cancel);
 
             foreach (var entityId in _undoBreaks)
-                dataHandler.UnBreakInheritanceAsync(entityId, CancellationToken.None)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                await dataHandler.UnBreakInheritanceAsync(entityId, cancel);
         }
 
         /// <summary>

@@ -257,7 +257,7 @@ namespace SenseNet.Security.Tests
         {
             public string Body { get; set; }
 
-            protected override void Store(SecurityContext context) { }
+            protected override Task StoreAsync(SecurityContext context, CancellationToken cancel) { return Task.CompletedTask; }
             protected override void Apply(SecurityContext context)
             {
                 SnLog.WriteInformation("Applied: #" + Id);

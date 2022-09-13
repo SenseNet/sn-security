@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Linq;
+using System.Threading.Tasks;
 using SenseNet.Diagnostics;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
@@ -75,7 +76,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// Called by an internal component in right order.
         /// </summary>
         //UNDONE:x: Async SecurityActivity.ExecuteInternal (call abstract methods)
-        internal void ExecuteInternal()
+        internal void ExecuteInternal(CancellationToken cancel)
         {
             try
             {
@@ -86,7 +87,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                     if (execLock.FullExecutionEnabled)
                     {
                         Initialize(Context);
-                        Store(Context);
+                        StoreAsync(Context, cancel).ConfigureAwait(false).GetAwaiter().GetResult(); //UNDONE:xxxx: await
                         Distribute(Context);
                     }
                 }
@@ -127,7 +128,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// Customization point for the activity data persistence.
         /// </summary>
         /// <param name="context">Current SecurityContext to use any security related thing.</param>
-        protected abstract void Store(SecurityContext context);
+        protected abstract Task StoreAsync(SecurityContext context, CancellationToken cancel);
 
         /// <summary>
         /// Customization point for the memory operations based on the activity data.

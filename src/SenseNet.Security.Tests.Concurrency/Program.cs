@@ -465,9 +465,9 @@ namespace SenseNet.Security.Tests.Concurrency
             _sleepInMilliseconds = sleepInMilliseconds;
         }
 
-        protected override void Store(SecurityContext context)
+        protected override Task StoreAsync(SecurityContext context, CancellationToken cancel)
         {
-            // do nothing
+            return Task.CompletedTask;
         }
 
         protected override void Apply(SecurityContext context)

@@ -26,16 +26,16 @@ namespace SenseNet.Security.Messaging
         public SecurityActivityQueue(SecuritySystem securitySystem, CommunicationMonitor communicationMonitor,
             DataHandler dataHandler, SecurityActivityHistoryController activityHistory)
         {
+            _cancellation = new CancellationTokenSource();
             _securitySystem = securitySystem;
             _communicationMonitor = communicationMonitor;
             _dataHandler = dataHandler;
             _serializer = new Serializer(this, activityHistory, dataHandler);
-            _executor = new Executor(activityHistory);
+            _executor = new Executor(activityHistory, _cancellation);
             _terminationHistory = new TerminationHistory();
             _dependencyManager = new DependencyManager(_serializer, _executor, _terminationHistory, activityHistory);
             _serializer.DependencyManager = _dependencyManager;
             _executor.DependencyManager = _dependencyManager;
-            _cancellation = new CancellationTokenSource();
 
             communicationMonitor.HearthBeat += (sender, args) => HealthCheck();
         }
@@ -530,14 +530,16 @@ namespace SenseNet.Security.Messaging
         private class Executor
         {
             private readonly SecurityActivityHistoryController _activityHistory;
+            private readonly CancellationTokenSource _cancellation;
 
             public DependencyManager DependencyManager { get; set; }
 
             private bool _enabled = true;
 
-            public Executor(SecurityActivityHistoryController activityHistory)
+            public Executor(SecurityActivityHistoryController activityHistory, CancellationTokenSource cancellation)
             {
                 _activityHistory = activityHistory;
+                _cancellation = cancellation;
             }
 
             internal void __enable()
@@ -558,7 +560,7 @@ namespace SenseNet.Security.Messaging
                 {
                     using (var op = SnTrace.SecurityQueue.StartOperation("SAQ: EXECUTION START SA{0} .", activity.Id))
                     {
-                        activity.ExecuteInternal();
+                        activity.ExecuteInternal(_cancellation.Token);
                         op.Successful = true;
                     }
                 }
