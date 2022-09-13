@@ -21,17 +21,15 @@ namespace SenseNet.Security.Messaging
         private readonly DependencyManager _dependencyManager;
         private readonly TerminationHistory _terminationHistory;
         private readonly Executor _executor;
-        private readonly CancellationTokenSource _cancellation;
 
         public SecurityActivityQueue(SecuritySystem securitySystem, CommunicationMonitor communicationMonitor,
             DataHandler dataHandler, SecurityActivityHistoryController activityHistory)
         {
-            _cancellation = new CancellationTokenSource();
             _securitySystem = securitySystem;
             _communicationMonitor = communicationMonitor;
             _dataHandler = dataHandler;
             _serializer = new Serializer(this, activityHistory, dataHandler);
-            _executor = new Executor(activityHistory, _cancellation);
+            _executor = new Executor(activityHistory);
             _terminationHistory = new TerminationHistory();
             _dependencyManager = new DependencyManager(_serializer, _executor, _terminationHistory, activityHistory);
             _serializer.DependencyManager = _dependencyManager;
@@ -63,7 +61,7 @@ namespace SenseNet.Security.Messaging
                 var notLoaded = state.Gaps.ToList();
                 foreach (var activity in new SecurityActivityLoader(state.Gaps, false, _dataHandler))
                 {
-                    ExecuteActivityAsync(activity).ConfigureAwait(false).GetAwaiter().GetResult();
+                    ExecuteActivity(activity);
                     // memorize executed
                     notLoaded.Remove(activity.Id);
                 }
@@ -79,7 +77,7 @@ namespace SenseNet.Security.Messaging
             {
                 SnTrace.SecurityQueue.Write("SAQ: Health checker is processing activities from {0} to {1}", lastId + 1, lastDbId);
                 foreach (var activity in new SecurityActivityLoader(lastId + 1, lastDbId, false, _dataHandler))
-                    ExecuteActivityAsync(activity).ConfigureAwait(false).GetAwaiter().GetResult();
+                    ExecuteActivity(activity);
             }
         }
         public bool IsWorking()
@@ -104,7 +102,6 @@ namespace SenseNet.Security.Messaging
             _serializer.Reset();
             _dependencyManager.Reset();
             _terminationHistory.Reset(0);
-            _cancellation.Cancel();
         }
 
         public CompletionState GetCurrentCompletionState()
@@ -121,13 +118,10 @@ namespace SenseNet.Security.Messaging
             };
         }
 
-        // No CancellationToken parameter is required
-        public async Task ExecuteActivityAsync(SecurityActivity activity)
+        public void ExecuteActivity(SecurityActivity activity)
         {
-            // At this point, the SecurityActivityQueue has taken over the activity,
-            // and only it can abort the execution with its own cancellation source.
             if (!activity.FromDatabase && !activity.FromReceiver)
-                await _dataHandler.SaveActivityAsync(activity, _cancellation.Token);
+                _dataHandler.SaveActivityAsync(activity, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
             _serializer.EnqueueActivity(activity);
         }
@@ -530,16 +524,14 @@ namespace SenseNet.Security.Messaging
         private class Executor
         {
             private readonly SecurityActivityHistoryController _activityHistory;
-            private readonly CancellationTokenSource _cancellation;
 
             public DependencyManager DependencyManager { get; set; }
 
             private bool _enabled = true;
 
-            public Executor(SecurityActivityHistoryController activityHistory, CancellationTokenSource cancellation)
+            public Executor(SecurityActivityHistoryController activityHistory)
             {
                 _activityHistory = activityHistory;
-                _cancellation = cancellation;
             }
 
             internal void __enable()
@@ -560,7 +552,7 @@ namespace SenseNet.Security.Messaging
                 {
                     using (var op = SnTrace.SecurityQueue.StartOperation("SAQ: EXECUTION START SA{0} .", activity.Id))
                     {
-                        activity.ExecuteInternal(_cancellation.Token);
+                        activity.ExecuteInternal();
                         op.Successful = true;
                     }
                 }

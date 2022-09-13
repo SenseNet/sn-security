@@ -56,16 +56,15 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <param name="waitForComplete">If the value is true (default),
         /// the current thread waits for the full execution on this computer.
         /// Otherwise the method returns immediately.</param>
-        public void Execute(SecurityContext context, bool waitForComplete = true) //UNDONE:x: async-await?
+        public void Execute(SecurityContext context, bool waitForComplete = true)
         {
             Context = context;
             if (Sender == null)
                 Sender = context.SecuritySystem.MessageSenderManager.CreateMessageSender();
 
-            context.SecuritySystem.SecurityActivityQueue.ExecuteActivityAsync(this)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            context.SecuritySystem.SecurityActivityQueue.ExecuteActivity(this);
 
-            if(waitForComplete)
+            if (waitForComplete)
                 WaitForComplete();
 
             if (_executionException != null)
@@ -75,8 +74,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Called by an internal component in right order.
         /// </summary>
-        //UNDONE:x: Async SecurityActivity.ExecuteInternal (call abstract methods)
-        internal void ExecuteInternal(CancellationToken cancel)
+        internal void ExecuteInternal()
         {
             try
             {
@@ -87,7 +85,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                     if (execLock.FullExecutionEnabled)
                     {
                         Initialize(Context);
-                        StoreAsync(Context, cancel).ConfigureAwait(false).GetAwaiter().GetResult(); //UNDONE:xxxx: await
+                        StoreAsync(Context, CancellationToken.None).GetAwaiter().GetResult();
                         Distribute(Context);
                     }
                 }
@@ -115,7 +113,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         {
             // default implementation does nothing
         }
-        private void Distribute(SecurityContext context) //UNDONE:x: async-await?
+        private void Distribute(SecurityContext context)
         {
             DistributedMessage msg = this;
             if (BodySize > __context.SecuritySystem.MessagingOptions.DistributableSecurityActivityMaxSize)
@@ -123,13 +121,12 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             context.SecuritySystem.MessageProvider.SendMessage(msg);
         }
 
-        //UNDONE:x: Async SecurityActivity.Store (abstract)
         /// <summary>
         /// Customization point for the activity data persistence.
         /// </summary>
         /// <param name="context">Current SecurityContext to use any security related thing.</param>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
         protected abstract Task StoreAsync(SecurityContext context, CancellationToken cancel);
-
         /// <summary>
         /// Customization point for the memory operations based on the activity data.
         /// </summary>
