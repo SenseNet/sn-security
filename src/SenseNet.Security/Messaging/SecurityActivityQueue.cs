@@ -70,7 +70,9 @@ namespace SenseNet.Security.Messaging
             }
 
             var lastId = _terminationHistory.GetLastTerminatedId();
-            var lastDbId = _dataHandler.GetLastSecurityActivityId(_securitySystem.StartedAt);
+            var lastDbId = _dataHandler.GetLastSecurityActivityIdAsync(_securitySystem.StartedAt, CancellationToken.None)
+                .GetAwaiter().GetResult();
+
             if (lastId < lastDbId)
             {
                 SnTrace.SecurityQueue.Write("SAQ: Health checker is processing activities from {0} to {1}", lastId + 1, lastDbId);
@@ -119,7 +121,7 @@ namespace SenseNet.Security.Messaging
         public void ExecuteActivity(SecurityActivity activity)
         {
             if (!activity.FromDatabase && !activity.FromReceiver)
-                _dataHandler.SaveActivity(activity);
+                _dataHandler.SaveActivityAsync(activity, CancellationToken.None).GetAwaiter().GetResult();
 
             _serializer.EnqueueActivity(activity);
         }

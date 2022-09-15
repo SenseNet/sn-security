@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace SenseNet.Security
 {
@@ -27,14 +28,17 @@ namespace SenseNet.Security
         {
             Load();
         }
-        internal void Load()
+        internal void Load() //UNDONE:x: async-await.
         {
-            var entities = _dataHandler.LoadSecurityEntities();
-            var aclTable = _dataHandler.LoadAcls();
+            var entities = _dataHandler.LoadSecurityEntitiesAsync(CancellationToken.None)
+                .GetAwaiter().GetResult();
+            var aclTable = _dataHandler.LoadAclsAsync(CancellationToken.None)
+                .GetAwaiter().GetResult();
             BuildAcls(entities, aclTable);
 
             Entities = entities;
-            Groups = _dataHandler.LoadAllGroups();
+            Groups = _dataHandler.LoadAllGroupsAsync(CancellationToken.None)
+                .GetAwaiter().GetResult();
             Membership = FlattenUserMembership(Groups);
         }
 

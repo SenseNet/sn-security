@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
 {
@@ -80,17 +82,19 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Stores the modifications in the database.
         /// </summary>
-        protected override void Store(SecurityContext context)
+        protected override async Task StoreAsync(SecurityContext context, CancellationToken cancel) //UNDONE:x: async: Task.WhenAll?
         {
             var dataHandler = context.SecuritySystem.DataHandler;
-            dataHandler.WritePermissionEntries(_entries);
-            dataHandler.RemovePermissionEntries(_entriesToRemove);
+
+            await dataHandler.WritePermissionEntriesAsync(_entries, cancel).ConfigureAwait(false);
+
+            await dataHandler.RemovePermissionEntriesAsync(_entriesToRemove, cancel).ConfigureAwait(false);
 
             foreach (var entityId in _breaks)
-                dataHandler.BreakInheritance(entityId);
+                await dataHandler.BreakInheritanceAsync(entityId, cancel).ConfigureAwait(false);
 
             foreach (var entityId in _undoBreaks)
-                dataHandler.UnBreakInheritance(entityId);
+                await dataHandler.UnBreakInheritanceAsync(entityId, cancel).ConfigureAwait(false);
         }
 
         /// <summary>

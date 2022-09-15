@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Configuration;
@@ -19,15 +21,27 @@ namespace SenseNet.Security.Tests
             {
             }
 
+            [Obsolete("Use async version instead.")]
             public override void CleanupSecurityActivities(int timeLimitInMinutes)
             {
-                base.CleanupSecurityActivities(timeLimitInMinutes);
+                CleanupSecurityActivitiesAsync(timeLimitInMinutes, CancellationToken.None)
+                    .GetAwaiter().GetResult();
+            }
+            public override async Task CleanupSecurityActivitiesAsync(int timeLimitInMinutes, CancellationToken cancel)
+            {
+                await base.CleanupSecurityActivitiesAsync(timeLimitInMinutes, cancel).ConfigureAwait(false);
                 IsCleanupSecurityActivitiesCalled = true;
             }
 
+            [Obsolete("Use async version instead.")]
             public override int GetLastSecurityActivityId(DateTime startedTime)
             {
-                var result = base.GetLastSecurityActivityId(startedTime);
+                return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None)
+                    .GetAwaiter().GetResult();
+            }
+            public override async Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
+            {
+                var result = await base.GetLastSecurityActivityIdAsync(startedTime, cancel).ConfigureAwait(false);
                 IsGetLastSecurityActivityIdCalled = true;
                 return result;
             }

@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Linq;
+using System.Threading.Tasks;
 using SenseNet.Diagnostics;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
@@ -63,7 +64,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             context.SecuritySystem.SecurityActivityQueue.ExecuteActivity(this);
 
-            if(waitForComplete)
+            if (waitForComplete)
                 WaitForComplete();
 
             if (_executionException != null)
@@ -77,12 +78,13 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         {
             try
             {
-                using (var execLock = Context.SecuritySystem.DataHandler.AcquireSecurityActivityExecutionLock(this))
+                using (var execLock = Context.SecuritySystem.DataHandler
+                           .AcquireSecurityActivityExecutionLockAsync(this, CancellationToken.None).GetAwaiter().GetResult())
                 {
                     if (execLock.FullExecutionEnabled)
                     {
                         Initialize(Context);
-                        Store(Context);
+                        StoreAsync(Context, CancellationToken.None).GetAwaiter().GetResult();
                         Distribute(Context);
                     }
                 }
@@ -122,7 +124,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// Customization point for the activity data persistence.
         /// </summary>
         /// <param name="context">Current SecurityContext to use any security related thing.</param>
-        protected abstract void Store(SecurityContext context);
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
+        protected abstract Task StoreAsync(SecurityContext context, CancellationToken cancel);
         /// <summary>
         /// Customization point for the memory operations based on the activity data.
         /// </summary>

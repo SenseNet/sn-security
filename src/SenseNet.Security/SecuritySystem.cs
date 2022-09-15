@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Configuration;
@@ -73,14 +75,21 @@ namespace SenseNet.Security
             SystemUser = new SecuritySystemUser(configuration.SystemUserId);
         }
 
+        [Obsolete("Use async version instead.")]
         public void Start()
+        {
+            StartAsync(CancellationToken.None).GetAwaiter().GetResult();
+        }
+        public async Task StartAsync(CancellationToken cancel)
         {
             GeneralSecurityContext = null;
 
             // The message provider must receive ongoing activities at this time.
             StartedAt = DateTime.UtcNow;
 
-            var uncompleted = DataHandler.LoadCompletionState(out var lastActivityIdFromDb);
+            var dbResult = await DataHandler.LoadCompletionStateAsync(cancel).ConfigureAwait(false);
+            var uncompleted = dbResult.CompletionState;
+            var lastActivityIdFromDb = dbResult.LastDatabaseId;
             
             PermissionTypeBase.InferForcedRelations();
 
@@ -142,7 +151,8 @@ namespace SenseNet.Security
             // load from database if it was too big to distribute
             if (message is BigActivityMessage bigActivityMessage)
             {
-                activity = DataHandler.LoadBigSecurityActivity(bigActivityMessage.DatabaseId);
+                activity = DataHandler.LoadBigSecurityActivityAsync(bigActivityMessage.DatabaseId, CancellationToken.None)
+                    .GetAwaiter().GetResult();
                 if (activity == null)
                     SnTrace.Security.WriteError("Cannot load body of a BigActivity. Id: {0}", bigActivityMessage.DatabaseId);
             }

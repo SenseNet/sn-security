@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
 {
@@ -22,9 +24,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Stores the modifications in the database.
         /// </summary>
-        protected override void Store(SecurityContext context)
+        protected override Task StoreAsync(SecurityContext context, CancellationToken cancel)
         {
-            context.SecuritySystem.DataHandler.DeleteIdentities(IdentityIds);
+            return context.SecuritySystem.DataHandler.DeleteIdentitiesAsync(IdentityIds, cancel);
         }
 
         /// <summary>

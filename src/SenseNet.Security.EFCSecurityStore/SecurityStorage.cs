@@ -6,7 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace SenseNet.Security.EFCSecurityStore
 {
@@ -99,13 +102,12 @@ DELETE FROM EFMessages
             throw new NotSupportedException();
         }
 
-        internal int GetEstimatedEntityCount()
+        internal async Task<int> GetEstimatedEntityCountAsync(CancellationToken cancel)
         {
-            var result = EfcIntSet
+            var result = await EfcIntSet
                 .FromSqlRaw("SELECT 1 AS Id, COUNT(1) AS Value FROM EFEntities")
-                .Single()
-                .Value;
-            return result;
+                .SingleAsync(cancel).ConfigureAwait(false);
+            return result.Value;
         }
 
         /// <summary>
@@ -138,12 +140,13 @@ UNION ALL
 SELECT 0, CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN 0 ELSE @ident END [Value]
 --ORDER BY Id
 ";
-        internal int[] GetUnprocessedActivityIds()
+        internal async Task<int[]> GetUnprocessedActivityIdsAsync(CancellationToken cancel)
         {
-            var result = EfcIntSet
+            var dbResult = await EfcIntSet
                 .FromSqlRaw(SelectUnprocessedActivityIds)
                 .Select(x => x.Value)
-                .AsEnumerable()
+                .ToArrayAsync(cancel).ConfigureAwait(false);
+            var result = dbResult
                 .OrderBy(x => x)
                 .ToArray();
             return result;
@@ -153,10 +156,9 @@ SELECT 0, CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN 0 ELSE @ident END 
         private const string LoadStoredSecurityEntityByIdScript = @"
 SELECT TOP 1 E.Id, E.OwnerId nullableOwnerId, E.ParentId nullableParentId, E.IsInherited, convert(bit, case when E2.EFEntityId is null then 0 else 1 end) as HasExplicitEntry 
 FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.Id = @EntityId";
-
-        internal StoredSecurityEntity LoadStoredSecurityEntityById(int entityId)
+        internal async Task<StoredSecurityEntity> LoadStoredSecurityEntityByIdAsync(int entityId, CancellationToken cancel)
         {
-            var result = EfcStoredSecurityEntitySet
+            var result = await EfcStoredSecurityEntitySet
                 // ReSharper disable once FormatStringProblem
                 .FromSqlRaw(LoadStoredSecurityEntityByIdScript, new SqlParameter("@EntityId", entityId))
                 .Select(x => new StoredSecurityEntity
@@ -167,23 +169,23 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
                     nullableParentId = x.nullableParentId,
                     nullableOwnerId = x.nullableOwnerId
                 })
-                .FirstOrDefault();
+                .FirstOrDefaultAsync(cancel).ConfigureAwait(false);
             return result;
         }
 
         private const string LoadAffectedEntityIdsByEntriesAndBreaksScript = @"SELECT DISTINCT Id AS Value FROM (SELECT DISTINCT EFEntityId Id FROM [EFEntries] UNION ALL SELECT Id FROM [EFEntities] WHERE IsInherited = 0) AS x";
-        internal IEnumerable<int> LoadAffectedEntityIdsByEntriesAndBreaks()
+        internal async Task<IEnumerable<int>> LoadAffectedEntityIdsByEntriesAndBreaksAsync(CancellationToken cancel)
         {
-            var result = EfcIntSet
+            var result = await EfcIntSet
                 .FromSqlRaw(LoadAffectedEntityIdsByEntriesAndBreaksScript)
                 .Select(x => x.Value)
-                .ToArray();
-            return result;
+                .ToArrayAsync(cancel).ConfigureAwait(false);
+            return (IEnumerable<int>)result;
         }
 
 
         private const string RemovePermissionEntriesScript = @"DELETE FROM EFEntries WHERE EFEntityId = {0} AND EntryType = {1} AND IdentityId = {2} AND LocalOnly = {3}";
-        internal void RemovePermissionEntries(IEnumerable<StoredAce> aces)
+        internal async Task RemovePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
             var storedAces = aces as StoredAce[] ?? aces.ToArray();
             var count = storedAces.Length;
@@ -208,11 +210,11 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
                 sb.AppendLine("COMMIT TRANSACTION");
             }
 
-            Database.ExecuteSqlRaw(sb.ToString());
+            await Database.ExecuteSqlRawAsync(sb.ToString(), cancel).ConfigureAwait(false);
         }
 
         private const string InsertPermissionEntriesScript = @"INSERT INTO EFEntries SELECT {0}, {1}, {2}, {3}, {4}, {5}";
-        internal void WritePermissionEntries(IEnumerable<StoredAce> aces)
+        internal async Task WritePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
             var storedAces = aces as StoredAce[] ?? aces.ToArray();
             var count = storedAces.Length;
@@ -236,14 +238,15 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
             sb.AppendLine();
             sb.AppendLine("COMMIT TRANSACTION");
 
-            Database.ExecuteSqlRaw(sb.ToString());
+            await Database.ExecuteSqlRawAsync(sb.ToString(), cancel).ConfigureAwait(false);
         }
 
 
         private const string RemovePermissionEntriesByEntityScript = @"DELETE FROM EFEntries WHERE EFEntityId = @EntityId";
-        internal void RemovePermissionEntriesByEntity(int entityId)
+        internal Task RemovePermissionEntriesByEntityAsync(int entityId, CancellationToken cancel)
         {
-            Database.ExecuteSqlRaw(RemovePermissionEntriesByEntityScript, new SqlParameter("@EntityId", entityId));
+            return Database.ExecuteSqlRawAsync(RemovePermissionEntriesByEntityScript,
+                new[] {new SqlParameter("@EntityId", entityId)}, cancel);
         }
 
         private const string DeleteEntitiesAndEntriesScript = @"DECLARE @EntityIdTable TABLE (EntityId int)
@@ -262,21 +265,23 @@ SELECT Id FROM EntityCTE
 DELETE E1 FROM EFEntries E1 INNER JOIN @EntityIdTable E2 ON E2.EntityId = E1.EFEntityId
 DELETE E1 FROM EFEntities E1 INNER JOIN @EntityIdTable E2 ON E2.EntityId = E1.Id";
 
-        internal void DeleteEntitiesAndEntries(int entityId)
+        internal Task DeleteEntitiesAndEntriesAsync(int entityId, CancellationToken cancel)
         {
             // This script collects all entity ids in a subtree (including the provided root),
             // deletes all security entries related to them, then deletes all entities.
-            Database.ExecuteSqlRaw(DeleteEntitiesAndEntriesScript, new SqlParameter("@EntityId", entityId));
+            return Database.ExecuteSqlRawAsync(DeleteEntitiesAndEntriesScript,
+                new[] { new SqlParameter("@EntityId", entityId) }, cancel);
         }
 
         private const string CleanupSecurityActivitiesScript = @"DELETE FROM EFMessages WHERE SavedAt < DATEADD(minute, -@TimeLimit, GETUTCDATE()) AND ExecutionState = 'Done'";
-        internal void CleanupSecurityActivities(int timeLimitInMinutes)
+        internal Task CleanupSecurityActivitiesAsync(int timeLimitInMinutes, CancellationToken cancel)
         {
-            Database.ExecuteSqlRaw(CleanupSecurityActivitiesScript, new SqlParameter("@TimeLimit", timeLimitInMinutes));
+            return Database.ExecuteSqlRawAsync(CleanupSecurityActivitiesScript, 
+                new[]{new SqlParameter("@TimeLimit", timeLimitInMinutes)}, cancel);
         }
 
         // ReSharper disable once ConvertToConstant.Local
-        private static readonly string _acquireSecurityActivityExecutionLockScript = @"UPDATE EFMessages
+        private static readonly string AcquireSecurityActivityExecutionLockScript = @"UPDATE EFMessages
 	SET ExecutionState = '" + ExecutionState.Executing + @"', LockedBy = @LockedBy, LockedAt = GETUTCDATE()
 	WHERE Id = @ActivityId AND ((ExecutionState = '" + ExecutionState.Wait + @"') OR (ExecutionState = '" + ExecutionState.Executing + @"' AND LockedAt < DATEADD(second, -@TimeLimit, GETUTCDATE())))
 IF (@@rowcount > 0)
@@ -284,20 +289,22 @@ IF (@@rowcount > 0)
 ELSE
 	SELECT Id, ExecutionState AS Value FROM EFMessages WHERE Id = @ActivityId
 ";
-        public string AcquireSecurityActivityExecutionLock(int securityActivityId, string lockedBy, int timeoutInSeconds)
+        public async Task<string> AcquireSecurityActivityExecutionLockAsync(int securityActivityId, string lockedBy, int timeoutInSeconds,
+            CancellationToken cancel)
         {
-            var query = EfcStringSet
-                .FromSqlRaw(_acquireSecurityActivityExecutionLockScript,
+            var dbResult = await EfcStringSet
+                .FromSqlRaw(AcquireSecurityActivityExecutionLockScript,
                         new SqlParameter("@ActivityId", securityActivityId),
                         new SqlParameter("@LockedBy", lockedBy ?? ""),
-                        new SqlParameter("@TimeLimit", timeoutInSeconds));
+                        new SqlParameter("@TimeLimit", timeoutInSeconds))
+                .ToArrayAsync(cancel).ConfigureAwait(false);
 
             var result = string.Empty;
 
             // We use foreach here instead of Single or First, because Entity Framework
             // generates an outer SELECT for those methods that result in an incorrect
             // SQL syntax.
-            foreach (var item in query)
+            foreach (var item in dbResult)
             {
                 // read the first and only item and return immediately
                 result = item.Value;
@@ -308,30 +315,27 @@ ELSE
         }
 
         // ReSharper disable once ConvertToConstant.Local
-        private static readonly string _refreshSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";
-        public void RefreshSecurityActivityExecutionLock(int securityActivityId)
+        private static readonly string RefreshSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET LockedAt = GETUTCDATE() WHERE Id = @ActivityId";
+        public Task RefreshSecurityActivityExecutionLockAsync(int securityActivityId, CancellationToken cancel)
         {
-            Database
-                .ExecuteSqlRaw(
-                    _refreshSecurityActivityExecutionLockScript,
-                    new SqlParameter("@ActivityId", securityActivityId));
+            return Database.ExecuteSqlRawAsync(RefreshSecurityActivityExecutionLockScript,
+                new[] {new SqlParameter("@ActivityId", securityActivityId)}, cancel);
         }
 
         // ReSharper disable once ConvertToConstant.Local
-        private static readonly string _releaseSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET ExecutionState = '" + ExecutionState.Done + @"' WHERE Id = @ActivityId";
-        public void ReleaseSecurityActivityExecutionLock(int securityActivityId)
+        private static readonly string ReleaseSecurityActivityExecutionLockScript = @"UPDATE EFMessages SET ExecutionState = '" + ExecutionState.Done + @"' WHERE Id = @ActivityId";
+        public Task ReleaseSecurityActivityExecutionLockAsync(int securityActivityId, CancellationToken cancel)
         {
-            Database
-                .ExecuteSqlRaw(
-                    _releaseSecurityActivityExecutionLockScript,
-                    new SqlParameter("@ActivityId", securityActivityId));
+            return Database.ExecuteSqlRawAsync(ReleaseSecurityActivityExecutionLockScript,
+                new[] {new SqlParameter("@ActivityId", securityActivityId)}, cancel);
         }
 
         private const string DeleteIdentityScript = @"DELETE FROM EFMemberships WHERE GroupId = @IdentityId OR MemberId = @IdentityId
 DELETE FROM EFEntries WHERE IdentityId = @IdentityId";
-        internal void DeleteIdentity(int identityId)
+        internal Task DeleteIdentityAsync(int identityId, CancellationToken cancel)
         {
-            Database.ExecuteSqlRaw(DeleteIdentityScript, new SqlParameter("@IdentityId", identityId));
+            return Database.ExecuteSqlRawAsync(DeleteIdentityScript,
+                new[] {new SqlParameter("@IdentityId", identityId)}, cancel);
         }
 
         private const string DeleteIdentitiesScript = @"
@@ -349,7 +353,7 @@ DELETE E1 FROM EFEntries E1 INNER JOIN @Identities I1 ON E1.IdentityId = I1.Id
 DELETE M1 FROM EFMemberships M1 INNER JOIN @Identities I1 ON M1.GroupId = I1.Id OR M1.MemberId = I1.Id
 
 COMMIT TRANSACTION";
-        internal void DeleteIdentities(IEnumerable<int> ids)
+        internal async Task DeleteIdentitiesAsync(IEnumerable<int> ids, CancellationToken cancel)
         {
             // construct an xml from the given id list for the sql command to make an id list on the SQL Server side
             var param = new SqlParameter("@IdentityList", SqlDbType.Xml)
@@ -357,14 +361,15 @@ COMMIT TRANSACTION";
                 Value = string.Format(IdListXmlTemplate, string.Join(string.Empty, ids.Select(identityId => string.Format(IdListItemXmlTemplate, identityId))))
             };
 
-            Database.ExecuteSqlRaw(DeleteIdentitiesScript, param);
+            await Database.ExecuteSqlRawAsync(DeleteIdentitiesScript, new[] {param}, cancel).ConfigureAwait(false);
         }
 
         private const string RemoveMembersScript = @"DELETE FROM EFMemberships WHERE GroupId = @GroupId AND MemberId IN ({0})";
-        internal void RemoveMembers(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers)
+        internal async Task RemoveMembersAsync(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers,
+            CancellationToken cancel)
         {
             var sql = string.Format(RemoveMembersScript, string.Join(", ", groupMembers.Union(userMembers)));
-            Database.ExecuteSqlRaw(sql, new SqlParameter("@GroupId", groupId));
+            await Database.ExecuteSqlRawAsync(sql, new[] {new SqlParameter("@GroupId", groupId)}, cancel).ConfigureAwait(false);
         }
 
 

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
 {
@@ -21,9 +23,10 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Stores the modifications in the database.
         /// </summary>
-        protected override void Store(SecurityContext context)
+        protected override Task StoreAsync(SecurityContext context, CancellationToken cancel)
         {
-            context.SecuritySystem.DataHandler.DeleteSecurityGroup(GroupId); }
+            return context.SecuritySystem.DataHandler.DeleteSecurityGroupAsync(GroupId, cancel);
+        }
 
         /// <summary>
         /// Applies the modifications in the memory structures.

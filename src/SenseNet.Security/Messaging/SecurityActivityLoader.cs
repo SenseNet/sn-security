@@ -3,6 +3,7 @@ using SenseNet.Security.Messaging.SecurityMessages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace SenseNet.Security.Messaging
 {
@@ -118,11 +119,12 @@ namespace SenseNet.Security.Messaging
 
                 isLast = last.Id >= _to;
             }
-            private IEnumerable<SecurityActivity> LoadSegment(int from, int to, int count)
+            private IEnumerable<SecurityActivity> LoadSegment(int from, int to, int count) //UNDONE:x: async-await?
             {
                 using (var op = SnTrace.SecurityQueue.StartOperation("SAQ: Loading segment: from: {0}, to: {1}, count: {2}.", from, to, count))
                 {
-                    var segment = _dataHandler.LoadSecurityActivities(from, to, count, _executingUnprocessedActivities);
+                    var segment = _dataHandler.LoadSecurityActivitiesAsync(from, to, count,
+                        _executingUnprocessedActivities, CancellationToken.None).GetAwaiter().GetResult();
                     op.Successful = true;
                     return segment;
                 }
@@ -187,10 +189,11 @@ namespace SenseNet.Security.Messaging
                         break;
                 }
             }
-            private IEnumerable<SecurityActivity> LoadGaps(int[] gaps)
+            private IEnumerable<SecurityActivity> LoadGaps(int[] gaps) //UNDONE:x: async-await?
             {
                 SnTrace.SecurityQueue.Write("SAQ: Loading gaps (count: {0}): [{1}]", gaps.Length, string.Join(", ", gaps));
-                return _dataHandler.LoadSecurityActivities(gaps, _executingUnprocessedActivities);
+                return _dataHandler.LoadSecurityActivitiesAsync(gaps, _executingUnprocessedActivities, CancellationToken.None)
+                    .GetAwaiter().GetResult();
             }
 
         }

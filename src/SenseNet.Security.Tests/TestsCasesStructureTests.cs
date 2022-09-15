@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
 
@@ -812,7 +813,8 @@ namespace SenseNet.Security.Tests
 
         private StoredSecurityEntity GetStoredSecurityEntity(int entityId)
         {
-            return SecuritySystem.DataProvider.LoadStoredSecurityEntity(entityId);
+            return SecuritySystem.DataProvider.LoadStoredSecurityEntityAsync(entityId, CancellationToken.None)
+                .GetAwaiter().GetResult();
         }
 
         private void CreateSecurityEntity(TestEntity entity)

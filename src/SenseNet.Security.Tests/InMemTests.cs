@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Extensions.DependencyInjection;
@@ -23,7 +25,7 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void InMem_Services_Register()
+        public async Task InMem_Services_Register()
         {
             var services = new ServiceCollection()
                 .AddLogging();
@@ -39,7 +41,7 @@ namespace SenseNet.Security.Tests
             var provider = services.BuildServiceProvider();
             var sdp = (MemoryDataProvider)provider.GetRequiredService<ISecurityDataProvider>();
             
-            Assert.AreEqual(123, sdp.LoadSecurityEntities().Single().Id);
+            Assert.AreEqual(123, (await sdp.LoadSecurityEntitiesAsync(CancellationToken.None)).Single().Id);
         }
     }
 }

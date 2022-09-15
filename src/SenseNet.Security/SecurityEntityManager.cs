@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using SenseNet.Diagnostics;
 
 namespace SenseNet.Security
@@ -45,6 +47,7 @@ namespace SenseNet.Security
 
         internal SecurityEntity GetEntity(int entityId, bool throwError)
         {
+            //UNDONE:x: async-await and ReaderWriterLockSlim
             EnterReadLock();
             try
             {
@@ -55,6 +58,7 @@ namespace SenseNet.Security
                 ExitReadLock();
             }
         }
+
         /// <summary>
         /// Loads a security entity. If the entity cannot be found in the cache, it loads it
         /// from the database and puts it into the cache. It the entity cannot be loaded
@@ -72,13 +76,16 @@ namespace SenseNet.Security
             if (entity == null)
             {
                 // compensation: try to load the entity and its aces from the db
-                var storedEntity = _dataHandler.GetStoredSecurityEntity(entityId);
+                var storedEntity = _dataHandler.GetStoredSecurityEntityAsync(entityId, CancellationToken.None)
+                    .GetAwaiter().GetResult();
+
                 if (storedEntity != null)
                 {
                     entity = CreateEntitySafe(entityId, storedEntity.ParentId, storedEntity.OwnerId, storedEntity.IsInherited, storedEntity.HasExplicitEntry);
 
                     var acl = new AclInfo(entityId);
-                    var entries = _dataHandler.LoadPermissionEntries(new[] { entityId });
+                    var entries = _dataHandler.LoadPermissionEntriesAsync(new[] {entityId}, CancellationToken.None)
+                        .GetAwaiter().GetResult();
                     foreach (var entry in entries)
                         acl.Entries.Add(new AceInfo { EntryType = entry.EntryType, IdentityId = entry.IdentityId, LocalOnly = entry.LocalOnly, AllowBits = entry.AllowBits, DenyBits = entry.DenyBits });
                     if (acl.Entries.Count > 0)
@@ -88,7 +95,8 @@ namespace SenseNet.Security
                 {
                     if (_missingEntityHandler.GetMissingEntity(entityId, out var parentId, out var ownerId))
                     {
-                        _dataHandler.CreateSecurityEntitySafe(entityId, parentId, ownerId);
+                        _dataHandler.CreateSecurityEntitySafeAsync(entityId, parentId, ownerId, CancellationToken.None)
+                            .GetAwaiter().GetResult();
                         entity = CreateEntitySafe(entityId, parentId, ownerId);
                     }
                 }
