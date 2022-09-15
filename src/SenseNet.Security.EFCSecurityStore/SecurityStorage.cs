@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace SenseNet.Security.EFCSecurityStore
 {
@@ -144,9 +143,9 @@ SELECT 0, CASE WHEN @lastInserted IS NULL AND @ident = 1 THEN 0 ELSE @ident END 
         {
             var dbResult = await EfcIntSet
                 .FromSqlRaw(SelectUnprocessedActivityIds)
-                .Select(x => x.Value)
                 .ToArrayAsync(cancel).ConfigureAwait(false);
             var result = dbResult
+                .Select(x => x.Value)
                 .OrderBy(x => x)
                 .ToArray();
             return result;
