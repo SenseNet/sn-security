@@ -1,13 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29409.12
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security", "SenseNet.Security\SenseNet.Security.csproj", "{B2B39975-3D5E-4457-B9CE-0FCEC20F2F59}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Messaging.Msmq", "SenseNet.Security.Messaging.Msmq\SenseNet.Security.Messaging.Msmq.csproj", "{67D1C02B-0336-4E35-8EC9-573DA304BBEF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.TestConsole", "SenseNet.Security.TestConsole\SenseNet.Security.TestConsole.csproj", "{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security.Messaging.RabbitMQ", "SenseNet.Security.Messaging.RabbitMQ\SenseNet.Security.Messaging.RabbitMQ.csproj", "{84F97FC3-12B9-4D30-95B6-3308EE3CC322}"
 EndProject
@@ -17,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security.EFCSecuri
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security.Tests", "SenseNet.Security.Tests\SenseNet.Security.Tests.csproj", "{797748F0-D729-48FD-A805-52D6AFBFC829}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SenseNet.Security.Tests.Concurrency", "SenseNet.Security.Tests.Concurrency\SenseNet.Security.Tests.Concurrency.csproj", "{A1346136-E251-496B-B2E3-F323C75E29DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseNet.Security.Tests.Concurrency", "SenseNet.Security.Tests.Concurrency\SenseNet.Security.Tests.Concurrency.csproj", "{A1346136-E251-496B-B2E3-F323C75E29DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,14 +25,6 @@ Global
 		{B2B39975-3D5E-4457-B9CE-0FCEC20F2F59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2B39975-3D5E-4457-B9CE-0FCEC20F2F59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2B39975-3D5E-4457-B9CE-0FCEC20F2F59}.Release|Any CPU.Build.0 = Release|Any CPU
-		{67D1C02B-0336-4E35-8EC9-573DA304BBEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{67D1C02B-0336-4E35-8EC9-573DA304BBEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{67D1C02B-0336-4E35-8EC9-573DA304BBEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{67D1C02B-0336-4E35-8EC9-573DA304BBEF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD8F4463-7E02-4F88-8BAD-89F7C17969F6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{84F97FC3-12B9-4D30-95B6-3308EE3CC322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{84F97FC3-12B9-4D30-95B6-3308EE3CC322}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84F97FC3-12B9-4D30-95B6-3308EE3CC322}.Release|Any CPU.ActiveCfg = Release|Any CPU
