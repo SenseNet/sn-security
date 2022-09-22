@@ -117,8 +117,10 @@ namespace SenseNet.Security.Messaging.RabbitMQ
             consumer.Received += (model, args) =>
             {
                 // this is the main entry point for receiving messages
-                using var ms = new MemoryStream(args.Body.ToArray());
-                OnMessageReceived(ms);
+                using (var ms = new MemoryStream(args.Body.ToArray()))
+                {
+                    OnMessageReceived(ms);
+                }
             };
 
             ReceiverChannel.BasicConsume(queueName, true, consumer);
