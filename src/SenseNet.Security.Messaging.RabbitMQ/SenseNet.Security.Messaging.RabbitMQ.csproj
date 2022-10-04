@@ -15,6 +15,7 @@
     <PackageTags>sensenet security permissions messaging rabbitmq</PackageTags>
     <PackageReleaseNotes>See release notes on GitHub.</PackageReleaseNotes>
     <Product>sensenet Security RabbitMQ message provider</Product>
+	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
