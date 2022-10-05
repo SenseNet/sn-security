@@ -224,7 +224,7 @@ namespace SenseNet.Security.Messaging
         /// <returns></returns>
         protected virtual IDistributedMessage DeserializeMessage(Stream data)
         {
-            var bf = new BinaryFormatter();
+            var bf = new BinaryFormatter(); // 4 Receive
             IDistributedMessage message;
             try
             {
@@ -249,7 +249,7 @@ namespace SenseNet.Security.Messaging
             try
             {
                 var ms = new MemoryStream();
-                var bf = new BinaryFormatter();
+                var bf = new BinaryFormatter(); // 2 Send
                 bf.Serialize(ms, message);
                 ms.Flush();
                 ms.Position = 0;

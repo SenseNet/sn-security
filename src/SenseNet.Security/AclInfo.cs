@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace SenseNet.Security
 {
@@ -15,12 +16,13 @@ namespace SenseNet.Security
     {
         [NonSerialized]
         private SecurityEntity _entity;
+        [JsonIgnore]
         internal SecurityEntity Entity { get => _entity; set => _entity = value; } // managed in SecurityEntity only
 
         /// <summary>
         /// Id of the entity.
         /// </summary>
-        public int EntityId { get; }
+        public int EntityId { get; set; }
         /// <summary>
         /// Gets the inheritance state. True if the entity inherits the permission settings from the ancestors.
         /// </summary>
@@ -37,11 +39,12 @@ namespace SenseNet.Security
         /// <summary>
         /// Set of ACEs.
         /// </summary>
-        public List<AceInfo> Entries { get; internal set; }
+        public List<AceInfo> Entries { get; set; }
 
         /// <summary>
         /// Parent AclInfo.
         /// </summary>
+        [JsonIgnore]
         public AclInfo Parent => GetParent();
 
         private AclInfo GetParent()
@@ -57,6 +60,8 @@ namespace SenseNet.Security
             }
             return null;
         }
+
+        internal AclInfo() { }
 
         /// <summary>
         /// Initializes a new instance of the AclInfo.

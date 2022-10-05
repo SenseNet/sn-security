@@ -11,7 +11,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public class DeleteIdentitiesActivity : MembershipActivity
     {
-        internal IEnumerable<int> IdentityIds { get; }
+        public IEnumerable<int> IdentityIds { get; set; }
+
+        internal DeleteIdentitiesActivity() { }
 
         /// <summary>
         /// Initializes a new instance of the DeleteIdentitiesActivity.

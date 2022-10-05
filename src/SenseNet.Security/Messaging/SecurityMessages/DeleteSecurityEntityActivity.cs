@@ -10,7 +10,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public class DeleteSecurityEntityActivity : SecurityActivity
     {
-        internal int EntityId { get; }
+        public int EntityId { get; set; }
+
+        internal DeleteSecurityEntityActivity() { }
 
         /// <summary>
         /// Initializes a new instance of the DeleteSecurityEntityActivity.

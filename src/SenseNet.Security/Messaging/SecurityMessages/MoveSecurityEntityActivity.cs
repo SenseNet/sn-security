@@ -10,8 +10,10 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public class MoveSecurityEntityActivity : SecurityActivity
     {
-        internal int SourceId { get; }
-        internal int TargetId { get; }
+        public int SourceId { get; set; }
+        public int TargetId { get; set; }
+
+        internal MoveSecurityEntityActivity() { }
 
         /// <summary>
         /// Initializes a new instance of the MoveSecurityEntityActivity.

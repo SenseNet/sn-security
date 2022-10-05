@@ -10,7 +10,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public class DeleteUserActivity : MembershipActivity
     {
-        internal int UserId { get; }
+        public int UserId { get; set; }
+
+        internal DeleteUserActivity() { }
 
         /// <summary>
         /// Initializes a new instance of the DeleteUserActivity.

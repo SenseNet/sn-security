@@ -29,7 +29,7 @@ namespace SenseNet.Security
             try
             {
                 var ms = new MemoryStream();
-                var bf = new BinaryFormatter();
+                var bf = new BinaryFormatter(); // 1 Save
                 bf.Serialize(ms, activity);
                 ms.Flush();
                 ms.Position = 0;
@@ -46,7 +46,7 @@ namespace SenseNet.Security
         {
             Stream data = new MemoryStream(bytes);
 
-            var bf = new BinaryFormatter();
+            var bf = new BinaryFormatter(); // 3 Load
             SecurityActivity activity = null;
             try
             {

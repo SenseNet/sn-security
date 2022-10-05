@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
 {
@@ -12,12 +14,21 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public class SetAclActivity : SecurityActivity
     {
-        private readonly IEnumerable<AclInfo> _acls;
-        private readonly List<int> _breaks;
-        private readonly List<int> _undoBreaks;
-        private readonly List<StoredAce> _entries = new List<StoredAce>();
-        private readonly List<StoredAce> _entriesToRemove = new List<StoredAce>();
-        private readonly List<int> _emptyAcls = new List<int>();
+        private IEnumerable<AclInfo> _acls;
+        private List<int> _breaks;
+        private List<int> _undoBreaks;
+        private List<StoredAce> _entries = new List<StoredAce>();
+        private List<StoredAce> _entriesToRemove = new List<StoredAce>();
+        private List<int> _emptyAcls = new List<int>();
+
+        public IEnumerable<AclInfo> Acls { get => _acls; set => _acls = value; }
+        public List<int> Breaks { get => _breaks; set => _breaks = value; }
+        public List<int> UndoBreaks { get => _undoBreaks; set => _undoBreaks = value; }
+        public List<StoredAce> Entries { get => _entries; set => _entries = value; }
+        public List<StoredAce> EntriesToRemove { get => _entriesToRemove; set => _entriesToRemove = value; }
+        public List<int> EmptyAcls { get => _emptyAcls; set => _emptyAcls = value; }
+
+        internal SetAclActivity() { }
 
         /// <summary>
         /// Initializes a new instance of the SetAclActivity.
@@ -109,6 +120,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         [NonSerialized]
         // ReSharper disable once InconsistentNaming
         private List<int> __allEntityIds;
+        [JsonIgnore]
         internal List<int> AllEntityIds => __allEntityIds ?? (__allEntityIds = CollectEntityIds());
 
         private List<int> CollectEntityIds()

@@ -10,8 +10,10 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public class ModifySecurityEntityOwnerActivity : SecurityActivity
     {
-        internal int EntityId { get; }
-        internal int OwnerId { get; }
+        public int EntityId { get; set; }
+        public int OwnerId { get; set; }
+
+        internal ModifySecurityEntityOwnerActivity() { }
 
         /// <summary>
         /// Initializes a new instance of the ModifySecurityEntityOwnerActivity.
