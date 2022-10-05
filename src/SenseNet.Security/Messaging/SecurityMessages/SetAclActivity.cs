@@ -93,7 +93,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Stores the modifications in the database.
         /// </summary>
-        protected override async Task StoreAsync(SecurityContext context, CancellationToken cancel) //UNDONE:x: async: Task.WhenAll?
+        protected override async Task StoreAsync(SecurityContext context, CancellationToken cancel) //TODO: async: Task.WhenAll?
         {
             var dataHandler = context.SecuritySystem.DataHandler;
 
