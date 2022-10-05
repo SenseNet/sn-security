@@ -15,7 +15,7 @@ namespace SenseNet.Security
         /// </summary>
         public virtual int[] GetFlattenedGroups()
         {
-            return Cache.GetGroups(CurrentUser.Id);
+            return SecuritySystem.Cache.GetGroups(CurrentUser.Id);
         }
         /// <summary>
         /// Gets a flattened list of group ids that the current is member of, plus Everyone (except in case of a visitor) 
@@ -41,7 +41,7 @@ namespace SenseNet.Security
         /// </summary>
         public virtual bool IsInGroup(int memberId, int groupId)
         {
-            return Cache.IsInGroup(memberId, groupId);
+            return SecuritySystem.Cache.IsInGroup(memberId, groupId);
         }
 
         /// <summary>

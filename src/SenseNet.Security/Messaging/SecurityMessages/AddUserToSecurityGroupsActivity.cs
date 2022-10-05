@@ -40,7 +40,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.AddUserToGroups(UserId, ParentGroups);
+            context.SecuritySystem.Cache.AddUserToGroups(UserId, ParentGroups);
         }
     }
 }

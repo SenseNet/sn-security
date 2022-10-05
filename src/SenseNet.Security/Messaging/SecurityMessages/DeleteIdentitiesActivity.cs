@@ -36,7 +36,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.DeleteIdentities(context, IdentityIds);
+            context.SecuritySystem.Cache.DeleteIdentities(context, IdentityIds);
         }
     }
 }

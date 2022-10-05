@@ -20,7 +20,7 @@ namespace SenseNet.Security
         /// </summary>
         public ISecurityUser CurrentUser { get; }
 
-        internal SecurityCache Cache => SecuritySystem.Cache; //UNDONE: Remove unnecessary dependency: Cache
+[Obsolete("##", true)] internal SecurityCache Cache => SecuritySystem.Cache; //UNDONE: Remove unnecessary dependency: Cache
 
         internal PermissionEvaluator Evaluator { get; }
 
@@ -437,17 +437,17 @@ namespace SenseNet.Security
         /// <summary>WARNING! Do not use this method in your code. Used in consistency checker tool.</summary>
         public virtual IEnumerable<long> GetCachedMembershipForConsistencyCheck()
         {
-            return Cache.GetMembershipForConsistencyCheck();
+            return SecuritySystem.Cache.GetMembershipForConsistencyCheck();
         }
         /// <summary>WARNING! Do not use this method in your code. Used in consistency checker tool.</summary>
         public virtual void GetFlatteningForConsistencyCheck(out IEnumerable<long> missingInFlattening, out IEnumerable<long> unknownInFlattening)
         {
-            Cache.GetFlatteningForConsistencyCheck(out missingInFlattening, out unknownInFlattening);
+            SecuritySystem.Cache.GetFlatteningForConsistencyCheck(out missingInFlattening, out unknownInFlattening);
         }
         /// <summary>WARNING! Do not use this method in your code. Used in consistency checker tool.</summary>
         public virtual IDictionary<int, SecurityEntity> GetCachedEntitiesForConsistencyCheck()
         {
-            return Cache.Entities;
+            return SecuritySystem.Cache.Entities;
         }
 
     }

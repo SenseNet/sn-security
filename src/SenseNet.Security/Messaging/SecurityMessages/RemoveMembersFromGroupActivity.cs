@@ -43,7 +43,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.RemoveMembers(GroupId, GroupMembers, UserMembers, ParentGroups);
+            context.SecuritySystem.Cache.RemoveMembers(GroupId, GroupMembers, UserMembers, ParentGroups);
         }
     }
 }

@@ -306,7 +306,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 //---------------------- work
 
                 var ctx = securitySystem.GeneralSecurityContext;
-                var entities = ctx.Cache.Entities;
+                var entities = ctx.SecuritySystem.Cache.Entities;
                 var source = entities[3];
                 var target0 = entities[1];
                 var target1 = entities[52];
@@ -326,7 +326,7 @@ namespace SenseNet.Security.Tests.Concurrency
             var count = 0;
 
                 var ctx = securitySystem.GeneralSecurityContext;
-                var entities = ctx.Cache.Entities;
+                var entities = ctx.SecuritySystem.Cache.Entities;
 
             while (!_stopped)
             {
