@@ -20,8 +20,6 @@ namespace SenseNet.Security
         /// </summary>
         public ISecurityUser CurrentUser { get; }
 
-[Obsolete("##", true)] internal SecurityCache Cache => SecuritySystem.Cache; //UNDONE: Remove unnecessary dependency: Cache
-
         internal PermissionEvaluator Evaluator { get; }
 
         private readonly PermissionQuery _permissionQuery;
