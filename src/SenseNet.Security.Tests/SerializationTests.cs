@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using SenseNet.Security.Messaging;
@@ -41,7 +42,6 @@ namespace SenseNet.Security.Tests
 
         private Type[] _messageTypes = new[]
         {
-
             // IDistributedMessage
             typeof(UnknownMessage),
             // DistributedMessage : IDistributedMessage
@@ -333,19 +333,16 @@ namespace SenseNet.Security.Tests
 
         private void SerializationTest<T>(T message, Action<T, string> checkReceived) where T : IDistributedMessage
         {
-            //using (var stream = new FileStream(@"C:\Users\kavics\Desktop\setacl", FileMode.Create))
-            //{
-            //    var bf = new BinaryFormatter();
-            //    bf.Serialize(stream, message);
-            //}
+            var services = new ServiceCollection()
+                .AddDefaultSecurityMessageTypes()
+                .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
+                .BuildServiceProvider();
 
             // simulate message completion
             message.MessageSent = DateTime.UtcNow;
             message.Sender = new MessageSender(Environment.MachineName, Guid.NewGuid().ToString());
 
-            var formatter = new SnMessageFormatter(
-                knownMessageTypes: _messageTypes.Select(t => new DistributedMessageType(t)),
-                jsonConverters: Array.Empty<JsonConverter>());
+            var formatter = services.GetRequiredService<ISecurityMessageFormatter>();
 
             var serialized = formatter.Serialize(message);
 

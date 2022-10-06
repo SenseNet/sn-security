@@ -8,12 +8,6 @@ using System.Text;
 
 namespace SenseNet.Security.Messaging
 {
-    public interface IMessageFormatter
-    {
-        IDistributedMessage Deserialize(Stream data);
-        public Stream Serialize(IDistributedMessage message);
-    }
-
     public class DistributedMessageType
     {
         public Type MessageType;
@@ -24,7 +18,7 @@ namespace SenseNet.Security.Messaging
         }
     }
 
-    public class SnMessageFormatter : IMessageFormatter
+    public class SnSecurityMessageFormatter : ISecurityMessageFormatter
     {
         private class Envelope
         {
@@ -35,7 +29,7 @@ namespace SenseNet.Security.Messaging
         private readonly Dictionary<string, Type> _knownMessageTypes;
         private readonly JsonSerializerSettings _serializationSettings;
 
-        public SnMessageFormatter(IEnumerable<DistributedMessageType> knownMessageTypes,
+        public SnSecurityMessageFormatter(IEnumerable<DistributedMessageType> knownMessageTypes,
             IEnumerable<JsonConverter> jsonConverters)
         {
             _knownMessageTypes = knownMessageTypes
@@ -83,13 +77,13 @@ namespace SenseNet.Security.Messaging
 
         public Stream Serialize(IDistributedMessage message)
         {
-            var envelope = new Envelope {Type = message.GetType().FullName, Msg = message};
+            var envelope = new Envelope { Type = message.GetType().FullName, Msg = message };
             var text = JsonConvert.SerializeObject(envelope, _serializationSettings);
             var stream = GetStreamFromString(text);
             return stream;
         }
 
-        public static Stream GetStreamFromString(string textData)
+        private static MemoryStream GetStreamFromString(string textData)
         {
             var stream = new MemoryStream();
 
@@ -106,12 +100,5 @@ namespace SenseNet.Security.Messaging
 
             return stream;
         }
-        public static string GetStringFromStream(Stream stream)
-        {
-            StreamReader sr = new StreamReader(stream);
-            stream.Position = 0;
-            return sr.ReadToEnd();
-        }
-
     }
 }
