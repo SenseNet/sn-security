@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using SenseNet.Security.Configuration;
 using SenseNet.Security.Data;
 
@@ -53,7 +54,9 @@ namespace SenseNet.Security.Tests.Concurrency
 
         internal static SecuritySystem StartTheSystem(ISecurityDataProvider securityDataProvider)
         {
-            var messageSenderManager = new MessageSenderManager("asdf");
+            var messageSenderManager = new MessageSenderManager(
+                new OptionsWrapper<MessageSenderOptions>(
+                    new MessageSenderOptions{ComputerId = "asdf", InstanceId = "instance1"}));
             // Call SecurityContext starter method.
             //var securitySystem = SecurityContextForConcurrencyTests.StartTheSystem(new SecurityConfiguration
             //{

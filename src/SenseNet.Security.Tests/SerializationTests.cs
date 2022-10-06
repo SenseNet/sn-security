@@ -6,6 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using SenseNet.Extensions.DependencyInjection;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 
@@ -334,13 +335,19 @@ namespace SenseNet.Security.Tests
         private void SerializationTest<T>(T message, Action<T, string> checkReceived) where T : IDistributedMessage
         {
             var services = new ServiceCollection()
-                .AddDefaultSecurityMessageTypes()
-                .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
+                .AddSenseNetSecurity(configureMessageSender: options =>
+                {
+                    options.ComputerId = "Machine1";
+                    options.InstanceId = "Instance1";
+                })
+                //.AddDefaultSecurityMessageTypes()
+                //.AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
                 .BuildServiceProvider();
 
             // simulate message completion
+            var senderManager = services.GetRequiredService<IMessageSenderManager>();
             message.MessageSent = DateTime.UtcNow;
-            message.Sender = new MessageSender(Environment.MachineName, Guid.NewGuid().ToString());
+            message.Sender = senderManager.CreateMessageSender();
 
             var formatter = services.GetRequiredService<ISecurityMessageFormatter>();
 

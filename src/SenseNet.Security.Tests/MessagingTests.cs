@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
@@ -58,7 +59,9 @@ namespace SenseNet.Security.Tests
             };
 
             //---- Start the system
-            var messageSenderManager = new MessageSenderManager();
+            var messageSenderManager = new MessageSenderManager(
+                new OptionsWrapper<MessageSenderOptions>(
+                    new MessageSenderOptions()));
             var msgProvider = new TestMessageProvider(messageSenderManager);
             msgProvider.MessageReceived += MsgProvider_MessageReceived;
             msgProvider.Initialize();
@@ -105,7 +108,9 @@ namespace SenseNet.Security.Tests
             };
 
             //---- Start the system
-            var messageSenderManager = new MessageSenderManager();
+            var messageSenderManager = new MessageSenderManager(
+                new OptionsWrapper<MessageSenderOptions>(
+                    new MessageSenderOptions()));
             var msgProvider = new TestMessageProvider(messageSenderManager);
             msgProvider.Initialize();
             var securitySystem = Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);

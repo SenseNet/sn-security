@@ -106,7 +106,9 @@ namespace SenseNet.Security.Tests
             var aces = SystemStartTests.CreateTestAces();
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities, Messages = new List<Tuple<int, DateTime, byte[]>>() };
 
-            var messageSenderManager = new MessageSenderManager(null, instanceName);
+            var messageSenderManager = new MessageSenderManager(
+                new OptionsWrapper<MessageSenderOptions>(
+                    new MessageSenderOptions {InstanceId = instanceName}));
             var securitySystem = new SecuritySystem(
                 new MemoryDataProvider(storage),
                 new TestMessageProvider(messageSenderManager, messageQueue, isReceiver),

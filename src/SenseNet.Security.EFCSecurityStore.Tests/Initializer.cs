@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using SenseNet.Security.Messaging;
 
 namespace SenseNet.Security.EFCSecurityStore.Tests
@@ -16,7 +17,9 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                 .Build();
 
             // install db directly
-            new EFCSecurityDataProvider(new MessageSenderManager(), 0, Configuration.Instance.GetConnectionString())
+            new EFCSecurityDataProvider(new MessageSenderManager(
+                    new OptionsWrapper<MessageSenderOptions>(
+                        new MessageSenderOptions())), 0, Configuration.Instance.GetConnectionString())
                 .InstallDatabase();
 
             var _ = PermissionType.See; // pre-loads the type

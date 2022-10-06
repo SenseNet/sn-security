@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Options;
 using SenseNet.Security.Tests.TestPortal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
@@ -29,7 +30,12 @@ namespace SenseNet.Security.Tests
             //dataProvider.DeleteEverything();
             dataProvider.InstallDatabase();
 
-            var securitySystem = Context.StartTheSystem(dataProvider, new DefaultMessageProvider(new MessageSenderManager()));
+            var securitySystem = Context.StartTheSystem(
+                dataProvider,
+                new DefaultMessageProvider(
+                    new MessageSenderManager(
+                        new OptionsWrapper<MessageSenderOptions>(
+                            new MessageSenderOptions()))));
             securitySystem.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             CurrentContext = new Context(TestUser.User1, securitySystem);
 

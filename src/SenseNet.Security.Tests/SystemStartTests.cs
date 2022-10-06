@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
@@ -48,7 +49,12 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             //---- Start the system
-            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
+            var securitySystem = Context.StartTheSystem(
+                new MemoryDataProvider(storage),
+                new DefaultMessageProvider(
+                    new MessageSenderManager(
+                        new OptionsWrapper<MessageSenderOptions>(
+                            new MessageSenderOptions()))));
 
             //---- Start the request
             _context = new Context(TestUser.User1, securitySystem);
@@ -253,7 +259,12 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             //---- Start the system
-            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
+            var securitySystem = Context.StartTheSystem(
+                new MemoryDataProvider(storage),
+                new DefaultMessageProvider(
+                    new MessageSenderManager(
+                        new OptionsWrapper<MessageSenderOptions>(
+                            new MessageSenderOptions()))));
             var ctxAcc = new ObjectAccessor(securitySystem);
             var killed = (bool)ctxAcc.GetField("_killed");
             Assert.IsFalse(killed);

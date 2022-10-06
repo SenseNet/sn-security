@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Options;
 using SenseNet.Security.Data;
 
 namespace SenseNet.Security.Tests
@@ -49,7 +50,12 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             var timer = Stopwatch.StartNew();
-            securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
+            securitySystem = Context.StartTheSystem(
+                new MemoryDataProvider(storage),
+                new DefaultMessageProvider(
+                    new MessageSenderManager(
+                        new OptionsWrapper<MessageSenderOptions>(
+                            new MessageSenderOptions()))));
             timer.Stop();
             var elapsed = timer.Elapsed;
 

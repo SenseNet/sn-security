@@ -51,7 +51,10 @@ namespace SenseNet.Security.Tests
         public void CommunicationMonitor_HearthBeat()
         {
             var testDp = new TestDp(DatabaseStorage.CreateEmpty());
-            var messageProvider = new DefaultMessageProvider(new MessageSenderManager());
+            var messageProvider = new DefaultMessageProvider(
+                new MessageSenderManager(
+                    new OptionsWrapper<MessageSenderOptions>(
+                        new MessageSenderOptions())));
             var missingEntityHandler = new MissingEntityHandler();
             var messagingOptions = Options.Create(new MessagingOptions()
             {

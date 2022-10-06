@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
@@ -123,7 +124,12 @@ namespace SenseNet.Security.Tests
         }
         internal Context GetEmptyContext(TestUser currentUser, ISecurityDataProvider dbProvider, TextWriter traceChannel = null)
         {
-            var securitySystem = Context.StartTheSystem(dbProvider, new DefaultMessageProvider(new MessageSenderManager()), traceChannel);
+            var securitySystem = Context.StartTheSystem(
+                dbProvider,
+                new DefaultMessageProvider(new MessageSenderManager(
+                    new OptionsWrapper<MessageSenderOptions>(
+                        new MessageSenderOptions()))),
+                traceChannel);
             return new Context(currentUser, securitySystem);
         }
 

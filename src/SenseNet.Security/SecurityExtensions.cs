@@ -18,7 +18,8 @@ namespace SenseNet.Extensions.DependencyInjection
         /// </summary>
         public static IServiceCollection AddSenseNetSecurity(this IServiceCollection services,
             Action<SecurityConfiguration> configureSecurity = null,
-            Action<MessagingOptions> configureMessaging = null)
+            Action<MessagingOptions> configureMessaging = null,
+            Action<MessageSenderOptions> configureMessageSender = null)
         {
             // custom or default configuration
             if (configureSecurity != null)
@@ -34,8 +35,10 @@ namespace SenseNet.Extensions.DependencyInjection
             services
                 .AddInMemorySecurityDataProvider(DatabaseStorage.CreateEmpty())
                 .AddSecurityMissingEntityHandler<MissingEntityHandler>()
-                .AddDefaultSecurityMessageSenderManager()
-                .AddDefaultSecurityMessageProvider();
+                .AddDefaultSecurityMessageSenderManager(configureMessageSender)
+                .AddDefaultSecurityMessageProvider()
+                .AddDefaultSecurityMessageTypes()
+                .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>();
 
             return services;
         }
@@ -84,9 +87,11 @@ namespace SenseNet.Extensions.DependencyInjection
         /// <summary>
         /// Registers the default message sender manager in the service collection.
         /// </summary>
-        public static IServiceCollection AddDefaultSecurityMessageSenderManager(this IServiceCollection services)
+        public static IServiceCollection AddDefaultSecurityMessageSenderManager(this IServiceCollection services,
+            Action<MessageSenderOptions> configure = null)
         {
-            return services.AddSecurityMessageSenderManager<MessageSenderManager>();
+            return services.AddSecurityMessageSenderManager<MessageSenderManager>()
+                .Configure<MessageSenderOptions>(x => { configure?.Invoke(x); });
         }
         /// <summary>
         /// Registers a message sender manager in the service collection.
