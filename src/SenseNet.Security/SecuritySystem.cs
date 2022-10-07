@@ -59,7 +59,7 @@ namespace SenseNet.Security
 
         internal DateTime StartedAt { get; private set; }
 
-        //UNDONE: get configuration through IOptions and register SecuritySystem as a service.
+        //UNDONE:DI get configuration through IOptions and register SecuritySystem as a service.
         public SecuritySystem(
             ISecurityDataProvider dataProvider,
             IMessageProvider messageProvider,

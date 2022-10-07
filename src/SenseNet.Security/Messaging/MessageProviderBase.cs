@@ -224,6 +224,7 @@ namespace SenseNet.Security.Messaging
         /// <returns></returns>
         protected virtual IDistributedMessage DeserializeMessage(Stream data)
         {
+            //UNDONE:DI: Use ctor and ISecurityMessageFormatter.Deserialize()
             var bf = new BinaryFormatter(); // 4 Receive
             IDistributedMessage message;
             try
@@ -246,6 +247,7 @@ namespace SenseNet.Security.Messaging
         /// <returns></returns>
         protected virtual Stream SerializeMessage(object message)
         {
+            //UNDONE:DI: Use ctor and ISecurityMessageFormatter.Serialize()
             try
             {
                 var ms = new MemoryStream();

@@ -126,9 +126,7 @@ namespace SenseNet.Security.Tests
         {
             var securitySystem = Context.StartTheSystem(
                 dbProvider,
-                new DefaultMessageProvider(new MessageSenderManager(
-                    new OptionsWrapper<MessageSenderOptions>(
-                        new MessageSenderOptions()))),
+                DiTools.CreateDefaultMessageProvider(),
                 traceChannel);
             return new Context(currentUser, securitySystem);
         }
