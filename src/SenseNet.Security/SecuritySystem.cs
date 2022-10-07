@@ -63,6 +63,7 @@ namespace SenseNet.Security
         public SecuritySystem(
             ISecurityDataProvider dataProvider,
             IMessageProvider messageProvider,
+//UNDONE:DI: Use messageFormatter parameter
 //            ISecurityMessageFormatter messageFormatter,
             IMissingEntityHandler missingEntityHandler,
             SecurityConfiguration configuration,
@@ -70,6 +71,7 @@ namespace SenseNet.Security
         {
             Configuration = configuration;
             MessagingOptions = messagingOptions;
+//UNDONE:DI: Use messageFormatter from the parameter
 dataProvider.ActivitySerializer = new ActivitySerializer(this, new BinarySecurityMessageFormatter());
             DataHandler = new DataHandler(dataProvider, Options.Create(messagingOptions));
             ActivityHistory = new SecurityActivityHistoryController();

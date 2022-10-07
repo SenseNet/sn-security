@@ -230,21 +230,6 @@ namespace SenseNet.Security.Messaging
         protected virtual IDistributedMessage DeserializeMessage(Stream data)
         {
             return _messageFormatter.Deserialize(data);
-
-            //UNDONE:DI: Use ctor and ISecurityMessageFormatter.Deserialize()
-            var bf = new BinaryFormatter(); // 4 Receive
-            IDistributedMessage message;
-            try
-            {
-                message = (IDistributedMessage)bf.Deserialize(data);
-            }
-            catch (SerializationException e) //logged
-            {
-                SnLog.WriteException(e, EventMessage.Error.MessageDeserialization, EventId.Messaging);
-                message = new UnknownMessage { MessageData = data };
-                // don't rethrow because caller handles
-            }
-            return message;
         }
         /// <summary>
         /// Helper method for serializing a message object. The current implementation
@@ -255,21 +240,6 @@ namespace SenseNet.Security.Messaging
         protected virtual Stream SerializeMessage(IDistributedMessage message)
         {
             return _messageFormatter.Serialize(message);
-            //UNDONE:DI: Use ctor and ISecurityMessageFormatter.Serialize()
-            try
-            {
-                var ms = new MemoryStream();
-                var bf = new BinaryFormatter(); // 2 Send
-                bf.Serialize(ms, message);
-                ms.Flush();
-                ms.Position = 0;
-                return ms;
-            }
-            catch (Exception e)
-            {
-                SnLog.WriteException(e, EventMessage.Error.MessageSerialization, EventId.Messaging);
-                throw;
-            }
         }
     }
 }

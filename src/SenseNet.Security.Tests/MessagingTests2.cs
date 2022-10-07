@@ -37,7 +37,7 @@ namespace SenseNet.Security.Tests
                 // can decide whether they should process it or not.
                 message.MessageSent = DateTime.UtcNow;
                 var stream = (MemoryStream)SerializeMessage(message);
-                var buffer = stream.GetBuffer();
+                var buffer = stream.ToArray();
                 _messageQueue.Enqueue(buffer);
             }
 
@@ -102,25 +102,24 @@ namespace SenseNet.Security.Tests
 
         private SecuritySystem CreateSecuritySystem(string instanceName, Queue<byte[]> messageQueue, bool isReceiver)
         {
+            var services = new ServiceCollection()
+                .AddDefaultSecurityMessageTypes()
+                .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
+                .BuildServiceProvider();
+
             var entities = SystemStartTests.CreateTestEntities();
             var groups = SystemStartTests.CreateTestGroups();
             var memberships = Tools.CreateInMemoryMembershipTable(groups);
             var aces = SystemStartTests.CreateTestAces();
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities, Messages = new List<Tuple<int, DateTime, byte[]>>() };
 
-            var services = new ServiceCollection()
-                .AddDefaultSecurityMessageTypes()
-                .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
-                .BuildServiceProvider();
-
-            var messageFormatter = services.GetRequiredService<ISecurityMessageFormatter>();
-
-            var messageSenderManager = new MessageSenderManager(
-                new OptionsWrapper<MessageSenderOptions>(
-                    new MessageSenderOptions {InstanceId = instanceName}));
             var securitySystem = new SecuritySystem(
                 new MemoryDataProvider(storage),
-                new TestMessageProvider(messageSenderManager, messageFormatter, messageQueue, isReceiver),
+                new TestMessageProvider(
+                    DiTools.CreateMessageSenderManager(null, instanceName),
+                    services.GetRequiredService<ISecurityMessageFormatter>(),
+                    messageQueue,
+                    isReceiver),
                 new MissingEntityHandler(),
                 new SecurityConfiguration(),
                 new MessagingOptions());

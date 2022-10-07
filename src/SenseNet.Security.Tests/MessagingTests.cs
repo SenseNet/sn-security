@@ -59,10 +59,7 @@ namespace SenseNet.Security.Tests
             };
 
             //---- Start the system
-            var messageSenderManager = new MessageSenderManager(
-                new OptionsWrapper<MessageSenderOptions>(
-                    new MessageSenderOptions()));
-            var msgProvider = new TestMessageProvider(messageSenderManager);
+            var msgProvider = new TestMessageProvider(DiTools.CreateMessageSenderManager());
             msgProvider.MessageReceived += MsgProvider_MessageReceived;
             msgProvider.Initialize();
 
@@ -108,10 +105,7 @@ namespace SenseNet.Security.Tests
             };
 
             //---- Start the system
-            var messageSenderManager = new MessageSenderManager(
-                new OptionsWrapper<MessageSenderOptions>(
-                    new MessageSenderOptions()));
-            var msgProvider = new TestMessageProvider(messageSenderManager);
+            var msgProvider = new TestMessageProvider(DiTools.CreateMessageSenderManager());
             msgProvider.Initialize();
             var securitySystem = Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
 

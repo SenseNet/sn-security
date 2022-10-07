@@ -54,20 +54,10 @@ namespace SenseNet.Security.Tests.Concurrency
 
         internal static SecuritySystem StartTheSystem(ISecurityDataProvider securityDataProvider)
         {
-            var messageSenderManager = new MessageSenderManager(
-                new OptionsWrapper<MessageSenderOptions>(
-                    new MessageSenderOptions{ComputerId = "asdf", InstanceId = "instance1"}));
-            // Call SecurityContext starter method.
-            //var securitySystem = SecurityContextForConcurrencyTests.StartTheSystem(new SecurityConfiguration
-            //{
-            //    SecurityDataProvider = securityDataProvider,
-            //    MessageProvider = new DefaultMessageProvider(messageSenderManager),
-            //    CommunicationMonitorRunningPeriodInSeconds = 31
-            //});
             var config = new SecurityConfiguration();
             var messagingOptions = new MessagingOptions { CommunicationMonitorRunningPeriodInSeconds = 31};
             var securitySystem = new SecuritySystem(securityDataProvider,
-                new DefaultMessageProvider(messageSenderManager),
+                DiTools.CreateDefaultMessageProvider("asdf", "instance1"),
                 new MissingEntityHandler(), config, messagingOptions);
             securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 
