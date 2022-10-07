@@ -1,6 +1,7 @@
 ﻿using SenseNet.Security.Messaging;
 using System.IO;
 using System.Threading;
+using Microsoft.Extensions.Options;
 using SenseNet.Security.Configuration;
 
 namespace SenseNet.Security.Tests.TestPortal
@@ -13,8 +14,8 @@ namespace SenseNet.Security.Tests.TestPortal
         {
             var securitySystem = new SecuritySystem(securityDataProvider, messageProvider,
                 new MissingEntityHandler(),
-                new SecurityConfiguration(),
-                new MessagingOptions { CommunicationMonitorRunningPeriodInSeconds = 31 });
+                Options.Create(new SecurityConfiguration()),
+                Options.Create(new MessagingOptions {CommunicationMonitorRunningPeriodInSeconds = 31}));
             securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             return securitySystem;

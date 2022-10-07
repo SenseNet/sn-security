@@ -53,12 +53,13 @@ namespace SenseNet.Security.Tests
             var testDp = new TestDp(DatabaseStorage.CreateEmpty());
             var messageProvider = DiTools.CreateDefaultMessageProvider();
             var missingEntityHandler = new MissingEntityHandler();
+            var securityConfiguration = Options.Create(new SecurityConfiguration());
             var messagingOptions = Options.Create(new MessagingOptions()
             {
                 CommunicationMonitorRunningPeriodInSeconds = 1
             });
             var securitySystem = new SecuritySystem(testDp, messageProvider, missingEntityHandler,
-                new SecurityConfiguration(), messagingOptions.Value);
+                securityConfiguration, messagingOptions);
             var dataHandler = new DataHandler(testDp, messagingOptions);
             var communicationMonitor = new CommunicationMonitor(dataHandler, messagingOptions);
             var activityHistory = new SecurityActivityHistoryController();

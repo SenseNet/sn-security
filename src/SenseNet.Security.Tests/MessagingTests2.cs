@@ -121,8 +121,8 @@ namespace SenseNet.Security.Tests
                     messageQueue,
                     isReceiver),
                 new MissingEntityHandler(),
-                new SecurityConfiguration(),
-                new MessagingOptions());
+                Options.Create(new SecurityConfiguration()),
+                Options.Create(new MessagingOptions()));
 
             securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 
