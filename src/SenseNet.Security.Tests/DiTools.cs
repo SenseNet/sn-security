@@ -12,8 +12,7 @@ namespace SenseNet.Security.Tests
         public static IMessageSenderManager CreateMessageSenderManager(string computerId = null, string instanceId = null)
         {
             return new MessageSenderManager(
-                new OptionsWrapper<MessageSenderOptions>(
-                    new MessageSenderOptions { ComputerId = computerId, InstanceId = instanceId }));
+                Options.Create(new MessageSenderOptions { ComputerId = computerId, InstanceId = instanceId }));
         }
     }
 }

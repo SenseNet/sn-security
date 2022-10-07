@@ -29,13 +29,11 @@ namespace SenseNet.Security.EFCSecurityStore
 
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
         [Obsolete("Use the constructor with IOptions and dependency injection instead.", true)]
-        //UNDONE:DI Use the constructor with IOptions and dependency injection instead.
         public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager) : this(messageSenderManager, 0, null)
         {
         }
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
         [Obsolete("Use the constructor with IOptions and dependency injection instead.", true)]
-        //UNDONE:DI Use the constructor with IOptions and dependency injection instead.
         public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager, int commandTimeout, string connectionString)
         {
             _messageSenderManager = messageSenderManager;
