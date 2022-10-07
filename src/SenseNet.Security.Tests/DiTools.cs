@@ -1,9 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SenseNet.Security.Messaging;
 
 namespace SenseNet.Security.Tests

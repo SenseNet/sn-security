@@ -22,9 +22,6 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
     {
         protected override ISecurityDataProvider GetDataProvider()
         {
-//return new EFCSecurityDataProvider(new MessageSenderManager(
-//    new OptionsWrapper<MessageSenderOptions>(
-//        new MessageSenderOptions())), 0, Configuration.Instance.GetConnectionString());
             return new EFCSecurityDataProvider(
                 messageSenderManager: DiTools.CreateMessageSenderManager(),
                 options: new OptionsWrapper<DataOptions>(

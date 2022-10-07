@@ -19,10 +19,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-// install db directly
-//new EFCSecurityDataProvider(new MessageSenderManager(
-//        new OptionsWrapper<MessageSenderOptions>(
-//            new MessageSenderOptions())), 0, Configuration.Instance.GetConnectionString())
+            // install db directly
             new EFCSecurityDataProvider(
                     messageSenderManager: DiTools.CreateMessageSenderManager(),
                     options: new OptionsWrapper<DataOptions>(
