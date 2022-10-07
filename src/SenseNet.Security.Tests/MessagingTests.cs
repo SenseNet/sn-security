@@ -107,7 +107,11 @@ namespace SenseNet.Security.Tests
             //---- Start the system
             var msgProvider = new TestMessageProvider(DiTools.CreateMessageSenderManager());
             msgProvider.Initialize();
-            var securitySystem = Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
+            var securitySystem = Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider,
+                configureServices: services =>
+                {
+                    services.AddSecurityMessageType<TestActivity>();
+                });
 
             _context = new Context(TestUser.User1, securitySystem);
 

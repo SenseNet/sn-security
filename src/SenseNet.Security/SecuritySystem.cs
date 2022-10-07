@@ -59,20 +59,18 @@ namespace SenseNet.Security
 
         internal DateTime StartedAt { get; private set; }
 
-//UNDONE:DI register SecuritySystem as a service.
+        //UNDONE:DI register SecuritySystem as a service.
         public SecuritySystem(
             ISecurityDataProvider dataProvider,
             IMessageProvider messageProvider,
-//UNDONE:DI: Use messageFormatter parameter
-//ISecurityMessageFormatter messageFormatter,
+            ISecurityMessageFormatter messageFormatter,
             IMissingEntityHandler missingEntityHandler,
             IOptions<SecurityConfiguration> configuration,
             IOptions<MessagingOptions> messagingOptions)
         {
             Configuration = configuration?.Value ?? new SecurityConfiguration();
             MessagingOptions = messagingOptions?.Value ?? new MessagingOptions();
-//UNDONE:DI: Use messageFormatter from the parameter
-dataProvider.ActivitySerializer = new ActivitySerializer(this, new BinarySecurityMessageFormatter());
+            dataProvider.ActivitySerializer = new ActivitySerializer(this, messageFormatter);
             DataHandler = new DataHandler(dataProvider, messagingOptions);
             ActivityHistory = new SecurityActivityHistoryController();
             DataProvider = dataProvider;

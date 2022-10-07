@@ -120,6 +120,7 @@ namespace SenseNet.Security.Tests
                     services.GetRequiredService<ISecurityMessageFormatter>(),
                     messageQueue,
                     isReceiver),
+                services.GetRequiredService<ISecurityMessageFormatter>(),
                 new MissingEntityHandler(),
                 Options.Create(new SecurityConfiguration()),
                 Options.Create(new MessagingOptions()));
