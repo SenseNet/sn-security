@@ -24,6 +24,7 @@ namespace SenseNet.Security.Messaging
         private DateTime _startingTheSystem = DateTime.MaxValue;
         private readonly MessagingOptions _options;
 
+        private ISecurityMessageFormatter _messageFormatter;
         public IMessageSenderManager MessageSenderManager { get; }
 
         /// <summary>
@@ -38,9 +39,13 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         public virtual int IncomingMessageCount => _incomingMessageCount;
 
-        protected MessageProviderBase(IMessageSenderManager messageSenderManager, IOptions<MessagingOptions> messagingOptions)
+        protected MessageProviderBase(
+            IMessageSenderManager messageSenderManager,
+            ISecurityMessageFormatter messageFormatter,
+            IOptions<MessagingOptions> messagingOptions)
         {
             MessageSenderManager = messageSenderManager;
+            _messageFormatter = messageFormatter;
             _options = messagingOptions.Value;
         }
 
@@ -224,6 +229,8 @@ namespace SenseNet.Security.Messaging
         /// <returns></returns>
         protected virtual IDistributedMessage DeserializeMessage(Stream data)
         {
+            return _messageFormatter.Deserialize(data);
+
             //UNDONE:DI: Use ctor and ISecurityMessageFormatter.Deserialize()
             var bf = new BinaryFormatter(); // 4 Receive
             IDistributedMessage message;
@@ -245,8 +252,9 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        protected virtual Stream SerializeMessage(object message)
+        protected virtual Stream SerializeMessage(IDistributedMessage message)
         {
+            return _messageFormatter.Serialize(message);
             //UNDONE:DI: Use ctor and ISecurityMessageFormatter.Serialize()
             try
             {

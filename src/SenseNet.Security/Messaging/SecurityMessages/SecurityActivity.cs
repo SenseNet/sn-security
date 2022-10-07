@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SenseNet.Diagnostics;
 
 namespace SenseNet.Security.Messaging.SecurityMessages
@@ -38,6 +39,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Gets the current SecurityContext.
         /// </summary>
+        [JsonIgnore]
         public SecurityContext Context { get => __context; internal set => __context = value; }
 
         /// <summary>
@@ -163,6 +165,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
         [NonSerialized]
         private SecurityActivity _attachedActivity;
+        [JsonIgnore]
         internal SecurityActivity AttachedActivity
         {
             get => _attachedActivity;
@@ -248,6 +251,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Gets or sets whether the activity comes from the message receiver.
         /// </summary>
+        [JsonIgnore]
         public bool FromReceiver
         {
             get => _fromReceiver;
@@ -259,6 +263,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Gets or sets whether the activity is loaded from the database.
         /// </summary>
+        [JsonIgnore]
         public bool FromDatabase
         {
             get => _fromDatabase;
@@ -270,6 +275,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <summary>
         /// Gets or sets whether the activity is loaded from the database at the system start.
         /// </summary>
+        [JsonIgnore]
         public bool IsUnprocessedActivity
         {
             get => _isUnprocessedActivity;
@@ -277,9 +283,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         }
 
         [field: NonSerialized]
+        [JsonIgnore]
         internal List<SecurityActivity> WaitingFor { get; private set; } = new List<SecurityActivity>();
 
         [field: NonSerialized]
+        [JsonIgnore]
         internal List<SecurityActivity> WaitingForMe { get; private set; } = new List<SecurityActivity>();
 
         internal void WaitFor(SecurityActivity olderActivity)

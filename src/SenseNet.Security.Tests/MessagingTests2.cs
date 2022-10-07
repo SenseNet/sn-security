@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Configuration;
@@ -21,8 +22,9 @@ namespace SenseNet.Security.Tests
             private Queue<byte[]> _messageQueue;
             private bool _isReceiver;
 
-            public TestMessageProvider(IMessageSenderManager messageSenderManager, Queue<byte[]> messageQueue,
-                bool isReceiver) : base(messageSenderManager, Options.Create(new MessagingOptions()))
+            public TestMessageProvider(IMessageSenderManager messageSenderManager, ISecurityMessageFormatter messageFormatter,
+                Queue<byte[]> messageQueue, bool isReceiver)
+                : base(messageSenderManager, messageFormatter, Options.Create(new MessagingOptions()))
             {
                 _messageQueue = messageQueue;
                 _isReceiver = isReceiver;
@@ -106,12 +108,19 @@ namespace SenseNet.Security.Tests
             var aces = SystemStartTests.CreateTestAces();
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities, Messages = new List<Tuple<int, DateTime, byte[]>>() };
 
+            var services = new ServiceCollection()
+                .AddDefaultSecurityMessageTypes()
+                .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
+                .BuildServiceProvider();
+
+            var messageFormatter = services.GetRequiredService<ISecurityMessageFormatter>();
+
             var messageSenderManager = new MessageSenderManager(
                 new OptionsWrapper<MessageSenderOptions>(
                     new MessageSenderOptions {InstanceId = instanceName}));
             var securitySystem = new SecuritySystem(
                 new MemoryDataProvider(storage),
-                new TestMessageProvider(messageSenderManager, messageQueue, isReceiver),
+                new TestMessageProvider(messageSenderManager, messageFormatter, messageQueue, isReceiver),
                 new MissingEntityHandler(),
                 new SecurityConfiguration(),
                 new MessagingOptions());
