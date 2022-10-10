@@ -21,6 +21,7 @@ namespace SenseNet.Security
         private readonly SecuritySystem _securitySystem;
         private readonly ISecurityMessageFormatter _messageFormatter;
 
+        //UNDONE:DI: Remove SecuritySystem dependency
         public ActivitySerializer(SecuritySystem securitySystem, ISecurityMessageFormatter messageFormatter)
         {
             _securitySystem = securitySystem;
@@ -42,6 +43,7 @@ namespace SenseNet.Security
         public SecurityActivity DeserializeActivity(byte[] bytes)
         {
             var activity = (SecurityActivity)_messageFormatter.Deserialize(new MemoryStream(bytes));
+            //UNDONE:DI: Remove SecuritySystem dependency: add GeneralSecurityContext to the services
             activity.Context = _securitySystem.GeneralSecurityContext;
             return activity;
         }

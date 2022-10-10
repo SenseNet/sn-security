@@ -70,6 +70,7 @@ namespace SenseNet.Security
         {
             Configuration = configuration?.Value ?? new SecurityConfiguration();
             MessagingOptions = messagingOptions?.Value ?? new MessagingOptions();
+            //UNDONE:DI: Initialize through ctor of implementations
             dataProvider.ActivitySerializer = new ActivitySerializer(this, messageFormatter);
             DataHandler = new DataHandler(dataProvider, messagingOptions);
             ActivityHistory = new SecurityActivityHistoryController();
