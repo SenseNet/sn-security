@@ -88,7 +88,7 @@ namespace SenseNet.Security
         /// Loader method for retrieving all ACE-s. Called during system start.
         /// </summary>
         IEnumerable<StoredAce> LoadAllAces();
-        //UNDONE:x: Async version of LoadAllAces (uses yield)
+        //TODO: async version of LoadAllAces (uses yield)
 
         /******************************************* structure storage */
 

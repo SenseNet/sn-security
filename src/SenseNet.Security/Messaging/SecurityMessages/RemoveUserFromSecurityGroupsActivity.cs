@@ -11,8 +11,10 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public class RemoveUserFromSecurityGroupsActivity : MembershipActivity
     {
-        internal int UserId { get; }
-        internal IEnumerable<int> ParentGroups { get; }
+        public int UserId { get; set; }
+        public IEnumerable<int> ParentGroups { get; set; }
+
+        internal RemoveUserFromSecurityGroupsActivity() { }
 
         /// <summary>
         /// Initializes a new instance of the RemoveUserFromSecurityGroupsActivity.
@@ -36,7 +38,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.RemoveUserFromGroups(UserId, ParentGroups);
+            context.SecuritySystem.Cache.RemoveUserFromGroups(UserId, ParentGroups);
         }
     }
 }

@@ -10,9 +10,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public class CreateSecurityEntityActivity : SecurityActivity
     {
-        internal int EntityId { get; }
-        internal int ParentEntityId { get; }
-        internal int OwnerId { get; }
+        public int EntityId { get; set; }
+        public int ParentEntityId { get; set; }
+        public int OwnerId { get; set; }
+
+        internal CreateSecurityEntityActivity() { }
 
         /// <summary>
         /// Initializes a new instance of the CreateSecurityEntityActivity.

@@ -22,7 +22,7 @@ namespace SenseNet.Security
     /// <summary>
     /// Contains security-related queryable collections.
     /// </summary>
-    public class SecurityQuery //UNDONE: Has static members
+    public class SecurityQuery
     {
         private enum Axis { All, ParentChain, Subtree }
 

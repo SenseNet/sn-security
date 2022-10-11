@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
@@ -123,7 +124,10 @@ namespace SenseNet.Security.Tests
         }
         internal Context GetEmptyContext(TestUser currentUser, ISecurityDataProvider dbProvider, TextWriter traceChannel = null)
         {
-            var securitySystem = Context.StartTheSystem(dbProvider, new DefaultMessageProvider(new MessageSenderManager()), traceChannel);
+            var securitySystem = Context.StartTheSystem(
+                dbProvider,
+                DiTools.CreateDefaultMessageProvider(),
+                traceChannel);
             return new Context(currentUser, securitySystem);
         }
 
@@ -246,7 +250,7 @@ namespace SenseNet.Security.Tests
         }
         internal string EntityIdStructureToString(SecurityContext ctx)
         {
-            var root = ctx.Cache.Entities.First().Value;
+            var root = ctx.SecuritySystem.Cache.Entities.First().Value;
             while (root.Parent != null)
                 root = root.Parent;
 
@@ -271,7 +275,7 @@ namespace SenseNet.Security.Tests
         internal void SetMembership(SecurityContext context, string src)
         {
             // "U1:G1,G2|U2:G1"
-            var membership = context.Cache.Membership;
+            var membership = context.SecuritySystem.Cache.Membership;
             membership.Clear();
             foreach (var userRecord in src.Split('|'))
             {
@@ -351,7 +355,7 @@ namespace SenseNet.Security.Tests
 
         internal Dictionary<int, AclInfo> CollectAllAcls(SecurityContext ctx)
         {
-            var result = ctx.Cache.Entities.Values.Where(e => e.Acl != null).Select(e => e.Acl).ToDictionary(e => e.EntityId);
+            var result = ctx.SecuritySystem.Cache.Entities.Values.Where(e => e.Acl != null).Select(e => e.Acl).ToDictionary(e => e.EntityId);
             return result;
         }
 

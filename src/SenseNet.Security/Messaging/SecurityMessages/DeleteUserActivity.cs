@@ -10,7 +10,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public class DeleteUserActivity : MembershipActivity
     {
-        internal int UserId { get; }
+        public int UserId { get; set; }
+
+        internal DeleteUserActivity() { }
 
         /// <summary>
         /// Initializes a new instance of the DeleteUserActivity.
@@ -33,7 +35,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.DeleteUser(context, UserId);
+            context.SecuritySystem.Cache.DeleteUser(context, UserId);
         }
     }
 }

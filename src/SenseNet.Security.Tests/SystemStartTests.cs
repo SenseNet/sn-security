@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
@@ -48,16 +49,16 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             //---- Start the system
-            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
+            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider());
 
             //---- Start the request
             _context = new Context(TestUser.User1, securitySystem);
 
             //---- check cache
             var dbAcc = new MemoryDataProviderAccessor((MemoryDataProvider)_context.Security.SecuritySystem.DataProvider);
-            Assert.AreEqual(entities.Count, _context.Security.Cache.Entities.Count);
+            Assert.AreEqual(entities.Count, _context.Security.SecuritySystem.Cache.Entities.Count);
             Assert.AreEqual(entities.Count, dbAcc.Storage.Entities.Count);
-            Assert.AreEqual(groups.Count, _context.Security.Cache.Groups.Count);
+            Assert.AreEqual(groups.Count, _context.Security.SecuritySystem.Cache.Groups.Count);
             Assert.AreEqual(memberships.Count, dbAcc.Storage.Memberships.Count);
             Assert.AreEqual(aces.Count, storage.Aces.Count);
 
@@ -73,7 +74,7 @@ namespace SenseNet.Security.Tests
             var id50 = Id("E50");
 
             //---- check nearest holder ids
-            var entityTable = _context.Security.Cache.Entities;
+            var entityTable = _context.Security.SecuritySystem.Cache.Entities;
             Assert.AreEqual(id1, entityTable[Id("E1")].GetFirstAclId());
             Assert.AreEqual(id1, entityTable[Id("E2")].GetFirstAclId());
             Assert.AreEqual(id3, entityTable[Id("E3")].GetFirstAclId());
@@ -253,7 +254,7 @@ namespace SenseNet.Security.Tests
             var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
 
             //---- Start the system
-            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), new DefaultMessageProvider(new MessageSenderManager()));
+            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider());
             var ctxAcc = new ObjectAccessor(securitySystem);
             var killed = (bool)ctxAcc.GetField("_killed");
             Assert.IsFalse(killed);

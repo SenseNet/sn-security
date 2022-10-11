@@ -1,7 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
 using Microsoft.Extensions.Configuration;
-using SenseNet.Security.Messaging;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using SenseNet.Security.EFCSecurityStore.Configuration;
+using SenseNet.Security.Tests;
 
 namespace SenseNet.Security.EFCSecurityStore.Tests
 {
@@ -16,7 +20,11 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                 .Build();
 
             // install db directly
-            new EFCSecurityDataProvider(new MessageSenderManager(), 0, Configuration.Instance.GetConnectionString())
+            new EFCSecurityDataProvider(
+                    messageSenderManager: DiTools.CreateMessageSenderManager(),
+                    options: new OptionsWrapper<DataOptions>(
+                        new DataOptions { ConnectionString = Configuration.Instance.GetConnectionString() }),
+                    logger: NullLoggerFactory.Instance.CreateLogger<EFCSecurityDataProvider>())
                 .InstallDatabase();
 
             var _ = PermissionType.See; // pre-loads the type

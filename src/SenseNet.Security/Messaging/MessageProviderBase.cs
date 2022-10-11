@@ -24,6 +24,7 @@ namespace SenseNet.Security.Messaging
         private DateTime _startingTheSystem = DateTime.MaxValue;
         private readonly MessagingOptions _options;
 
+        private ISecurityMessageFormatter _messageFormatter;
         public IMessageSenderManager MessageSenderManager { get; }
 
         /// <summary>
@@ -38,9 +39,13 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         public virtual int IncomingMessageCount => _incomingMessageCount;
 
-        protected MessageProviderBase(IMessageSenderManager messageSenderManager, IOptions<MessagingOptions> messagingOptions)
+        protected MessageProviderBase(
+            IMessageSenderManager messageSenderManager,
+            ISecurityMessageFormatter messageFormatter,
+            IOptions<MessagingOptions> messagingOptions)
         {
             MessageSenderManager = messageSenderManager;
+            _messageFormatter = messageFormatter;
             _options = messagingOptions.Value;
         }
 
@@ -224,19 +229,7 @@ namespace SenseNet.Security.Messaging
         /// <returns></returns>
         protected virtual IDistributedMessage DeserializeMessage(Stream data)
         {
-            var bf = new BinaryFormatter();
-            IDistributedMessage message;
-            try
-            {
-                message = (IDistributedMessage)bf.Deserialize(data);
-            }
-            catch (SerializationException e) //logged
-            {
-                SnLog.WriteException(e, EventMessage.Error.MessageDeserialization, EventId.Messaging);
-                message = new UnknownMessage { MessageData = data };
-                // don't rethrow because caller handles
-            }
-            return message;
+            return _messageFormatter.Deserialize(data);
         }
         /// <summary>
         /// Helper method for serializing a message object. The current implementation
@@ -244,22 +237,9 @@ namespace SenseNet.Security.Messaging
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        protected virtual Stream SerializeMessage(object message)
+        protected virtual Stream SerializeMessage(IDistributedMessage message)
         {
-            try
-            {
-                var ms = new MemoryStream();
-                var bf = new BinaryFormatter();
-                bf.Serialize(ms, message);
-                ms.Flush();
-                ms.Position = 0;
-                return ms;
-            }
-            catch (Exception e)
-            {
-                SnLog.WriteException(e, EventMessage.Error.MessageSerialization, EventId.Messaging);
-                throw;
-            }
+            return _messageFormatter.Serialize(message);
         }
     }
 }

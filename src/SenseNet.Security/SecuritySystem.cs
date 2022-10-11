@@ -59,20 +59,26 @@ namespace SenseNet.Security
 
         internal DateTime StartedAt { get; private set; }
 
-        //UNDONE: get configuration through IOptions and register SecuritySystem as a service.
-        public SecuritySystem(ISecurityDataProvider dataProvider, IMessageProvider messageProvider,
-            IMissingEntityHandler missingEntityHandler, SecurityConfiguration configuration, MessagingOptions messagingOptions)
+        //UNDONE:DI register SecuritySystem as a service.
+        public SecuritySystem(
+            ISecurityDataProvider dataProvider,
+            IMessageProvider messageProvider,
+            ISecurityMessageFormatter messageFormatter,
+            IMissingEntityHandler missingEntityHandler,
+            IOptions<SecurityConfiguration> configuration,
+            IOptions<MessagingOptions> messagingOptions)
         {
-            Configuration = configuration;
-            MessagingOptions = messagingOptions;
-            dataProvider.ActivitySerializer = new ActivitySerializer(this);
-            DataHandler = new DataHandler(dataProvider, Options.Create(messagingOptions));
+            Configuration = configuration?.Value ?? new SecurityConfiguration();
+            MessagingOptions = messagingOptions?.Value ?? new MessagingOptions();
+            //UNDONE:DI: Initialize through ctor of implementations
+            dataProvider.ActivitySerializer = new ActivitySerializer(this, messageFormatter);
+            DataHandler = new DataHandler(dataProvider, messagingOptions);
             ActivityHistory = new SecurityActivityHistoryController();
             DataProvider = dataProvider;
             MessageProvider = messageProvider;
             MessageSenderManager = messageProvider.MessageSenderManager;
             MissingEntityHandler = missingEntityHandler;
-            SystemUser = new SecuritySystemUser(configuration.SystemUserId);
+            SystemUser = new SecuritySystemUser(Configuration.SystemUserId);
         }
 
         [Obsolete("Use async version instead.")]

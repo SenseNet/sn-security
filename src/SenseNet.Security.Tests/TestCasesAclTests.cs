@@ -86,8 +86,8 @@ namespace SenseNet.Security.Tests
             EnsureRepository();
 
             SetMembership(CurrentContext.Security, "U1:G1");
-            Assert.IsTrue(CurrentContext.Security.Cache.IsInGroup(Id("U1"), Id("G1")), "G1 not contains U1");
-            Assert.IsFalse(CurrentContext.Security.Cache.IsInGroup(int.MaxValue, int.MaxValue - 1), "Any group contains anyone");
+            Assert.IsTrue(CurrentContext.Security.SecuritySystem.Cache.IsInGroup(Id("U1"), Id("G1")), "G1 not contains U1");
+            Assert.IsFalse(CurrentContext.Security.SecuritySystem.Cache.IsInGroup(int.MaxValue, int.MaxValue - 1), "Any group contains anyone");
             SetAcl("+E1|Normal|+U1:________---_+++,Normal|+G1:---_+++________");
             var acl = CurrentContext.Security.GetAcl(Id("E1"));
             Assert.AreEqual("+E1|Normal|+G1:_________________________________________________---_+++________,Normal|+U1:_________________________________________________________---_+++", ReplaceIds(acl.ToString()));
@@ -932,7 +932,7 @@ namespace SenseNet.Security.Tests
             ed.ClearPermission(Id("E5"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.Apply();
             Assert.AreEqual("____________________________________________________+_______+___", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
-            Assert.AreEqual(default, CurrentContext.Security.Cache.Entities[Id("E5")].GetFirstAclId());
+            Assert.AreEqual(default, CurrentContext.Security.SecuritySystem.Cache.Entities[Id("E5")].GetFirstAclId());
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();

@@ -35,7 +35,7 @@ namespace SenseNet.Security
         public DataHandler(ISecurityDataProvider dataProvider, IOptions<MessagingOptions> messagingOptions)
         {
             _dataProvider = dataProvider;
-            _messagingOptions = messagingOptions.Value;
+            _messagingOptions = messagingOptions?.Value ?? new MessagingOptions();
         }
 
         private bool _isDatabaseReady;

@@ -16,6 +16,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Entity Framework Core data provider implementation for the SenseNet.Security project.</Description>
     <PackageReleaseNotes>See release notes on GitHub.</PackageReleaseNotes>
+	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

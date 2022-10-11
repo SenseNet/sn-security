@@ -8,8 +8,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using SenseNet.Security.Configuration;
 using SenseNet.Security.Data;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SenseNet.Security.Tests.Concurrency
 {
@@ -53,19 +55,18 @@ namespace SenseNet.Security.Tests.Concurrency
 
         internal static SecuritySystem StartTheSystem(ISecurityDataProvider securityDataProvider)
         {
-            var messageSenderManager = new MessageSenderManager("asdf");
-            // Call SecurityContext starter method.
-            //var securitySystem = SecurityContextForConcurrencyTests.StartTheSystem(new SecurityConfiguration
-            //{
-            //    SecurityDataProvider = securityDataProvider,
-            //    MessageProvider = new DefaultMessageProvider(messageSenderManager),
-            //    CommunicationMonitorRunningPeriodInSeconds = 31
-            //});
+            var services = new ServiceCollection()
+                .AddDefaultSecurityMessageTypes()
+                .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
+                .BuildServiceProvider();
+
             var config = new SecurityConfiguration();
-            var messagingOptions = new MessagingOptions { CommunicationMonitorRunningPeriodInSeconds = 31};
+            var securityConfiguration = Options.Create(new SecurityConfiguration());
+            var messagingOptions = Options.Create(new MessagingOptions {CommunicationMonitorRunningPeriodInSeconds = 31});
             var securitySystem = new SecuritySystem(securityDataProvider,
-                new DefaultMessageProvider(messageSenderManager),
-                new MissingEntityHandler(), config, messagingOptions);
+                DiTools.CreateDefaultMessageProvider("asdf", "instance1"),
+                services.GetRequiredService<ISecurityMessageFormatter>(),
+                new MissingEntityHandler(), securityConfiguration, messagingOptions);
             securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // legacy logic
@@ -306,7 +307,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 //---------------------- work
 
                 var ctx = securitySystem.GeneralSecurityContext;
-                var entities = ctx.Cache.Entities;
+                var entities = ctx.SecuritySystem.Cache.Entities;
                 var source = entities[3];
                 var target0 = entities[1];
                 var target1 = entities[52];
@@ -326,7 +327,7 @@ namespace SenseNet.Security.Tests.Concurrency
             var count = 0;
 
                 var ctx = securitySystem.GeneralSecurityContext;
-                var entities = ctx.Cache.Entities;
+                var entities = ctx.SecuritySystem.Cache.Entities;
 
             while (!_stopped)
             {

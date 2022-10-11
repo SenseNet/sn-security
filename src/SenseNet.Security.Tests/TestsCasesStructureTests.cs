@@ -734,7 +734,7 @@ namespace SenseNet.Security.Tests
             }
             finally
             {
-                ctx.Cache.Entities.Clear();
+                ctx.SecuritySystem.Cache.Entities.Clear();
             }
         }
 

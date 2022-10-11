@@ -130,7 +130,7 @@ namespace SenseNet.Security.Tests
                 @"G1:G2,G3,G4,G5,G6|G2:U1,U2|G3:U10,G7,G8,G9,G10,G11|G4:U3,U4,U5|G5:G12,G13,G14,G15|
                 G6:U6|G7:|G8:U7,U8,U9|G9:G16,G17,G18,G19|G10:U11|G11:U12,U13|G12:U14,U15,U16,U17,U18,U19,U20|G13:U21|G14:U22,U23|
                 G15:U24|G16:U25|G17:U26|G18:U27,U28|G19:U29|G20:U30,U31,U32,U33,G21,G22,G23|G21:U34,U35|G22:U36|G23:U37,U38");
-            context.Security.Cache.Reset();
+            context.Security.SecuritySystem.Cache.Reset();
             Assert.AreEqual(InitialMembership, DumpMembership(context.Security));
         }
         [TestCleanup]
@@ -518,7 +518,7 @@ namespace SenseNet.Security.Tests
 
         internal static string DumpMembership(SecurityContext context)
         {
-            return DumpMembership(context.Cache.Membership);
+            return DumpMembership(context.SecuritySystem.Cache.Membership);
         }
         public static string DumpMembership(Dictionary<int, List<int>> membership)
         {

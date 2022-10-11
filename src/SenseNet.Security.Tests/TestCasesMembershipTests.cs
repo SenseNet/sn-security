@@ -1336,7 +1336,7 @@ namespace SenseNet.Security.Tests
 
         internal static string DumpMembership(SecurityContext context)
         {
-            return DumpMembership(context.Cache.Membership);
+            return DumpMembership(context.SecuritySystem.Cache.Membership);
         }
         public static string DumpMembership(Dictionary<int, List<int>> membership)
         {

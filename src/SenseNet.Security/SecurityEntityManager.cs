@@ -47,7 +47,7 @@ namespace SenseNet.Security
 
         internal SecurityEntity GetEntity(int entityId, bool throwError)
         {
-            //UNDONE:x: async-await and ReaderWriterLockSlim
+            //TODO: async-await and ReaderWriterLockSlim
             EnterReadLock();
             try
             {

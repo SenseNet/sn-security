@@ -10,7 +10,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public class DeleteGroupActivity : MembershipActivity
     {
-        internal int GroupId { get; }
+        public int GroupId { get; set; }
+
+        public DeleteGroupActivity() { }
 
         /// <summary>
         /// Initializes a new instance of the DeleteGroupActivity.
@@ -33,7 +35,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.DeleteSecurityGroup(context, GroupId);
+            context.SecuritySystem.Cache.DeleteSecurityGroup(context, GroupId);
         }
     }
 }

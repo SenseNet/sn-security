@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Data;
 using SenseNet.Security.Messaging;
@@ -31,7 +32,7 @@ namespace SenseNet.Security.Tests
         {
             //SecuritySystem.Instance.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             //MemoryDataProvider.LastActivityId = 0;
-            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), new DefaultMessageProvider(new MessageSenderManager()));
+            var securitySystem = Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), DiTools.CreateDefaultMessageProvider());
             var context = new Context(currentUser, securitySystem);
             CreatePlayground(context);
             return context;

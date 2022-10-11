@@ -3,8 +3,12 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Extensions.DependencyInjection;
+using SenseNet.Security.EFCSecurityStore.Configuration;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 using SenseNet.Security.Tests;
@@ -18,7 +22,11 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
     {
         protected override ISecurityDataProvider GetDataProvider()
         {
-            return new EFCSecurityDataProvider(new MessageSenderManager(), 0, Configuration.Instance.GetConnectionString());
+            return new EFCSecurityDataProvider(
+                messageSenderManager: DiTools.CreateMessageSenderManager(),
+                options: new OptionsWrapper<DataOptions>(
+                    new DataOptions {ConnectionString = Configuration.Instance.GetConnectionString()}),
+                logger: NullLoggerFactory.Instance.CreateLogger<EFCSecurityDataProvider>());
         }
 
         private SecurityStorage Db()

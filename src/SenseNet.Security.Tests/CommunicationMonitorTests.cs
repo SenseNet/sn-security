@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Configuration;
@@ -50,15 +51,22 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void CommunicationMonitor_HearthBeat()
         {
+            var services = new ServiceCollection()
+                .AddDefaultSecurityMessageTypes()
+                .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
+                .BuildServiceProvider();
+
             var testDp = new TestDp(DatabaseStorage.CreateEmpty());
-            var messageProvider = new DefaultMessageProvider(new MessageSenderManager());
+            var messageProvider = DiTools.CreateDefaultMessageProvider();
+            var messageFormatter = services.GetRequiredService<ISecurityMessageFormatter>();
             var missingEntityHandler = new MissingEntityHandler();
+            var securityConfiguration = Options.Create(new SecurityConfiguration());
             var messagingOptions = Options.Create(new MessagingOptions()
             {
                 CommunicationMonitorRunningPeriodInSeconds = 1
             });
-            var securitySystem = new SecuritySystem(testDp, messageProvider, missingEntityHandler,
-                new SecurityConfiguration(), messagingOptions.Value);
+            var securitySystem = new SecuritySystem(testDp, messageProvider, messageFormatter, missingEntityHandler,
+                securityConfiguration, messagingOptions);
             var dataHandler = new DataHandler(testDp, messagingOptions);
             var communicationMonitor = new CommunicationMonitor(dataHandler, messagingOptions);
             var activityHistory = new SecurityActivityHistoryController();

@@ -12,10 +12,12 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public class AddMembersToGroupActivity : MembershipActivity
     {
-        internal int GroupId { get; }
-        internal IEnumerable<int> UserMembers { get; }
-        internal IEnumerable<int> GroupMembers { get; }
-        internal IEnumerable<int> ParentGroups { get; }
+        public int GroupId { get; set; }
+        public IEnumerable<int> UserMembers { get; set; }
+        public IEnumerable<int> GroupMembers { get; set; }
+        public IEnumerable<int> ParentGroups { get; set; }
+
+        internal AddMembersToGroupActivity() { }
 
         /// <summary>
         /// Initializes a new instance of the AddMembersToGroupActivity.
@@ -46,7 +48,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected override void Apply(SecurityContext context)
         {
-            context.Cache.AddMembers(GroupId, GroupMembers, UserMembers, ParentGroups);
+            context.SecuritySystem.Cache.AddMembers(GroupId, GroupMembers, UserMembers, ParentGroups);
         }
     }
 }
