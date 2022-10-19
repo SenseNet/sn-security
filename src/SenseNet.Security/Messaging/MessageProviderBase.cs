@@ -5,9 +5,11 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Configuration;
+using EventId = SenseNet.Diagnostics.EventId;
 
 namespace SenseNet.Security.Messaging
 {
@@ -25,6 +27,7 @@ namespace SenseNet.Security.Messaging
         private readonly MessagingOptions _options;
 
         private ISecurityMessageFormatter _messageFormatter;
+        private readonly ILogger<MessageProviderBase> _logger;
         public IMessageSenderManager MessageSenderManager { get; }
 
         /// <summary>
@@ -42,10 +45,12 @@ namespace SenseNet.Security.Messaging
         protected MessageProviderBase(
             IMessageSenderManager messageSenderManager,
             ISecurityMessageFormatter messageFormatter,
-            IOptions<MessagingOptions> messagingOptions)
+            IOptions<MessagingOptions> messagingOptions,
+            ILogger<MessageProviderBase> logger)
         {
             MessageSenderManager = messageSenderManager;
             _messageFormatter = messageFormatter;
+            _logger = logger;
             _options = messagingOptions.Value;
         }
 
@@ -103,7 +108,11 @@ namespace SenseNet.Security.Messaging
         {
             var message = DeserializeMessage(messageBody);
             if (message == null)
+            {
+                _logger.LogWarning("Security message received but could not be deserialized.");
                 return;
+            }
+
             if (MessageSenderManager.IsMe(message.Sender))
             {
                 SnTrace.Messaging.Write($"{message.GetType().Name} SKIPPED as local (from me).");
@@ -115,6 +124,8 @@ namespace SenseNet.Security.Messaging
                 SnTrace.Messaging.Write($"{message.GetType().Name} was sent before system startup ({message.MessageSent}), it is SKIPPED.");
                 return;
             }
+
+            _logger.LogTrace($"Security message {message.GetType().Name} received.");
 
             lock (_messageListSwitchSync)
                 _incomingMessages.Add(message);
@@ -229,7 +240,16 @@ namespace SenseNet.Security.Messaging
         /// <returns></returns>
         protected virtual IDistributedMessage DeserializeMessage(Stream data)
         {
-            return _messageFormatter.Deserialize(data);
+            try
+            {
+                return _messageFormatter.Deserialize(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deserializing security message. {ex.Message}");
+            }
+
+            return null;
         }
         /// <summary>
         /// Helper method for serializing a message object. The current implementation

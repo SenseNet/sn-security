@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Configuration;
@@ -24,7 +25,8 @@ namespace SenseNet.Security.Tests
 
             public TestMessageProvider(IMessageSenderManager messageSenderManager, ISecurityMessageFormatter messageFormatter,
                 Queue<byte[]> messageQueue, bool isReceiver)
-                : base(messageSenderManager, messageFormatter, Options.Create(new MessagingOptions()))
+                : base(messageSenderManager, messageFormatter, Options.Create(new MessagingOptions()), 
+                    NullLogger<MessageProviderBase>.Instance)
             {
                 _messageQueue = messageQueue;
                 _isReceiver = isReceiver;

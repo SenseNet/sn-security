@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Configuration;
+using EventId = SenseNet.Diagnostics.EventId;
 
 namespace SenseNet.Security.Messaging.RabbitMQ
 {
@@ -16,6 +19,7 @@ namespace SenseNet.Security.Messaging.RabbitMQ
     /// </summary>
     public class RabbitMQMessageProvider : MessageProviderBase
     {
+        private readonly ILogger<RabbitMQMessageProvider> _logger;
         private bool _initialized;
 
         /// <summary>
@@ -40,9 +44,11 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         public RabbitMQMessageProvider(IMessageSenderManager messageSenderManager,
             ISecurityMessageFormatter messageFormatter,
             IOptions<MessagingOptions> messagingOptions,
-            IOptions<RabbitMqOptions> rabbitmqOptions) :
-            base(messageSenderManager, messageFormatter, messagingOptions)
+            IOptions<RabbitMqOptions> rabbitmqOptions,
+            ILogger<RabbitMQMessageProvider> logger) :
+            base(messageSenderManager, messageFormatter, messagingOptions, logger)
         {
+            _logger = logger;
             ServiceUrl = rabbitmqOptions.Value.ServiceUrl;
             MessageExchange = rabbitmqOptions.Value.MessageExchange;
         }
@@ -50,7 +56,7 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         [Obsolete("Use dependency injection or the constructor with the RabbitMqOptions instance.", true)]
         public RabbitMQMessageProvider(IMessageSenderManager messageSenderManager, ISecurityMessageFormatter messageFormatter,
             IOptions<MessagingOptions> messagingOptions, string serviceUrl, string exchange = null)
-            : base(messageSenderManager, messageFormatter, messagingOptions)
+            : base(messageSenderManager, messageFormatter, messagingOptions, NullLogger<MessageProviderBase>.Instance)
         {
             if (string.IsNullOrEmpty(serviceUrl))
                 throw new ArgumentNullException(nameof(serviceUrl));
@@ -84,9 +90,17 @@ namespace SenseNet.Security.Messaging.RabbitMQ
                 return;
 
             base.Initialize();
-            
-            Connection = OpenConnection(ServiceUrl);
 
+            try
+            {
+                Connection = OpenConnection(ServiceUrl);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Connection could not be established to service {ServiceUrl}. Error: {ex.Message}");
+                return;
+            }
+            
             string queueName;
 
             try
@@ -148,7 +162,7 @@ namespace SenseNet.Security.Messaging.RabbitMQ
                 SnTrace.Messaging.WriteError("RMQ: Security: Empty message.");
                 return;
             }
-
+            
             // This has to be set before sending the message so that receivers
             // can decide whether they should process it or not.
             message.MessageSent = DateTime.UtcNow;
@@ -157,6 +171,8 @@ namespace SenseNet.Security.Messaging.RabbitMQ
 
             try
             {
+                _logger.LogTrace($"Serializing security message {message.GetType().Name}");
+
                 using (var messageStream = SerializeMessage(message))
                 {
                     if (messageStream is MemoryStream ms)
@@ -185,6 +201,8 @@ namespace SenseNet.Security.Messaging.RabbitMQ
                 // between threads and be able to dispose the object.
                 try
                 {
+                    _logger.LogTrace($"Sending security message {message.GetType().Name}");
+
                     using (var channel = OpenChannel(Connection))
                     {
                         channel.BasicPublish(MessageExchange, string.Empty, null, body);
