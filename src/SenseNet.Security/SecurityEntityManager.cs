@@ -292,6 +292,8 @@ namespace SenseNet.Security
         }
         internal SecurityEntity CreateEntitySafe(int entityId, int parentEntityId, int ownerId, bool? isInherited = null, bool? hasExplicitEntry = null)
         {
+            SnTrace.Security.Write($"Adding entity {entityId} to security cache.");
+
             SecurityEntity parent = null;
             if (parentEntityId != default)
             {

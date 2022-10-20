@@ -208,6 +208,9 @@ namespace SenseNet.Security.Messaging
         private void ProcessSingleMessage(object parameter)
         {
             var message = parameter as IDistributedMessage;
+
+            _logger.LogTrace($"Processing {message?.GetType().Name} security message.");
+
             MessageReceived?.Invoke(this, new MessageReceivedEventArgs(message));
         }
 

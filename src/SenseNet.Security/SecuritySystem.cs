@@ -157,6 +157,8 @@ namespace SenseNet.Security
             // load from database if it was too big to distribute
             if (message is BigActivityMessage bigActivityMessage)
             {
+                SnTrace.Security.Write($"Loading big activity message with id {bigActivityMessage.DatabaseId}");
+
                 activity = DataHandler.LoadBigSecurityActivityAsync(bigActivityMessage.DatabaseId, CancellationToken.None)
                     .GetAwaiter().GetResult();
                 if (activity == null)
@@ -164,15 +166,20 @@ namespace SenseNet.Security
             }
 
             // trying to interpret
-            if (activity == null)
-                activity = message as SecurityActivity;
+            activity ??= message as SecurityActivity;
 
             // Apply if everything is good
             if (activity != null)
             {
+                SnTrace.Security.Write($"Executing {activity.GetType().Name} security activity.");
+
                 activity.FromReceiver = true;
                 activity.Context = GeneralSecurityContext;
                 activity.Execute(GeneralSecurityContext, false);
+            }
+            else
+            {
+                SnTrace.Security.Write($"Security activity received but it is null.");
             }
         }
     }
