@@ -75,12 +75,16 @@ namespace SenseNet.Security
 
             if (entity == null)
             {
+                SnTrace.Security.Write($"Entity {entityId} not found in cache, reloading it from the database.");
+
                 // compensation: try to load the entity and its aces from the db
                 var storedEntity = _dataHandler.GetStoredSecurityEntityAsync(entityId, CancellationToken.None)
                     .GetAwaiter().GetResult();
 
                 if (storedEntity != null)
                 {
+                    SnTrace.Security.Write($"Entity {entityId} is loaded from the database. Parent: {storedEntity.ParentId}");
+
                     entity = CreateEntitySafe(entityId, storedEntity.ParentId, storedEntity.OwnerId, storedEntity.IsInherited, storedEntity.HasExplicitEntry);
 
                     var acl = new AclInfo(entityId);
@@ -93,6 +97,8 @@ namespace SenseNet.Security
                 }
                 else
                 {
+                    SnTrace.Security.Write($"Entity {entityId} not found in database, reloading it using MissingEntityHandler.");
+
                     if (_missingEntityHandler.GetMissingEntity(entityId, out var parentId, out var ownerId))
                     {
                         _dataHandler.CreateSecurityEntitySafeAsync(entityId, parentId, ownerId, CancellationToken.None)
@@ -292,7 +298,7 @@ namespace SenseNet.Security
         }
         internal SecurityEntity CreateEntitySafe(int entityId, int parentEntityId, int ownerId, bool? isInherited = null, bool? hasExplicitEntry = null)
         {
-            SnTrace.Security.Write($"Adding entity {entityId} to security cache.");
+            SnTrace.Security.Write($"Adding entity {entityId} to security cache with parent id {parentEntityId}. Inherited: {isInherited}");
 
             SecurityEntity parent = null;
             if (parentEntityId != default)
@@ -310,6 +316,8 @@ namespace SenseNet.Security
             };
             parent?.AddChild(entity);
             _cache.Entities[entityId] = entity;
+
+            SnTrace.Security.Write($"Entity {entityId} added to security cache. Cached entity count: {_cache.Entities.Keys.Count}");
 
             return entity;
         }
