@@ -14,6 +14,7 @@ using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
+using SenseNet.Tools;
 
 // ReSharper disable InconsistentNaming
 namespace SenseNet.Security.EFCSecurityStore
@@ -522,27 +523,53 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<SecurityActivity[]> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities, CancellationToken cancel)
         {
-            var result = new List<SecurityActivity>();
-            var db = Db();
-            await using (db.ConfigureAwait(false))
-            {
-                var items = await db.EFMessages
-                    .Where(x => gaps.Contains(x.Id))
-                    .OrderBy(x => x.Id)
-                    .ToArrayAsync(cancel).ConfigureAwait(false);
-
-                foreach (var item in items)
+            var result = await Retrier.RetryAsync(10, 1000, async () =>
                 {
-                    var activity = ActivitySerializer.DeserializeActivity(item.Body);
-                    if (activity == null)
-                        continue;
-                    activity.Id = item.Id;
-                    activity.FromDatabase = true;
-                    activity.IsUnprocessedActivity = executingUnprocessedActivities;
-                    result.Add(activity);
-                }
-            }
+                    var activities = new List<SecurityActivity>();
+                    var db = Db();
+                    await using (db.ConfigureAwait(false))
+                    {
+                        var items = await db.EFMessages
+                            .Where(x => gaps.Contains(x.Id))
+                            .OrderBy(x => x.Id)
+                            .ToArrayAsync(cancel).ConfigureAwait(false);
+
+                        foreach (var item in items)
+                        {
+                            var activity = ActivitySerializer.DeserializeActivity(item.Body);
+                            if (activity == null)
+                                continue;
+                            activity.Id = item.Id;
+                            activity.FromDatabase = true;
+                            activity.IsUnprocessedActivity = executingUnprocessedActivities;
+                            activities.Add(activity);
+                        }
+                    }
+
+                    return activities;
+                },
+                (acts, i, ex) =>
+                {
+                    if (ex == null)
+                        return true;
+
+                    // if we do not recognize the error, throw it immediately
+                    if (i == 1 || !RetriableException(ex))
+                        throw ex;
+
+                    // continue the cycle
+                    return false;
+                }).ConfigureAwait(false);
+
             return result.ToArray();
+        }
+
+        private static bool RetriableException(Exception ex)
+        {
+            return (ex is InvalidOperationException &&
+                    (ex.Message.Contains("connection from the pool") ||
+                     ex.Message.Contains("BeginExecuteReader requires an open and available Connection."))) ||
+                   (ex is SqlException && ex.Message.Contains("A network-related or instance-specific error occurred"));
         }
 
         [Obsolete("Use async version instead.")]
