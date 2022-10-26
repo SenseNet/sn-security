@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
-    <Version>3.0.3.4</Version>
+    <Version>3.0.3.5</Version>
     <DebugType>Full</DebugType>
     <Authors>kavics,tusmester</Authors>
     <Company>Sense/Net Inc.</Company>
