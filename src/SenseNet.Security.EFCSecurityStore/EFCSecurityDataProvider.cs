@@ -100,6 +100,7 @@ namespace SenseNet.Security.EFCSecurityStore
             using var db = Db();
             db.InstallDatabase();
         }
+
         public async Task<bool> IsDatabaseReadyAsync(CancellationToken cancel)
         {
             const string schemaCheckSql = @"
@@ -109,26 +110,39 @@ SELECT CASE WHEN EXISTS (
 THEN CAST(1 AS BIT)
 ELSE CAST(0 AS BIT) END";
 
-            try
+            var result = false;
+            var db = Db();
+            await using (db.ConfigureAwait(false))
             {
-                using var db = Db();
-                using var conn = db.Database.GetDbConnection();
-                await conn.OpenAsync(cancel).ConfigureAwait(false);
+                var conn = db.Database.GetDbConnection();
+                await using (conn.ConfigureAwait(false))
+                {
+                    try
+                    {
+                        await conn.OpenAsync(cancel).ConfigureAwait(false);
+                        var cmd = conn.CreateCommand();
+                        await using (conn.ConfigureAwait(false))
+                        {
+                            cmd.CommandType = System.Data.CommandType.Text;
+                            cmd.CommandText = schemaCheckSql;
 
-                using var cmd = conn.CreateCommand();
-                cmd.CommandType = System.Data.CommandType.Text;
-                cmd.CommandText = schemaCheckSql;
+                            var dbResult = await cmd.ExecuteScalarAsync(cancel).ConfigureAwait(false);
 
-                var result = await cmd.ExecuteScalarAsync(cancel).ConfigureAwait(false);
-
-                return Convert.ToBoolean(result);
+                            result = Convert.ToBoolean(dbResult);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogTrace($"Error when accessing the database: {ex.Message}");
+                    }
+                    finally
+                    {
+                        await conn.CloseAsync().ConfigureAwait(false);
+                    }
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogTrace($"Error when accessing the database: {ex.Message}");
-            }
 
-            return false;
+            return result;
         }
 
         [Obsolete("Use async version instead.")]
