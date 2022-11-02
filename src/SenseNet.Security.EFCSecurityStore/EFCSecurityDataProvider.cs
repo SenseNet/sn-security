@@ -211,9 +211,12 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<StoredSecurityEntity> LoadStoredSecurityEntityAsync(int entityId, CancellationToken cancel)
         {
-            var db = Db();
-            await using (db.ConfigureAwait(false))
-                return await db.LoadStoredSecurityEntityByIdAsync(entityId, cancel).ConfigureAwait(false);
+            return await RetryAsync(async () =>
+            {
+                var db = Db();
+                await using (db.ConfigureAwait(false))
+                    return await db.LoadStoredSecurityEntityByIdAsync(entityId, cancel).ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
 
         [Obsolete("Use async version instead.")]
@@ -223,26 +226,34 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task InsertSecurityEntityAsync(StoredSecurityEntity entity, CancellationToken cancel)
         {
-            using var db = Db();
-            var origEntity = await LoadEFEntityAsync(entity.Id, db, cancel);
-            if (origEntity != null)
-                return;
+            await RetryAsync(async () =>
+            {
+                var db = Db();
+                EFEntity origEntity;
+                await using (db.ConfigureAwait(false))
+                {
+                    origEntity = await LoadEFEntityAsync(entity.Id, db, cancel);
+                }
 
-            db.EFEntities.Add(new EFEntity
-            {
-                Id = entity.Id,
-                OwnerId = entity.nullableOwnerId,
-                ParentId = entity.nullableParentId,
-                IsInherited = entity.IsInherited
-            });
-            try
-            {
-                await db.SaveChangesAsync(cancel).ConfigureAwait(false);
-            }
-            catch (DbUpdateException)
-            {
-                // entity already exists, that's ok
-            }
+                if (origEntity != null)
+                    return;
+
+                db.EFEntities.Add(new EFEntity
+                {
+                    Id = entity.Id,
+                    OwnerId = entity.nullableOwnerId,
+                    ParentId = entity.nullableParentId,
+                    IsInherited = entity.IsInherited
+                });
+                try
+                {
+                    await db.SaveChangesAsync(cancel).ConfigureAwait(false);
+                }
+                catch (DbUpdateException)
+                {
+                    // entity already exists, that's ok
+                }
+            }).ConfigureAwait(false);
         }
 
         [Obsolete("Use async version instead.")]
@@ -509,28 +520,32 @@ ELSE CAST(0 AS BIT) END";
         public async Task<SecurityActivity[]> LoadSecurityActivitiesAsync(int from, int to, int count, bool executingUnprocessedActivities,
             CancellationToken cancel)
         {
-            var result = new List<SecurityActivity>();
-            var db = Db();
-            await using (db.ConfigureAwait(false))
+            return await RetryAsync(async () =>
             {
-                var items = await db.EFMessages
-                    .Where(x => x.Id >= from && x.Id <= to)
-                    .OrderBy(x => x.Id)
-                    .Take(count)
-                    .ToArrayAsync(cancel).ConfigureAwait(false);
-
-                foreach (var item in items)
+                var result = new List<SecurityActivity>();
+                var db = Db();
+                await using (db.ConfigureAwait(false))
                 {
-                    var activity = ActivitySerializer.DeserializeActivity(item.Body);
-                    if (activity == null)
-                        continue;
-                    activity.Id = item.Id;
-                    activity.FromDatabase = true;
-                    activity.IsUnprocessedActivity = executingUnprocessedActivities;
-                    result.Add(activity);
+                    var items = await db.EFMessages
+                        .Where(x => x.Id >= from && x.Id <= to)
+                        .OrderBy(x => x.Id)
+                        .Take(count)
+                        .ToArrayAsync(cancel).ConfigureAwait(false);
+
+                    foreach (var item in items)
+                    {
+                        var activity = ActivitySerializer.DeserializeActivity(item.Body);
+                        if (activity == null)
+                            continue;
+                        activity.Id = item.Id;
+                        activity.FromDatabase = true;
+                        activity.IsUnprocessedActivity = executingUnprocessedActivities;
+                        result.Add(activity);
+                    }
                 }
-            }
-            return result.ToArray();
+
+                return result.ToArray();
+            }).ConfigureAwait(false);
         }
 
         [Obsolete("Use async version instead.")]
@@ -651,14 +666,20 @@ ELSE CAST(0 AS BIT) END";
                 : DateTime.UtcNow.AddSeconds(timeoutInSeconds);
             while (DateTime.UtcNow < maxTime)
             {
-                string result;
-                var db = Db();
-                await using (db.ConfigureAwait(false))
-                    result = await db.AcquireSecurityActivityExecutionLockAsync(
-                        securityActivity.Id, _messageSenderManager.InstanceId, timeoutInSeconds, cancel).ConfigureAwait(false);
+                var lockResult = await RetryAsync(async () =>
+                {
+                    string result;
+                    var db = Db();
+                    await using (db.ConfigureAwait(false))
+                        result = await db.AcquireSecurityActivityExecutionLockAsync(
+                                securityActivity.Id, _messageSenderManager.InstanceId, timeoutInSeconds, cancel)
+                            .ConfigureAwait(false);
+
+                    return result;
+                }).ConfigureAwait(false);
 
                 // ReSharper disable once SwitchStatementMissingSomeCases
-                switch (result)
+                switch (lockResult)
                 {
                     case ExecutionState.LockedForYou:
                         // enable full executing
@@ -922,6 +943,14 @@ ELSE CAST(0 AS BIT) END";
                    (ex is SqlException && ex.Message.Contains("A network-related or instance-specific error occurred"));
         }
 
+        public static Task RetryAsync(Func<Task> action)
+        {
+            return RetryAsync<object>(async () =>
+            {
+                await action().ConfigureAwait(false);
+                return null;
+            });
+        }
         public static Task<T> RetryAsync<T>(Func<Task<T>> action)
         {
             return Retrier.RetryAsync(30, 1000, action,
