@@ -600,22 +600,26 @@ ELSE CAST(0 AS BIT) END";
         public async Task<SaveSecurityActivityResult> SaveSecurityActivityAsync(SecurityActivity activity, CancellationToken cancel)
         {
             var body = ActivitySerializer.SerializeActivity(activity);
-            EntityEntry<EFMessage> result;
-            var db = Db();
-            await using (db.ConfigureAwait(false))
-            {
-                result = db.EFMessages.Add(new EFMessage
-                {
-                    ExecutionState = ExecutionState.Wait,
-                    SavedBy = _messageSenderManager.InstanceId,
-                    SavedAt = DateTime.UtcNow,
-                    Body = body
-                });
-                await db.SaveChangesAsync(cancel).ConfigureAwait(false);
-            }
-            return new SaveSecurityActivityResult {ActivityId = result.Entity.Id, BodySize = body.Length};
-        }
 
+            return await RetryAsync(async () =>
+            {
+                EntityEntry<EFMessage> result;
+                var db = Db();
+                await using (db.ConfigureAwait(false))
+                {
+                    result = db.EFMessages.Add(new EFMessage
+                    {
+                        ExecutionState = ExecutionState.Wait,
+                        SavedBy = _messageSenderManager.InstanceId,
+                        SavedAt = DateTime.UtcNow,
+                        Body = body
+                    });
+                    await db.SaveChangesAsync(cancel).ConfigureAwait(false);
+                }
+
+                return new SaveSecurityActivityResult { ActivityId = result.Entity.Id, BodySize = body.Length };
+            }).ConfigureAwait(false);
+        }
 
         [Obsolete("Use async version instead.")]
         public void CleanupSecurityActivities(int timeLimitInMinutes)
