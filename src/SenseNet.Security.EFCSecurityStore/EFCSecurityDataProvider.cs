@@ -14,6 +14,7 @@ using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
+using SenseNet.Diagnostics;
 using SenseNet.Tools;
 
 // ReSharper disable InconsistentNaming
@@ -383,25 +384,28 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<IEnumerable<StoredAce>> LoadPermissionEntriesAsync(IEnumerable<int> entityIds, CancellationToken cancel)
         {
-            var db = Db();
-            await using (db.ConfigureAwait(false))
+            return await RetryAsync(async () =>
             {
-                var dbResult = await db.EFEntries
-                    .Where(x => entityIds.Contains(x.EFEntityId))
-                    .ToArrayAsync(cancel).ConfigureAwait(false);
+                var db = Db();
+                await using (db.ConfigureAwait(false))
+                {
+                    var dbResult = await db.EFEntries
+                        .Where(x => entityIds.Contains(x.EFEntityId))
+                        .ToArrayAsync(cancel).ConfigureAwait(false);
 
-                // entity framework does not know the ulong because it is dumb :(
-                return dbResult.Select(a => new StoredAce
-                    {
-                        EntityId = a.EFEntityId,
-                        EntryType = (EntryType)a.EntryType,
-                        IdentityId = a.IdentityId,
-                        LocalOnly = a.LocalOnly,
-                        AllowBits = a.AllowBits.ToUInt64(),
-                        DenyBits = a.DenyBits.ToUInt64()
-                    })
-                    .ToArray();
-            }
+                    // entity framework does not know the ulong because it is dumb :(
+                    return dbResult.Select(a => new StoredAce
+                        {
+                            EntityId = a.EFEntityId,
+                            EntryType = (EntryType)a.EntryType,
+                            IdentityId = a.IdentityId,
+                            LocalOnly = a.LocalOnly,
+                            AllowBits = a.AllowBits.ToUInt64(),
+                            DenyBits = a.DenyBits.ToUInt64()
+                        })
+                        .ToArray();
+                }
+            }).ConfigureAwait(false);
         }
 
         [Obsolete("Use async version instead.")]
@@ -537,7 +541,7 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<SecurityActivity[]> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities, CancellationToken cancel)
         {
-            var result = await Retrier.RetryAsync(10, 1000, async () =>
+            var result = await RetryAsync(async () =>
                 {
                     var activities = new List<SecurityActivity>();
                     var db = Db();
@@ -560,32 +564,12 @@ ELSE CAST(0 AS BIT) END";
                         }
                     }
 
-                    return activities;
-                },
-                (acts, i, ex) =>
-                {
-                    if (ex == null)
-                        return true;
-
-                    // if we do not recognize the error, throw it immediately
-                    if (i == 1 || !RetriableException(ex))
-                        throw ex;
-
-                    // continue the cycle
-                    return false;
+                    return activities.ToArray();
                 }).ConfigureAwait(false);
 
-            return result.ToArray();
+            return result;
         }
-
-        private static bool RetriableException(Exception ex)
-        {
-            return (ex is InvalidOperationException &&
-                    (ex.Message.Contains("connection from the pool") ||
-                     ex.Message.Contains("BeginExecuteReader requires an open and available Connection."))) ||
-                   (ex is SqlException && ex.Message.Contains("A network-related or instance-specific error occurred"));
-        }
-
+        
         [Obsolete("Use async version instead.")]
         public SecurityActivity LoadSecurityActivity(int id)
         {
@@ -926,6 +910,35 @@ ELSE CAST(0 AS BIT) END";
                 return dbResult.Select(m => (Convert.ToInt64(m.GroupId) << 32) + m.MemberId)
                     .ToArray();
             }
+        }
+
+        private static bool RetriableException(Exception ex)
+        {
+            return (ex is InvalidOperationException && ex.Message.Contains("connection from the pool")) ||
+                   (ex is SqlException && ex.Message.Contains("A network-related or instance-specific error occurred"));
+        }
+
+        public static Task<T> RetryAsync<T>(Func<Task<T>> action)
+        {
+            return Retrier.RetryAsync(30, 1000, action,
+                (result, i, ex) =>
+                {
+                    if (ex == null)
+                        return true;
+
+                    // if we do not recognize the error, throw it immediately
+                    if (!RetriableException(ex))
+                        throw ex;
+
+                    if (i == 1)
+                    {
+                        SnTrace.Security.WriteError($"Security data layer error: {ex.Message}. Retry cycle ended.");
+                        throw new InvalidOperationException("Security data layer timeout occurred.", ex);
+                    }
+
+                    // continue the cycle
+                    return false;
+                });
         }
     }
 }
