@@ -229,29 +229,27 @@ ELSE CAST(0 AS BIT) END";
             await RetryAsync(async () =>
             {
                 var db = Db();
-                EFEntity origEntity;
                 await using (db.ConfigureAwait(false))
                 {
-                    origEntity = await LoadEFEntityAsync(entity.Id, db, cancel);
-                }
+                    var origEntity = await LoadEFEntityAsync(entity.Id, db, cancel);
+                    if (origEntity != null)
+                        return;
 
-                if (origEntity != null)
-                    return;
-
-                db.EFEntities.Add(new EFEntity
-                {
-                    Id = entity.Id,
-                    OwnerId = entity.nullableOwnerId,
-                    ParentId = entity.nullableParentId,
-                    IsInherited = entity.IsInherited
-                });
-                try
-                {
-                    await db.SaveChangesAsync(cancel).ConfigureAwait(false);
-                }
-                catch (DbUpdateException)
-                {
-                    // entity already exists, that's ok
+                    db.EFEntities.Add(new EFEntity
+                    {
+                        Id = entity.Id,
+                        OwnerId = entity.nullableOwnerId,
+                        ParentId = entity.nullableParentId,
+                        IsInherited = entity.IsInherited
+                    });
+                    try
+                    {
+                        await db.SaveChangesAsync(cancel).ConfigureAwait(false);
+                    }
+                    catch (DbUpdateException)
+                    {
+                        // entity already exists, that's ok
+                    }
                 }
             }).ConfigureAwait(false);
         }
