@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
-    <PackageReference Include="SenseNet.Tools" Version="3.2.7" />
+    <PackageReference Include="SenseNet.Tools" Version="3.2.7.2" />
   </ItemGroup>
 
   <ItemGroup>
