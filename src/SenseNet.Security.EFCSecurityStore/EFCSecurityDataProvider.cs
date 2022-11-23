@@ -28,38 +28,15 @@ namespace SenseNet.Security.EFCSecurityStore
         private readonly DataOptions _options;
         private readonly ILogger<EFCSecurityDataProvider> _logger;
         private readonly IMessageSenderManager _messageSenderManager;
+        private readonly IRetrier _retrier;
+
 
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
-        [Obsolete("Use the constructor with IOptions and dependency injection instead.", true)]
-        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager) : this(messageSenderManager, 0, null)
-        {
-        }
-        /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
-        [Obsolete("Use the constructor with IOptions and dependency injection instead.", true)]
-        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager, int commandTimeout, string connectionString)
+        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager, IRetrier retrier,
+            IOptions<DataOptions> options, ILogger<EFCSecurityDataProvider> logger)
         {
             _messageSenderManager = messageSenderManager;
-
-            // fallback to configuration
-            if (commandTimeout == 0)
-                commandTimeout = Configuration.Data.SecurityDatabaseCommandTimeoutInSeconds;
-
-            // fallback to well-known connection strings if the caller did not provide one
-            if (connectionString == null)
-                connectionString = ConfigurationManager.ConnectionStrings["SecurityStorage"]?.ConnectionString ??
-                                   ConfigurationManager.ConnectionStrings["SnCrMsSql"]?.ConnectionString;
-
-            _options = new DataOptions
-            {
-                ConnectionString = connectionString,
-                SqlCommandTimeout = commandTimeout
-            };
-            _logger = NullLogger<EFCSecurityDataProvider>.Instance;
-        }
-        /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
-        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager, IOptions<DataOptions> options, ILogger<EFCSecurityDataProvider> logger)
-        {
-            _messageSenderManager = messageSenderManager;
+            _retrier = retrier;
 
             _options = options?.Value ?? new DataOptions();
             _logger = logger;
@@ -237,7 +214,7 @@ ELSE CAST(0 AS BIT) END";
                 var db = Db();
                 await using (db.ConfigureAwait(false))
                     return await db.LoadStoredSecurityEntityByIdAsync(entityId, cancel).ConfigureAwait(false);
-            }).ConfigureAwait(false);
+            }, cancel).ConfigureAwait(false);
             op.Successful = true;
 
             return result;
@@ -278,7 +255,7 @@ ELSE CAST(0 AS BIT) END";
                         // entity already exists, that's ok
                     }
                 }
-            }).ConfigureAwait(false);
+            }, cancel).ConfigureAwait(false);
             op.Successful = true;
         }
 
@@ -469,7 +446,7 @@ ELSE CAST(0 AS BIT) END";
                         })
                         .ToArray();
                 }
-            }).ConfigureAwait(false);
+            }, cancel).ConfigureAwait(false);
             op.Successful = true;
 
             return result;
@@ -643,7 +620,7 @@ ELSE CAST(0 AS BIT) END";
                 }
 
                 return activities.ToArray();
-            }).ConfigureAwait(false);
+            }, cancel).ConfigureAwait(false);
             op.Successful = true;
 
             return result;
@@ -686,7 +663,7 @@ ELSE CAST(0 AS BIT) END";
                 }
 
                 return activities.ToArray();
-            }).ConfigureAwait(false);
+            }, cancel).ConfigureAwait(false);
             op.Successful = true;
 
             return result;
@@ -754,7 +731,7 @@ ELSE CAST(0 AS BIT) END";
                 }
 
                 return new SaveSecurityActivityResult { ActivityId = dbResult.Entity.Id, BodySize = body.Length };
-            }).ConfigureAwait(false);
+            }, cancel).ConfigureAwait(false);
 
             op.Successful = true;
 
@@ -811,7 +788,7 @@ ELSE CAST(0 AS BIT) END";
                             .ConfigureAwait(false);
 
                     return result;
-                }).ConfigureAwait(false);
+                }, cancel).ConfigureAwait(false);
 
                 // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (lockResult)
@@ -1151,35 +1128,25 @@ ELSE CAST(0 AS BIT) END";
                    (ex is SqlException && ex.Message.Contains("A network-related or instance-specific error occurred"));
         }
 
-        public static Task RetryAsync(Func<Task> action)
+        public Task RetryAsync(Func<Task> action, CancellationToken cancel)
         {
             return RetryAsync<object>(async () =>
             {
                 await action().ConfigureAwait(false);
                 return null;
-            });
+            }, cancel);
         }
-        public static Task<T> RetryAsync<T>(Func<Task<T>> action)
+        public Task<T> RetryAsync<T>(Func<Task<T>> action, CancellationToken cancel)
         {
-            return Retrier.RetryAsync(30, 1000, action,
-                (result, i, ex) =>
+            return _retrier.RetryAsync(action,
+                shouldRetryOnError: (ex, _) => RetriableException(ex),
+                onAfterLastIteration: (_, ex, i) =>
                 {
-                    if (ex == null)
-                        return true;
-
-                    // if we do not recognize the error, throw it immediately
-                    if (!RetriableException(ex))
-                        throw ex;
-
-                    if (i == 1)
-                    {
-                        SnTrace.Security.WriteError($"Security data layer error: {ex.Message}. Retry cycle ended.");
-                        throw new InvalidOperationException("Security data layer timeout occurred.", ex);
-                    }
-
-                    // continue the cycle
-                    return false;
-                });
+                    SnTrace.Security.WriteError(
+                        $"Security data layer error: {ex.Message}. Retry cycle ended after {i} iterations.");
+                    throw new InvalidOperationException("Security data layer timeout occurred.", ex);
+                },
+                cancel: cancel);
         }
     }
 }

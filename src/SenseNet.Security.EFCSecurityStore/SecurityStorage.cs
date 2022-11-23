@@ -157,7 +157,7 @@ SELECT TOP 1 E.Id, E.OwnerId nullableOwnerId, E.ParentId nullableParentId, E.IsI
 FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.Id = @EntityId";
         internal async Task<StoredSecurityEntity> LoadStoredSecurityEntityByIdAsync(int entityId, CancellationToken cancel)
         {
-            return await EFCSecurityDataProvider.RetryAsync(async () =>
+            return await _provider.RetryAsync(async () =>
             {
                 return await EfcStoredSecurityEntitySet
                     // ReSharper disable once FormatStringProblem
@@ -171,7 +171,7 @@ FROM EFEntities E LEFT OUTER JOIN EFEntries E2 ON E2.EFEntityId = E.Id WHERE E.I
                         nullableOwnerId = x.nullableOwnerId
                     })
                     .FirstOrDefaultAsync(cancel).ConfigureAwait(false);
-            }).ConfigureAwait(false);
+            }, cancel).ConfigureAwait(false);
         }
 
         private const string LoadAffectedEntityIdsByEntriesAndBreaksScript = @"SELECT DISTINCT Id AS Value FROM (SELECT DISTINCT EFEntityId Id FROM [EFEntries] UNION ALL SELECT Id FROM [EFEntities] WHERE IsInherited = 0) AS x";
