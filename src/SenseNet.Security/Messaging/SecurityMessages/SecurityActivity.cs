@@ -140,6 +140,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         private readonly AutoResetEvent _finishSignal = new AutoResetEvent(false);
         [NonSerialized]
         private bool _finished;
+        [NonSerialized]
+        private int _waitingThreadId;
 
         internal void WaitForComplete()
         {
@@ -148,6 +150,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
             if (_finishSignal == null)
                 return;
+
+            _waitingThreadId = Thread.CurrentThread.ManagedThreadId;
+            SnTrace.SecurityQueue.Write("SAQ: SA{0} blocks the T{1}", Id, _waitingThreadId);
 
             if (Debugger.IsAttached)
             {
@@ -198,7 +203,12 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             _finished = true;
             // finalize attached activities first
             AttachedActivity?.Finish();
-            _finishSignal?.Set();
+            if (_finishSignal != null)
+            {
+                _finishSignal.Set();
+                if (_waitingThreadId > 0)
+                    SnTrace.SecurityQueue.Write("SAQ: waiting resource released T{0}.", _waitingThreadId);
+            }
         }
 
         internal static class DependencyTools
