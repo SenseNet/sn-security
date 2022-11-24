@@ -200,8 +200,7 @@ namespace SenseNet.Security.Messaging
                     var loadedActivities = new SecurityActivityLoader(gaps, true, _dataHandler);
                     foreach (var loadedActivity in loadedActivities)
                     {
-                        SnTrace.SecurityQueue.Write("SAQ: Startup: SA{0} enqueued from db.", loadedActivity.Id);
-
+                        SnTrace.SecurityQueue.Write("SAQ: Startup: activity arrived from db: SA{0}.", loadedActivity.Id);
                         _activityHistory.Arrive(loadedActivity);
                         _arrivalQueue.Enqueue(loadedActivity);
                         _lastQueued = loadedActivity.Id;
@@ -213,9 +212,8 @@ namespace SenseNet.Security.Messaging
                     var loadedActivities = new SecurityActivityLoader(lastExecutedId + 1, lastDatabaseId, true, _dataHandler);
                     foreach (var loadedActivity in loadedActivities)
                     {
-                        SnTrace.SecurityQueue.Write("SAQ: Startup: SA{0} enqueued from db.", loadedActivity.Id);
+                        SnTrace.SecurityQueue.Write("SAQ: Startup: activity arrived from db: SA{0}.", loadedActivity.Id);
                         _activityHistory.Arrive(loadedActivity);
-                        SnTrace.SecurityQueue.Write("SecurityActivityArrived SA{0}", loadedActivity.Id);
                         _arrivalQueue.Enqueue(loadedActivity);
                         _lastQueued = loadedActivity.Id;
                         count++;
@@ -245,7 +243,7 @@ namespace SenseNet.Security.Messaging
 
             public void EnqueueActivity(SecurityActivity activity)
             {
-                SnTrace.SecurityQueue.Write("SAQ: SA{0} arrived{1}. {2}", activity.Id, activity.FromReceiver ? " from another computer" : "", activity.TypeName);
+                SnTrace.SecurityQueue.Write("SAQ: activity arrived{1}: SA{0}. {2}", activity.Id, activity.FromReceiver ? " from another computer" : "", activity.TypeName);
 
                 _activityHistory.Arrive(activity);
 
@@ -257,7 +255,7 @@ namespace SenseNet.Security.Messaging
                         if (sameActivity != null)
                         {
                             sameActivity.Attach(activity);
-                            SnTrace.SecurityQueue.Write("SAQ: SA{0} attached to another one in the queue", activity.Id);
+                            SnTrace.SecurityQueue.Write("SAQ: activity attached to another one in the queue: SA{0}", activity.Id);
                             return;
                         }
                         DependencyManager.AttachOrFinish(activity);
@@ -288,13 +286,13 @@ namespace SenseNet.Security.Messaging
                             _activityHistory.Arrive(loadedActivity);
                             _arrivalQueue.Enqueue(loadedActivity);
                             _lastQueued = loadedActivity.Id;
-                            SnTrace.SecurityQueue.Write("SAQ: SA{0} enqueued from db.", loadedActivity.Id);
+                            SnTrace.SecurityQueue.Write("SAQ: activity enqueued from db: SA{0}.", loadedActivity.Id);
                             DependencyManager.ActivityEnqueued();
                         }
                     }
                     _arrivalQueue.Enqueue(activity);
                     _lastQueued = activity.Id;
-                    SnTrace.SecurityQueue.Write("SAQ: SA{0} enqueued.", activity.Id);
+                    SnTrace.SecurityQueue.Write("SAQ: activity enqueued: SA{0}.", activity.Id);
                     DependencyManager.ActivityEnqueued();
                 }
             }
@@ -305,7 +303,7 @@ namespace SenseNet.Security.Messaging
                     if (_arrivalQueue.Count == 0)
                         return null;
                     var activity = _arrivalQueue.Dequeue();
-                    SnTrace.SecurityQueue.Write("SAQ: SA{0} dequeued.", activity.Id);
+                    SnTrace.SecurityQueue.Write("SAQ: activity dequeued: SA{0}.", activity.Id);
                     return activity;
                 }
             }
@@ -399,7 +397,7 @@ namespace SenseNet.Security.Messaging
                         if (newerActivity.MustWaitFor(olderActivity))
                         {
                             newerActivity.WaitFor(olderActivity);
-                            SnTrace.SecurityQueue.Write("SAQ: SA{0} depends from SA{1}", newerActivity.Id, olderActivity.Id);
+                            SnTrace.SecurityQueue.Write("SAQ: set dependency: SA{0} depends from SA{1}", newerActivity.Id, olderActivity.Id);
                             _activityHistory.Wait(newerActivity);
                         }
                     }
@@ -444,13 +442,13 @@ namespace SenseNet.Security.Messaging
                     if (sameActivity != null)
                     {
                         sameActivity.Attach(activity);
-                        SnTrace.SecurityQueue.Write("SAQ: SA{0} attached to another in the waiting set.", activity.Id);
+                        SnTrace.SecurityQueue.Write("SAQ: activity attached to another in the waiting set: SA{0}.", activity.Id);
                         return;
                     }
                 }
                 activity.Finish(); // release blocked thread
                 _activityHistory.Finish(activity.Id);
-                SnTrace.SecurityQueue.Write("SAQ: SA{0} ignored: finished but not executed.", activity.Id);
+                SnTrace.SecurityQueue.Write("SAQ: activity finished but not executed: SA{0}.", activity.Id);
             }
 
             // ReSharper disable once MemberHidesStaticFromOuterClass
@@ -550,7 +548,7 @@ namespace SenseNet.Security.Messaging
                 _activityHistory.Start(activity.Id);
                 try
                 {
-                    using (var op = SnTrace.SecurityQueue.StartOperation("SAQ: EXECUTION START SA{0} .", activity.Id))
+                    using (var op = SnTrace.SecurityQueue.StartOperation("SAQ: EXECUTION SA{0} .", activity.Id))
                     {
                         activity.ExecuteInternal();
                         op.Successful = true;

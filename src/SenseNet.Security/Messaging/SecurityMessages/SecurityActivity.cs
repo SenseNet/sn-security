@@ -152,7 +152,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                 return;
 
             _waitingThreadId = Thread.CurrentThread.ManagedThreadId;
-            SnTrace.SecurityQueue.Write("SAQ: SA{0} blocks the T{1}", Id, _waitingThreadId);
+            SnTrace.SecurityQueue.Write("SAQ: activity blocks the T{1}: SA{0}", Id, _waitingThreadId);
 
             if (Debugger.IsAttached)
             {
