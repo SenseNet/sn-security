@@ -38,7 +38,8 @@ namespace SenseNet.Extensions.DependencyInjection
                 .AddDefaultSecurityMessageSenderManager(configureMessageSender)
                 .AddDefaultSecurityMessageProvider()
                 .AddDefaultSecurityMessageTypes()
-                .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>();
+                .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
+                .AddSenseNetRetrier();
 
             return services;
         }

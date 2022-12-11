@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using SenseNet.Security.EFCSecurityStore.Configuration;
 using SenseNet.Security.Tests;
+using SenseNet.Tools;
 
 namespace SenseNet.Security.EFCSecurityStore.Tests
 {
@@ -21,10 +21,10 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
 
             // install db directly
             new EFCSecurityDataProvider(
-                    messageSenderManager: DiTools.CreateMessageSenderManager(),
-                    options: new OptionsWrapper<DataOptions>(
-                        new DataOptions { ConnectionString = Configuration.Instance.GetConnectionString() }),
-                    logger: NullLoggerFactory.Instance.CreateLogger<EFCSecurityDataProvider>())
+                    DiTools.CreateMessageSenderManager(),
+                    new DefaultRetrier(Options.Create(new RetrierOptions()), NullLogger<DefaultRetrier>.Instance),
+                    Options.Create(new DataOptions { ConnectionString = Configuration.Instance.GetConnectionString() }),
+                    NullLogger<EFCSecurityDataProvider>.Instance)
                 .InstallDatabase();
 
             var _ = PermissionType.See; // pre-loads the type

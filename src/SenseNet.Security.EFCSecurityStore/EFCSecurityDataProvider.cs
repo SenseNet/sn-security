@@ -14,6 +14,8 @@ using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
+using SenseNet.Diagnostics;
+using SenseNet.Tools;
 
 // ReSharper disable InconsistentNaming
 namespace SenseNet.Security.EFCSecurityStore
@@ -26,38 +28,15 @@ namespace SenseNet.Security.EFCSecurityStore
         private readonly DataOptions _options;
         private readonly ILogger<EFCSecurityDataProvider> _logger;
         private readonly IMessageSenderManager _messageSenderManager;
+        private readonly IRetrier _retrier;
+
 
         /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
-        [Obsolete("Use the constructor with IOptions and dependency injection instead.", true)]
-        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager) : this(messageSenderManager, 0, null)
-        {
-        }
-        /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
-        [Obsolete("Use the constructor with IOptions and dependency injection instead.", true)]
-        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager, int commandTimeout, string connectionString)
+        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager, IRetrier retrier,
+            IOptions<DataOptions> options, ILogger<EFCSecurityDataProvider> logger)
         {
             _messageSenderManager = messageSenderManager;
-
-            // fallback to configuration
-            if (commandTimeout == 0)
-                commandTimeout = Configuration.Data.SecurityDatabaseCommandTimeoutInSeconds;
-
-            // fallback to well-known connection strings if the caller did not provide one
-            if (connectionString == null)
-                connectionString = ConfigurationManager.ConnectionStrings["SecurityStorage"]?.ConnectionString ??
-                                   ConfigurationManager.ConnectionStrings["SnCrMsSql"]?.ConnectionString;
-
-            _options = new DataOptions
-            {
-                ConnectionString = connectionString,
-                SqlCommandTimeout = commandTimeout
-            };
-            _logger = NullLogger<EFCSecurityDataProvider>.Instance;
-        }
-        /// <summary>Initializes a new instance of the EFCSecurityDataProvider class.</summary>
-        public EFCSecurityDataProvider(IMessageSenderManager messageSenderManager, IOptions<DataOptions> options, ILogger<EFCSecurityDataProvider> logger)
-        {
-            _messageSenderManager = messageSenderManager;
+            _retrier = retrier;
 
             _options = options?.Value ?? new DataOptions();
             _logger = logger;
@@ -102,13 +81,14 @@ namespace SenseNet.Security.EFCSecurityStore
 
         public async Task<bool> IsDatabaseReadyAsync(CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation("EFCSecurityDataProvider: IsDatabaseReady()");
+
             const string schemaCheckSql = @"
 SELECT CASE WHEN EXISTS (
     SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'EFEntries'
 )
 THEN CAST(1 AS BIT)
 ELSE CAST(0 AS BIT) END";
-
             var result = false;
             var db = Db();
             await using (db.ConfigureAwait(false))
@@ -140,7 +120,7 @@ ELSE CAST(0 AS BIT) END";
                     }
                 }
             }
-
+            op.Successful = true;
             return result;
         }
 
@@ -151,9 +131,14 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<int> GetEstimatedEntityCountAsync(CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation("EFCSecurityDataProvider: GetEstimatedEntityCount()");
+
+            int result;
             var db = Db();
             await using (db.ConfigureAwait(false))
-                return await db.GetEstimatedEntityCountAsync(cancel).ConfigureAwait(false);
+                result = await db.GetEstimatedEntityCountAsync(cancel).ConfigureAwait(false);
+            op.Successful = true;
+            return result;
         }
 
         [Obsolete("Use async version instead.")]
@@ -161,13 +146,15 @@ ELSE CAST(0 AS BIT) END";
         {
             return LoadSecurityEntitiesAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
-
         public async Task<IEnumerable<StoredSecurityEntity>> LoadSecurityEntitiesAsync(CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation("EFCSecurityDataProvider: LoadSecurityEntities()");
+
+            IEnumerable<StoredSecurityEntity> result;
             var db = Db();
             await using (db.ConfigureAwait(false))
             {
-                return await db.EFEntities.Select(x => new StoredSecurityEntity
+                result = await db.EFEntities.Select(x => new StoredSecurityEntity
                 {
                     Id = x.Id,
                     nullableOwnerId = x.OwnerId,
@@ -175,6 +162,9 @@ ELSE CAST(0 AS BIT) END";
                     IsInherited = x.IsInherited
                 }).ToArrayAsync(cancel).ConfigureAwait(false);
             }
+            op.Successful = true;
+
+            return result;
         }
 
         [Obsolete("Use async version instead.")]
@@ -184,9 +174,16 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<IEnumerable<int>> LoadAffectedEntityIdsByEntriesAndBreaksAsync(CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: LoadAffectedEntityIdsByEntriesAndBreaks()");
+
+            IEnumerable<int> result;
             var db = Db();
             await using (db.ConfigureAwait(false))
-                return await db.LoadAffectedEntityIdsByEntriesAndBreaksAsync(cancel).ConfigureAwait(false);
+                result = await db.LoadAffectedEntityIdsByEntriesAndBreaksAsync(cancel).ConfigureAwait(false);
+            op.Successful = true;
+
+            return result;
         }
 
         /// <summary>
@@ -209,9 +206,18 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<StoredSecurityEntity> LoadStoredSecurityEntityAsync(int entityId, CancellationToken cancel)
         {
-            var db = Db();
-            await using (db.ConfigureAwait(false))
-                return await db.LoadStoredSecurityEntityByIdAsync(entityId, cancel).ConfigureAwait(false);
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: LoadStoredSecurityEntityAsync(entityId: {0})", entityId);
+
+            var result = await RetryAsync(async () =>
+            {
+                var db = Db();
+                await using (db.ConfigureAwait(false))
+                    return await db.LoadStoredSecurityEntityByIdAsync(entityId, cancel).ConfigureAwait(false);
+            }, cancel).ConfigureAwait(false);
+            op.Successful = true;
+
+            return result;
         }
 
         [Obsolete("Use async version instead.")]
@@ -221,26 +227,36 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task InsertSecurityEntityAsync(StoredSecurityEntity entity, CancellationToken cancel)
         {
-            using var db = Db();
-            var origEntity = await LoadEFEntityAsync(entity.Id, db, cancel);
-            if (origEntity != null)
-                return;
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: InsertSecurityEntity. Id: {0}, ParentId: {1}", entity.Id, entity.ParentId);
 
-            db.EFEntities.Add(new EFEntity
+            await RetryAsync(async () =>
             {
-                Id = entity.Id,
-                OwnerId = entity.nullableOwnerId,
-                ParentId = entity.nullableParentId,
-                IsInherited = entity.IsInherited
-            });
-            try
-            {
-                await db.SaveChangesAsync(cancel).ConfigureAwait(false);
-            }
-            catch (DbUpdateException)
-            {
-                // entity already exists, that's ok
-            }
+                var db = Db();
+                await using (db.ConfigureAwait(false))
+                {
+                    var origEntity = await LoadEFEntityAsync(entity.Id, db, cancel);
+                    if (origEntity != null)
+                        return;
+
+                    db.EFEntities.Add(new EFEntity
+                    {
+                        Id = entity.Id,
+                        OwnerId = entity.nullableOwnerId,
+                        ParentId = entity.nullableParentId,
+                        IsInherited = entity.IsInherited
+                    });
+                    try
+                    {
+                        await db.SaveChangesAsync(cancel).ConfigureAwait(false);
+                    }
+                    catch (DbUpdateException)
+                    {
+                        // entity already exists, that's ok
+                    }
+                }
+            }, cancel).ConfigureAwait(false);
+            op.Successful = true;
         }
 
         [Obsolete("Use async version instead.")]
@@ -250,8 +266,10 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task UpdateSecurityEntityAsync(StoredSecurityEntity entity, CancellationToken cancel)
         {
-            var exceptions = new List<Exception>();
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: UpdateSecurityEntity. Id: {0}, ParentId: {1}", entity.Id, entity.ParentId);
 
+            var exceptions = new List<Exception>();
             for (var retry = 3; retry > 0; retry--)
             {
                 try
@@ -293,6 +311,8 @@ ELSE CAST(0 AS BIT) END";
             if (exceptions.Count > 0)
                 throw new SecurityStructureException(
                     "Cannot update entity because of concurrency: " + entity.Id, new AggregateException(exceptions));
+
+            op.Successful = true;
         }
 
         [Obsolete("Use async version instead.")]
@@ -302,6 +322,9 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task DeleteSecurityEntityAsync(int entityId, CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: DeleteSecurityEntity(entityId: {0})", entityId);
+
             var db = Db();
             await using (db.ConfigureAwait(false))
             {
@@ -322,6 +345,8 @@ ELSE CAST(0 AS BIT) END";
                     throw new SecurityStructureException("Cannot delete entity because of a database error: " + entityId, ex);
                 }
             }
+
+            op.Successful = true;
         }
 
         [Obsolete("Use async version instead.")]
@@ -331,6 +356,9 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task MoveSecurityEntityAsync(int sourceId, int targetId, CancellationToken cancel) // always called with SetSecurityHolder method
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: MoveSecurityEntity(sourceId: {0}, targetId: {1})", sourceId, targetId);
+
             var db = Db();
             await using (db.ConfigureAwait(false))
             {
@@ -347,6 +375,8 @@ ELSE CAST(0 AS BIT) END";
 
                 await db.SaveChangesAsync(cancel).ConfigureAwait(false);
             }
+
+            op.Successful = true;
         }
 
         [Obsolete("Use async version instead.")]
@@ -356,13 +386,17 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<IEnumerable<StoredAce>> LoadAllPermissionEntriesAsync(CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: LoadAllPermissionEntries()");
+
+            IEnumerable<StoredAce> result;
             var db = Db();
             await using (db.ConfigureAwait(false))
             {
                 var dbResult = await db.EFEntries.ToArrayAsync(cancel).ConfigureAwait(false);
 
                 // entity framework does not know the ulong because it is dumb :(
-                return dbResult.Select(a => new StoredAce
+                result = dbResult.Select(a => new StoredAce
                     {
                         EntityId = a.EFEntityId,
                         EntryType = (EntryType)a.EntryType,
@@ -373,6 +407,9 @@ ELSE CAST(0 AS BIT) END";
                     })
                     .ToArray();
             }
+            op.Successful = true;
+
+            return result;
         }
 
         [Obsolete("Use async version instead.")]
@@ -382,25 +419,37 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<IEnumerable<StoredAce>> LoadPermissionEntriesAsync(IEnumerable<int> entityIds, CancellationToken cancel)
         {
-            var db = Db();
-            await using (db.ConfigureAwait(false))
-            {
-                var dbResult = await db.EFEntries
-                    .Where(x => entityIds.Contains(x.EFEntityId))
-                    .ToArrayAsync(cancel).ConfigureAwait(false);
+            var entityIdArray = entityIds as int[] ?? entityIds.ToArray();
 
-                // entity framework does not know the ulong because it is dumb :(
-                return dbResult.Select(a => new StoredAce
-                    {
-                        EntityId = a.EFEntityId,
-                        EntryType = (EntryType)a.EntryType,
-                        IdentityId = a.IdentityId,
-                        LocalOnly = a.LocalOnly,
-                        AllowBits = a.AllowBits.ToUInt64(),
-                        DenyBits = a.DenyBits.ToUInt64()
-                    })
-                    .ToArray();
-            }
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: LoadPermissionEntries(entityIds: {0})",
+                string.Join(", ", entityIdArray.Select(x => x.ToString())));
+
+            var result = await RetryAsync(async () =>
+            {
+                var db = Db();
+                await using (db.ConfigureAwait(false))
+                {
+                    var dbResult = await db.EFEntries
+                        .Where(x => entityIdArray.Contains(x.EFEntityId))
+                        .ToArrayAsync(cancel).ConfigureAwait(false);
+
+                    // entity framework does not know the ulong because it is dumb :(
+                    return dbResult.Select(a => new StoredAce
+                        {
+                            EntityId = a.EFEntityId,
+                            EntryType = (EntryType)a.EntryType,
+                            IdentityId = a.IdentityId,
+                            LocalOnly = a.LocalOnly,
+                            AllowBits = a.AllowBits.ToUInt64(),
+                            DenyBits = a.DenyBits.ToUInt64()
+                        })
+                        .ToArray();
+                }
+            }, cancel).ConfigureAwait(false);
+            op.Successful = true;
+
+            return result;
         }
 
         [Obsolete("Use async version instead.")]
@@ -411,6 +460,10 @@ ELSE CAST(0 AS BIT) END";
         public async Task WritePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
             var storedAces = aces as StoredAce[] ?? aces.ToArray();
+
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: WritePermissionEntries. Count: {0}", storedAces.Length);
+
             try
             {
                 var db = Db();
@@ -422,12 +475,13 @@ ELSE CAST(0 AS BIT) END";
                 // possible foreign key constraint error
                 var message = ex.Message.StartsWith("The INSERT statement conflicted with the FOREIGN KEY constraint")
                     ? "Cannot write permission entries because one of the entities is missing from the database. " +
-                        // ReSharper disable once PossibleMultipleEnumeration
-                        string.Join(",", storedAces.Select(a => a.EntityId).Distinct().OrderBy(ei => ei))
+                      string.Join(",", storedAces.Select(a => a.EntityId).Distinct().OrderBy(ei => ei))
                     : "Cannot write permission entries because of a database error.";
 
                 throw new SecurityStructureException(message, ex);
             }
+
+            op.Successful = true;
         }
 
         [Obsolete("Use async version instead.")]
@@ -437,9 +491,16 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task RemovePermissionEntriesAsync(IEnumerable<StoredAce> aces, CancellationToken cancel)
         {
+            var storedAces = aces as StoredAce[] ?? aces.ToArray();
+
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: RemovePermissionEntries. Count: {0}", storedAces.Length);
+
             var db = Db();
             await using (db.ConfigureAwait(false))
-                await db.RemovePermissionEntriesAsync(aces, cancel).ConfigureAwait(false);
+                await db.RemovePermissionEntriesAsync(storedAces, cancel).ConfigureAwait(false);
+
+            op.Successful = true;
         }
 
         [Obsolete("Use async version instead.")]
@@ -449,9 +510,14 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task RemovePermissionEntriesByEntityAsync(int entityId, CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: RemovePermissionEntriesByEntity(entityId: {0})", entityId);
+
             var db = Db();
             await using (db.ConfigureAwait(false))
                 await db.RemovePermissionEntriesByEntityAsync(entityId, cancel).ConfigureAwait(false);
+
+            op.Successful = true;
         }
 
         [Obsolete("Use async version instead.")]
@@ -461,9 +527,14 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task DeleteEntitiesAndEntriesAsync(int entityId, CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: DeleteEntitiesAndEntries(entityId: {0})", entityId);
+
             var db = Db();
             await using (db.ConfigureAwait(false))
                 await db.DeleteEntitiesAndEntriesAsync(entityId, cancel).ConfigureAwait(false);
+
+            op.Successful = true;
         }
 
         //===================================================================== SecurityActivity
@@ -475,12 +546,20 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: GetLastSecurityActivityId(startedTime: {0})",
+                startedTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
+
+            int result;
             var db = Db();
             await using (db.ConfigureAwait(false))
             {
                 var lastMsg = await db.EFMessages.OrderByDescending(e => e.Id).FirstOrDefaultAsync(cancel).ConfigureAwait(false);
-                return lastMsg?.Id ?? 0;
+                result = lastMsg?.Id ?? 0;
             }
+            op.Successful = true;
+
+            return result;
         }
 
         [Obsolete("Use async version instead.")]
@@ -490,9 +569,17 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<int[]> GetUnprocessedActivityIdsAsync(CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: GetUnprocessedActivityIds()");
+
+            int[] result;
             var db = Db();
             await using (db.ConfigureAwait(false))
-                return await db.GetUnprocessedActivityIdsAsync(cancel).ConfigureAwait(false);
+                result = await db.GetUnprocessedActivityIdsAsync(cancel).ConfigureAwait(false);
+
+            op.Successful = true;
+
+            return result;
         }
 
         [Obsolete("Use async version instead.")]
@@ -504,28 +591,39 @@ ELSE CAST(0 AS BIT) END";
         public async Task<SecurityActivity[]> LoadSecurityActivitiesAsync(int from, int to, int count, bool executingUnprocessedActivities,
             CancellationToken cancel)
         {
-            var result = new List<SecurityActivity>();
-            var db = Db();
-            await using (db.ConfigureAwait(false))
-            {
-                var items = await db.EFMessages
-                    .Where(x => x.Id >= from && x.Id <= to)
-                    .OrderBy(x => x.Id)
-                    .Take(count)
-                    .ToArrayAsync(cancel).ConfigureAwait(false);
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: LoadSecurityActivities(from: {0}, to: {1}, count: {2}, executingUnprocessedActivities: {3})",
+                from, to, count, executingUnprocessedActivities);
 
-                foreach (var item in items)
+            var result = await RetryAsync(async () =>
+            {
+                var activities = new List<SecurityActivity>();
+                var db = Db();
+                await using (db.ConfigureAwait(false))
                 {
-                    var activity = ActivitySerializer.DeserializeActivity(item.Body);
-                    if (activity == null)
-                        continue;
-                    activity.Id = item.Id;
-                    activity.FromDatabase = true;
-                    activity.IsUnprocessedActivity = executingUnprocessedActivities;
-                    result.Add(activity);
+                    var items = await db.EFMessages
+                        .Where(x => x.Id >= from && x.Id <= to)
+                        .OrderBy(x => x.Id)
+                        .Take(count)
+                        .ToArrayAsync(cancel).ConfigureAwait(false);
+
+                    foreach (var item in items)
+                    {
+                        var activity = ActivitySerializer.DeserializeActivity(item.Body);
+                        if (activity == null)
+                            continue;
+                        activity.Id = item.Id;
+                        activity.FromDatabase = true;
+                        activity.IsUnprocessedActivity = executingUnprocessedActivities;
+                        activities.Add(activity);
+                    }
                 }
-            }
-            return result.ToArray();
+
+                return activities.ToArray();
+            }, cancel).ConfigureAwait(false);
+            op.Successful = true;
+
+            return result;
         }
 
         [Obsolete("Use async version instead.")]
@@ -536,29 +634,41 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<SecurityActivity[]> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities, CancellationToken cancel)
         {
-            var result = new List<SecurityActivity>();
-            var db = Db();
-            await using (db.ConfigureAwait(false))
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: LoadSecurityActivities(gaps: [{0}], executingUnprocessedActivities: {1})",
+                gaps.Length > 20 ? $"count: {gaps.Length}" : string.Join(", ", gaps.Select(x => x.ToString())),
+                executingUnprocessedActivities);
+
+            var result = await RetryAsync(async () =>
             {
-                var items = await db.EFMessages
-                    .Where(x => gaps.Contains(x.Id))
-                    .OrderBy(x => x.Id)
-                    .ToArrayAsync(cancel).ConfigureAwait(false);
-
-                foreach (var item in items)
+                var activities = new List<SecurityActivity>();
+                var db = Db();
+                await using (db.ConfigureAwait(false))
                 {
-                    var activity = ActivitySerializer.DeserializeActivity(item.Body);
-                    if (activity == null)
-                        continue;
-                    activity.Id = item.Id;
-                    activity.FromDatabase = true;
-                    activity.IsUnprocessedActivity = executingUnprocessedActivities;
-                    result.Add(activity);
-                }
-            }
-            return result.ToArray();
-        }
+                    var items = await db.EFMessages
+                        .Where(x => gaps.Contains(x.Id))
+                        .OrderBy(x => x.Id)
+                        .ToArrayAsync(cancel).ConfigureAwait(false);
 
+                    foreach (var item in items)
+                    {
+                        var activity = ActivitySerializer.DeserializeActivity(item.Body);
+                        if (activity == null)
+                            continue;
+                        activity.Id = item.Id;
+                        activity.FromDatabase = true;
+                        activity.IsUnprocessedActivity = executingUnprocessedActivities;
+                        activities.Add(activity);
+                    }
+                }
+
+                return activities.ToArray();
+            }, cancel).ConfigureAwait(false);
+            op.Successful = true;
+
+            return result;
+        }
+        
         [Obsolete("Use async version instead.")]
         public SecurityActivity LoadSecurityActivity(int id)
         {
@@ -566,17 +676,27 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<SecurityActivity> LoadSecurityActivityAsync(int id, CancellationToken cancel)
         {
+
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: LoadSecurityActivity(id: {0})", id);
+
+            SecurityActivity result = null;
             var db = Db();
             await using (db.ConfigureAwait(false))
             {
-                var item = await db.EFMessages.FirstOrDefaultAsync(x => x.Id == id, cancel).ConfigureAwait(false);
-                if (item == null)
-                    return null;
+                var msg = await db.EFMessages
+                    .FirstOrDefaultAsync(x => x.Id == id, cancel)
+                    .ConfigureAwait(false);
 
-                var activity = ActivitySerializer.DeserializeActivity(item.Body);
-                activity.Id = item.Id;
-                return activity;
+                if (msg != null)
+                {
+                    result = ActivitySerializer.DeserializeActivity(msg.Body);
+                    result.Id = msg.Id;
+                }
             }
+            op.Successful = true;
+
+            return result;
         }
 
         [Obsolete("Use async version instead.")]
@@ -588,23 +708,35 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<SaveSecurityActivityResult> SaveSecurityActivityAsync(SecurityActivity activity, CancellationToken cancel)
         {
-            var body = ActivitySerializer.SerializeActivity(activity);
-            EntityEntry<EFMessage> result;
-            var db = Db();
-            await using (db.ConfigureAwait(false))
-            {
-                result = db.EFMessages.Add(new EFMessage
-                {
-                    ExecutionState = ExecutionState.Wait,
-                    SavedBy = _messageSenderManager.InstanceId,
-                    SavedAt = DateTime.UtcNow,
-                    Body = body
-                });
-                await db.SaveChangesAsync(cancel).ConfigureAwait(false);
-            }
-            return new SaveSecurityActivityResult {ActivityId = result.Entity.Id, BodySize = body.Length};
-        }
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: SaveSecurityActivity. Id: {0}, TypeName: {1}",
+                activity.Id, activity.TypeName);
 
+            var body = ActivitySerializer.SerializeActivity(activity);
+
+            var result = await RetryAsync(async () =>
+            {
+                EntityEntry<EFMessage> dbResult;
+                var db = Db();
+                await using (db.ConfigureAwait(false))
+                {
+                    dbResult = db.EFMessages.Add(new EFMessage
+                    {
+                        ExecutionState = ExecutionState.Wait,
+                        SavedBy = _messageSenderManager.InstanceId,
+                        SavedAt = DateTime.UtcNow,
+                        Body = body
+                    });
+                    await db.SaveChangesAsync(cancel).ConfigureAwait(false);
+                }
+
+                return new SaveSecurityActivityResult { ActivityId = dbResult.Entity.Id, BodySize = body.Length };
+            }, cancel).ConfigureAwait(false);
+
+            op.Successful = true;
+
+            return result;
+        }
 
         [Obsolete("Use async version instead.")]
         public void CleanupSecurityActivities(int timeLimitInMinutes)
@@ -613,9 +745,14 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task CleanupSecurityActivitiesAsync(int timeLimitInMinutes, CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: CleanupSecurityActivities(timeLimitInMinutes: {0})", timeLimitInMinutes);
+
             var db = Db();
             await using (db.ConfigureAwait(false))
                 await db.CleanupSecurityActivitiesAsync(timeLimitInMinutes, cancel).ConfigureAwait(false);
+
+            op.Successful = true;
         }
 
         /// <summary>
@@ -631,29 +768,43 @@ ELSE CAST(0 AS BIT) END";
         public async Task<SecurityActivityExecutionLock> AcquireSecurityActivityExecutionLockAsync(
             SecurityActivity securityActivity, int timeoutInSeconds, CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: AcquireSecurityActivityExecutionLock. Id: {0}, TypeName: {1}, timeoutInSeconds: {2}",
+                securityActivity.Id, securityActivity.TypeName, timeoutInSeconds);
+
             var maxTime = timeoutInSeconds == int.MaxValue
                 ? DateTime.MaxValue
                 : DateTime.UtcNow.AddSeconds(timeoutInSeconds);
+
             while (DateTime.UtcNow < maxTime)
             {
-                string result;
-                var db = Db();
-                await using (db.ConfigureAwait(false))
-                    result = await db.AcquireSecurityActivityExecutionLockAsync(
-                        securityActivity.Id, _messageSenderManager.InstanceId, timeoutInSeconds, cancel).ConfigureAwait(false);
+                var lockResult = await RetryAsync(async () =>
+                {
+                    string result;
+                    var db = Db();
+                    await using (db.ConfigureAwait(false))
+                        result = await db.AcquireSecurityActivityExecutionLockAsync(
+                                securityActivity.Id, _messageSenderManager.InstanceId, timeoutInSeconds, cancel)
+                            .ConfigureAwait(false);
+
+                    return result;
+                }, cancel).ConfigureAwait(false);
 
                 // ReSharper disable once SwitchStatementMissingSomeCases
-                switch (result)
+                switch (lockResult)
                 {
                     case ExecutionState.LockedForYou:
                         // enable full executing
+                        op.Successful = true;
                         return new SecurityActivityExecutionLock(securityActivity, this, true);
                     case ExecutionState.Executing:
                     case ExecutionState.Done:
                         // enable partially executing
+                        op.Successful = true;
                         return new SecurityActivityExecutionLock(securityActivity, this, false);
                 }
             }
+            op.Successful = true;
 
             throw new SecurityActivityTimeoutException(
                 $"Waiting for a SecurityActivityExecutionLock timed out: #{securityActivity.Id}/{securityActivity.TypeName}");
@@ -669,9 +820,15 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task RefreshSecurityActivityExecutionLockAsync(SecurityActivity securityActivity, CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: RefreshSecurityActivityExecutionLock. Id: {0}, TypeName: {1}",
+                securityActivity.Id, securityActivity.TypeName);
+
             var db = Db();
             await using (db.ConfigureAwait(false))
                 await db.RefreshSecurityActivityExecutionLockAsync(securityActivity.Id, cancel).ConfigureAwait(false);
+
+            op.Successful = true;
         }
 
         /// <summary>
@@ -684,16 +841,26 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task ReleaseSecurityActivityExecutionLockAsync(SecurityActivity securityActivity, CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: ReleaseSecurityActivityExecutionLock. Id: {0}, TypeName: {1}",
+                securityActivity.Id, securityActivity.TypeName);
+
             var db = Db();
             await using (db.ConfigureAwait(false))
                 await db.ReleaseSecurityActivityExecutionLockAsync(securityActivity.Id, cancel).ConfigureAwait(false);
+
+            op.Successful = true;
         }
 
         //===================================================================== Tools
 
         private static Task<EFEntity> LoadEFEntityAsync(int entityId, SecurityStorage db, CancellationToken cancel)
         {
-            return db.EFEntities.FirstOrDefaultAsync(x => x.Id == entityId, cancel);
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: LoadEFEntityAsync(entityId: {0}, db)", entityId);
+            var result =  db.EFEntities.FirstOrDefaultAsync(x => x.Id == entityId, cancel);
+            op.Successful = true;
+            return result;
         }
 
         /* ===================================================================== */
@@ -708,6 +875,10 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<GroupRelatedEntitiesQueryResult> QueryGroupRelatedEntitiesAsync(int groupId, CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: QueryGroupRelatedEntities(groupId: {0}, out entityIds, out exclusiveEntityIds)", groupId);
+
+            GroupRelatedEntitiesQueryResult result;
             var exclusiveEntityIds = new List<int>();
             var db = Db();
             await using (db.ConfigureAwait(false))
@@ -725,12 +896,15 @@ ELSE CAST(0 AS BIT) END";
                         exclusiveEntityIds.Add(relatedEntityId);
                 }
 
-                return new GroupRelatedEntitiesQueryResult
+                result = new GroupRelatedEntitiesQueryResult
                 {
                     EntityIds = entityIds,
                     ExclusiveEntityIds = exclusiveEntityIds
                 };
             }
+            op.Successful = true;
+
+            return result;
         }
 
 
@@ -741,8 +915,11 @@ ELSE CAST(0 AS BIT) END";
         {
             return LoadAllGroupsAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
+
         public async Task<IEnumerable<SecurityGroup>> LoadAllGroupsAsync(CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: LoadAllGroupsAsync()");
 
             var groups = new Dictionary<int, SecurityGroup>();
             var db = Db();
@@ -763,6 +940,8 @@ ELSE CAST(0 AS BIT) END";
                     }
                 }, cancel).ConfigureAwait(false);
             }
+            op.Successful = true;
+
             return groups.Values;
         }
 
@@ -782,6 +961,9 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<SecurityGroup> LoadSecurityGroupAsync(int groupId, CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: LoadSecurityGroup(groupId: {0})", groupId);
+
             var group = new SecurityGroup(groupId);
             var groups = new Dictionary<int, SecurityGroup> { { group.Id, group } };
             var rows = 0;
@@ -803,6 +985,8 @@ ELSE CAST(0 AS BIT) END";
                     }
                 }
             }
+            op.Successful = true;
+
             return rows == 0 ? null : group;
         }
 
@@ -813,9 +997,12 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task DeleteIdentityAndRelatedEntriesAsync(int identityId, CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: DeleteIdentityAndRelatedEntries(identityId: {0})", identityId);
             var db = Db();
             await using (db.ConfigureAwait(false))
                 await db.DeleteIdentityAsync(identityId, cancel).ConfigureAwait(false);
+            op.Successful = true;
         }
 
         [Obsolete("Use async version instead.")]
@@ -825,9 +1012,14 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task DeleteIdentitiesAndRelatedEntriesAsync(IEnumerable<int> ids, CancellationToken cancel)
         {
+            var idArray = ids as int[] ?? ids.ToArray();
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: DeleteIdentitiesAndRelatedEntries(ids: {0})",
+                string.Join(", ", idArray.Select(x=>x.ToString())));
             var db = Db();
             await using (db.ConfigureAwait(false))
-                await db.DeleteIdentitiesAsync(ids, cancel).ConfigureAwait(false);
+                await db.DeleteIdentitiesAsync(idArray, cancel).ConfigureAwait(false);
+            op.Successful = true;
         }
 
         [Obsolete("Use async version instead.")]
@@ -840,11 +1032,17 @@ ELSE CAST(0 AS BIT) END";
         public async Task AddMembersAsync(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers,
             CancellationToken cancel)
         {
-            groupMembers = groupMembers ?? Array.Empty<int>();
-            userMembers = userMembers ?? Array.Empty<int>();
+            groupMembers ??= Array.Empty<int>();
+            userMembers ??= Array.Empty<int>();
 
             var groupArray = groupMembers as int[] ?? groupMembers.ToArray();
             var userArray = userMembers as int[] ?? userMembers.ToArray();
+
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: AddMembers(groupId: {0}, userMembers: [{1}], groupMembers: [{2}])",
+                groupId,
+                string.Join(", ", userArray.Select(x => x.ToString())),
+                string.Join(", ", groupArray.Select(x => x.ToString())));
 
             var allNewMembers = groupArray.Union(userArray);
             var db = Db();
@@ -857,15 +1055,17 @@ ELSE CAST(0 AS BIT) END";
                 var newGroupIds = groupArray.Except(origMemberIds).ToArray();
                 var newUserIds = userArray.Except(origMemberIds).ToArray();
                 var newGroups = newGroupIds.Select(g => new EFMembership
-                    {GroupId = groupId, MemberId = g, IsUser = false});
+                    { GroupId = groupId, MemberId = g, IsUser = false });
                 var newUsers = newUserIds.Select(g => new EFMembership
-                    {GroupId = groupId, MemberId = g, IsUser = true});
+                    { GroupId = groupId, MemberId = g, IsUser = true });
 
                 db.EFMemberships.AddRange(newGroups);
                 db.EFMemberships.AddRange(newUsers);
 
                 await db.SaveChangesAsync(cancel).ConfigureAwait(false);
             }
+
+            op.Successful = true;
         }
 
         [Obsolete("Use async version instead.")]
@@ -875,9 +1075,23 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task RemoveMembersAsync(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, CancellationToken cancel)
         {
+            groupMembers ??= Array.Empty<int>();
+            userMembers ??= Array.Empty<int>();
+
+            var groupArray = groupMembers as int[] ?? groupMembers.ToArray();
+            var userArray = userMembers as int[] ?? userMembers.ToArray();
+
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: RemoveMembers(groupId: {0}, userMembers: [{1}], groupMembers: [{2}])",
+                groupId,
+                string.Join(", ", userArray.Select(x => x.ToString())),
+                string.Join(", ", groupArray.Select(x => x.ToString())));
+
             var db = Db();
             await using (db.ConfigureAwait(false))
-                await db.RemoveMembersAsync(groupId, userMembers ?? Array.Empty<int>(), groupMembers ?? Array.Empty<int>(), cancel).ConfigureAwait(false);
+                await db.RemoveMembersAsync(groupId, userArray, groupArray, cancel).ConfigureAwait(false);
+
+            op.Successful = true;
         }
 
         //============================================================
@@ -892,13 +1106,47 @@ ELSE CAST(0 AS BIT) END";
         }
         public async Task<IEnumerable<long>> GetMembershipForConsistencyCheckAsync(CancellationToken cancel)
         {
+            using var op = SnTrace.SecurityDatabase.StartOperation(
+                "EFCSecurityDataProvider: GetMembershipForConsistencyCheck()");
+
+            long[] result;
             var db = Db();
             await using (db.ConfigureAwait(false))
             {
                 var dbResult = await db.EFMemberships.ToArrayAsync(cancel).ConfigureAwait(false);
-                return dbResult.Select(m => (Convert.ToInt64(m.GroupId) << 32) + m.MemberId)
+                result = dbResult.Select(m => (Convert.ToInt64(m.GroupId) << 32) + m.MemberId)
                     .ToArray();
             }
+            op.Successful = true;
+
+            return result;
+        }
+
+        private static bool RetriableException(Exception ex)
+        {
+            return (ex is InvalidOperationException && ex.Message.Contains("connection from the pool")) ||
+                   (ex is SqlException && ex.Message.Contains("A network-related or instance-specific error occurred"));
+        }
+
+        public Task RetryAsync(Func<Task> action, CancellationToken cancel)
+        {
+            return RetryAsync<object>(async () =>
+            {
+                await action().ConfigureAwait(false);
+                return null;
+            }, cancel);
+        }
+        public Task<T> RetryAsync<T>(Func<Task<T>> action, CancellationToken cancel)
+        {
+            return _retrier.RetryAsync(action,
+                shouldRetryOnError: (ex, _) => RetriableException(ex),
+                onAfterLastIteration: (_, ex, i) =>
+                {
+                    SnTrace.Security.WriteError(
+                        $"Security data layer error: {ex.Message}. Retry cycle ended after {i} iterations.");
+                    throw new InvalidOperationException("Security data layer timeout occurred.", ex);
+                },
+                cancel: cancel);
         }
     }
 }

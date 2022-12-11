@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,6 +12,7 @@ using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 using SenseNet.Security.Tests;
 using SenseNet.Security.Tests.TestPortal;
+using SenseNet.Tools;
 
 namespace SenseNet.Security.EFCSecurityStore.Tests
 {
@@ -23,10 +23,10 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
         protected override ISecurityDataProvider GetDataProvider()
         {
             return new EFCSecurityDataProvider(
-                messageSenderManager: DiTools.CreateMessageSenderManager(),
-                options: new OptionsWrapper<DataOptions>(
-                    new DataOptions {ConnectionString = Configuration.Instance.GetConnectionString()}),
-                logger: NullLoggerFactory.Instance.CreateLogger<EFCSecurityDataProvider>());
+                DiTools.CreateMessageSenderManager(),
+                new DefaultRetrier(Options.Create(new RetrierOptions()), NullLogger<DefaultRetrier>.Instance),
+                Options.Create(new DataOptions { ConnectionString = Configuration.Instance.GetConnectionString() }),
+                NullLogger<EFCSecurityDataProvider>.Instance);
         }
 
         private SecurityStorage Db()
@@ -316,6 +316,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             // part 1 ----------------------------------------------------------
             var services = new ServiceCollection()
                 .AddLogging()
+                .AddSenseNetRetrier()
                 .AddSingleton<IMessageSenderManager, MessageSenderManager>();
 
             // WITHOUT configuration
@@ -331,6 +332,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             // part 2 ----------------------------------------------------------
             services = new ServiceCollection()
                 .AddLogging()
+                .AddSenseNetRetrier()
                 .AddSingleton<IMessageSenderManager, MessageSenderManager>();
 
             // WITH configuration

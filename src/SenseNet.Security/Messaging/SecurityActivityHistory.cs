@@ -166,7 +166,7 @@ namespace SenseNet.Security.Messaging
                         return;
                     }
                 }
-                SnTrace.SecurityQueue.Write("SAQ: SA{0} DOES NOT FOUND IN HISTORY. Cannot register the 'start' event.", activityId);
+                SnTrace.SecurityQueue.Write("SAQ: Missing from history: SA{0}. Cannot register the 'start' event.", activityId);
             }
         }
         internal void Finish(int activityId)
@@ -182,7 +182,7 @@ namespace SenseNet.Security.Messaging
                     }
                 }
             }
-            SnTrace.SecurityQueue.Write("SAQ: SA{0} DOES NOT FOUND IN HISTORY. Cannot register the 'stop' event.", activityId);
+            SnTrace.SecurityQueue.Write("SAQ: Missing from history: SA{0}. Cannot register the 'stop' event.", activityId);
         }
         internal void Error(int activityId, Exception e)
         {
@@ -197,7 +197,7 @@ namespace SenseNet.Security.Messaging
                     }
                 }
             }
-            SnTrace.SecurityQueue.Write("SAQ: SA{0} DOES NOT FOUND IN HISTORY. Cannot register an 'error' on it.", activityId);
+            SnTrace.SecurityQueue.Write("SAQ: Missing from history: SA{0}. Cannot register an 'error' on it.", activityId);
         }
     }
 
