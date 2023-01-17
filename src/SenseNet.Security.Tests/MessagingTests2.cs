@@ -18,7 +18,7 @@ namespace SenseNet.Security.Tests
     {
         #region Classes
 
-        private class TestMessageProvider:MessageProviderBase
+        internal class TestMessageProvider:MessageProviderBase
         {
             private Queue<byte[]> _messageQueue;
             private bool _isReceiver;
@@ -102,7 +102,7 @@ namespace SenseNet.Security.Tests
             }
         }
 
-        private SecuritySystem CreateSecuritySystem(string instanceName, Queue<byte[]> messageQueue, bool isReceiver)
+        internal static SecuritySystem CreateSecuritySystem(string instanceName, Queue<byte[]> messageQueue, bool isReceiver)
         {
             var services = new ServiceCollection()
                 .AddDefaultSecurityMessageTypes()
