@@ -227,8 +227,13 @@ namespace SenseNet.Security.Messaging
                 DependencyManager.ActivityEnqueued();
 
                 if (lastDatabaseId != 0 || lastExecutedId != 0 || gaps.Any())
+                {
                     while (_securityActivityQueue.IsWorking())
+                    {
+                        SnTrace.SecurityQueue.Write("SAQ: Thread.Sleep(200)");
                         Thread.Sleep(200);
+                    }
+                }
 
                 if (hasUnprocessed)
                     SnLog.WriteInformation(string.Format(EventMessage.Information.ExecutingUnprocessedActivitiesFinished, count),
@@ -370,18 +375,23 @@ namespace SenseNet.Security.Messaging
             {
                 if (_run)
                     return;
+                SnTrace.SecurityQueue.Write("SAQ: DependencyManager: set _run = true");
                 _run = true;
+                SnTrace.SecurityQueue.Write("DependencyManager: Task.Run(ProcessActivities)");
                 Task.Run(ProcessActivities);
             }
 
             private void ProcessActivities()
             {
+                using var op = SnTrace.SecurityQueue.StartOperation("DependencyManager.ProcessActivities");
                 while (true)
                 {
                     var newerActivity = _serializer.DequeueActivity();
                     if (newerActivity == null)
                     {
+                        SnTrace.SecurityQueue.Write("SAQ: DependencyManager: set _run = false");
                         _run = false;
+                        op.Successful = true;
                         return;
                     }
                     MakeDependencies(newerActivity);
@@ -405,7 +415,10 @@ namespace SenseNet.Security.Messaging
                     _waitingSet.Add(newerActivity);
 
                     if (newerActivity.WaitingFor.Count == 0)
+                    {
+                        SnTrace.SecurityQueue.Write("Task.Run(() => _executor.Execute(newerActivity: SA{0}))", newerActivity.Id);
                         Task.Run(() => _executor.Execute(newerActivity));
+                    }
                 }
             }
 
@@ -430,7 +443,10 @@ namespace SenseNet.Security.Messaging
                     {
                         dependentItem.FinishWaiting(activity);
                         if (dependentItem.WaitingFor.Count == 0)
+                        {
+                            SnTrace.SecurityQueue.Write("Task.Run(() => _executor.Execute(dependentItem: SA{0}))", dependentItem.Id);
                             Task.Run(() => _executor.Execute(dependentItem));
+                        }
                     }
                 }
             }
