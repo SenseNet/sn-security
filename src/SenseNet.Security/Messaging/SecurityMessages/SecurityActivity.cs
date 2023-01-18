@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,11 +36,12 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         private static int _activityId;
 
         [field: NonSerialized]
-        [JsonIgnore]
         private int _instanceId;
         [JsonIgnore] internal string Key => $"{Id}-{_instanceId}";
 
-        private Exception _executionException;
+        [field: NonSerialized]
+        [JsonIgnore]
+        public Exception ExecutionException { get; private set; }
 
         /// <summary>
         /// Gets the current SecurityContext.
@@ -80,8 +79,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             if (waitForComplete)
                 WaitForComplete();
 
-            if (_executionException != null)
-                throw _executionException;
+            if (ExecutionException != null)
+                throw ExecutionException;
         }
 
         /// <summary>
@@ -89,9 +88,6 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         /// <param name="context">Current SecurityContext</param>
         /// <param name="cancel">The token to monitor for cancellation requests.</param>
-        /// <param name="waitForComplete">If the value is true (default),
-        /// the current thread waits for the full execution on this computer.
-        /// Otherwise the method returns immediately.</param>
         /// <returns>
         /// A Task that represents the asynchronous operation and wraps the query result.
         /// </returns>
@@ -101,8 +97,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             Sender ??= context.SecuritySystem.MessageSenderManager.CreateMessageSender();
 
             await context.SecuritySystem.SecurityActivityQueue.ExecuteActivityAsync(this, cancel);
-            if (_executionException != null)
-                throw _executionException;
+            if (ExecutionException != null)
+                throw ExecutionException;
         }
 
         /// <summary>
@@ -127,7 +123,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             }
             catch (Exception e)
             {
-                _executionException = e;
+                ExecutionException = e;
 
                 // we log this here, because if the activity is not waited for later than the exception would not be logged
                 SnTrace.Security.WriteError("Error during security activity execution. SA{0} {1}", Id, e);
@@ -161,7 +157,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             }
             catch (Exception e)
             {
-                _executionException = e;
+                ExecutionException = e;
 
                 // we log this here, because if the activity is not waited for later than the exception would not be logged
                 SnTrace.Security.WriteError(() => $"Error during security activity execution. #SA{Key} {e}");
@@ -233,6 +229,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
         [field: NonSerialized]
         [JsonIgnore]
+        [Obsolete("SAQ: Use Attachments property instead", true)]
         internal SecurityActivity AttachedActivity { get; private set; }
 
         /// <summary>
@@ -243,6 +240,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// sources: e.g from messaging, from database or from direct execution.
         /// </summary>
         /// <param name="activity"></param>
+        [Obsolete("SAQ: Use Attachments property instead. ", true)]
         internal void Attach(SecurityActivity activity)
         {
             if (ReferenceEquals(this, activity))
@@ -259,8 +257,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         internal void Finish()
         {
             _finished = true;
+
             // finalize attached activities first
-            AttachedActivity?.Finish();
+            foreach (var attachment in Attachments)
+                attachment.Finish();
+
             if (_finishSignal != null)
             {
                 _finishSignal.Set();
@@ -374,5 +375,38 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             WaitingFor = new List<SecurityActivity>();
             WaitingForMe = new List<SecurityActivity>();
         }
+
+
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        internal CancellationToken CancellationToken { get; set; }
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        private Task _executionTask;
+        [field: NonSerialized]
+        [JsonIgnore]
+        private Task _finalizationTask;
+
+        internal Task CreateTaskForWait()
+        {
+            _finalizationTask = new Task(() => { /* do nothing */ }, CancellationToken, TaskCreationOptions.LongRunning); //UNDONE:SAQ ?? avoid a lot of LongRunning
+            return _finalizationTask;
+        }
+        internal void StartExecutionTask()
+        {
+            _executionTask = ExecuteInternalAsync(CancellationToken);
+        }
+        internal void StartFinalizationTask()
+        {
+            _finalizationTask?.Start();
+        }
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        internal List<SecurityActivity> Attachments { get; private set; } = new List<SecurityActivity>();
+
+        public TaskStatus? GetExecutionTaskStatus() => _executionTask?.Status;
     }
 }

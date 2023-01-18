@@ -500,5 +500,10 @@ namespace SenseNet.Security
             foreach (var parentGroupId in parentGroups.Distinct())
                 await _dataProvider.RemoveMembersAsync(parentGroupId, new[] { userId }, null, cancel).ConfigureAwait(false);
         }
+
+        public async Task<IEnumerable<SecurityActivity>> LoadLastActivities(int fromId, CancellationToken cancel)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
