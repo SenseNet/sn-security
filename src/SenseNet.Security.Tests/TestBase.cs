@@ -25,6 +25,7 @@ namespace SenseNet.Security.Tests
             SnTrace.EnableAll();
             SnTrace.SecurityQueue.Enabled = false;
 
+            SnTrace.Test.Write("------------------------------------------------------------------------");
             _snTraceOperation =
                 SnTrace.Test.StartOperation(
                     $"TESTMETHOD: {testContext.FullyQualifiedTestClassName}.{testContext.TestName}");

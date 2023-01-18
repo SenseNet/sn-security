@@ -70,6 +70,12 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         [Obsolete("SAQ: Use ExecuteAsync instead.", false)]
         public void Execute(SecurityContext context, bool waitForComplete = true)
         {
+            if (context.SecuritySystem.SecurityActivityQueue is SecurityActivityQueue)
+            {
+                ExecuteAsync(context, CancellationToken.None).GetAwaiter().GetResult();
+                return;
+            }
+
             Context = context;
             if (Sender == null)
                 Sender = context.SecuritySystem.MessageSenderManager.CreateMessageSender();

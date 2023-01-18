@@ -10,7 +10,7 @@ using SenseNet.Security.Messaging.SecurityMessages;
 
 namespace SenseNet.Security.Messaging
 {
-    internal class SecurityActivityQueue : IDisposable
+    internal class SecurityActivityQueue : ISecurityActivityQueue, IDisposable
     {
         private readonly DataHandler _dataHandler;
         private readonly CancellationTokenSource _mainCancellationSource;
@@ -28,6 +28,10 @@ namespace SenseNet.Security.Messaging
             _completionState = new CompletionState();
         }
 
+        public void Shutdown()
+        {
+            Dispose();
+        }
         public void Dispose()
         {
             _mainCancellationSource.Cancel();
@@ -36,19 +40,23 @@ namespace SenseNet.Security.Messaging
             _mainThreadControllerTask.Dispose();
             _mainCancellationSource.Dispose();
 
-            //UNDONE: SAQ: remove comment if the cleaning CompletionState is required when disposing the ActivityQueue
+            //UNDONE:SAQ: remove comment if the cleaning CompletionState is required when disposing the ActivityQueue
             //_lastExecutedId = 0;
             //_gaps.Clear();
             //_completionState = new CompletionState();
 
-            SnTrace.Write("SAQ: disposed");
+            SnTrace.SecurityQueue.Write("SAQ: disposed");
         }
 
-        public async Task StartAsync(CancellationToken cancel)
+        public void Startup(CompletionState uncompleted, int lastActivityIdFromDb)
         {
-            var dbState = await _dataHandler.LoadCompletionStateAsync(cancel);
-            await StartAsync(dbState.CompletionState, dbState.LastDatabaseId, cancel);
+            StartAsync(uncompleted, lastActivityIdFromDb, CancellationToken.None).GetAwaiter().GetResult();
         }
+        //public async Task StartAsync(CancellationToken cancel)
+        //{
+        //    var dbState = await _dataHandler.LoadCompletionStateAsync(cancel);
+        //    await StartAsync(dbState.CompletionState, dbState.LastDatabaseId, cancel);
+        //}
         public async Task StartAsync(CompletionState uncompleted, int lastDatabaseId, CancellationToken cancel)
         {
             _lastExecutedId = uncompleted?.LastActivityId ?? 0;
@@ -64,14 +72,16 @@ namespace SenseNet.Security.Messaging
 
             await Task.Delay(1, cancel);
 
-            //UNDONE: SAQ: wait for finishing all unprocessed activities or not?
+            //UNDONE:SAQ: wait for finishing all unprocessed activities or not?
             await ExecuteUnprocessedActivitiesAtStartAsync(_lastExecutedId, _gaps, lastDatabaseId, cancel);
         }
+
+
         // ReSharper disable once UnusedParameter.Local
         private Task ExecuteUnprocessedActivitiesAtStartAsync(int lastExecutedId, List<int> gaps, int lastDatabaseId, CancellationToken cancel)
         {
             var count = 0;
-            SnTrace.Write($"Discovering unprocessed security activities");
+            SnTrace.SecurityQueue.Write($"Discovering unprocessed security activities");
             if (gaps.Any())
             {
                 var loadedActivities = new SecurityActivityLoader(gaps.ToArray(), true, _dataHandler);
@@ -95,26 +105,30 @@ namespace SenseNet.Security.Messaging
                 }
             }
             //SnLog.WriteInformation(string.Format(EventMessage.Information.ExecutingUnprocessedActivitiesFinished, count),
-            SnTrace.Write($"Executing unprocessed security activities ({count}).");
+            SnTrace.SecurityQueue.Write($"Executing unprocessed security activities ({count}).");
 
             return Task.CompletedTask;
         }
 
         // Activity arrival
-        public Task ExecuteAsync(SecurityActivity activity, CancellationToken cancel)
+        public void ExecuteActivity(SecurityActivity activity)
+        {
+            ExecuteActivityAsync(activity, CancellationToken.None);
+        }
+        public Task ExecuteActivityAsync(SecurityActivity activity, CancellationToken cancel)
         {
             if (!activity.FromDatabase && !activity.FromReceiver)
                 _dataHandler.SaveActivityAsync(activity, cancel).GetAwaiter().GetResult();
 
             if (activity.FromReceiver)
-                SnTrace.Write(() => $"SAQ: Arrive from receiver #SA{activity.Key}");
+                SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive from receiver #SA{activity.Key}");
             else
-                SnTrace.Write(() => $"SAQ: Arrive #SA{activity.Key}");
+                SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive #SA{activity.Key}");
 
             activity.CancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancel, _mainCancellationToken).Token;
 
             _arrivalQueue.Enqueue(activity);
-            _waitToWorkSignal.Set(); //UNDONE: SAQ: This instruction should replaced to other places (timer?).
+            _waitToWorkSignal.Set(); //UNDONE:SAQ: This instruction should replaced to other places (timer?).
 
             return activity.CreateTaskForWait();
         }
@@ -130,14 +144,14 @@ namespace SenseNet.Security.Messaging
         private readonly List<int> _gaps = new();
         private CompletionState _completionState;
 
-        public CompletionState GetCompletionState()
+        public CompletionState GetCurrentCompletionState()
         {
             return _completionState;
         }
 
         private void ControlActivityQueueThread(CancellationToken cancel)
         {
-            SnTrace.Write("SAQT: started");
+            SnTrace.SecurityQueue.Write("SAQT: started");
             var finishedList = new List<SecurityActivity>(); // temporary
             var lastStartedId = _lastExecutedId;
 
@@ -152,7 +166,7 @@ namespace SenseNet.Security.Messaging
                     if (_waitingList.Count == 0 && _executingList.Count == 0)
                     {
                         var id = lastStartedId;
-                        SnTrace.Write(() => $"SAQT: waiting for arrival #SA{id + 1}");
+                        SnTrace.SecurityQueue.Write(() => $"SAQT: waiting for arrival #SA{id + 1}");
                         _waitToWorkSignal.WaitOne();
                     }
 
@@ -161,9 +175,9 @@ namespace SenseNet.Security.Messaging
 
                     // Continue working
                     _workCycle++;
-                    SnTrace.Write(() => $"SAQT: works (cycle: {_workCycle}, " +
-                                               $"_arrivalQueue.Count: {_arrivalQueue.Count}), " +
-                                               $"_executingList.Count: {_executingList.Count}");
+                    SnTrace.SecurityQueue.Write(() => $"SAQT: works (cycle: {_workCycle}, " +
+                                                      $"_arrivalQueue.Count: {_arrivalQueue.Count}), " +
+                                                      $"_executingList.Count: {_executingList.Count}");
 
                     LineUpArrivedActivities(_arrivalQueue, _waitingList);
 
@@ -189,7 +203,7 @@ namespace SenseNet.Security.Messaging
                             // Load the missed out activities from database or skip this if it is happening right now.
                             var id = lastStartedId;
                             _activityLoaderTask ??= Task.Run(() => LoadLastActivities(id + 1, cancel));
-                            break; //UNDONE: SAQ: are you sure to exit here?
+                            break; //UNDONE:SAQ: are you sure to exit here?
                         }
                     }
 
@@ -201,21 +215,21 @@ namespace SenseNet.Security.Messaging
                     ManageFinishedActivities(finishedList, _executingList);
 
                     // End of cycle
-                    SnTrace.Write(() => $"SAQT: wait a bit.");
+                    SnTrace.SecurityQueue.Write(() => $"SAQT: wait a bit.");
                     Task.Delay(1).Wait();
                 }
                 catch (Exception e)
                 {
-                    SnTrace.WriteError(() => e.ToString());
+                    SnTrace.SecurityQueue.WriteError(() => e.ToString());
 
-                    //UNDONE: SAQ: Cancel all waiting tasks
+                    //UNDONE:SAQ: Cancel all waiting tasks
                     _waitingList.FirstOrDefault()?.StartFinalizationTask();
 
                     break;
                 }
             }
 
-            SnTrace.Write("SAQT: finished");
+            SnTrace.SecurityQueue.Write("SAQT: finished");
         }
         private void LineUpArrivedActivities(ConcurrentQueue<SecurityActivity> arrivalQueue, List<SecurityActivity> waitingList)
         {
@@ -227,7 +241,7 @@ namespace SenseNet.Security.Messaging
             }
 
             waitingList.Sort((x, y) => x.Id.CompareTo(y.Id));
-            SnTrace.Write(() => $"SAQT: arrivalSortedList.Count: {waitingList.Count}");
+            SnTrace.SecurityQueue.Write(() => $"SAQT: arrivalSortedList.Count: {waitingList.Count}");
         }
         private void AttachOrIgnore(SecurityActivity activity, List<SecurityActivity> executingList)
         {
@@ -235,13 +249,13 @@ namespace SenseNet.Security.Messaging
                 .FirstOrDefault(x => x.Id == activity.Id);
             if (existing != null)
             {
-                SnTrace.Write(() => $"SAQT: activity attached to another one: " +
-                                    $"#SA{activity.Key} -> SA{existing.Key}");
+                SnTrace.SecurityQueue.Write(() => $"SAQT: activity attached to another one: " +
+                                                  $"#SA{activity.Key} -> SA{existing.Key}");
                 existing.Attachments.Add(activity);
             }
             else
             {
-                SnTrace.Write(() =>
+                SnTrace.SecurityQueue.Write(() =>
                     $"SAQT: execution ignored immediately: #SA{activity.Key}");
                 activity.StartFinalizationTask();
             }
@@ -256,7 +270,7 @@ namespace SenseNet.Security.Messaging
             // Add to concurrently executable list
             if (activity.WaitingFor.Count == 0)
             {
-                SnTrace.Write(() => $"SAQT: moved to executing list: #SA{activity.Key}");
+                SnTrace.SecurityQueue.Write(() => $"SAQT: moved to executing list: #SA{activity.Key}");
                 executingList.Add(activity);
             }
 
@@ -268,7 +282,7 @@ namespace SenseNet.Security.Messaging
             var loaded = await _dataHandler.LoadLastActivities(fromId, cancel);
             foreach (var activity in loaded)
             {
-                SnTrace.Write(() => $"SAQ: Arrive from database #SA{activity.Key}");
+                SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive from database #SA{activity.Key}");
                 _arrivalQueue.Enqueue(activity);
             }
             // Unlock loading
@@ -291,7 +305,7 @@ namespace SenseNet.Security.Messaging
 
             foreach (var activityToStart in toStart)
             {
-                SnTrace.Write(() => $"SAQT: start execution: #SA{activityToStart.Key}");
+                SnTrace.SecurityQueue.Write(() => $"SAQT: start execution: #SA{activityToStart.Key}");
                 // Start the activity's execution task in an async way to ensure separate tasks for each one
                 // otherwise, separation would only occur at first awaited instructions of each implementation.
                 Task.Run(() => activityToStart.StartExecutionTask(), cancel);
@@ -306,15 +320,15 @@ namespace SenseNet.Security.Messaging
         {
             foreach (var finishedActivity in finishedList)
             {
-                SnTrace.Write(() => $"SAQT: execution finished: #SA{finishedActivity.Key}");
-                //UNDONE: SAQ: memorize activity in the ActivityHistory?
+                SnTrace.SecurityQueue.Write(() => $"SAQT: execution finished: #SA{finishedActivity.Key}");
+                //UNDONE:SAQ: memorize activity in the ActivityHistory?
                 finishedActivity.StartFinalizationTask();
                 executingList.Remove(finishedActivity);
                 FinishActivity(finishedActivity);
 
                 foreach (var attachment in finishedActivity.Attachments)
                 {
-                    SnTrace.Write(() => $"SAQT: execution ignored (attachment): #SA{attachment.Key}");
+                    SnTrace.SecurityQueue.Write(() => $"SAQT: execution ignored (attachment): #SA{attachment.Key}");
                     attachment.StartFinalizationTask();
                 }
 
@@ -323,7 +337,7 @@ namespace SenseNet.Security.Messaging
                 // Handle dependencies: start completely freed dependent activities by adding them to executing-list.
                 foreach (var dependentActivity in finishedActivity.WaitingForMe.ToArray())
                 {
-                    SnTrace.Write(() => $"SAQT: activate dependent: #SA{dependentActivity.Key}");
+                    SnTrace.SecurityQueue.Write(() => $"SAQT: activate dependent: #SA{dependentActivity.Key}");
                     dependentActivity.FinishWaiting(finishedActivity);
                     if (dependentActivity.WaitingFor.Count == 0)
                         executingList.Add(dependentActivity);
@@ -348,10 +362,9 @@ namespace SenseNet.Security.Messaging
                     _gaps.Remove(id);
                 }
                 _completionState = new CompletionState { LastActivityId = _lastExecutedId, Gaps = _gaps.ToArray() };
-                SnTrace.Write(() => $"SAQT: State after finishing SA{id}: {_completionState}");
+                SnTrace.SecurityQueue.Write(() => $"SAQT: State after finishing SA{id}: {_completionState}");
             }
         }
-
         private IEnumerable<SecurityActivity> GetAllFromChains(List<SecurityActivity> roots)
         {
             var flattened = new List<SecurityActivity>(roots);
@@ -363,5 +376,17 @@ namespace SenseNet.Security.Messaging
                 index++;
             }
         }
+
+        /* ======================================================================================== */
+
+        public SecurityActivityQueueState GetCurrentState()
+        {
+            throw new NotImplementedException();
+        }
+        public void HealthCheck()
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

@@ -501,9 +501,10 @@ namespace SenseNet.Security
                 await _dataProvider.RemoveMembersAsync(parentGroupId, new[] { userId }, null, cancel).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<SecurityActivity>> LoadLastActivities(int fromId, CancellationToken cancel)
+        public Task<IEnumerable<SecurityActivity>> LoadLastActivities(int fromId, CancellationToken cancel)
         {
-            throw new NotImplementedException();
+            //UNDONE:SAQ: blocked read...
+            return LoadSecurityActivitiesAsync(fromId, int.MaxValue, int.MaxValue, false, cancel);
         }
     }
 }

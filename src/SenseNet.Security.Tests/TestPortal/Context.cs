@@ -11,11 +11,12 @@ namespace SenseNet.Security.Tests.TestPortal
     public class Context
     {
         // Called by tests. The messageProvider must be initialized.
-        internal static SecuritySystem StartTheSystem(
+        internal static SecuritySystem StartTheSystem (
             ISecurityDataProvider securityDataProvider,
             IMessageProvider messageProvider,
             TextWriter traceChannel = null,
-            Action<IServiceCollection> configureServices = null
+            Action<IServiceCollection> configureServices = null,
+            bool legacy = true
             )
         {
             var serviceCollection = new ServiceCollection()
@@ -29,7 +30,7 @@ namespace SenseNet.Security.Tests.TestPortal
                 new MissingEntityHandler(),
                 Options.Create(new SecurityConfiguration()),
                 Options.Create(new MessagingOptions {CommunicationMonitorRunningPeriodInSeconds = 31}));
-            securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
+            securitySystem.StartAsync(CancellationToken.None, legacy).GetAwaiter().GetResult();
 
             return securitySystem;
         }

@@ -14,6 +14,7 @@ namespace SenseNet.Security.Messaging
     {
         SecurityActivityQueueState GetCurrentState(); //UNDONE:SAQ: implement with new return value type.
         void Startup(CompletionState uncompleted, int lastActivityIdFromDb);
+        Task StartAsync(CompletionState uncompleted, int lastActivityIdFromDb, CancellationToken cancel);
         void Shutdown();
         [Obsolete("SAQ: Use ExecuteActivityAsync instead.", false)]
         void ExecuteActivity(SecurityActivity activity);
@@ -105,6 +106,11 @@ namespace SenseNet.Security.Messaging
             _serializer.Start(lastActivityIdFromDb, uncompleted.LastActivityId, uncompleted.Gaps);
 
             _communicationMonitor.Start();
+        }
+        public Task StartAsync(CompletionState uncompleted, int lastActivityIdFromDb, CancellationToken cancel)
+        {
+            Startup(uncompleted, lastActivityIdFromDb);
+            return Task.CompletedTask;
         }
 
         public void Shutdown()
