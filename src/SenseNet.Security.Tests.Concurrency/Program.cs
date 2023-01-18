@@ -475,7 +475,7 @@ namespace SenseNet.Security.Tests.Concurrency
             Thread.Sleep(_sleepInMilliseconds);
         }
 
-        internal override bool MustWaitFor(Messaging.SecurityMessages.SecurityActivity olderActivity)
+        internal override bool ShouldWaitFor(Messaging.SecurityMessages.SecurityActivity olderActivity)
         {
             return false;
         }

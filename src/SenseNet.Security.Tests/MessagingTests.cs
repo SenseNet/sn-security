@@ -266,7 +266,7 @@ namespace SenseNet.Security.Tests
                 SnLog.WriteInformation("Applied: #" + Id);
             }
 
-            internal override bool MustWaitFor(SecurityActivity olderActivity)
+            internal override bool ShouldWaitFor(SecurityActivity olderActivity)
             {
                 return false;
             }

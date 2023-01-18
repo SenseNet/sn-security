@@ -409,7 +409,7 @@ namespace SenseNet.Security.Messaging
                     foreach (var olderActivity in _waitingSet)
                     {
                         Debug.Assert(olderActivity.Id != newerActivity.Id);
-                        if (newerActivity.MustWaitFor(olderActivity))
+                        if (newerActivity.ShouldWaitFor(olderActivity))
                         {
                             newerActivity.WaitFor(olderActivity);
                             SnTrace.SecurityQueue.Write("SAQ: set dependency: SA{0} depends from SA{1}", newerActivity.Id, olderActivity.Id);
