@@ -175,7 +175,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
         {
             var sCtx = CurrentContext.Security;
             //UNDONE:SAQ: Rewrite this test: don't cast directly: (SecurityActivityQueue) SecurityActivityQueue
-            var securityActivityQueue = (SecurityActivityQueue) SecurityActivityQueue;
+            var securityActivityQueue = (SecurityActivityQueue_Legacy) SecurityActivityQueue;
             var user1Id = TestUser.User1.Id;
 
             // register some dependent activities

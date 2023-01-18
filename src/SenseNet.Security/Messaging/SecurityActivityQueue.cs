@@ -22,7 +22,7 @@ namespace SenseNet.Security.Messaging
         void HealthCheck();
     }
 
-    internal class SecurityActivityQueue : ISecurityActivityQueue
+    internal class SecurityActivityQueue_Legacy : ISecurityActivityQueue
     {
         private readonly SecuritySystem _securitySystem;
         private readonly CommunicationMonitor _communicationMonitor;
@@ -32,7 +32,7 @@ namespace SenseNet.Security.Messaging
         private readonly TerminationHistory _terminationHistory;
         private readonly Executor _executor;
 
-        public SecurityActivityQueue(SecuritySystem securitySystem, CommunicationMonitor communicationMonitor,
+        public SecurityActivityQueue_Legacy(SecuritySystem securitySystem, CommunicationMonitor communicationMonitor,
             DataHandler dataHandler, SecurityActivityHistoryController activityHistory)
         {
             _securitySystem = securitySystem;
@@ -167,11 +167,11 @@ namespace SenseNet.Security.Messaging
         {
             public DependencyManager DependencyManager { get; set; }
 
-            private readonly SecurityActivityQueue _securityActivityQueue;
+            private readonly SecurityActivityQueue_Legacy _securityActivityQueue;
             private readonly SecurityActivityHistoryController _activityHistory;
             private readonly DataHandler _dataHandler;
 
-            public Serializer(SecurityActivityQueue securityActivityQueue, SecurityActivityHistoryController activityHistory,
+            public Serializer(SecurityActivityQueue_Legacy securityActivityQueue, SecurityActivityHistoryController activityHistory,
                 DataHandler dataHandler)
             {
                 _securityActivityQueue = securityActivityQueue;
