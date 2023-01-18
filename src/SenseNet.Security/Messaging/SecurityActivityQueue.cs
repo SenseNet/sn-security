@@ -10,10 +10,20 @@ using SenseNet.Diagnostics;
 
 namespace SenseNet.Security.Messaging
 {
-    internal class SecurityActivityQueue
+    internal interface ISecurityActivityQueue
     {
-        internal static int SecurityActivityLoadingBufferSize = 200;
+        SecurityActivityQueueState GetCurrentState(); //UNDONE:SAQ: implement with new return value type.
+        void Startup(CompletionState uncompleted, int lastActivityIdFromDb);
+        void Shutdown();
+        [Obsolete("SAQ: Use ExecuteActivityAsync instead.", false)]
+        void ExecuteActivity(SecurityActivity activity);
+        Task ExecuteActivityAsync(SecurityActivity activity, CancellationToken cancel);
+        CompletionState GetCurrentCompletionState();
+        void HealthCheck();
+    }
 
+    internal class SecurityActivityQueue : ISecurityActivityQueue
+    {
         private readonly SecuritySystem _securitySystem;
         private readonly CommunicationMonitor _communicationMonitor;
         private readonly DataHandler _dataHandler;
@@ -38,7 +48,7 @@ namespace SenseNet.Security.Messaging
             communicationMonitor.HearthBeat += (sender, args) => HealthCheck();
         }
 
-        internal void HealthCheck()
+        public void HealthCheck()
         {
             if (!_dataHandler.IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())
             {
@@ -85,7 +95,7 @@ namespace SenseNet.Security.Messaging
             return !(_serializer.IsEmpty && _dependencyManager.IsEmpty);
         }
 
-        internal void Startup(CompletionState uncompleted, int lastActivityIdFromDb)
+        public void Startup(CompletionState uncompleted, int lastActivityIdFromDb)
         {
             _communicationMonitor.Stop();
 
@@ -97,7 +107,7 @@ namespace SenseNet.Security.Messaging
             _communicationMonitor.Start();
         }
 
-        internal void Shutdown()
+        public void Shutdown()
         {
             _serializer.Reset();
             _dependencyManager.Reset();
@@ -124,6 +134,11 @@ namespace SenseNet.Security.Messaging
                 _dataHandler.SaveActivityAsync(activity, CancellationToken.None).GetAwaiter().GetResult();
 
             _serializer.EnqueueActivity(activity);
+        }
+
+        public Task ExecuteActivityAsync(SecurityActivity activity, CancellationToken cancel)
+        {
+            throw new NotSupportedException();
         }
 
         /// <summary>Only for tests</summary>

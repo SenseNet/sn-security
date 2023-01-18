@@ -49,7 +49,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             }
         }
 
-        private SecurityActivityQueue SecurityActivityQueue => SecuritySystem.SecurityActivityQueue;
+        private ISecurityActivityQueue SecurityActivityQueue => SecuritySystem.SecurityActivityQueue;
 
         [TestMethod]
         public void EFC_LoadActivities_AtStart_DataHandlerLevel()
@@ -174,6 +174,8 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
         public void EFC_LoadActivities_RightDependencies()
         {
             var sCtx = CurrentContext.Security;
+            //UNDONE:SAQ: Rewrite this test: don't cast directly: (SecurityActivityQueue) SecurityActivityQueue
+            var securityActivityQueue = (SecurityActivityQueue) SecurityActivityQueue;
             var user1Id = TestUser.User1.Id;
 
             // register some dependent activities
@@ -182,7 +184,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
 
             try
             {
-                SecurityActivityQueue.__disableExecution();
+                securityActivityQueue.__disableExecution();
 
                 new CreateSecurityEntityActivity(Id("E01"), default, user1Id).Execute(sCtx, false);
                 {
@@ -205,7 +207,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                 new DeleteSecurityEntityActivity(Id("E02")).Execute(sCtx, false);
 
                 // dump
-                var waitingActivities = SecurityActivityQueue.__getWaitingSet();
+                var waitingActivities = securityActivityQueue.__getWaitingSet();
                 var x = waitingActivities.Select(a => "{"
                    + $"id:{a.Id}, w:[{string.Join(",", a.WaitingFor.Select(b => b.Id))}], wm:[{string.Join(",", a.WaitingForMe.Select(c => c.Id))}]"
                                                      + "}");
@@ -213,7 +215,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             }
             finally
             {
-                SecurityActivityQueue.__enableExecution();
+                securityActivityQueue.__enableExecution();
             }
 
             var lastId = Db().ExecuteTestScript<int>("select top 1 Id as Value from [EFMessages] order by Id desc").First();

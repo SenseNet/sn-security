@@ -31,7 +31,6 @@ namespace SenseNet.Security.Tests
             dataProvider.InstallDatabase();
 
             var securitySystem = Context.StartTheSystem(dataProvider, DiTools.CreateDefaultMessageProvider());
-            securitySystem.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             CurrentContext = new Context(TestUser.User1, securitySystem);
 
             DataHandler = securitySystem.DataHandler;

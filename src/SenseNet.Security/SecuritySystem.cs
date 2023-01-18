@@ -42,7 +42,7 @@ namespace SenseNet.Security
         public IMessageSenderManager MessageSenderManager { get; set; }
         internal SecurityCache Cache { get; private set; }
         internal CommunicationMonitor CommunicationMonitor { get; private set; }
-        internal SecurityActivityQueue SecurityActivityQueue { get; private set; }
+        internal ISecurityActivityQueue SecurityActivityQueue { get; private set; }
         internal SecurityEntityManager EntityManager { get; set; }
         internal IMissingEntityHandler MissingEntityHandler { get; set; }
         internal SecurityActivityHistoryController ActivityHistory { get; set; }

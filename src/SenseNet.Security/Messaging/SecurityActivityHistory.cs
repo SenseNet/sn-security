@@ -60,7 +60,7 @@ namespace SenseNet.Security.Messaging
 
     public class SecurityActivityHistoryController
     {
-        internal SecurityActivityQueue SecurityActivityQueue { get; set; } // Property injection
+        internal ISecurityActivityQueue SecurityActivityQueue { get; set; } // Property injection
 
         internal SecurityActivityHistory GetHistory()
         {

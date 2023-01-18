@@ -9,6 +9,8 @@ namespace SenseNet.Security.Messaging
 {
     internal class SecurityActivityLoader : IEnumerable<SecurityActivity>
     {
+        private const int SecurityActivityLoadingBufferSize = 200;
+
         private readonly bool _gapLoader;
 
         private readonly int _from;
@@ -25,7 +27,7 @@ namespace SenseNet.Security.Messaging
             _to = to;
             _executingUnprocessedActivities = executingUnprocessedActivities;
             _dataHandler = dataHandler;
-            _pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
+            _pageSize = SecurityActivityLoadingBufferSize;
         }
         // ReSharper disable once UnusedParameter.Local
         public SecurityActivityLoader(int[] gaps, bool executingUnprocessedActivities, DataHandler dataHandler)
@@ -33,7 +35,7 @@ namespace SenseNet.Security.Messaging
             _gapLoader = true;
             _gaps = gaps;
             _dataHandler = dataHandler;
-            _pageSize = SecurityActivityQueue.SecurityActivityLoadingBufferSize;
+            _pageSize = SecurityActivityLoadingBufferSize;
         }
 
         public IEnumerator<SecurityActivity> GetEnumerator()
