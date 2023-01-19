@@ -402,7 +402,7 @@ namespace SenseNet.Security
             return _dataProvider.GetLastSecurityActivityIdAsync(startedTime, cancel);
         }
 
-        internal async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int from, int to, int count,
+        internal virtual async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int from, int to, int count,
             bool executingUnprocessedActivities, CancellationToken cancel)
         {
             var result = await _dataProvider.LoadSecurityActivitiesAsync(from, to, count, executingUnprocessedActivities, cancel).ConfigureAwait(false);

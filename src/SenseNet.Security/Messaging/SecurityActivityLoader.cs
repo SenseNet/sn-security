@@ -20,22 +20,23 @@ namespace SenseNet.Security.Messaging
         private readonly bool _executingUnprocessedActivities;
         private readonly DataHandler _dataHandler;
 
-        public SecurityActivityLoader(int from, int to, bool executingUnprocessedActivities, DataHandler dataHandler)
+        public SecurityActivityLoader(int from, int to, bool executingUnprocessedActivities, DataHandler dataHandler, int? pageSize = null)
         {
             _gapLoader = false;
             _from = from;
             _to = to;
             _executingUnprocessedActivities = executingUnprocessedActivities;
             _dataHandler = dataHandler;
-            _pageSize = SecurityActivityLoadingBufferSize;
+            _pageSize = pageSize ?? SecurityActivityLoadingBufferSize;
         }
         // ReSharper disable once UnusedParameter.Local
-        public SecurityActivityLoader(int[] gaps, bool executingUnprocessedActivities, DataHandler dataHandler)
+        public SecurityActivityLoader(int[] gaps, bool executingUnprocessedActivities, DataHandler dataHandler, int? pageSize = null)
         {
             _gapLoader = true;
             _gaps = gaps;
+            _executingUnprocessedActivities = executingUnprocessedActivities;
             _dataHandler = dataHandler;
-            _pageSize = SecurityActivityLoadingBufferSize;
+            _pageSize = pageSize ?? SecurityActivityLoadingBufferSize;
         }
 
         public IEnumerator<SecurityActivity> GetEnumerator()
