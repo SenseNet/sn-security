@@ -409,7 +409,7 @@ namespace SenseNet.Security
             return result;
         }
 
-        internal async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities,
+        internal virtual async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities,
             CancellationToken cancel)
         {
             var result = await _dataProvider.LoadSecurityActivitiesAsync(gaps, executingUnprocessedActivities, cancel).ConfigureAwait(false);
