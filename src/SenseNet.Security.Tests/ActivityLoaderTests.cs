@@ -151,8 +151,8 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expected, actual);
             Assert.AreEqual(3, dataHandler.CallCount);
             Assert.AreEqual("LoadSecurityActivitiesAsync([1,2,3,4,5,6,7,8,9,10], True, cancel)", dataHandler.Calls[0]);
-            Assert.AreEqual("LoadSecurityActivitiesAsync([11,12,13,14,15,16,17,18,19,20], True, cancel)", dataHandler.Calls[0]);
-            Assert.AreEqual("LoadSecurityActivitiesAsync([21,22,23,24,25], True, cancel)", dataHandler.Calls[0]);
+            Assert.AreEqual("LoadSecurityActivitiesAsync([11,12,13,14,15,16,17,18,19,20], True, cancel)", dataHandler.Calls[1]);
+            Assert.AreEqual("LoadSecurityActivitiesAsync([21,22,23,24,25], True, cancel)", dataHandler.Calls[2]);
         }
     }
 }
