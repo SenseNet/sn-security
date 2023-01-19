@@ -286,10 +286,10 @@ namespace SenseNet.Security.Messaging
         private async Task LoadLastActivities(int fromId, CancellationToken cancel)
         {
             IEnumerable<SecurityActivity> loaded;
-            using (var op = SnTrace.StartOperation(() => $"DataHandler: LoadLastActivities(fromId: {fromId})"))
+            using (var op = SnTrace.SecurityQueue.StartOperation(() => $"DataHandler: LoadLastActivities(fromId: {fromId})"))
             {
                 loaded = await _dataHandler.LoadLastActivities(fromId, cancel);
-                //SnTrace.Write($"DataHandler: loaded activities: {result.Length}");
+                //SnTrace.SecurityQueue.Write($"DataHandler: loaded activities: {result.Length}");
                 op.Successful = true;
             }
             foreach (var activity in loaded)
