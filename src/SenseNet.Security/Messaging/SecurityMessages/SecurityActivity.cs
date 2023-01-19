@@ -102,9 +102,12 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             Context = context;
             Sender ??= context.SecuritySystem.MessageSenderManager.CreateMessageSender();
 
+            var caller = FromReceiver || FromDatabase ? "System" : "Business";
+            using var op = SnTrace.SecurityQueue.StartOperation(() => $"App: {caller} executes #SA{this.Key}");
             await context.SecuritySystem.SecurityActivityQueue.ExecuteActivityAsync(this, cancel);
             if (ExecutionException != null)
                 throw ExecutionException;
+            op.Successful = true;
         }
 
         /// <summary>

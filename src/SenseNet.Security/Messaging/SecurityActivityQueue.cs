@@ -118,7 +118,11 @@ namespace SenseNet.Security.Messaging
         public Task ExecuteActivityAsync(SecurityActivity activity, CancellationToken cancel)
         {
             if (!activity.FromDatabase && !activity.FromReceiver)
+            {
+                using var op = SnTrace.SecurityQueue.StartOperation(() => $"DataHandler: SaveActivity #SA{activity.Key}");
                 _dataHandler.SaveActivityAsync(activity, cancel).GetAwaiter().GetResult();
+                op.Successful = true;
+            }
 
             if (activity.FromReceiver)
                 SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive from receiver #SA{activity.Key}");
