@@ -1,12 +1,10 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SenseNet.Configuration;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Tests.TestPortal;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
-using Microsoft.EntityFrameworkCore;
 using SenseNet.Security.Data;
 using System.Linq;
 using SenseNet.Diagnostics.Analysis;
@@ -50,13 +48,75 @@ public class SecurityActivityQueueTests : TestBase
         //ASSERT
         await Task.Delay(100);
         _context.Security.SecuritySystem.Shutdown();
-        var x = _context.Security.GetEffectiveEntries(idE54);
         Assert.IsTrue(securitySystem.Cache.Entities.TryGetValue(idE54, out var entity54));
         Assert.AreEqual(idE53, entity54.Parent.Id);
         Assert.AreEqual(idU1, entity54.OwnerId);
 
         var trace = _testTracer.Lines;
         var msg = CheckTrace(trace, 1);
+        Assert.AreEqual(null, msg);
+    }
+    [TestMethod]
+    public async Task SAQ_CreateEntity_Duplications()
+    {
+        //---- Ensure test data
+        var entities = SystemStartTests.CreateTestEntities();
+        var groups = SystemStartTests.CreateTestGroups();
+        //var memberships = Tools.CreateInMemoryMembershipTable("G1:U1,U2|G2:U3,U4|G3:U1,U3|G4:U4|G5:U5");
+        var memberships = Tools.CreateInMemoryMembershipTable(groups);
+        var aces = SystemStartTests.CreateTestAces();
+        var storage = new DatabaseStorage
+        {
+            Aces = aces,
+            Memberships = memberships,
+            Entities = entities,
+            Messages = new List<Tuple<int, DateTime, byte[]>>()
+        };
+
+        var securitySystem = Context.StartTheSystem(
+            new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider(), legacy: false);
+
+        var idE53 = GetId("E53");
+        var idE54 = GetId("E54");
+        var idE55 = GetId("E55");
+        var idE56 = GetId("E56");
+        var idU1 = GetId("U1");
+        _context = new Context(TestUser.User1, securitySystem);
+        var cancel = CancellationToken.None;
+
+        // Create 2 activities (FromReceiver = true avoids duplicated saves).
+        var activity1 = new CreateSecurityEntityActivity(idE54, idE53, idU1) {FromReceiver = true};
+        await securitySystem.DataHandler.SaveActivityAsync(activity1, cancel).ConfigureAwait(false);
+        var activity2 = new CreateSecurityEntityActivity(idE55, idE54, idU1) { FromReceiver = true };
+        await securitySystem.DataHandler.SaveActivityAsync(activity2, cancel).ConfigureAwait(false);
+        // Duplicate both activities.
+        var loaded = (await securitySystem.DataHandler
+            .LoadSecurityActivitiesAsync(activity1.Id, activity2.Id, 2, false, cancel)
+            .ConfigureAwait(false)).ToArray();
+
+        // ACTION execute in wrong order
+        var tasks = new[]
+        {
+            loaded[1].ExecuteAsync(_context.Security, cancel), // copied activity2
+            activity2.ExecuteAsync(_context.Security, cancel), // waits for activity1 (E54 creation)
+            loaded[0].ExecuteAsync(_context.Security, cancel), // copied activity1
+            activity1.ExecuteAsync(_context.Security, cancel), // execute all
+        };
+        await Task.WhenAll(tasks);
+
+        //ASSERT
+        await Task.Delay(100);
+        _context.Security.SecuritySystem.Shutdown();
+
+        Assert.IsTrue(securitySystem.Cache.Entities.TryGetValue(idE54, out var entity54));
+        Assert.AreEqual(idE53, entity54.Parent.Id);
+        Assert.AreEqual(idU1, entity54.OwnerId);
+        Assert.IsTrue(securitySystem.Cache.Entities.TryGetValue(idE55, out var entity55));
+        Assert.AreEqual(idE54, entity55.Parent.Id);
+        Assert.AreEqual(idU1, entity55.OwnerId);
+
+        var trace = _testTracer.Lines;
+        var msg = CheckTrace(trace, 2);
         Assert.AreEqual(null, msg);
     }
     [TestMethod]
@@ -88,7 +148,7 @@ public class SecurityActivityQueueTests : TestBase
         var cancel = CancellationToken.None;
 
         // Create 3 activities (FromReceiver = true avoids duplicated saves).
-        var activity1 = new CreateSecurityEntityActivity(idE54, idE53, idU1) {FromReceiver = true};
+        var activity1 = new CreateSecurityEntityActivity(idE54, idE53, idU1) { FromReceiver = true };
         await securitySystem.DataHandler.SaveActivityAsync(activity1, cancel).ConfigureAwait(false);
         var activity2 = new CreateSecurityEntityActivity(idE55, idE54, idU1) { FromReceiver = true };
         await securitySystem.DataHandler.SaveActivityAsync(activity2, cancel).ConfigureAwait(false);
@@ -175,7 +235,7 @@ public class SecurityActivityQueueTests : TestBase
         var t0 = Entry.Parse(trace.First()).Time;
 
         var allEvents = new Dictionary<string, ActivityEvents>();
-        var allEntries = trace.Select(Entry.Parse);
+        var allEntries = trace.Select(Entry.Parse).ToArray();
         foreach (var entry in allEntries)
         {
             // SAQT: execution ignored immediately: A1-1
@@ -240,7 +300,7 @@ public class SecurityActivityQueueTests : TestBase
         }
 
         if (grouped.Count != count)
-            return $"events.Count = {allEvents.Count}, expected: {count}";
+            return $"events.Count = {grouped.Count}, expected: {count}";
 
         foreach (var events in allEvents)
         {
@@ -253,7 +313,6 @@ public class SecurityActivityQueueTests : TestBase
             var executedCount = events.Values.Count(x => !x.ExecutionIgnored);
             var ignoredCount = events.Values.Count(x => x.ExecutionIgnored);
             var savedCount = events.Values.Count(x => x.Saved);
-            var notSavedCount = events.Values.Count(x => !x.Saved);
             if (executedCount > 1)
                 return $"A{events.First().Value.Id} is executed more times.";
             if (savedCount > 1)
@@ -320,7 +379,7 @@ public class SecurityActivityQueueTests : TestBase
         return allEvents[key];
     }
 
-    private bool ParseLine(Dictionary<string, ActivityEvents> events, Entry entry, string msg, string? status, out ActivityEvents item)
+    private bool ParseLine(Dictionary<string, ActivityEvents> events, Entry entry, string msg, string status, out ActivityEvents item)
     {
         if (entry.Message.StartsWith(msg) && (status == null || status == entry.Status))
         {
@@ -334,7 +393,7 @@ public class SecurityActivityQueueTests : TestBase
     private string ParseItemId(string msg, int index)
     {
         var src = msg.Substring(index);
-        var p = src.IndexOf(" ");
+        var p = src.IndexOf(" ", StringComparison.Ordinal);
         if (p > 0)
             src = src.Substring(0, p);
         return src;
@@ -343,15 +402,9 @@ public class SecurityActivityQueueTests : TestBase
     {
         if (items.TryGetValue(key, out var item))
             return item;
-        try
-        {
-            var ids = key.Trim(_trimChars).Split('-').Select(int.Parse).ToArray();
-            item = new ActivityEvents { Key = key, Id = ids[0], ObjectId = ids[1] };
-        }
-        catch (Exception e)
-        {
-            throw;
-        }
+
+        var ids = key.Trim(_trimChars).Split('-').Select(int.Parse).ToArray();
+        item = new ActivityEvents { Key = key, Id = ids[0], ObjectId = ids[1] };
         items.Add(key, item);
         return item;
     }

@@ -124,7 +124,9 @@ namespace SenseNet.Security.Messaging
                 op.Successful = true;
             }
 
-            if (activity.FromReceiver)
+            if (activity.FromDatabase)
+                SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive from database #SA{activity.Key}");
+            else if (activity.FromReceiver)
                 SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive from receiver #SA{activity.Key}");
             else
                 SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive #SA{activity.Key}");
@@ -283,7 +285,13 @@ namespace SenseNet.Security.Messaging
         }
         private async Task LoadLastActivities(int fromId, CancellationToken cancel)
         {
-            var loaded = await _dataHandler.LoadLastActivities(fromId, cancel);
+            IEnumerable<SecurityActivity> loaded;
+            using (var op = SnTrace.StartOperation(() => $"DataHandler: LoadLastActivities(fromId: {fromId})"))
+            {
+                loaded = await _dataHandler.LoadLastActivities(fromId, cancel);
+                //SnTrace.Write($"DataHandler: loaded activities: {result.Length}");
+                op.Successful = true;
+            }
             foreach (var activity in loaded)
             {
                 SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive from database #SA{activity.Key}");
