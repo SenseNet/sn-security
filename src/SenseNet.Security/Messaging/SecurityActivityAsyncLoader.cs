@@ -19,7 +19,6 @@ internal class SecurityActivityAsyncLoader
         _dataHandler = dataHandler;
     }
 
-
     public async IAsyncEnumerable<SecurityActivity> LoadAsync(int from, int to, bool unprocessed, 
         [EnumeratorCancellation] CancellationToken cancel, int? pageSize = null)
     {

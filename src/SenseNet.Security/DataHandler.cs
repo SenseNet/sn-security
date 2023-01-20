@@ -500,11 +500,5 @@ namespace SenseNet.Security
             foreach (var parentGroupId in parentGroups.Distinct())
                 await _dataProvider.RemoveMembersAsync(parentGroupId, new[] { userId }, null, cancel).ConfigureAwait(false);
         }
-
-        public Task<IEnumerable<SecurityActivity>> LoadLastActivities(int fromId, CancellationToken cancel)
-        {
-            //UNDONE:SAQ: blocked read...
-            return LoadSecurityActivitiesAsync(fromId, int.MaxValue, int.MaxValue, false, cancel);
-        }
     }
 }

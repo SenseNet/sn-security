@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
@@ -52,11 +53,6 @@ namespace SenseNet.Security.Messaging
         {
             StartAsync(uncompleted, lastActivityIdFromDb, CancellationToken.None).GetAwaiter().GetResult();
         }
-        //public async Task StartAsync(CancellationToken cancel)
-        //{
-        //    var dbState = await _dataHandler.LoadCompletionStateAsync(cancel);
-        //    await StartAsync(dbState.CompletionState, dbState.LastDatabaseId, cancel);
-        //}
         public async Task StartAsync(CompletionState uncompleted, int lastDatabaseId, CancellationToken cancel)
         {
             _lastExecutedId = uncompleted?.LastActivityId ?? 0;
@@ -78,36 +74,32 @@ namespace SenseNet.Security.Messaging
 
 
         // ReSharper disable once UnusedParameter.Local
-        private Task ExecuteUnprocessedActivitiesAtStartAsync(int lastExecutedId, List<int> gaps, int lastDatabaseId, CancellationToken cancel)
+        private async Task ExecuteUnprocessedActivitiesAtStartAsync(int lastExecutedId, List<int> gaps, int lastDatabaseId, CancellationToken cancel)
         {
-            var count = 0;
             SnTrace.SecurityQueue.Write($"Discovering unprocessed security activities");
-            if (gaps.Any())
+
+            var count = 0;
+            void Arrive(SecurityActivity activity)
             {
-                var loadedActivities = new SecurityActivityLoader(gaps.ToArray(), true, _dataHandler);
-                foreach (var loadedActivity in loadedActivities)
-                {
-                    SnTrace.SecurityQueue.Write("SAQ: Startup: activity arrived from db: SA{0}.", loadedActivity.Id);
-                    _arrivalQueue.Enqueue(loadedActivity);
-                    _waitToWorkSignal.Set();
-                    count++;
-                }
+                SnTrace.SecurityQueue.Write("SAQ: Startup: activity arrived from db: SA{0}.", activity.Id);
+                _arrivalQueue.Enqueue(activity);
+                _waitToWorkSignal.Set();
+                count++;
             }
-            if (lastExecutedId < lastDatabaseId)
+
+            if (gaps.Any() || lastExecutedId < lastDatabaseId)
             {
-                var loadedActivities = new SecurityActivityLoader(lastExecutedId + 1, lastDatabaseId, true, _dataHandler);
-                foreach (var loadedActivity in loadedActivities)
-                {
-                    SnTrace.SecurityQueue.Write("SAQ: Startup: activity arrived from db: SA{0}.", loadedActivity.Id);
-                    _arrivalQueue.Enqueue(loadedActivity);
-                    _waitToWorkSignal.Set();
-                    count++;
-                }
+                var loader = new SecurityActivityAsyncLoader(_dataHandler);
+                if (gaps.Any())
+                    await foreach (var loadedActivity in loader.LoadAsync(gaps.ToArray(), true, cancel).ConfigureAwait(false))
+                        Arrive(loadedActivity);
+                if (lastExecutedId < lastDatabaseId)
+                    await foreach (var loadedActivity in loader.LoadAsync(lastExecutedId + 1, lastDatabaseId, true, cancel).ConfigureAwait(false))
+                        Arrive(loadedActivity);
             }
+
             //SnLog.WriteInformation(string.Format(EventMessage.Information.ExecutingUnprocessedActivitiesFinished, count),
             SnTrace.SecurityQueue.Write($"Executing unprocessed security activities ({count}).");
-
-            return Task.CompletedTask;
         }
 
         // Activity arrival
@@ -285,14 +277,14 @@ namespace SenseNet.Security.Messaging
         }
         private async Task LoadLastActivities(int fromId, CancellationToken cancel)
         {
-            IEnumerable<SecurityActivity> loaded;
+            ConfiguredCancelableAsyncEnumerable<SecurityActivity> loaded;
             using (var op = SnTrace.SecurityQueue.StartOperation(() => $"DataHandler: LoadLastActivities(fromId: {fromId})"))
             {
-                loaded = await _dataHandler.LoadLastActivities(fromId, cancel);
-                //SnTrace.SecurityQueue.Write($"DataHandler: loaded activities: {result.Length}");
+                var loader = new SecurityActivityAsyncLoader(_dataHandler);
+                loaded = loader.LoadAsync(fromId, int.MaxValue, false, cancel).ConfigureAwait(false);
                 op.Successful = true;
             }
-            foreach (var activity in loaded)
+            await foreach (var activity in loaded)
             {
                 SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive from database #SA{activity.Key}");
                 _arrivalQueue.Enqueue(activity);
