@@ -275,7 +275,7 @@ namespace SenseNet.Security.Messaging
                         var sameActivity = _arrivalQueue.FirstOrDefault(a => a.Id == activity.Id);
                         if (sameActivity != null)
                         {
-                            sameActivity.Attachments.Add(activity);
+                            sameActivity.Attach(activity);
                             SnTrace.SecurityQueue.Write("SAQ: activity attached to another one in the queue: SA{0}", activity.Id);
                             return;
                         }
@@ -462,7 +462,7 @@ namespace SenseNet.Security.Messaging
                     var sameActivity = _waitingSet.FirstOrDefault(a => a.Id == activity.Id);
                     if (sameActivity != null)
                     {
-                        sameActivity.Attachments.Add(activity);
+                        sameActivity.Attach(activity);
                         SnTrace.SecurityQueue.Write("SAQ: activity attached to another in the waiting set: SA{0}.", activity.Id);
                         return;
                     }

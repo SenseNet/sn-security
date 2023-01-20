@@ -236,30 +236,6 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             }
         }
 
-        [field: NonSerialized]
-        [JsonIgnore]
-        [Obsolete("SAQ: Use Attachments property instead", true)]
-        internal SecurityActivity AttachedActivity { get; private set; }
-
-        /// <summary>
-        /// When an activity gets executed and needs to be finalized, all activity objects that have
-        /// the same id need to be finalized too. The Attach methods puts all activities with the
-        /// same id to a chain to let the Finish method call the Finish method of each object in the chain.
-        /// This method was needed because it is possible that the same activity arrives from different
-        /// sources: e.g from messaging, from database or from direct execution.
-        /// </summary>
-        /// <param name="activity"></param>
-        [Obsolete("SAQ: Use Attachments property instead. ", true)]
-        internal void Attach(SecurityActivity activity)
-        {
-            if (ReferenceEquals(this, activity))
-                return;
-            if (AttachedActivity == null)
-                AttachedActivity = activity;
-            else
-                AttachedActivity.Attach(activity);
-        }
-
         /// <summary>
         /// Finish the full activity chain (see the Attach method for details).
         /// </summary>
@@ -268,7 +244,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             _finished = true;
 
             // finalize attached activities first
-            foreach (var attachment in Attachments)
+            foreach (var attachment in _attachments)
                 attachment.Finish();
 
             if (_finishSignal != null)
@@ -412,10 +388,25 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             _finalizationTask?.Start();
         }
 
+        public TaskStatus? GetExecutionTaskStatus() => _executionTask?.Status;
+
+        /* =============================================================================== ATTACHMENTS */
         [field: NonSerialized]
         [JsonIgnore]
-        internal List<SecurityActivity> Attachments { get; private set; } = new List<SecurityActivity>();
+        private List<SecurityActivity> _attachments = new();
+        internal SecurityActivity[] GetAttachments() => _attachments.ToArray();
+        internal void Attach(SecurityActivity activity)
+        {
+            if (ReferenceEquals(this, activity))
+                return;
+            if (_attachments.Contains(activity))
+                return;
+            _attachments.Add(activity);
+        }
+        public void ClearAttachments()
+        {
+            _attachments.Clear();
+        }
 
-        public TaskStatus? GetExecutionTaskStatus() => _executionTask?.Status;
     }
 }

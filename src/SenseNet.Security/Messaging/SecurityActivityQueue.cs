@@ -249,7 +249,7 @@ namespace SenseNet.Security.Messaging
             {
                 SnTrace.SecurityQueue.Write(() => $"SAQT: activity attached to another one: " +
                                                   $"#SA{activity.Key} -> SA{existing.Key}");
-                existing.Attachments.Add(activity);
+                existing.Attach(activity);
             }
             else
             {
@@ -330,13 +330,13 @@ namespace SenseNet.Security.Messaging
                 executingList.Remove(finishedActivity);
                 FinishActivity(finishedActivity);
 
-                foreach (var attachment in finishedActivity.Attachments)
+                foreach (var attachment in finishedActivity.GetAttachments())
                 {
                     SnTrace.SecurityQueue.Write(() => $"SAQT: execution ignored (attachment): #SA{attachment.Key}");
                     attachment.StartFinalizationTask();
                 }
 
-                finishedActivity.Attachments.Clear();
+                finishedActivity.ClearAttachments();
 
                 // Handle dependencies: start completely freed dependent activities by adding them to executing-list.
                 foreach (var dependentActivity in finishedActivity.WaitingForMe.ToArray())
