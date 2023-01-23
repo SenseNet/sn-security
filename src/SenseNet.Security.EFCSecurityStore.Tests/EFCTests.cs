@@ -2,10 +2,13 @@
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SenseNet.Diagnostics;
 using SenseNet.Extensions.DependencyInjection;
 using SenseNet.Security.EFCSecurityStore.Configuration;
 using SenseNet.Security.Messaging;
@@ -259,10 +262,15 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             var rootEntityId = Id("E01");
 
             // create some activities with gap
-            sCtx.CreateSecurityEntity(rootEntityId, default, user1Id);
+//            sCtx.CreateSecurityEntity(rootEntityId, default, user1Id);
+            var activity = new CreateSecurityEntityActivity(rootEntityId, default, user1Id);
+            this.SecuritySystem.DataHandler.SaveActivityAsync(activity, CancellationToken.None).GetAwaiter().GetResult();
+            this.SecuritySystem.DataHandler.SaveActivityAsync(activity, CancellationToken.None).GetAwaiter().GetResult();
             for (var entityId = rootEntityId + 1; entityId < rootEntityId + 11; entityId++)
             {
-                sCtx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
+//                sCtx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
+                activity = new CreateSecurityEntityActivity(entityId, rootEntityId, user1Id);
+                this.SecuritySystem.DataHandler.SaveActivityAsync(activity, CancellationToken.None).GetAwaiter().GetResult();
                 Db().ExecuteTestScript(@"
                     -- 2 gap
                     INSERT INTO EFMessages ([SavedBy], [SavedAt], [ExecutionState]) VALUES ('asdf1', GETDATE(),'Wait')
@@ -276,6 +284,8 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             sb.Clear();
             var uncompleted = DataHandler_LoadCompletionState(out var lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
+
+            Task.Delay(2000).GetAwaiter().GetResult();
 
             var cs1 = SecurityActivityQueue.GetCurrentCompletionState();
 

@@ -25,7 +25,6 @@ namespace SenseNet.Security.Messaging
             // initialize non-nullable fields
             _mainCancellationSource = new CancellationTokenSource();
             _mainCancellationToken = _mainCancellationSource.Token;
-            _mainThreadControllerTask = Task.CompletedTask;
             _completionState = new CompletionState();
         }
 
@@ -62,9 +61,10 @@ namespace SenseNet.Security.Messaging
             _completionState = new CompletionState { LastActivityId = _lastExecutedId, Gaps = _gaps.ToArray() };
 
             // Start worker thread
-            _mainThreadControllerTask = Task.Factory.StartNew(
-                () => ControlActivityQueueThread(_mainCancellationToken),
-                _mainCancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            if(_mainThreadControllerTask == null)
+                _mainThreadControllerTask = Task.Factory.StartNew(
+                    () => ControlActivityQueueThread(_mainCancellationToken),
+                    _mainCancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             await Task.Delay(1, cancel);
 
@@ -186,7 +186,14 @@ namespace SenseNet.Security.Messaging
                     while (_waitingList.Count > 0)
                     {
                         var activityToExecute = _waitingList[0];
-                        if (!activityToExecute.IsUnprocessedActivity && activityToExecute.Id <= lastStartedId) // already arrived or executed
+                        if (activityToExecute is PlaceholderActivity placeholder)
+                        {
+                            _waitingList.RemoveAt(0);
+                            lastStartedId = placeholder.LastId;
+                            SnTrace.SecurityQueue.Write(() => $"SAQT: process placeholder #SA{activityToExecute.Key}. " +
+                                                              $"LastId: {placeholder.LastId}");
+                        }
+                        else if (!activityToExecute.IsUnprocessedActivity && activityToExecute.Id <= lastStartedId) // already arrived or executed
                         {
                             _waitingList.RemoveAt(0);
                             AttachOrIgnore(activityToExecute, _executingList);
@@ -284,10 +291,26 @@ namespace SenseNet.Security.Messaging
                 loaded = loader.LoadAsync(fromId, int.MaxValue, false, cancel).ConfigureAwait(false);
                 op.Successful = true;
             }
+
+            int expectedId = fromId;
             await foreach (var activity in loaded)
             {
+                if (activity.Id != expectedId)
+                {
+                    var firstId = expectedId;
+                    var lastId = activity.Id - 1;
+                    if (activity.Id > expectedId + 1)
+                        SnTrace.SecurityQueue.Write(() => $"SAQ: missing from database #SA{firstId}..#SA{lastId}");
+                    else
+                        SnTrace.SecurityQueue.Write(() => $"SAQ: missing from database #SA{firstId}");
+
+                    _arrivalQueue.Enqueue(new PlaceholderActivity(firstId, lastId));
+                    expectedId = activity.Id;
+                }
                 SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive from database #SA{activity.Key}");
                 _arrivalQueue.Enqueue(activity);
+                _waitToWorkSignal.Set();
+                expectedId++;
             }
             // Unlock loading
             _activityLoaderTask = null;

@@ -23,7 +23,7 @@ namespace SenseNet.Security.Tests
             if (!SnTrace.SnTracers.Any(x => x is SnFileSystemTracer))
                 SnTrace.SnTracers.Add(new SnFileSystemTracer());
             SnTrace.EnableAll();
-            SnTrace.SecurityQueue.Enabled = false;
+//            SnTrace.SecurityQueue.Enabled = false;
 
             SnTrace.Test.Write("------------------------------------------------------------------------");
             _snTraceOperation =

@@ -115,9 +115,9 @@ namespace SenseNet.Security
             CommunicationMonitor = new CommunicationMonitor(DataHandler, Options.Create(MessagingOptions));
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
 
-            SecurityActivityQueue = legacy
+            SecurityActivityQueue = /*legacy
                 ? new SecurityActivityQueue_Legacy(this, CommunicationMonitor, DataHandler, ActivityHistory)
-                : SecurityActivityQueue = new SecurityActivityQueue(DataHandler);
+                :*/ SecurityActivityQueue = new SecurityActivityQueue(DataHandler);
             await SecurityActivityQueue.StartAsync(uncompleted, lastActivityIdFromDb, cancel);
 
             ActivityHistory.SecurityActivityQueue = SecurityActivityQueue; // Property injection
