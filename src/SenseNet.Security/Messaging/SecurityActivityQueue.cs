@@ -78,6 +78,19 @@ namespace SenseNet.Security.Messaging
         {
             SnTrace.SecurityQueue.Write($"Discovering unprocessed security activities");
 
+            var hasUnprocessed = gaps.Count > 0 || lastDatabaseId != lastExecutedId;
+
+            SnLog.WriteInformation(EventMessage.Information.StartTheSystem, EventId.RepositoryLifecycle,
+                // ReSharper disable once ArgumentsStyleOther
+                properties: new Dictionary<string, object>{
+                    {"LastDatabaseId", lastDatabaseId},
+                    {"LastExecutedId", lastExecutedId},
+                    {"CountOfGaps", gaps.Count},
+                    {"Gaps", gaps.Count > 50
+                        ? "[" + string.Join(", ", gaps.Take(50)) + ", ...]"
+                        : "[" + string.Join(", ", gaps) + "]"}
+                });
+
             var count = 0;
             void Arrive(SecurityActivity activity)
             {
@@ -98,8 +111,10 @@ namespace SenseNet.Security.Messaging
                         Arrive(loadedActivity);
             }
 
-            //SnLog.WriteInformation(string.Format(EventMessage.Information.ExecutingUnprocessedActivitiesFinished, count),
-            SnTrace.SecurityQueue.Write($"Executing unprocessed security activities ({count}).");
+            //if (hasUnprocessed)
+            //    SnLog.WriteInformation(string.Format(EventMessage.Information.ExecutingUnprocessedActivitiesFinished, count),
+            //        EventId.RepositoryLifecycle);
+            //SnTrace.SecurityQueue.Write($"Executing unprocessed security activities ({count}).");
         }
 
         // Activity arrival
@@ -324,7 +339,7 @@ namespace SenseNet.Security.Messaging
             // - finished: RanToCompletion, Canceled, Faulted
             // - executing: Running, WaitingForChildrenToComplete
             var toStart = executingList
-                .Where(x => x.GetExecutionTaskStatus() == null)
+                .Where(x => !x.Started && x.GetExecutionTaskStatus() == null)
                 .ToArray();
             var toRelease = executingList
                 .Where(x => _finishedTaskStates.Contains(x.GetExecutionTaskStatus()))
@@ -335,8 +350,10 @@ namespace SenseNet.Security.Messaging
                 SnTrace.SecurityQueue.Write(() => $"SAQT: start execution: #SA{activityToStart.Key}");
                 // Start the activity's execution task in an async way to ensure separate tasks for each one
                 // otherwise, separation would only occur at first awaited instructions of each implementation.
+                activityToStart.Started = true;
                 Task.Run(() => activityToStart.StartExecutionTask(), cancel);
             }
+
 
             foreach (var finishedActivity in toRelease)
             {

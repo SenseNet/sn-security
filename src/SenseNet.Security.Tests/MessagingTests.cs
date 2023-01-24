@@ -318,7 +318,8 @@ namespace SenseNet.Security.Tests
             public void SendMessage(IDistributedMessage message)
             {
                 SnLog.WriteInformation("Send: " + message.GetType().Name);
-
+                if (message is TestActivity originalActivity)
+                    message = new TestActivity {Id = originalActivity.Id, Sender = originalActivity.Sender};
                 MessageReceived?.Invoke(this, new MessageReceivedEventArgs(message));
             }
             public void Start(DateTime startingTheSystem)
@@ -339,13 +340,9 @@ namespace SenseNet.Security.Tests
 
             public event MessageReceivedEventHandler MessageReceived;
 
-#pragma warning disable 67
             public event ReceiveExceptionEventHandler ReceiveException;
-#pragma warning restore 67
 
-#pragma warning disable 67
             public event SendExceptionEventHandler SendException;
-#pragma warning restore 67
         }
         private class MemoryDataProviderForMessagingTests : MemoryDataProvider
         {

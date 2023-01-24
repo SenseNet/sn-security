@@ -178,7 +178,10 @@ namespace SenseNet.Security
 
                 activity.FromReceiver = true;
                 activity.Context = GeneralSecurityContext;
-                activity.Execute(GeneralSecurityContext, false);
+                //activity.Execute(GeneralSecurityContext, false);
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed.
+                activity.ExecuteAsync(GeneralSecurityContext, CancellationToken.None);
+#pragma warning restore CS4014
             }
             else
             {

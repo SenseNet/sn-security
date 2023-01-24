@@ -72,7 +72,9 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         {
             if (context.SecuritySystem.SecurityActivityQueue is SecurityActivityQueue)
             {
-                ExecuteAsync(context, CancellationToken.None).GetAwaiter().GetResult();
+                var task = ExecuteAsync(context, CancellationToken.None);
+                if(waitForComplete)
+                    task.GetAwaiter().GetResult();
                 return;
             }
 
@@ -388,7 +390,15 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             _finalizationTask?.Start();
         }
 
-        public TaskStatus? GetExecutionTaskStatus() => _executionTask?.Status;
+        /// <summary>
+        /// Gets or sets a flag that is true if the StartExecutionTask() is called in async way.
+        /// This flag react faster than testing _executionTask existence.
+        /// </summary>
+        [field: NonSerialized]
+        [JsonIgnore]
+        internal bool Started { get; set; }
+
+        internal TaskStatus? GetExecutionTaskStatus() => _executionTask?.Status;
 
         /* =============================================================================== ATTACHMENTS */
         [field: NonSerialized]
