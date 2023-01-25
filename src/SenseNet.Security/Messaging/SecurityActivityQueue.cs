@@ -207,7 +207,6 @@ namespace SenseNet.Security.Messaging
 
                             lastStartedId = placeholder.LastId;
 
-//UNDONE:SAQ: Remove from gaps and recalculate _completionState
                             for (int i = placeholder.Id; i <= placeholder.LastId; i++)
                                 _gaps.Remove(i);
                             _completionState = new CompletionState { LastActivityId = _lastExecutedId, Gaps = _gaps.ToArray() };
