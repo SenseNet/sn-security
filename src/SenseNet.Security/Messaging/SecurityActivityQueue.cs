@@ -42,11 +42,6 @@ namespace SenseNet.Security.Messaging
             _mainThreadControllerTask.Dispose();
             _mainCancellationSource.Dispose();
 
-            //UNDONE:SAQ: remove comment if the cleaning CompletionState is required when disposing the ActivityQueue
-            //_lastExecutedId = 0;
-            //_gaps.Clear();
-            //_completionState = new CompletionState();
-
             SnTrace.SecurityQueue.Write("SAQ: disposed");
         }
 
@@ -70,7 +65,7 @@ namespace SenseNet.Security.Messaging
 
             await Task.Delay(1, cancel);
 
-            //UNDONE:SAQ: wait for finishing all unprocessed activities or not?
+            //UNDONE:SAQ: ?? wait for finishing all unprocessed activities or not?
             await ExecuteUnprocessedActivitiesAtStartAsync(_lastExecutedId, _gaps, lastDatabaseId, cancel);
         }
 
@@ -143,7 +138,7 @@ namespace SenseNet.Security.Messaging
             activity.CancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancel, _mainCancellationToken).Token;
 
             _arrivalQueue.Enqueue(activity);
-            _waitToWorkSignal.Set(); //UNDONE:SAQ: This instruction should replaced to other places (timer?).
+            _waitToWorkSignal.Set();
 
             return activity.CreateTaskForWait();
         }
@@ -209,7 +204,14 @@ namespace SenseNet.Security.Messaging
                         if (activityToExecute is PlaceholderActivity placeholder)
                         {
                             _waitingList.RemoveAt(0);
+
                             lastStartedId = placeholder.LastId;
+
+//UNDONE:SAQ: Remove from gaps and recalculate _completionState
+                            for (int i = placeholder.Id; i <= placeholder.LastId; i++)
+                                _gaps.Remove(i);
+                            _completionState = new CompletionState { LastActivityId = _lastExecutedId, Gaps = _gaps.ToArray() };
+
                             SnTrace.SecurityQueue.Write(() => $"SAQT: process placeholder #SA{activityToExecute.Key}. " +
                                                               $"LastId: {placeholder.LastId}");
                         }
@@ -228,7 +230,7 @@ namespace SenseNet.Security.Messaging
                             // Load the missed out activities from database or skip this if it is happening right now.
                             var id = lastStartedId;
                             _activityLoaderTask ??= Task.Run(() => LoadLastActivities(id + 1, cancel));
-                            break; //UNDONE:SAQ: are you sure to exit here?
+                            break; //UNDONE:SAQ: ?? are you sure to exit here?
                         }
                     }
 
@@ -256,7 +258,6 @@ namespace SenseNet.Security.Messaging
 
             SnTrace.SecurityQueue.Write("SAQT: finished");
         }
-
         private void RemoveGapsIfRequested()
         {
             if (_gapDeletionRequest != null && _gapDeletionRequest.Any())
@@ -269,7 +270,6 @@ namespace SenseNet.Security.Messaging
                 SnTrace.SecurityQueue.Write(() => $"SAQT: State after forgetting gaps: {_completionState}");
             }
         }
-
         private void LineUpArrivedActivities(ConcurrentQueue<SecurityActivity> arrivalQueue, List<SecurityActivity> waitingList)
         {
             // Move arrived items to the waiting list
@@ -384,7 +384,7 @@ namespace SenseNet.Security.Messaging
             foreach (var finishedActivity in finishedList)
             {
                 SnTrace.SecurityQueue.Write(() => $"SAQT: execution finished: #SA{finishedActivity.Key}");
-                //UNDONE:SAQ: memorize activity in the ActivityHistory?
+                //UNDONE:SAQ: ?? memorize activity in the ActivityHistory?
                 finishedActivity.StartFinalizationTask();
                 executingList.Remove(finishedActivity);
                 FinishActivity(finishedActivity);

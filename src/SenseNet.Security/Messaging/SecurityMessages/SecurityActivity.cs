@@ -378,7 +378,8 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
         internal Task CreateTaskForWait()
         {
-            _finalizationTask = new Task(() => { /* do nothing */ }, CancellationToken, TaskCreationOptions.LongRunning); //UNDONE:SAQ ?? avoid a lot of LongRunning
+            //UNDONE:SAQ: ?? avoid a lot of LongRunning
+            _finalizationTask = new Task(() => { /* do nothing */ }, CancellationToken, TaskCreationOptions.LongRunning);
             return _finalizationTask;
         }
         internal void StartExecutionTask()
