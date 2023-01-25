@@ -114,7 +114,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
         }
 
         [TestMethod]
-        public void EFC_LoadActivities_AtStart_ActivityQueueLevel()
+        public async Task EFC_LoadActivities_AtStart_ActivityQueueLevel()
         {
             var sCtx = CurrentContext.Security;
             var user1Id = TestUser.User1.Id;
@@ -132,7 +132,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             var expectedCs = new CompletionState { LastActivityId = lastId };
             var uncompleted = DataHandler_LoadCompletionState(out var lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
-            var cs0 = SecurityActivityQueue.GetCurrentState().Termination;
+            var cs0 = SecurityActivityQueue.GetCurrentCompletionState();
             Assert.AreEqual(expectedCs.ToString(), cs0.ToString());
 
 
@@ -149,8 +149,9 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             var expectedIsFromDb1 = string.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId });
             uncompleted = DataHandler_LoadCompletionState(out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
-            var cs1 = SecurityActivityQueue.GetCurrentState().Termination;
-            var idsFromDb1 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None).GetAwaiter().GetResult());
+            await Task.Delay(200).ConfigureAwait(false);
+            var cs1 = SecurityActivityQueue.GetCurrentCompletionState();
+            var idsFromDb1 = string.Join(", ", await Db().GetUnprocessedActivityIdsAsync(CancellationToken.None).ConfigureAwait(false));
             Assert.AreEqual(expectedCs.ToString(), cs1.ToString());
             Assert.AreEqual(expectedIsFromDb1, idsFromDb1);
 
@@ -167,8 +168,9 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             var expectedIsFromDb2 = string.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId, lastId });
             uncompleted = DataHandler_LoadCompletionState(out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
-            var cs2 = SecurityActivityQueue.GetCurrentState().Termination;
-            var idsFromDb2 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None).GetAwaiter().GetResult());
+            await Task.Delay(200).ConfigureAwait(false);
+            var cs2 = SecurityActivityQueue.GetCurrentCompletionState();
+            var idsFromDb2 = string.Join(", ", await Db().GetUnprocessedActivityIdsAsync(CancellationToken.None).ConfigureAwait(false));
             Assert.AreEqual(expectedCs.ToString(), cs2.ToString());
             Assert.AreEqual(expectedIsFromDb2, idsFromDb2);
         }
