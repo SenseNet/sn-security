@@ -23,6 +23,7 @@ namespace SenseNet.Security.Messaging
         void HealthCheck();
     }
 
+    [Obsolete("Do not use this class anymore", true)]
     internal class SecurityActivityQueue_Legacy : ISecurityActivityQueue
     {
         private readonly SecuritySystem _securitySystem;
