@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
@@ -46,7 +47,7 @@ namespace SenseNet.Security.Tests
             //var memberships = Tools.CreateInMemoryMembershipTable("G1:U1,U2|G2:U3,U4|G3:U1,U3|G4:U4|G5:U5");
             var memberships = Tools.CreateInMemoryMembershipTable(groups);
             var aces = CreateTestAces();
-            var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
+            var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities, Messages = new List<Tuple<int, DateTime, byte[]>>()};
 
             //---- Start the system
             var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider());
@@ -104,6 +105,16 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(id1, acl3.Parent.EntityId);
             Assert.AreEqual(id1, acl5.Parent.EntityId);
             Assert.AreEqual(id5, acl50.Parent.EntityId);
+
+            //---- check some work
+            var state0 = securitySystem.SecurityActivityQueue.GetCurrentState();
+            Assert.AreEqual(0, state0.Termination.LastActivityId);
+            Assert.AreEqual(0, state0.InnerState.Hearthbeats);
+            _context.Security.CreateSecurityEntity(999, GetId("E1"), GetId("U1"));
+            Task.Delay(10).Wait();
+            var state1 = securitySystem.SecurityActivityQueue.GetCurrentState();
+            Assert.AreEqual(1, state1.Termination.LastActivityId);
+            Assert.IsTrue(state1.InnerState.Hearthbeats > 1);
         }
         private static AclInfo GetAcl(Dictionary<int, AclInfo> acls, int entityId)
         {

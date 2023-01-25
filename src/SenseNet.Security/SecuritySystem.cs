@@ -86,7 +86,7 @@ namespace SenseNet.Security
         {
             StartAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
-        public async Task StartAsync(CancellationToken cancel, bool legacy = true)
+        public async Task StartAsync(CancellationToken cancel)
         {
             GeneralSecurityContext = null;
 
@@ -115,9 +115,9 @@ namespace SenseNet.Security
             CommunicationMonitor = new CommunicationMonitor(DataHandler, Options.Create(MessagingOptions));
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
 
-            SecurityActivityQueue = /*legacy
-                ? new SecurityActivityQueue_Legacy(this, CommunicationMonitor, DataHandler, ActivityHistory)
-                :*/ SecurityActivityQueue = new SecurityActivityQueue(DataHandler, CommunicationMonitor);
+            //SecurityActivityQueue =
+            //    new SecurityActivityQueue_Legacy(this, CommunicationMonitor, DataHandler, ActivityHistory);
+            SecurityActivityQueue = new SecurityActivityQueue(DataHandler, CommunicationMonitor, ActivityHistory);
             await SecurityActivityQueue.StartAsync(uncompleted, lastActivityIdFromDb, cancel);
 
             ActivityHistory.SecurityActivityQueue = SecurityActivityQueue; // Property injection

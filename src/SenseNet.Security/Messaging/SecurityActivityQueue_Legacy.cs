@@ -10,19 +10,6 @@ using SenseNet.Diagnostics;
 
 namespace SenseNet.Security.Messaging
 {
-    internal interface ISecurityActivityQueue
-    {
-        SecurityActivityQueueState GetCurrentState(); //UNDONE:SAQ: implement with new return value type.
-        void Startup(CompletionState uncompleted, int lastActivityIdFromDb);
-        Task StartAsync(CompletionState uncompleted, int lastActivityIdFromDb, CancellationToken cancel);
-        void Shutdown();
-        [Obsolete("SAQ: Use ExecuteActivityAsync instead.", false)]
-        void ExecuteActivity(SecurityActivity activity);
-        Task ExecuteActivityAsync(SecurityActivity activity, CancellationToken cancel);
-        CompletionState GetCurrentCompletionState();
-        void HealthCheck();
-    }
-
     [Obsolete("Do not use this class anymore", true)]
     internal class SecurityActivityQueue_Legacy : ISecurityActivityQueue
     {
@@ -615,5 +602,4 @@ namespace SenseNet.Security.Messaging
             }
         }
     }
-
 }

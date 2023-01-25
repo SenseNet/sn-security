@@ -15,9 +15,7 @@ namespace SenseNet.Security.Tests.TestPortal
             ISecurityDataProvider securityDataProvider,
             IMessageProvider messageProvider,
             TextWriter traceChannel = null,
-            Action<IServiceCollection> configureServices = null,
-            bool legacy = true
-            )
+            Action<IServiceCollection> configureServices = null)
         {
             var serviceCollection = new ServiceCollection()
                 .AddDefaultSecurityMessageTypes()
@@ -30,7 +28,7 @@ namespace SenseNet.Security.Tests.TestPortal
                 new MissingEntityHandler(),
                 Options.Create(new SecurityConfiguration()),
                 Options.Create(new MessagingOptions {CommunicationMonitorRunningPeriodInSeconds = 31}));
-            securitySystem.StartAsync(CancellationToken.None, legacy).GetAwaiter().GetResult();
+            securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             return securitySystem;
         }

@@ -35,8 +35,7 @@ public class SecurityActivityQueueTests : TestBase
             Messages = new List<Tuple<int, DateTime, byte[]>>()
         };
 
-        var securitySystem = Context.StartTheSystem(
-            new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider(), legacy: false);
+        var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider());
 
         // ACTION
         var idE53 = GetId("E53");
@@ -73,8 +72,7 @@ public class SecurityActivityQueueTests : TestBase
             Messages = new List<Tuple<int, DateTime, byte[]>>()
         };
 
-        var securitySystem = Context.StartTheSystem(
-            new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider(), legacy: false);
+        var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider());
 
         var idE53 = GetId("E53");
         var idE54 = GetId("E54");
@@ -136,8 +134,7 @@ public class SecurityActivityQueueTests : TestBase
             Messages = new List<Tuple<int, DateTime, byte[]>>()
         };
 
-        var securitySystem = Context.StartTheSystem(
-            new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider(), legacy: false);
+        var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider());
 
         var idE53 = GetId("E53");
         var idE54 = GetId("E54");

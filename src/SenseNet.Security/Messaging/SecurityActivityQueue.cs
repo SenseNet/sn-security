@@ -4,7 +4,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using SenseNet.Security.Messaging.SecurityMessages;
@@ -14,13 +13,16 @@ namespace SenseNet.Security.Messaging
     internal class SecurityActivityQueue : ISecurityActivityQueue, IDisposable
     {
         private readonly DataHandler _dataHandler;
+        private readonly SecurityActivityHistoryController _activityHistory;
         private readonly CancellationTokenSource _mainCancellationSource;
         private readonly CancellationToken _mainCancellationToken;
         private Task _mainThreadControllerTask;
 
-        public SecurityActivityQueue(DataHandler dataHandler, CommunicationMonitor communicationMonitor)
+        public SecurityActivityQueue(DataHandler dataHandler, CommunicationMonitor communicationMonitor,
+            SecurityActivityHistoryController activityHistory)
         {
             _dataHandler = dataHandler;
+            _activityHistory = activityHistory;
 
             // initialize non-nullable fields
             _mainCancellationSource = new CancellationTokenSource();
@@ -65,7 +67,6 @@ namespace SenseNet.Security.Messaging
 
             await Task.Delay(1, cancel);
 
-            //UNDONE:SAQ: ?? wait for finishing all unprocessed activities or not?
             await ExecuteUnprocessedActivitiesAtStartAsync(_lastExecutedId, _gaps, lastDatabaseId, cancel);
         }
 
@@ -94,6 +95,7 @@ namespace SenseNet.Security.Messaging
                 SnTrace.SecurityQueue.Write("SAQ: Startup: activity arrived from db: SA{0}.", activity.Id);
                 _arrivalQueue.Enqueue(activity);
                 _waitToWorkSignal.Set();
+                //TODO: rewrite SecurityActivityHistoryController and call this: _activityHistory.Arrive(activity);
                 count++;
             }
 
@@ -139,6 +141,7 @@ namespace SenseNet.Security.Messaging
 
             _arrivalQueue.Enqueue(activity);
             _waitToWorkSignal.Set();
+            //TODO: rewrite SecurityActivityHistoryController and call this: _activityHistory.Arrive(activity);
 
             return activity.CreateTaskForWait();
         }
@@ -214,13 +217,15 @@ namespace SenseNet.Security.Messaging
                             SnTrace.SecurityQueue.Write(() => $"SAQT: process placeholder #SA{activityToExecute.Key}. " +
                                                               $"LastId: {placeholder.LastId}");
                         }
-                        else if (!activityToExecute.IsUnprocessedActivity && activityToExecute.Id <= lastStartedId) // already arrived or executed
+                        else if (!activityToExecute.IsUnprocessedActivity && activityToExecute.Id <= lastStartedId)
                         {
+                            // Already arrived or executed
                             _waitingList.RemoveAt(0);
                             AttachOrIgnore(activityToExecute, _executingList);
                         }
-                        else if (activityToExecute.IsUnprocessedActivity || activityToExecute.Id == lastStartedId + 1) // arrived in order
+                        else if (activityToExecute.IsUnprocessedActivity || activityToExecute.Id == lastStartedId + 1)
                         {
+                            // Arrived in order (most common case)
                             _waitingList.RemoveAt(0);
                             lastStartedId = ExecuteOrChain(activityToExecute, _executingList);
                         }
@@ -229,7 +234,8 @@ namespace SenseNet.Security.Messaging
                             // Load the missed out activities from database or skip this if it is happening right now.
                             var id = lastStartedId;
                             _activityLoaderTask ??= Task.Run(() => LoadLastActivities(id + 1, cancel));
-                            break; //UNDONE:SAQ: ?? are you sure to exit here?
+                            // Need to exit because the loaded activities appear in the _arrivalQueue
+                            break;
                         }
                     }
 
@@ -246,10 +252,9 @@ namespace SenseNet.Security.Messaging
                 }
                 catch (Exception e)
                 {
-                    SnTrace.SecurityQueue.WriteError(() => e.ToString());
+                    SnLog.WriteError(e);
 
-                    //UNDONE:SAQ: Cancel all waiting tasks
-                    _waitingList.FirstOrDefault()?.StartFinalizationTask();
+                    _mainCancellationSource.Cancel();
 
                     break;
                 }
@@ -302,8 +307,13 @@ namespace SenseNet.Security.Messaging
         {
             // Discover dependencies
             foreach (var activityUnderExecution in GetAllFromChains(executingList))
+            {
                 if (activity.ShouldWaitFor(activityUnderExecution))
+                {
                     activity.WaitFor(activityUnderExecution);
+                    //TODO: rewrite SecurityActivityHistoryController and call this: _activityHistory.Wait(activity);
+                }
+            }
 
             // Add to concurrently executable list
             if (activity.WaitingFor.Count == 0)
@@ -338,11 +348,13 @@ namespace SenseNet.Security.Messaging
                         SnTrace.SecurityQueue.Write(() => $"SAQ: missing from database #SA{firstId}");
 
                     _arrivalQueue.Enqueue(new PlaceholderActivity(firstId, lastId));
+                    //TODO: rewrite SecurityActivityHistoryController and call this: _activityHistory.Arrive(activity);
                     expectedId = activity.Id;
                 }
                 SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive from database #SA{activity.Key}");
                 _arrivalQueue.Enqueue(activity);
                 _waitToWorkSignal.Set();
+                //TODO: rewrite SecurityActivityHistoryController and call this: _activityHistory.Arrive(activity);
                 expectedId++;
             }
             // Unlock loading
@@ -370,6 +382,7 @@ namespace SenseNet.Security.Messaging
                 // otherwise, separation would only occur at first awaited instructions of each implementation.
                 activityToStart.Started = true;
                 Task.Run(() => activityToStart.StartExecutionTask(), cancel);
+                //TODO: rewrite SecurityActivityHistoryController and call this: _activityHistory.Start(activityToStart.Id);
             }
 
 
@@ -383,7 +396,6 @@ namespace SenseNet.Security.Messaging
             foreach (var finishedActivity in finishedList)
             {
                 SnTrace.SecurityQueue.Write(() => $"SAQT: execution finished: #SA{finishedActivity.Key}");
-                //UNDONE:SAQ: ?? memorize activity in the ActivityHistory?
                 finishedActivity.StartFinalizationTask();
                 executingList.Remove(finishedActivity);
                 FinishActivity(finishedActivity);
@@ -425,6 +437,11 @@ namespace SenseNet.Security.Messaging
                 }
                 _completionState = new CompletionState { LastActivityId = _lastExecutedId, Gaps = _gaps.ToArray() };
                 SnTrace.SecurityQueue.Write(() => $"SAQT: State after finishing SA{id}: {_completionState}");
+                //TODO: rewrite SecurityActivityHistoryController and call this: _activityHistory.Finish(id);
+            }
+            else
+            {
+                //TODO: rewrite SecurityActivityHistoryController and call this: _activityHistory.Error(activity.Id, activity.ExecutionException);
             }
         }
         private IEnumerable<SecurityActivity> GetAllFromChains(List<SecurityActivity> roots)
@@ -443,8 +460,24 @@ namespace SenseNet.Security.Messaging
 
         public SecurityActivityQueueState GetCurrentState()
         {
-            throw new NotImplementedException();
+            return new SecurityActivityQueueState
+            {
+                Termination = new CompletionState
+                {
+                    LastActivityId = _completionState.LastActivityId,
+                    Gaps = _completionState.Gaps
+                },
+                InnerState = new SecurityActivityQueueInnerState
+                {
+                    WaitingToArrive = _arrivalQueue.Count,
+                    PendingExecution = _waitingList.Count,
+                    UnderExecution = _executingList.Count,
+                    IsLoaderActive = _activityLoaderTask != null,
+                    Hearthbeats = _workCycle,
+                }
+            };
         }
+
         public void HealthCheck()
         {
             if (!_dataHandler.IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())

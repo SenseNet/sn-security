@@ -71,7 +71,7 @@ namespace SenseNet.Security.Tests
             var communicationMonitor = new CommunicationMonitor(dataHandler, messagingOptions);
             var activityHistory = new SecurityActivityHistoryController();
             //var securityActivityQueue = new SecurityActivityQueue_Legacy(securitySystem, communicationMonitor, dataHandler, activityHistory);
-            var securityActivityQueue = new SecurityActivityQueue(dataHandler, communicationMonitor);
+            var securityActivityQueue = new SecurityActivityQueue(dataHandler, communicationMonitor, activityHistory);
 
             // ACTION
             var communicationMonitorAcc = new ObjectAccessor(communicationMonitor);
