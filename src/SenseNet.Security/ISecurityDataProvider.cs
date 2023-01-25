@@ -347,6 +347,7 @@ namespace SenseNet.Security
         /// Asynchronously returns the biggest activity id that was saved before the provided time if there is any.
         /// Otherwise returns with 0.
         /// </summary>
+        //UNDONE:SAQ: Remove unused parameter: startedTime
         Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel);
 
         /// <summary>

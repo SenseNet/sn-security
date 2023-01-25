@@ -117,7 +117,7 @@ namespace SenseNet.Security
 
             SecurityActivityQueue = /*legacy
                 ? new SecurityActivityQueue_Legacy(this, CommunicationMonitor, DataHandler, ActivityHistory)
-                :*/ SecurityActivityQueue = new SecurityActivityQueue(DataHandler);
+                :*/ SecurityActivityQueue = new SecurityActivityQueue(DataHandler, CommunicationMonitor);
             await SecurityActivityQueue.StartAsync(uncompleted, lastActivityIdFromDb, cancel);
 
             ActivityHistory.SecurityActivityQueue = SecurityActivityQueue; // Property injection

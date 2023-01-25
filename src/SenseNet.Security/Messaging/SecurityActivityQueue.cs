@@ -18,7 +18,7 @@ namespace SenseNet.Security.Messaging
         private readonly CancellationToken _mainCancellationToken;
         private Task _mainThreadControllerTask;
 
-        public SecurityActivityQueue(DataHandler dataHandler)
+        public SecurityActivityQueue(DataHandler dataHandler, CommunicationMonitor communicationMonitor)
         {
             _dataHandler = dataHandler;
 
@@ -26,6 +26,8 @@ namespace SenseNet.Security.Messaging
             _mainCancellationSource = new CancellationTokenSource();
             _mainCancellationToken = _mainCancellationSource.Token;
             _completionState = new CompletionState();
+
+            communicationMonitor.HearthBeat += (sender, args) => HealthCheck();
         }
 
         public void Shutdown()
@@ -156,6 +158,7 @@ namespace SenseNet.Security.Messaging
         private int _lastExecutedId;
         private readonly List<int> _gaps = new();
         private CompletionState _completionState;
+        private List<int> _gapDeletionRequest;
 
         public CompletionState GetCurrentCompletionState()
         {
@@ -191,6 +194,8 @@ namespace SenseNet.Security.Messaging
                     SnTrace.SecurityQueue.Write(() => $"SAQT: works (cycle: {_workCycle}, " +
                                                       $"_arrivalQueue.Count: {_arrivalQueue.Count}), " +
                                                       $"_executingList.Count: {_executingList.Count}");
+
+                    RemoveGapsIfRequested();
 
                     LineUpArrivedActivities(_arrivalQueue, _waitingList);
 
@@ -251,6 +256,20 @@ namespace SenseNet.Security.Messaging
 
             SnTrace.SecurityQueue.Write("SAQT: finished");
         }
+
+        private void RemoveGapsIfRequested()
+        {
+            if (_gapDeletionRequest != null && _gapDeletionRequest.Any())
+            {
+                SnTrace.SecurityQueue.Write("SAQT: forget gaps.");
+                foreach (var id in _gapDeletionRequest.ToArray())
+                    _gaps.Remove(id);
+                _gapDeletionRequest = null;
+                _completionState = new CompletionState { LastActivityId = _lastExecutedId, Gaps = _gaps.ToArray() };
+                SnTrace.SecurityQueue.Write(() => $"SAQT: State after forgetting gaps: {_completionState}");
+            }
+        }
+
         private void LineUpArrivedActivities(ConcurrentQueue<SecurityActivity> arrivalQueue, List<SecurityActivity> waitingList)
         {
             // Move arrived items to the waiting list
@@ -429,7 +448,52 @@ namespace SenseNet.Security.Messaging
         }
         public void HealthCheck()
         {
-            throw new NotImplementedException();
+            if (!_dataHandler.IsDatabaseReadyAsync(CancellationToken.None).GetAwaiter().GetResult())
+            {
+                SnTrace.Security.Write("SAQ: Health check triggered but database does not exist yet.");
+                return;
+            }
+            if (_activityLoaderTask != null)
+            {
+                SnTrace.Security.Write("SAQ: Health check triggered but ignored.");
+                return;
+            }
+            SnTrace.Security.Write("SAQ: Health check triggered.");
+
+            var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+
+            var state = _completionState;
+            var gapsLength = state.Gaps.Length;
+            if (gapsLength > 0)
+            {
+                SnTrace.SecurityQueue.Write("SAQ: Health checker is processing {0} gap{1}.", gapsLength, gapsLength > 1 ? "s" : "");
+
+                var notLoaded = state.Gaps.ToList();
+                foreach (var activity in new SecurityActivityLoader(state.Gaps, false, _dataHandler))
+                {
+                    ExecuteActivityAsync(activity, cancellation.Token);
+                    // memorize executed
+                    notLoaded.Remove(activity.Id);
+                }
+                // forget not loaded activities.
+                _gapDeletionRequest = notLoaded; //_terminationHistory.RemoveFromGaps(notLoaded);
+            }
+
+            var lastId = _lastExecutedId; //_terminationHistory.GetLastTerminatedId();
+            var lastDbId = _dataHandler.GetLastSecurityActivityIdAsync(DateTime.MinValue, CancellationToken.None)
+                .GetAwaiter().GetResult();
+
+            if (lastId < lastDbId)
+            {
+                SnTrace.SecurityQueue.Write("SAQ: Health checker is processing activities from {0} to {1}", lastId + 1, lastDbId);
+                foreach (var activity in new SecurityActivityLoader(lastId + 1, lastDbId, false, _dataHandler))
+                    ExecuteActivityAsync(activity, cancellation.Token);
+            }
+            else
+            {
+                if (_gapDeletionRequest != null && _gapDeletionRequest.Any())
+                    _waitToWorkSignal.Set();
+            }
         }
 
     }
