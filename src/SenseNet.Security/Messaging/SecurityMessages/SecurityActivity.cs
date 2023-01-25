@@ -325,11 +325,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
 
         [field: NonSerialized]
         [JsonIgnore]
-        internal List<SecurityActivity> WaitingFor { get; private set; } = new List<SecurityActivity>();
+        internal List<SecurityActivity> WaitingFor { get; private set; } = new();
 
         [field: NonSerialized]
         [JsonIgnore]
-        internal List<SecurityActivity> WaitingForMe { get; private set; } = new List<SecurityActivity>();
+        internal List<SecurityActivity> WaitingForMe { get; private set; } = new();
 
         internal void WaitFor(SecurityActivity olderActivity)
         {
