@@ -397,9 +397,9 @@ namespace SenseNet.Security
             activity.Id = result.ActivityId;
         }
 
-        internal Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
+        internal Task<int> GetLastSecurityActivityIdAsync(CancellationToken cancel)
         {
-            return _dataProvider.GetLastSecurityActivityIdAsync(startedTime, cancel);
+            return _dataProvider.GetLastSecurityActivityIdAsync(cancel);
         }
 
         internal virtual async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int from, int to, int count,

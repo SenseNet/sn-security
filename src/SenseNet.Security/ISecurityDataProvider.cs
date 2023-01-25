@@ -342,13 +342,13 @@ namespace SenseNet.Security
         /// Otherwise returns with 0.
         /// </summary>
         [Obsolete("Use async version instead.")]
-        int GetLastSecurityActivityId(DateTime startedTime);
+        int GetLastSecurityActivityId();
         /// <summary>
         /// Asynchronously returns the biggest activity id that was saved before the provided time if there is any.
         /// Otherwise returns with 0.
         /// </summary>
         //UNDONE:SAQ: Remove unused parameter: startedTime
-        Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel);
+        Task<int> GetLastSecurityActivityIdAsync(CancellationToken cancel);
 
         /// <summary>
         /// Returns an array of all unprocessed activity ids supplemented with the last stored activity id.

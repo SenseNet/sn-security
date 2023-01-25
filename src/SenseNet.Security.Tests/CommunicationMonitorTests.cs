@@ -35,14 +35,14 @@ namespace SenseNet.Security.Tests
             }
 
             [Obsolete("Use async version instead.")]
-            public override int GetLastSecurityActivityId(DateTime startedTime)
+            public override int GetLastSecurityActivityId()
             {
-                return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None)
+                return GetLastSecurityActivityIdAsync(CancellationToken.None)
                     .GetAwaiter().GetResult();
             }
-            public override async Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
+            public override async Task<int> GetLastSecurityActivityIdAsync(CancellationToken cancel)
             {
-                var result = await base.GetLastSecurityActivityIdAsync(startedTime, cancel).ConfigureAwait(false);
+                var result = await base.GetLastSecurityActivityIdAsync(cancel).ConfigureAwait(false);
                 IsGetLastSecurityActivityIdCalled = true;
                 return result;
             }

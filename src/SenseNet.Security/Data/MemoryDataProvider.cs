@@ -415,11 +415,11 @@ namespace SenseNet.Security.Data
         }
 
         [Obsolete("Use async version instead.")]
-        public virtual int GetLastSecurityActivityId(DateTime startedTime)
+        public virtual int GetLastSecurityActivityId()
         {
-            return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None).GetAwaiter().GetResult();
+            return GetLastSecurityActivityIdAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
-        public virtual Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
+        public virtual Task<int> GetLastSecurityActivityIdAsync(CancellationToken cancel)
         {
             lock (_messageLock)
             {

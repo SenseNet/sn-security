@@ -479,7 +479,7 @@ namespace SenseNet.Security.Messaging
             }
 
             var lastId = _lastExecutedId; //_terminationHistory.GetLastTerminatedId();
-            var lastDbId = _dataHandler.GetLastSecurityActivityIdAsync(DateTime.MinValue, CancellationToken.None)
+            var lastDbId = _dataHandler.GetLastSecurityActivityIdAsync(CancellationToken.None)
                 .GetAwaiter().GetResult();
 
             if (lastId < lastDbId)
