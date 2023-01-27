@@ -56,7 +56,7 @@ namespace SenseNet.Security
         /// <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
         /// <param name="parentGroups">Collection of the parent group member identifiers. Use this if the parent 
         /// group or groups are already known when this method is called. Can be null or empty.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void AddMembersToSecurityGroup(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups = null)
         {
             if (groupId == default)
@@ -96,7 +96,7 @@ namespace SenseNet.Security
         /// <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
         /// <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void RemoveMembersFromSecurityGroup(int groupId, IEnumerable<int> userMembers, IEnumerable<int> groupMembers, IEnumerable<int> parentGroups = null)
         {
             if (groupId == default)
@@ -133,7 +133,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the container group. Cannot be 0.</param>
         /// <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void AddGroupsToSecurityGroup(int groupId, IEnumerable<int> groupMembers)
         {
             if (groupId == default)
@@ -166,7 +166,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the member group. Cannot be 0.</param>
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void AddGroupToSecurityGroups(int groupId, IEnumerable<int> parentGroups)
         {
             if (groupId == default)
@@ -200,7 +200,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the container group. Cannot be 0.</param>
         /// <param name="groupMembers">Collection of the group member identifiers. Can be null or empty.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void RemoveGroupsFromSecurityGroup(int groupId, IEnumerable<int> groupMembers)
         {
             if (groupId == default)

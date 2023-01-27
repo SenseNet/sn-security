@@ -3,6 +3,7 @@ using SenseNet.Security.Tests.TestPortal;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using SenseNet.Diagnostics;
 
 // ReSharper disable InconsistentNaming
@@ -154,7 +155,8 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.AddMembersToSecurityGroup(G30, null, new[] { G9 }, new[] { G18 });
+            ctx.AddMembersToSecurityGroupAsync(G30, null, new[] { G9 }, CancellationToken.None, new[] { G18 })
+                .GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -173,7 +175,8 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.AddMembersToSecurityGroup(G30, new[] { U1, U40 }, new[] { G9 }, new[] { G18 });
+            ctx.AddMembersToSecurityGroupAsync(G30, new[] { U1, U40 }, new[] { G9 },
+                CancellationToken.None, new[] { G18 }).GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -256,7 +259,8 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // preparation (make circle with a new group and an existing and a new user).
-            ctx.AddMembersToSecurityGroup(G30, new[] { U1, U40 }, new[] { G9 }, new[] { G18 });
+            ctx.AddMembersToSecurityGroupAsync(G30, new[] { U1, U40 }, new[] { G9 },
+                CancellationToken.None, new[] { G18 }).GetAwaiter().GetResult();
             Assert.AreEqual("U1:G1,G2,G3,G9,G18,G30|U2:G1,G2|U3:G1,G4|U4:G1,G4|U5:G1,G4|U6:G1,G6|U7:G1,G3,G8|U8:G1,G3,G8|U9:G1,G3,G8|U10:G1,G3|" +
                 "U11:G1,G3,G10|U12:G1,G3,G11|U13:G1,G3,G11|U14:G1,G5,G12|U15:G1,G5,G12|U16:G1,G5,G12|U17:G1,G5,G12|U18:G1,G5,G12|" +
                 "U19:G1,G5,G12|U20:G1,G5,G12|U21:G1,G5,G13|U22:G1,G5,G14|U23:G1,G5,G14|U24:G1,G5,G15|U25:G1,G3,G9,G16,G18,G30|U26:G1,G3,G9,G17,G18,G30|" +
@@ -337,7 +341,8 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.RemoveMembersFromSecurityGroup(G20, new[] { U31, U33 }, new[] { G21 });
+            ctx.RemoveMembersFromSecurityGroupAsync(G20, new[] { U31, U33 }, new[] { G21 }, CancellationToken.None)
+                .GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -354,7 +359,8 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.RemoveMembersFromSecurityGroup(G3, new[] { U10 }, new[] { G9 }, new[] { G1 });
+            ctx.RemoveMembersFromSecurityGroupAsync(G3, new[] {U10}, new[] {G9},
+                CancellationToken.None, new[] {G1}).GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -426,7 +432,8 @@ namespace SenseNet.Security.Tests
             // preparation
             ctx.AddUserToSecurityGroups(U1, new[] { G5, G18, G20, G23 });
             ctx.AddUserToSecurityGroups(U40, new[] { G20 });
-            ctx.AddMembersToSecurityGroup(G20, null, null, new[] { G10, G12 });
+            ctx.AddMembersToSecurityGroupAsync(G20, null, null,
+                CancellationToken.None, new[] { G10, G12 }).GetAwaiter().GetResult();
             var membershipBefore = DumpMembership(ctx);
 
             // operation
@@ -453,11 +460,13 @@ namespace SenseNet.Security.Tests
             // preparation
             ctx.AddUserToSecurityGroups(U1, new[] { G5, G18, G20, G23 });
             ctx.AddUserToSecurityGroups(U40, new[] { G20 });
-            ctx.AddMembersToSecurityGroup(G20, null, null, new[] { G10, G12 });
+            ctx.AddMembersToSecurityGroupAsync(G20, null, null, 
+                CancellationToken.None, new[] { G10, G12 }).GetAwaiter().GetResult();
             var membershipBefore = DumpMembership(ctx);
 
             // operation
-            ctx.RemoveMembersFromSecurityGroup(G20, null, null, new[] { G10, G12 });
+            ctx.RemoveMembersFromSecurityGroupAsync(G20, null, null,
+                CancellationToken.None, new[] { G10, G12 }).GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(membershipBefore)

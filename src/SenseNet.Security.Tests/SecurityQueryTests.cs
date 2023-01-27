@@ -892,9 +892,12 @@ namespace SenseNet.Security.Tests
             ctx.AddUsersToSecurityGroup(Id("G12"), new[] { Id("U12") });
             ctx.AddUsersToSecurityGroup(Id("G11"), new[] { Id("U11") });
             ctx.AddUsersToSecurityGroup(Id("G10"), new[] { Id("U10") });
-            ctx.AddGroupToSecurityGroups(Id("G11"), new[] { Id("G10") });
-            ctx.AddGroupToSecurityGroups(Id("G13"), new[] { Id("G11") });
-            ctx.AddGroupToSecurityGroups(Id("G13"), new[] { Id("G12") });
+            ctx.AddGroupToSecurityGroupsAsync(Id("G11"), new[] { Id("G10") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddGroupToSecurityGroupsAsync(Id("G13"), new[] { Id("G11") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddGroupToSecurityGroupsAsync(Id("G13"), new[] { Id("G12") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
 
             ctx.CreateAclEditor()
                 .Allow(Id("E2"), Id("U1"), false, PermissionType.Custom01)

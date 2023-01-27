@@ -21,7 +21,8 @@ namespace SenseNet.Security.Tests
 
             //# storing a new totally completed group.
             CurrentContext.Security.DeleteSecurityGroup(101);
-            CurrentContext.Security.AddMembersToSecurityGroup(101, new[] { TestUser.User1.Id, TestUser.User2.Id }, new int[0], new int[0]);
+            CurrentContext.Security.AddMembersToSecurityGroupAsync(101, new[] { TestUser.User1.Id, TestUser.User2.Id },
+                Array.Empty<int>(),CancellationToken.None, Array.Empty<int>()).GetAwaiter().GetResult();
 
             var loaded = DataHandler.GetSecurityGroupAsync(groupId, CancellationToken.None)
                 .GetAwaiter().GetResult();
@@ -48,9 +49,11 @@ namespace SenseNet.Security.Tests
 
             //# storing a new totally completed group.
             CurrentContext.Security.DeleteSecurityGroup(101);
-            CurrentContext.Security.AddMembersToSecurityGroup(101, new[] { TestUser.User1.Id, TestUser.User2.Id }, new[] { 102 }, new int[0]);
+            CurrentContext.Security.AddMembersToSecurityGroupAsync(101, new[] { TestUser.User1.Id, TestUser.User2.Id }, new[] { 102 },
+                CancellationToken.None, Array.Empty<int>()).GetAwaiter().GetResult();
             CurrentContext.Security.DeleteSecurityGroup(102);
-            CurrentContext.Security.AddMembersToSecurityGroup(102, new[] { TestUser.User3.Id, TestUser.User4.Id }, new int[0], new[] { 101 });
+            CurrentContext.Security.AddMembersToSecurityGroupAsync(102, new[] { TestUser.User3.Id, TestUser.User4.Id }, Array.Empty<int>(),
+                CancellationToken.None, new[] { 101 }).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1|U2:G1|U3:G1,G2|U4:G1,G2", DumpMembership(CurrentContext.Security));
@@ -505,7 +508,8 @@ namespace SenseNet.Security.Tests
             //# Adding group and registering the change.
             group1.SetGroupMembers(new[] { group2, group3 });
             group3.SetGroupsWhereThisIsMember(new[] { group1 }); // necessary only in test
-            CurrentContext.Security.AddGroupsToSecurityGroup(group1.Id, new[] { group2.Id, group3.Id });
+            CurrentContext.Security.AddGroupsToSecurityGroupAsync(group1.Id, new[] { group2.Id, group3.Id }, 
+                CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1,G3", DumpMembership(CurrentContext.Security));
@@ -548,7 +552,8 @@ namespace SenseNet.Security.Tests
             //# Adding group and registering the change.
             group2.SetGroupMembers(new[] { group3 });
             group3.SetGroupsWhereThisIsMember(new[] { group2 }); // necessary only in test
-            CurrentContext.Security.AddGroupsToSecurityGroup(group2.Id, new[] { group3.Id });
+            CurrentContext.Security.AddGroupsToSecurityGroupAsync(group2.Id, new[] { group3.Id },
+                CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1,G2,G3", DumpMembership(CurrentContext.Security));
@@ -603,7 +608,8 @@ namespace SenseNet.Security.Tests
             //# Adding group and registering the change.
             group1.SetGroupMembers(new[] { group2, group4 });
             group4.SetGroupsWhereThisIsMember(new[] { group1 }); // necessary only in test
-            CurrentContext.Security.AddGroupsToSecurityGroup(group1.Id, new[] { group2.Id, group4.Id });
+            CurrentContext.Security.AddGroupsToSecurityGroupAsync(group1.Id, new[] { group2.Id, group4.Id },
+                CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1,G2,G3|U2:G1,G2,G3|U3:G1,G2,G3|U4:G1,G2,G3,G4", DumpMembership(CurrentContext.Security));
@@ -652,7 +658,8 @@ namespace SenseNet.Security.Tests
             //# Removing group and registering the change.
             group1.SetGroupMembers(new[] { group2 });
             group3.SetGroupsWhereThisIsMember(new TestGroup[0]); // necessary only in test
-            CurrentContext.Security.RemoveGroupsFromSecurityGroup(group1.Id, new[] { group3.Id });
+            CurrentContext.Security.RemoveGroupsFromSecurityGroupAsync(group1.Id, new[] { group3.Id },
+                    CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G3", DumpMembership(CurrentContext.Security));
@@ -694,7 +701,8 @@ namespace SenseNet.Security.Tests
             //# Removing group and registering the change.
             group2.SetGroupMembers(new TestGroup[0]);
             group3.SetGroupsWhereThisIsMember(new TestGroup[0]); // necessary only in test
-            CurrentContext.Security.RemoveGroupsFromSecurityGroup(group2.Id, new[] { group3.Id });
+            CurrentContext.Security.RemoveGroupsFromSecurityGroupAsync(group2.Id, new[] { group3.Id },
+                CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G3", DumpMembership(CurrentContext.Security));
@@ -743,7 +751,8 @@ namespace SenseNet.Security.Tests
 
             //# Removing group and registering the change.
             group1.RemoveGroup(group4);
-            CurrentContext.Security.RemoveGroupsFromSecurityGroup(group1.Id, new[] { group4.Id });
+            CurrentContext.Security.RemoveGroupsFromSecurityGroupAsync(group1.Id, new[] { group4.Id },
+                CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1,G2,G3|U2:G1,G2,G3|U3:G1,G2,G3|U4:G4", DumpMembership(CurrentContext.Security));
@@ -797,7 +806,8 @@ namespace SenseNet.Security.Tests
             //# Adding group chain and registering the change.
             group1.SetGroupMembers(new[] { group2, group3 });
             group3.SetGroupsWhereThisIsMember(new[] { group1 }); // necessary only in test
-            CurrentContext.Security.AddGroupsToSecurityGroup(group1.Id, new[] { group3.Id });
+            CurrentContext.Security.AddGroupsToSecurityGroupAsync(group1.Id, new[] { group3.Id }
+                , CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1,G3|U4:G1,G3,G4", DumpMembership(CurrentContext.Security));
@@ -850,7 +860,8 @@ namespace SenseNet.Security.Tests
             //# Adding group chain and registering the change.
             group2.SetGroupMembers(new[] { group3 });
             group3.SetGroupsWhereThisIsMember(new[] { group2 }); // necessary only in test
-            CurrentContext.Security.AddGroupsToSecurityGroup(group2.Id, new[] { group3.Id });
+            CurrentContext.Security.AddGroupsToSecurityGroupAsync(group2.Id, new[] { group3.Id }, 
+                CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1,G2,G3|U4:G1,G2,G3,G4", DumpMembership(CurrentContext.Security));
@@ -908,7 +919,8 @@ namespace SenseNet.Security.Tests
             //# Adding group and registering the change.
             group1.SetGroupMembers(new[] { group2, group4 });
             group4.SetGroupsWhereThisIsMember(new[] { group1 }); // necessary only in test
-            CurrentContext.Security.AddGroupsToSecurityGroup(group1.Id, new[] { group4.Id });
+            CurrentContext.Security.AddGroupsToSecurityGroupAsync(group1.Id, new[] { group4.Id },
+                CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1,G2,G3|U2:G1,G2,G3|U3:G1,G2,G3|U4:G1,G2,G3,G4|U5:G1,G2,G3,G4,G5", DumpMembership(CurrentContext.Security));
@@ -967,7 +979,8 @@ namespace SenseNet.Security.Tests
             //# Removing group and registering the change.
             group1.SetGroupMembers(new[] { group2 });
             group3.SetGroupsWhereThisIsMember(new TestGroup[0]); // necessary only in test
-            CurrentContext.Security.RemoveGroupsFromSecurityGroup(group1.Id, new[] { group3.Id });
+            CurrentContext.Security.RemoveGroupsFromSecurityGroupAsync(group1.Id, new[] { group3.Id },
+                CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G3|U4:G3,G4", DumpMembership(CurrentContext.Security));
@@ -1019,7 +1032,8 @@ namespace SenseNet.Security.Tests
             //# Removing group and registering the change.
             group2.SetGroupMembers(new TestGroup[0]);
             group3.SetGroupsWhereThisIsMember(new TestGroup[0]); // necessary only in test
-            CurrentContext.Security.RemoveGroupsFromSecurityGroup(group2.Id, new[] { group3.Id });
+            CurrentContext.Security.RemoveGroupsFromSecurityGroupAsync(group2.Id, new[] { group3.Id },
+                CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G3|U4:G3,G4", DumpMembership(CurrentContext.Security));
@@ -1080,7 +1094,8 @@ namespace SenseNet.Security.Tests
             //# Removing group and registering the change.
             group1.SetGroupMembers(new[] { group2 });
             group4.SetGroupsWhereThisIsMember(new TestGroup[0]);  // necessary only in test
-            CurrentContext.Security.RemoveGroupsFromSecurityGroup(group1.Id, new[] { group4.Id });
+            CurrentContext.Security.RemoveGroupsFromSecurityGroupAsync(group1.Id, new[] { group4.Id },
+                CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1,G2,G3|U2:G1,G2,G3|U3:G1,G2,G3|U4:G4|U5:G4,G5", DumpMembership(CurrentContext.Security));
@@ -1123,7 +1138,8 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1,G2,G3,G4,G5|U4:G1,G2,G3,G4,G5|U5:G1,G2,G3,G4,G5", DumpMembership(CurrentContext.Security));
 
             //# Removing group and registering the change.
-            CurrentContext.Security.RemoveGroupsFromSecurityGroup(Id("G1"), new[] { Id("G2") });
+            CurrentContext.Security.RemoveGroupsFromSecurityGroupAsync(Id("G1"), new[] { Id("G2") },
+                CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual("U1:G1|U2:G2|U3:G2,G3,G4,G5|U4:G2,G3,G4,G5|U5:G2,G3,G4,G5", DumpMembership(CurrentContext.Security));
         }
@@ -1332,7 +1348,12 @@ namespace SenseNet.Security.Tests
 
         internal static void AddOrModifySecurityGroup(SecurityContext ctx, TestGroup group)
         {
-            ctx.AddMembersToSecurityGroup(group.Id, group.GetUserMembers().Select(u => u.Id).ToArray(), group.GetGroupMembers().Select(g => g.Id).ToArray(), group.GetGroupsWhereThisIsMember().Select(p => p.Id).ToArray());
+            ctx.AddMembersToSecurityGroupAsync(group.Id,
+                group.GetUserMembers().Select(u => u.Id).ToArray(),
+                group.GetGroupMembers().Select(g => g.Id).ToArray(),
+                CancellationToken.None,
+                group.GetGroupsWhereThisIsMember().Select(p => p.Id).ToArray())
+                .GetAwaiter().GetResult();
         }
 
         internal static string DumpMembership(SecurityContext context)
