@@ -251,7 +251,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         /// <param name="ownerId">Id of the entity's owner identity.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void ModifyEntityOwner(int entityId, int ownerId)
         {
             if (entityId == default)

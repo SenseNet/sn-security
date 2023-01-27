@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
 
@@ -327,7 +328,8 @@ namespace SenseNet.Security.Tests
             entity.OwnerId = TestUser.User2.Id;
 
             //# calling the security component for modifying the entity data
-            CurrentContext.Security.ModifyEntityOwner(entity.Id, entity.OwnerId);
+            CurrentContext.Security.ModifyEntityOwnerAsync(entity.Id, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
 
             var memEntity = CurrentContext.Security.GetSecurityEntity(id);
             Assert.AreEqual(id, memEntity.Id);
@@ -341,7 +343,8 @@ namespace SenseNet.Security.Tests
 
             //# calling the security component for clearing the entity's owner
             entity.OwnerId = default;
-            CurrentContext.Security.ModifyEntityOwner(entity.Id, entity.OwnerId);
+            CurrentContext.Security.ModifyEntityOwnerAsync(entity.Id, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
 
             memEntity = CurrentContext.Security.GetSecurityEntity(id);
             Assert.AreEqual(default, memEntity.OwnerId);
@@ -350,18 +353,23 @@ namespace SenseNet.Security.Tests
 
         }
         [TestMethod]
-        public void Structure_ModifyEntityOwner()
+        public async Task Structure_ModifyEntityOwner()
         {
             var id = Id("E101");
 
-            try { CurrentContext.Security.CreateSecurityEntity(id, default, TestUser.User1.Id); }
+            try
+            {
+                await CurrentContext.Security.CreateSecurityEntityAsync(id, default, TestUser.User1.Id,
+                    CancellationToken.None).ConfigureAwait(false);
+            }
             catch
             {
                 // ignored
             }
 
             //# calling the security component for modifying the entity's owner
-            CurrentContext.Security.ModifyEntityOwner(id, TestUser.User2.Id);
+            await CurrentContext.Security.ModifyEntityOwnerAsync(id, TestUser.User2.Id, CancellationToken.None)
+                .ConfigureAwait(false);
 
             var memEntity = CurrentContext.Security.GetSecurityEntity(id);
             Assert.AreEqual(id, memEntity.Id);
@@ -373,7 +381,8 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(TestUser.User2.Id, dbEntity.OwnerId);
 
             //# calling the security component for clearing the entity's owner
-            CurrentContext.Security.ModifyEntityOwner(id, default);
+            await CurrentContext.Security.ModifyEntityOwnerAsync(id, default, CancellationToken.None)
+                .ConfigureAwait(false);
 
             memEntity = CurrentContext.Security.GetSecurityEntity(id);
             Assert.AreEqual(default, memEntity.OwnerId);
@@ -384,21 +393,24 @@ namespace SenseNet.Security.Tests
         [ExpectedException(typeof(ArgumentException))]
         public void Structure_ModifyEntityOwner_invalidId()
         {
-            CurrentContext.Security.ModifyEntityOwner(default, TestUser.User2.Id);
+            CurrentContext.Security.ModifyEntityOwnerAsync(default, TestUser.User2.Id, CancellationToken.None)
+                .GetAwaiter().GetResult();
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Structure_ModifyEntity_invalidId()
         {
             var entity = new TestEntity { Id = default, OwnerId = TestUser.User1.Id, Parent = null };
-            CurrentContext.Security.ModifyEntityOwner(entity.Id, entity.OwnerId);
+            CurrentContext.Security.ModifyEntityOwnerAsync(entity.Id, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
         public void Structure_ModifyingEntity_missing()
         {
             var entity = new TestEntity { Id = Id("E101"), OwnerId = TestUser.User1.Id, Parent = null };
-            CurrentContext.Security.ModifyEntityOwner(entity.Id, entity.OwnerId);
+            CurrentContext.Security.ModifyEntityOwnerAsync(entity.Id, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
         }
 
 

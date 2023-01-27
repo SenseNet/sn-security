@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
 // ReSharper disable JoinDeclarationAndInitializer
@@ -307,7 +309,7 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E9"), PermissionType.See));
         }
         [TestMethod]
-        public void Eval_AssertSubtreePermission()
+        public async Task Eval_AssertSubtreePermission()
         {
             EnsureRepository();
 
@@ -319,17 +321,20 @@ namespace SenseNet.Security.Tests
 
             var origOwnerId = Id("U1");
             const int differentOwnerId = int.MaxValue;
+            var cancel = CancellationToken.None;
 
             CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See);
             CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.Preview);
-            CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+            await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), differentOwnerId, cancel)
+                .ConfigureAwait(false);
             try
             {
                 CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
             }
             finally
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), origOwnerId, cancel)
+                    .ConfigureAwait(false);
             }
 
             foreach (var perm in PermissionTypeBase.GetPermissionTypes())
@@ -347,7 +352,8 @@ namespace SenseNet.Security.Tests
                     }
                     try
                     {
-                        CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+                        await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), differentOwnerId, cancel)
+                            .ConfigureAwait(false);
                         CurrentContext.Security.AssertSubtreePermission(Id("E3"), perm);
                         Assert.Fail($"{perm.Name} subtree permission on E3 is true, expected: false.");
                     }
@@ -357,7 +363,8 @@ namespace SenseNet.Security.Tests
                     }
                     finally
                     {
-                        CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                        await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), origOwnerId, cancel)
+                            .ConfigureAwait(false);
                     }
                 }
             }
@@ -376,7 +383,8 @@ namespace SenseNet.Security.Tests
             }
             try
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+                await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), differentOwnerId, cancel)
+                    .ConfigureAwait(false);
                 CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
                 Assert.Fail("Open+Edit subtree permission on E3 is true, expected: false.");
             }
@@ -386,11 +394,12 @@ namespace SenseNet.Security.Tests
             }
             finally
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), origOwnerId, cancel)
+                    .ConfigureAwait(false);
             }
         }
         [TestMethod]
-        public void Eval_AssertSubtreePermission_Entity()
+        public async Task Eval_AssertSubtreePermission_Entity()
         {
             EnsureRepository();
 
@@ -449,7 +458,8 @@ namespace SenseNet.Security.Tests
             }
             try
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+                await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), differentOwnerId, CancellationToken.None)
+                    .ConfigureAwait(false);
                 CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
                 Assert.Fail("Open+Edit subtree permission on E3 is true, expected: false.");
             }
@@ -459,7 +469,8 @@ namespace SenseNet.Security.Tests
             }
             finally
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), origOwnerId, CancellationToken.None)
+                    .ConfigureAwait(false);
             }
         }
         [TestMethod]
