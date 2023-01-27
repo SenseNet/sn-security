@@ -197,7 +197,8 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.AddUserToSecurityGroups(U1, new[] { G4, G7, G10, G20, G22 });
+            ctx.AddUserToSecurityGroupsAsync(U1, new[] { G4, G7, G10, G20, G22 }, CancellationToken.None)
+                .GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -212,7 +213,8 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.AddUserToSecurityGroups(U40, new[] { G4, G7, G10, G20, G22 });
+            ctx.AddUserToSecurityGroupsAsync(U40, new[] { G4, G7, G10, G20, G22 },
+                CancellationToken.None).GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -225,7 +227,8 @@ namespace SenseNet.Security.Tests
         public void Membership2_RemoveUserFromMoreThanOneGroup()
         {
             var ctx = context.Security;
-            ctx.AddUserToSecurityGroups(U1, new[] { G4, G7, G10, G20, G22 });
+            ctx.AddUserToSecurityGroupsAsync(U1, new[] { G4, G7, G10, G20, G22 },
+                CancellationToken.None).GetAwaiter().GetResult();
             var expected = new MembershipEditor(InitialMembership)
                 .AddGroupsToUser(U1, G3, G4, G7, G10, G20, G22)
                 .ToString();
@@ -244,7 +247,7 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.AddUsersToSecurityGroup(G7, new[] { U40 });
+            ctx.AddUsersToSecurityGroupAsync(G7, new[] { U40 }, CancellationToken.None).GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -390,7 +393,8 @@ namespace SenseNet.Security.Tests
         public void Membership2_DeleteUser_MoreInstance()
         {
             var ctx = context.Security;
-            ctx.AddUserToSecurityGroups(U1, new[] { G4, G7, G10, G20, G22 });
+            ctx.AddUserToSecurityGroupsAsync(U1, new[] { G4, G7, G10, G20, G22 },
+                CancellationToken.None).GetAwaiter().GetResult();
             var expected = new MembershipEditor(InitialMembership)
                 .AddGroupsToUser(U1, G3, G4, G7, G10, G20, G22)
                 .ToString();
@@ -430,8 +434,10 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // preparation
-            ctx.AddUserToSecurityGroups(U1, new[] { G5, G18, G20, G23 });
-            ctx.AddUserToSecurityGroups(U40, new[] { G20 });
+            ctx.AddUserToSecurityGroupsAsync(U1, new[] { G5, G18, G20, G23 }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddUserToSecurityGroupsAsync(U40, new[] { G20 }, CancellationToken.None)
+                .GetAwaiter().GetResult();
             ctx.AddMembersToSecurityGroupAsync(G20, null, null,
                 CancellationToken.None, new[] { G10, G12 }).GetAwaiter().GetResult();
             var membershipBefore = DumpMembership(ctx);
@@ -458,10 +464,12 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // preparation
-            ctx.AddUserToSecurityGroups(U1, new[] { G5, G18, G20, G23 });
-            ctx.AddUserToSecurityGroups(U40, new[] { G20 });
-            ctx.AddMembersToSecurityGroupAsync(G20, null, null, 
-                CancellationToken.None, new[] { G10, G12 }).GetAwaiter().GetResult();
+            ctx.AddUserToSecurityGroupsAsync(U1, new[] { G5, G18, G20, G23 }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddUserToSecurityGroupsAsync(U40, new[] { G20 }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddMembersToSecurityGroupAsync(G20, null, null, CancellationToken.None, new[] { G10, G12 })
+                .GetAwaiter().GetResult();
             var membershipBefore = DumpMembership(ctx);
 
             // operation

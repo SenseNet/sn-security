@@ -888,10 +888,14 @@ namespace SenseNet.Security.Tests
 
             var ctx = CurrentContext.Security;
 
-            ctx.AddUsersToSecurityGroup(Id("G13"), new[] { Id("U13") });
-            ctx.AddUsersToSecurityGroup(Id("G12"), new[] { Id("U12") });
-            ctx.AddUsersToSecurityGroup(Id("G11"), new[] { Id("U11") });
-            ctx.AddUsersToSecurityGroup(Id("G10"), new[] { Id("U10") });
+            ctx.AddUsersToSecurityGroupAsync(Id("G13"), new[] { Id("U13") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddUsersToSecurityGroupAsync(Id("G12"), new[] { Id("U12") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddUsersToSecurityGroupAsync(Id("G11"), new[] { Id("U11") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddUsersToSecurityGroupAsync(Id("G10"), new[] { Id("U10") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
             ctx.AddGroupToSecurityGroupsAsync(Id("G11"), new[] { Id("G10") }, CancellationToken.None)
                 .GetAwaiter().GetResult();
             ctx.AddGroupToSecurityGroupsAsync(Id("G13"), new[] { Id("G11") }, CancellationToken.None)

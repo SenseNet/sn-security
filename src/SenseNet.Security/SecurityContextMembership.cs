@@ -235,7 +235,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the member group. Cannot be 0.</param>
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void RemoveGroupFromSecurityGroups(int groupId, IEnumerable<int> parentGroups)
         {
             if (groupId == default)
@@ -270,7 +270,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the container group. Cannot be 0.</param>
         /// <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void AddUsersToSecurityGroup(int groupId, IEnumerable<int> userMembers)
         {
             if (groupId == default)
@@ -304,7 +304,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="userId">Identifier of the the user member that will be added. Cannot be 0.</param>
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void AddUserToSecurityGroups(int userId, IEnumerable<int> parentGroups)
         {
             if (userId == default)
@@ -338,7 +338,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="groupId">Identifier of the container group. Cannot be 0.</param>
         /// <param name="userMembers">Collection of the user member identifiers. Can be null or empty.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void RemoveUsersFromSecurityGroup(int groupId, IEnumerable<int> userMembers)
         {
             if (groupId == default)
