@@ -372,7 +372,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="userId">Identifier of the user the will be removed. Cannot be 0.</param>
         /// <param name="parentGroups">Collection of the parent group identifiers. Can be null or empty.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void RemoveUserFromSecurityGroups(int userId, IEnumerable<int> parentGroups)
         {
             if (userId == default)
@@ -403,7 +403,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes the specified group and its relations including related security entries.
         /// </summary>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void DeleteSecurityGroup(int groupId)
         {
             if (groupId == default)
@@ -428,7 +428,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes the user from the system by removing all memberships and security entries related to this user.
         /// </summary>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void DeleteUser(int userId)
         {
             if (userId == default)
@@ -453,7 +453,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes the specified group or user and its relations including related security entries.
         /// </summary>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void DeleteIdentity(int id)
         {
             if (id == default)
@@ -461,7 +461,6 @@ namespace SenseNet.Security
             var activity = new DeleteIdentitiesActivity(new[] { id });
             activity.Execute(this);
         }
-
         /// <summary>
         /// Deletes the specified group or user and its relations including related security entries.
         /// </summary>
@@ -478,7 +477,7 @@ namespace SenseNet.Security
         /// <summary>
         /// Deletes the specified groups or users and their relations including related security entries.
         /// </summary>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void DeleteIdentities(IEnumerable<int> ids)
         {
             if (ids == null)
@@ -486,7 +485,6 @@ namespace SenseNet.Security
             var activity = new DeleteIdentitiesActivity(ids);
             activity.Execute(this);
         }
-
         /// <summary>
         /// Deletes the specified groups or users and their relations including related security entries.
         /// </summary>

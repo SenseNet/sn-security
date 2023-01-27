@@ -235,7 +235,8 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expected, DumpMembership(ctx));
 
             // operation
-            ctx.RemoveUserFromSecurityGroups(U1, new[] { G4, G7, G10, G20, G22 });
+            ctx.RemoveUserFromSecurityGroupsAsync(U1, new[] { G4, G7, G10, G20, G22 }, CancellationToken.None)
+                .GetAwaiter().GetResult();
 
             // test
             Assert.AreEqual(InitialMembership, DumpMembership(ctx));
@@ -271,7 +272,7 @@ namespace SenseNet.Security.Tests
                 "U37:G20,G23|U38:G20,G23|U40:G1,G3,G9,G18,G30", DumpMembership(ctx));
 
             // operation
-            ctx.DeleteSecurityGroup(G30);
+            ctx.DeleteSecurityGroupAsync(G30, CancellationToken.None).GetAwaiter().GetResult();
 
             // test
             Assert.AreEqual(InitialMembership, DumpMembership(ctx));
@@ -283,7 +284,7 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.DeleteSecurityGroup(G20);
+            ctx.DeleteSecurityGroupAsync(G20, CancellationToken.None).GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -303,7 +304,7 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.DeleteSecurityGroup(G3);
+            ctx.DeleteSecurityGroupAsync(G3, CancellationToken.None).GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -329,7 +330,7 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.DeleteSecurityGroup(G8);
+            ctx.DeleteSecurityGroupAsync(G8, CancellationToken.None).GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -380,7 +381,7 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.DeleteUser(U1);
+            ctx.DeleteUserAsync(U1, CancellationToken.None).GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -401,7 +402,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expected, DumpMembership(ctx));
 
             // operation
-            ctx.DeleteUser(U1);
+            ctx.DeleteUserAsync(U1, CancellationToken.None).GetAwaiter().GetResult();
 
             // test
             expected = new MembershipEditor(InitialMembership)
@@ -417,7 +418,7 @@ namespace SenseNet.Security.Tests
             var ctx = context.Security;
 
             // operation
-            ctx.DeleteIdentities(new[] { U1, G10, G20, U26 });
+            ctx.DeleteIdentitiesAsync(new[] { U1, G10, G20, U26 }, CancellationToken.None).GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(InitialMembership)
@@ -443,7 +444,7 @@ namespace SenseNet.Security.Tests
             var membershipBefore = DumpMembership(ctx);
 
             // operation
-            ctx.DeleteSecurityGroup(G20);
+            ctx.DeleteSecurityGroupAsync(G20, CancellationToken.None).GetAwaiter().GetResult();
 
             // test
             var expected = new MembershipEditor(membershipBefore)
@@ -508,7 +509,7 @@ namespace SenseNet.Security.Tests
             Assert.IsTrue(ctx.IsInGroup(G11, G1));  // parent of parent (transitive)
             Assert.IsFalse(ctx.IsInGroup(G11, G4)); // unrelated
 
-            ctx.DeleteSecurityGroup(G3);
+            ctx.DeleteSecurityGroupAsync(G3, CancellationToken.None).GetAwaiter().GetResult();
 
             // user in group
             Assert.IsTrue(ctx.IsInGroup(U13, G11)); // direct parent

@@ -20,7 +20,8 @@ namespace SenseNet.Security.Tests
             //group.SetGroupsWhereThisIsMember(new TestGroup[0]);
 
             //# storing a new totally completed group.
-            CurrentContext.Security.DeleteSecurityGroup(101);
+            CurrentContext.Security.DeleteSecurityGroupAsync(101, CancellationToken.None)
+                .GetAwaiter().GetResult();
             CurrentContext.Security.AddMembersToSecurityGroupAsync(101, new[] { TestUser.User1.Id, TestUser.User2.Id },
                 Array.Empty<int>(),CancellationToken.None, Array.Empty<int>()).GetAwaiter().GetResult();
 
@@ -48,10 +49,10 @@ namespace SenseNet.Security.Tests
             group2.SetGroupsWhereThisIsMember(new[] { group1 });
 
             //# storing a new totally completed group.
-            CurrentContext.Security.DeleteSecurityGroup(101);
+            CurrentContext.Security.DeleteSecurityGroupAsync(101, CancellationToken.None).GetAwaiter().GetResult();
             CurrentContext.Security.AddMembersToSecurityGroupAsync(101, new[] { TestUser.User1.Id, TestUser.User2.Id }, new[] { 102 },
                 CancellationToken.None, Array.Empty<int>()).GetAwaiter().GetResult();
-            CurrentContext.Security.DeleteSecurityGroup(102);
+            CurrentContext.Security.DeleteSecurityGroupAsync(102, CancellationToken.None).GetAwaiter().GetResult();
             CurrentContext.Security.AddMembersToSecurityGroupAsync(102, new[] { TestUser.User3.Id, TestUser.User4.Id }, Array.Empty<int>(),
                 CancellationToken.None, new[] { 101 }).GetAwaiter().GetResult();
 
@@ -129,7 +130,7 @@ namespace SenseNet.Security.Tests
             AddOrModifySecurityGroup(CurrentContext.Security, group2);
 
             //# deleting a group that is has member but it is not member of another one.
-            CurrentContext.Security.DeleteSecurityGroup(groupId1);
+            CurrentContext.Security.DeleteSecurityGroupAsync(groupId1, CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U3:G2|U4:G2", DumpMembership(CurrentContext.Security));
@@ -159,7 +160,7 @@ namespace SenseNet.Security.Tests
 
             //# deleting a group that is member of another one
             group1.RemoveGroup(group2);
-            CurrentContext.Security.DeleteSecurityGroup(group2.Id);
+            CurrentContext.Security.DeleteSecurityGroupAsync(group2.Id, CancellationToken.None).GetAwaiter().GetResult();
 
             // check
             Assert.AreEqual("U1:G1|U2:G1", DumpMembership(CurrentContext.Security));
@@ -189,7 +190,7 @@ namespace SenseNet.Security.Tests
 
             //# deleting a group that is member of another one
             group1.RemoveGroup(group2);
-            CurrentContext.Security.DeleteSecurityGroup(group2.Id);
+            CurrentContext.Security.DeleteSecurityGroupAsync(group2.Id, CancellationToken.None).GetAwaiter().GetResult();
             // update group that contained the removed group
             //CurrentContext.Security.AddOrModifySecurityGroup(groupId1, new[] { TestUser.User1.Id, TestUser.User2.Id });
 
@@ -226,7 +227,7 @@ namespace SenseNet.Security.Tests
 
             //# deleting a group that is an item of a circle
             group2.RemoveGroup(group3);
-            CurrentContext.Security.DeleteSecurityGroup(group3.Id);
+            CurrentContext.Security.DeleteSecurityGroupAsync(group3.Id, CancellationToken.None).GetAwaiter().GetResult();
 
 
             // check
@@ -255,7 +256,7 @@ namespace SenseNet.Security.Tests
         {
 
             //# deleting an unknown group
-            CurrentContext.Security.DeleteSecurityGroup(int.MaxValue);
+            CurrentContext.Security.DeleteSecurityGroupAsync(int.MaxValue, CancellationToken.None).GetAwaiter().GetResult();
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
@@ -263,7 +264,7 @@ namespace SenseNet.Security.Tests
         {
 
             //# deleting an invalid group
-            CurrentContext.Security.DeleteSecurityGroup(default);
+            CurrentContext.Security.DeleteSecurityGroupAsync(default, CancellationToken.None).GetAwaiter().GetResult();
 
         }
 
@@ -1156,7 +1157,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("U1:G1|U2:G1,G2|U3:G1,G2,G3,G4,G5|U4:G1,G2,G3,G4,G5|U5:G1,G2,G3,G4,G5", DumpMembership(CurrentContext.Security));
 
             //# Deleting group and registering the change.
-            CurrentContext.Security.DeleteSecurityGroup(Id("G2"));
+            CurrentContext.Security.DeleteSecurityGroupAsync(Id("G2"), CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual("U1:G1|U3:G3,G4,G5|U4:G3,G4,G5|U5:G3,G4,G5", DumpMembership(CurrentContext.Security));
         }
