@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
 
@@ -170,7 +171,7 @@ namespace SenseNet.Security.Tests
             var ed = ctx.CreateAclEditor();
             ed.BreakInheritance(Id("E5"), new[] { EntryType.Normal });
             ed.BreakInheritance(Id("E8"), new[] { EntryType.Normal });
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // ASSERT
             var entries5 = ctx.GetExplicitEntries(Id("E5")) // E1/E2/E5
@@ -202,7 +203,7 @@ namespace SenseNet.Security.Tests
             var ed = ctx.CreateAclEditor();
             ed.BreakInheritance(Id("E5"), new[] { EntryType.Normal, EntryType.Sharing });
             ed.BreakInheritance(Id("E8"), new[] { EntryType.Normal, EntryType.Sharing });
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // ASSERT
             var entries5 = ctx.GetExplicitEntries(Id("E5")) // E1/E2/E5
@@ -235,13 +236,13 @@ namespace SenseNet.Security.Tests
             var ed = ctx.CreateAclEditor();
             ed.BreakInheritance(Id("E5"), new[] { EntryType.Normal, EntryType.Sharing });
             ed.BreakInheritance(Id("E8"), new[] { EntryType.Normal, EntryType.Sharing });
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // ACTION
             ed = ctx.CreateAclEditor();
             ed.UnBreakInheritance(Id("E5"), new[] { EntryType.Normal });
             ed.UnBreakInheritance(Id("E8"), new[] { EntryType.Normal });
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // ASSERT
             var entries5 = ctx.GetExplicitEntries(Id("E5")); // E1/E2/E5
@@ -447,7 +448,7 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(0x2ul, entry.AllowBits);
 
             // ACTION 2
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // ASSERT 2
             var eff = ctx.GetEffectiveEntries(Id("E2")).OrderBy(x => x.EntryType).ToList();
@@ -503,7 +504,7 @@ namespace SenseNet.Security.Tests
             var bitMask = new PermissionBitMask { AllowBits = 0x1Ful, DenyBits = 0x00ul };
             ctx.CreateAclEditor(EntryType.Sharing)
                 .Set(Id("E5"), Id("U1"), false, bitMask)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var entries = ctx.GetExplicitEntries(Id("E5"), null, EntryType.Sharing);
             Assert.AreEqual(1, entries.Count);

@@ -55,16 +55,18 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
         private ISecurityActivityQueue SecurityActivityQueue => SecuritySystem.SecurityActivityQueue;
 
         [TestMethod]
-        public void EFC_LoadActivities_AtStart_DataHandlerLevel()
+        public async Task EFC_LoadActivities_AtStart_DataHandlerLevel()
         {
             var sCtx = CurrentContext.Security;
             var user1Id = TestUser.User1.Id;
             var rootEntityId = Id("E01");
 
             // create 30 activities
-            sCtx.CreateSecurityEntity(rootEntityId, default, user1Id);
+            await sCtx.CreateSecurityEntityAsync(rootEntityId, default, user1Id, CancellationToken.None)
+                .ConfigureAwait(false);
             for (var entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
-                sCtx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
+                await sCtx.CreateSecurityEntityAsync(entityId, rootEntityId, user1Id, CancellationToken.None)
+                    .ConfigureAwait(false);
 
             var lastId = Db().ExecuteTestScript<int>("select top 1 Id as Value from [EFMessages] order by Id desc").First();
 
@@ -121,9 +123,11 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             var rootEntityId = Id("E01");
 
             // create 30 activities
-            sCtx.CreateSecurityEntity(rootEntityId, default, user1Id);
+            await sCtx.CreateSecurityEntityAsync(rootEntityId, default, user1Id, CancellationToken.None)
+                .ConfigureAwait(false);
             for (var entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
-                sCtx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
+                await sCtx.CreateSecurityEntityAsync(entityId, rootEntityId, user1Id, CancellationToken.None)
+                    .ConfigureAwait(false);
 
             var lastId = Db().ExecuteTestScript<int>("select top 1 Id as Value from [EFMessages] order by Id desc").First();
 
@@ -228,7 +232,8 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                     DELETE EFMessages WHERE Id in (select top 2 Id from [EFMessages] order by Id desc)");
 
             // last activity
-            sCtx.CreateSecurityEntity(101, rootEntityId, user1Id);
+            await sCtx.CreateSecurityEntityAsync(101, rootEntityId, user1Id, CancellationToken.None)
+                .ConfigureAwait(false);
 
             var cs2 = SecurityActivityQueue.GetCurrentCompletionState();
             Assert.AreEqual(4, cs2.Gaps.Length);

@@ -468,7 +468,8 @@ namespace SenseNet.Security.Tests
             CreateStructureForInheritanceTests(out var ids);
 
             //# calling the security component for breaking permission inheritance
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(ids[1], new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(ids[1], new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // inspection
             var dbEntity = GetStoredSecurityEntity(ids[0]);
@@ -490,9 +491,11 @@ namespace SenseNet.Security.Tests
         {
             CreateStructureForInheritanceTests(out var ids);
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(ids[1], new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(ids[1], new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             // valid but ineffective
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(ids[1], new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(ids[1], new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // inspection
             var dbEntity = GetStoredSecurityEntity(ids[0]);
@@ -513,20 +516,23 @@ namespace SenseNet.Security.Tests
         [ExpectedException(typeof(EntityNotFoundException))]
         public void Structure_BreakInheritance_Invalid()
         {
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(default, new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(default, new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
         public void Structure_BreakInheritance_Missing()
         {
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(int.MaxValue, new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(int.MaxValue, new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
 
         [TestMethod]
         public void Structure_UndoBreakInheritance()
         {
             CreateStructureForInheritanceTests(out var ids);
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(ids[1], new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(ids[1], new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var dbEntity = GetStoredSecurityEntity(ids[1]);
             Assert.IsFalse(dbEntity.IsInherited);
@@ -534,7 +540,8 @@ namespace SenseNet.Security.Tests
             Assert.IsFalse(entity.IsInherited);
 
             //# calling the security component for restoring broken permission inheritance
-            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(ids[1], new[] {EntryType.Normal}).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(ids[1], new[] {EntryType.Normal})
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // inspection
             dbEntity = GetStoredSecurityEntity(ids[0]);
@@ -555,12 +562,15 @@ namespace SenseNet.Security.Tests
         public void Structure_UndoBreakInheritance_Twice()
         {
             CreateStructureForInheritanceTests(out var ids);
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(ids[1], new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(ids[1], new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             //#
-            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(ids[1], new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(ids[1], new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             //# valid but ineffective
-            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(ids[1], new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(ids[1], new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // inspection
             var dbEntity = GetStoredSecurityEntity(ids[0]);
@@ -581,13 +591,15 @@ namespace SenseNet.Security.Tests
         [ExpectedException(typeof(EntityNotFoundException))]
         public void Structure_UndoBreakInheritance_Invalid()
         {
-            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(default, new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(default, new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
         public void Structure_UndoBreakInheritance_Missing()
         {
-            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(int.MaxValue, new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(int.MaxValue, new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
 
 
@@ -760,7 +772,7 @@ namespace SenseNet.Security.Tests
                 .Allow(root.Id, 1001, false, PermissionType.Open)
                 .Allow(target.Id, 1002, false, PermissionType.Open)
                 .Allow(child1.Id, 1003, false, PermissionType.Open)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
 
         private void CreateStructureForInheritanceTests(out int[] chain)

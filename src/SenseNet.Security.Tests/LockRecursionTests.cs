@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Data;
@@ -34,13 +36,13 @@ namespace SenseNet.Security.Tests
             //MemoryDataProvider.LastActivityId = 0;
             var securitySystem = Context.StartTheSystem(new MemoryDataProvider(DatabaseStorage.CreateEmpty()), DiTools.CreateDefaultMessageProvider());
             var context = new Context(currentUser, securitySystem);
-            CreatePlayground(context);
+            CreatePlaygroundAsync(context, CancellationToken.None).GetAwaiter().GetResult();
             return context;
         }
 
         private readonly Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
 
-        private void CreatePlayground(Context context)
+        private async Task CreatePlaygroundAsync(Context context, CancellationToken cancel)
         {
             var u1 = TestUser.User1;
 
@@ -144,15 +146,15 @@ namespace SenseNet.Security.Tests
 
             var ctx = context.Security;
 
-            ctx.AddUsersToSecurityGroup(Id("G13"), new[] { Id("U13") });
-            ctx.AddUsersToSecurityGroup(Id("G12"), new[] { Id("U12") });
-            ctx.AddUsersToSecurityGroup(Id("G11"), new[] { Id("U11") });
-            ctx.AddUsersToSecurityGroup(Id("G10"), new[] { Id("U10") });
-            ctx.AddGroupToSecurityGroups(Id("G11"), new[] { Id("G10") });
-            ctx.AddGroupToSecurityGroups(Id("G13"), new[] { Id("G11") });
-            ctx.AddGroupToSecurityGroups(Id("G13"), new[] { Id("G12") });
+            await ctx.AddUsersToSecurityGroupAsync(Id("G13"), new[] { Id("U13") }, cancel).ConfigureAwait(false);
+            await ctx.AddUsersToSecurityGroupAsync(Id("G12"), new[] { Id("U12") }, cancel).ConfigureAwait(false);
+            await ctx.AddUsersToSecurityGroupAsync(Id("G11"), new[] { Id("U11") }, cancel).ConfigureAwait(false);
+            await ctx.AddUsersToSecurityGroupAsync(Id("G10"), new[] { Id("U10") }, cancel).ConfigureAwait(false);
+            await ctx.AddGroupToSecurityGroupsAsync(Id("G11"), new[] { Id("G10") }, cancel).ConfigureAwait(false);
+            await ctx.AddGroupToSecurityGroupsAsync(Id("G13"), new[] { Id("G11") }, cancel).ConfigureAwait(false);
+            await ctx.AddGroupToSecurityGroupsAsync(Id("G13"), new[] { Id("G12") }, cancel).ConfigureAwait(false);
 
-            ctx.CreateAclEditor()
+            await ctx.CreateAclEditor()
                 .Allow(Id("E2"), Id("U1"), false, PermissionType.Custom01)
                 .Allow(Id("E2"), Id("U2"), false, PermissionType.Custom01)
                 .Allow(Id("E2"), Id("U3"), false, PermissionType.Custom01)
@@ -180,9 +182,9 @@ namespace SenseNet.Security.Tests
 
                 .Allow(Id("E32"), Id("U1"), false, PermissionType.Custom01)
 
-                .Apply();
+                .ApplyAsync(cancel).ConfigureAwait(false);
 
-            ctx.CreateAclEditor()
+            await ctx.CreateAclEditor()
                 .BreakInheritance(Id("E22"), new[] { EntryType.Normal })
 
                 .BreakInheritance(Id("E34"), new[] { EntryType.Normal })
@@ -194,16 +196,15 @@ namespace SenseNet.Security.Tests
                 .BreakInheritance(Id("E36"), new[] { EntryType.Normal })
                 .ClearPermission(Id("E36"), Id("U1"), false, PermissionType.Custom01)
 
+                .ApplyAsync(cancel).ConfigureAwait(false);
 
-                .Apply();
-
-            ctx.CreateAclEditor()
+            await ctx.CreateAclEditor()
                 .BreakInheritance(Id("E37"), new[] { EntryType.Normal })
 
                 // E41 and her subtree (E41, E42) is disabled for everyone except the system user
                 .BreakInheritance(Id("E41"), new EntryType[0])
 
-                .Apply();
+                .ApplyAsync(cancel).ConfigureAwait(false);
 
         }
 
@@ -217,7 +218,8 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
-            context.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
+            context.Security.CreateSecurityEntityAsync(entity.Id, entity.ParentId, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
         }
 
         private static int Id(string name)

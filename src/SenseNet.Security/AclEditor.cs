@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using SenseNet.Security.Messaging.SecurityMessages;
 // ReSharper disable ArrangeThisQualifier
 
@@ -254,10 +256,21 @@ namespace SenseNet.Security
         /// <summary>
         /// Executes all modifications. If you do not call this method, no changes will be made.
         /// </summary>
+        [Obsolete("Use async version instead.", true)]
         public virtual void Apply()
         {
             var activity = new SetAclActivity(_acls.Values.ToArray(), _breaks, _unBreaks);
             activity.Execute(this.Context);
+        }
+        /// <summary>
+        /// Executes all modifications. If you do not call this method, no changes will be made.
+        /// </summary>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
+        /// <returns>A Task that represents the asynchronous operation.</returns>
+        public virtual async Task ApplyAsync(CancellationToken cancel)
+        {
+            var activity = new SetAclActivity(_acls.Values.ToArray(), _breaks, _unBreaks);
+            await activity.ExecuteAsync(this.Context, cancel).ConfigureAwait(false);
         }
 
         /// <summary>

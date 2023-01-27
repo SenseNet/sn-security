@@ -1297,7 +1297,7 @@ namespace SenseNet.Security.Tests
             ed.Allow(entityId, group3.Id, false, PermissionType.Open, PermissionType.Custom03);
             ed.Allow(entityId, group4.Id, false, PermissionType.Open, PermissionType.Custom04);
             ed.Allow(entityId, group5.Id, false, PermissionType.Open, PermissionType.Custom05);
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // #3: Validate the initial conditions: User4 has only Open and Custom04
             ctx = new SecurityContext(TestUser.User4, CurrentContext.Security.SecuritySystem);

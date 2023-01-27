@@ -2,6 +2,8 @@
 using SenseNet.Security.Tests.TestPortal;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using SenseNet.Diagnostics;
 
 // ReSharper disable JoinDeclarationAndInitializer
@@ -23,7 +25,7 @@ namespace SenseNet.Security.Tests
             _StartTest(TestContext);
 
             CurrentContext = GetEmptyContext(TestUser.User1);
-            CreatePlayground();
+            CreatePlaygroundAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
 
         [TestCleanup]
@@ -268,7 +270,7 @@ namespace SenseNet.Security.Tests
         #region Helper methods
         private readonly Dictionary<int, TestEntity> _repository = new Dictionary<int, TestEntity>();
 
-        private void CreatePlayground()
+        private async Task CreatePlaygroundAsync(CancellationToken cancel)
         {
             var u1 = TestUser.User1;
 
@@ -358,15 +360,15 @@ namespace SenseNet.Security.Tests
             }
             var ctx = CurrentContext.Security;
 
-            ctx.AddUsersToSecurityGroup(Id("G13"), new[] {Id("U13")});
-            ctx.AddUsersToSecurityGroup(Id("G12"), new[] {Id("U12")});
-            ctx.AddUsersToSecurityGroup(Id("G11"), new[] {Id("U11")});
-            ctx.AddUsersToSecurityGroup(Id("G10"), new[] {Id("U10")});
-            ctx.AddGroupToSecurityGroups(Id("G11"), new[] {Id("G10")});
-            ctx.AddGroupToSecurityGroups(Id("G13"), new[] {Id("G11")});
-            ctx.AddGroupToSecurityGroups(Id("G13"), new[] {Id("G12")});
+            await ctx.AddUsersToSecurityGroupAsync(Id("G13"), new[] {Id("U13")}, cancel).ConfigureAwait(false);
+            await ctx.AddUsersToSecurityGroupAsync(Id("G12"), new[] {Id("U12")}, cancel).ConfigureAwait(false);
+            await ctx.AddUsersToSecurityGroupAsync(Id("G11"), new[] {Id("U11")}, cancel).ConfigureAwait(false);
+            await ctx.AddUsersToSecurityGroupAsync(Id("G10"), new[] {Id("U10")}, cancel).ConfigureAwait(false);
+            await ctx.AddGroupToSecurityGroupsAsync(Id("G11"), new[] {Id("G10")}, cancel).ConfigureAwait(false);
+            await ctx.AddGroupToSecurityGroupsAsync(Id("G13"), new[] {Id("G11")}, cancel).ConfigureAwait(false);
+            await ctx.AddGroupToSecurityGroupsAsync(Id("G13"), new[] {Id("G12")}, cancel).ConfigureAwait(false);
 
-            ctx.CreateAclEditor()
+            await ctx.CreateAclEditor()
                 .Allow(Id("E2"), Id("U1"), false, PermissionType.Custom01)
                 .Allow(Id("E2"), Id("U2"), false, PermissionType.Custom01)
                 .Allow(Id("E2"), Id("U3"), false, PermissionType.Custom01)
@@ -411,7 +413,7 @@ namespace SenseNet.Security.Tests
                 .Allow(Id("E65"), Id("U10"), false, PermissionType.Custom05)
                 .Allow(Id("E66"), Id("U12"), false, PermissionType.Custom06)
 
-                .Apply();
+                .ApplyAsync(cancel).ConfigureAwait(false);
 
             var users = new[] { "U1", "U2", "U3", "U4", "U10", "U12" };
             var sharingPerms = PermissionTypeBase.GetPermissionTypes();
@@ -448,7 +450,7 @@ namespace SenseNet.Security.Tests
                     .Allow(Id("E65"), userId, false, sharingPerms)
                     .Allow(Id("E66"), userId, false, sharingPerms);
             }
-            aclEd.Apply();
+            await aclEd.ApplyAsync(cancel).ConfigureAwait(false);
         }
 
         private TestEntity CreateEntity(string name, string parentName, TestUser owner)
@@ -461,7 +463,8 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
-            CurrentContext.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
+            CurrentContext.Security.CreateSecurityEntityAsync(entity.Id, entity.ParentId, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
             return entity;
         }
 
