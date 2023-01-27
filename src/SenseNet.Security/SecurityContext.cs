@@ -222,7 +222,7 @@ namespace SenseNet.Security
         /// <param name="entityId">Id of the created entity. Cannot be 0.</param>
         /// <param name="parentEntityId">Id of the parent entity. Cannot be 0.</param>
         /// <param name="ownerId">Id of the entity's owner identity.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId)
         {
             if (entityId == default)
@@ -277,7 +277,7 @@ namespace SenseNet.Security
         /// Deletes the entity, it's whole subtree and all related ACLs.
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void DeleteEntity(int entityId)
         {
             if (entityId == default)
@@ -304,7 +304,7 @@ namespace SenseNet.Security
         /// </summary>
         /// <param name="sourceId">Id of the source entity. Cannot be 0.</param>
         /// <param name="targetId">Id of the target entity that will contain the source. Cannot be 0.</param>
-        [Obsolete("Use async version instead.", false)]
+        [Obsolete("Use async version instead.", true)]
         public virtual void MoveEntity(int sourceId, int targetId)
         {
             if (sourceId == default)

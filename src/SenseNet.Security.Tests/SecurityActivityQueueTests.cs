@@ -42,7 +42,8 @@ public class SecurityActivityQueueTests : TestBase
         var idE54 = GetId("E54");
         var idU1 = GetId("U1");
         _context = new Context(TestUser.User1, securitySystem);
-        _context.Security.CreateSecurityEntity(idE54, idE53, idU1);
+        await _context.Security.CreateSecurityEntityAsync(idE54, idE53, idU1, CancellationToken.None)
+            .ConfigureAwait(false);
 
         //ASSERT
         await Task.Delay(100);

@@ -247,7 +247,8 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : repository[GetId(parentName)]
             };
             repository.Add(entity.Id, entity);
-            context.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
+            context.CreateSecurityEntityAsync(entity.Id, entity.ParentId, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
         }
         internal string EntityIdStructureToString(SecurityContext ctx)
         {

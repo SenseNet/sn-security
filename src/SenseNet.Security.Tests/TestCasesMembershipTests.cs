@@ -1289,7 +1289,8 @@ namespace SenseNet.Security.Tests
 
             // #2: Set permissions on entity1 for each groups
             var entityId = Id("E1");
-            ctx.CreateSecurityEntity(entityId, 0, int.MaxValue);
+            ctx.CreateSecurityEntityAsync(entityId, 0, int.MaxValue, CancellationToken.None)
+                .GetAwaiter().GetResult();
 
             var ed = ctx.CreateAclEditor();
             ed.Allow(entityId, group1.Id, false, PermissionType.Open, PermissionType.Custom01);

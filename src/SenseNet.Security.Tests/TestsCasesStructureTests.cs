@@ -15,7 +15,8 @@ namespace SenseNet.Security.Tests
             var entity = new TestEntity { Id = id, OwnerId = TestUser.User1.Id, Parent = null };
 
             //# calling the security component
-            CurrentContext.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
+            CurrentContext.Security.CreateSecurityEntityAsync(entity.Id, entity.ParentId, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
 
             var dbEntity = GetStoredSecurityEntity(id);
             var memEntity = CurrentContext.Security.GetSecurityEntity(id);
@@ -35,7 +36,8 @@ namespace SenseNet.Security.Tests
             var id = Id("E101");
 
             //# calling the security component for creating one entity
-            CurrentContext.Security.CreateSecurityEntity(id, default, TestUser.User1.Id);
+            CurrentContext.Security.CreateSecurityEntityAsync(id, default, TestUser.User1.Id, CancellationToken.None)
+                .GetAwaiter().GetResult();
 
             var dbEntity = GetStoredSecurityEntity(id);
             var memEntity = CurrentContext.Security.GetSecurityEntity(id);
@@ -100,9 +102,12 @@ namespace SenseNet.Security.Tests
             var grandChildId = Id("E103");
 
             //# calling the security component for creating an entity chain
-            CurrentContext.Security.CreateSecurityEntity(rootId, default, TestUser.User1.Id);
-            CurrentContext.Security.CreateSecurityEntity(childId, rootId, TestUser.User2.Id);
-            CurrentContext.Security.CreateSecurityEntity(grandChildId, childId, TestUser.User3.Id);
+            CurrentContext.Security.CreateSecurityEntityAsync(rootId, default, TestUser.User1.Id,
+                    CancellationToken.None).GetAwaiter().GetResult();
+            CurrentContext.Security.CreateSecurityEntityAsync(childId, rootId, TestUser.User2.Id,
+                    CancellationToken.None).GetAwaiter().GetResult();
+            CurrentContext.Security.CreateSecurityEntityAsync(grandChildId, childId, TestUser.User3.Id,
+                    CancellationToken.None).GetAwaiter().GetResult();
 
             // inspection
             var memEntity = CurrentContext.Security.GetSecurityEntity(rootId);
@@ -174,7 +179,8 @@ namespace SenseNet.Security.Tests
         public void Structure_CreateSecurityEntity_invalidId()
         {
             //# calling the security component
-            CurrentContext.Security.CreateSecurityEntity(default, default, default);
+            CurrentContext.Security.CreateSecurityEntityAsync(default, default, default,
+                CancellationToken.None).GetAwaiter().GetResult();
         }
         [TestMethod]
         public void Structure_CreateSecurityEntity_existing()
@@ -226,7 +232,7 @@ namespace SenseNet.Security.Tests
             }
 
             //# Deleting an entity that has two children
-            CurrentContext.Security.DeleteEntity(childEntity1.Id);
+            CurrentContext.Security.DeleteEntityAsync(childEntity1.Id, CancellationToken.None).GetAwaiter().GetResult();
 
             // inspection
             Assert.IsNotNull(CurrentContext.Security.GetSecurityEntity(rootId));
@@ -277,7 +283,7 @@ namespace SenseNet.Security.Tests
 
             //# Deleting an entity that has two children
 
-            CurrentContext.Security.DeleteEntity(childId1);
+            CurrentContext.Security.DeleteEntityAsync(childId1, CancellationToken.None).GetAwaiter().GetResult();
 
             // inspection
             Assert.IsNotNull(CurrentContext.Security.GetSecurityEntity(rootId));
@@ -298,13 +304,13 @@ namespace SenseNet.Security.Tests
         [TestMethod]
         public void Structure_DeletingMissingEntityDoesNotThrows()
         {
-            CurrentContext.Security.DeleteEntity(int.MaxValue);
+            CurrentContext.Security.DeleteEntityAsync(int.MaxValue, CancellationToken.None).GetAwaiter().GetResult();
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Structure_DeleteEntity_invalidId()
         {
-            CurrentContext.Security.DeleteEntity(default(int));
+            CurrentContext.Security.DeleteEntityAsync(default(int), CancellationToken.None).GetAwaiter().GetResult();
         }
 
 
@@ -421,7 +427,7 @@ namespace SenseNet.Security.Tests
             CreateStructureForMoveTests(out _, out var source, out var target, out var child1, out var child2);
 
             //#
-            CurrentContext.Security.MoveEntity(source.Id, target.Id);
+            CurrentContext.Security.MoveEntityAsync(source.Id, target.Id, CancellationToken.None).GetAwaiter().GetResult();
 
             // check in database
             var movedDbEntity = GetStoredSecurityEntity(source.Id);
@@ -446,7 +452,7 @@ namespace SenseNet.Security.Tests
         {
             CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
             source.Id = default;
-            CurrentContext.Security.MoveEntity(source.Id, target.Id);
+            CurrentContext.Security.MoveEntityAsync(source.Id, target.Id, CancellationToken.None).GetAwaiter().GetResult();
         }
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
@@ -454,7 +460,7 @@ namespace SenseNet.Security.Tests
         {
             CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
             target.Id = default;
-            CurrentContext.Security.MoveEntity(source.Id, target.Id);
+            CurrentContext.Security.MoveEntityAsync(source.Id, target.Id, CancellationToken.None).GetAwaiter().GetResult();
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
@@ -462,7 +468,7 @@ namespace SenseNet.Security.Tests
         {
             CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
             source.Id = Id("E101");
-            CurrentContext.Security.MoveEntity(source.Id, target.Id);
+            CurrentContext.Security.MoveEntityAsync(source.Id, target.Id, CancellationToken.None).GetAwaiter().GetResult();
         }
         [TestMethod]
         [ExpectedException(typeof(EntityNotFoundException))]
@@ -470,7 +476,7 @@ namespace SenseNet.Security.Tests
         {
             CreateStructureForMoveTests(out _, out var source, out var target, out _, out _);
             target.Id = Id("E101");
-            CurrentContext.Security.MoveEntity(source.Id, target.Id);
+            CurrentContext.Security.MoveEntityAsync(source.Id, target.Id, CancellationToken.None).GetAwaiter().GetResult();
         }
 
 
@@ -635,7 +641,8 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             var _ = CreateRepository(ctx);
 
-            ctx.CreateSecurityEntity(Id("E54"), Id("E53"), 1);
+            ctx.CreateSecurityEntityAsync(Id("E54"), Id("E53"), 1, CancellationToken.None)
+                .GetAwaiter().GetResult();
 
             const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53{E54}}}E15}E6{E16E17}E7{E18E19}}E3" +
                                     "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E3" +
@@ -650,7 +657,8 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             var _ = CreateRepository(ctx);
 
-            ctx.CreateSecurityEntity(Id("E54"), Id("E50"), 1);
+            ctx.CreateSecurityEntityAsync(Id("E54"), Id("E50"), 1,
+                CancellationToken.None).GetAwaiter().GetResult();
 
             const string  expected = "{E1{E2{E5{E14{E50{E51{E52}E53E54}}E15}E6{E16E17}E7{E18E19}}E3" +
                                      "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{" +
@@ -664,7 +672,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             var _ = CreateRepository(ctx);
 
-            ctx.DeleteEntity(Id("E52"));
+            ctx.DeleteEntityAsync(Id("E52"), CancellationToken.None).GetAwaiter().GetResult();
 
             const string expected = "{E1{E2{E5{E14{E50{E51E53}}E15}E6{E16E17}E7{E18E19}}E3{E8{E20E21" +
                                     "{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34{E40E4" +
@@ -679,7 +687,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             var _ = CreateRepository(ctx);
 
-            ctx.DeleteEntity(Id("E25"));
+            ctx.DeleteEntityAsync(Id("E25"), CancellationToken.None).GetAwaiter().GetResult();
 
             const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E6{E16E17}E7{E18E19}}E3{E8" +
                                     "{E20E21{E22E23E24E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33E34" +
@@ -694,7 +702,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             var _ = CreateRepository(ctx);
 
-            ctx.MoveEntity(Id("E50"), Id("E15"));
+            ctx.MoveEntityAsync(Id("E50"), Id("E15"), CancellationToken.None).GetAwaiter().GetResult();
 
             const string expected = "{E1{E2{E5{E14E15{E50{E51{E52}E53}}}E6{E16E17}E7{E18E19}}E3" +
                                     "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E" +
@@ -709,7 +717,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             var _ = CreateRepository(ctx);
 
-            ctx.MoveEntity(Id("E50"), Id("E2"));
+            ctx.MoveEntityAsync(Id("E50"), Id("E2"), CancellationToken.None).GetAwaiter().GetResult();
 
             const string expected = "{E1{E2{E5{E14E15}E6{E16E17}E7{E18E19}E50{E51{E52}E53}}E3" +
                                     "{E8{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30" +
@@ -724,7 +732,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             var _ = CreateRepository(ctx);
 
-            ctx.MoveEntity(Id("E6"), Id("E3"));
+            ctx.MoveEntityAsync(Id("E6"), Id("E3"), CancellationToken.None).GetAwaiter().GetResult();
 
             const string expected = "{E1{E2{E5{E14{E50{E51{E52}E53}}E15}E7{E18E19}}E3{E6{E16E17}E8" +
                                     "{E20E21{E22E23E24E25E26E27E28E29}}E9E10}E4{E11E12{E30{E31{E33" +
@@ -843,7 +851,8 @@ namespace SenseNet.Security.Tests
 
         private void CreateSecurityEntity(TestEntity entity)
         {
-            CurrentContext.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
+            CurrentContext.Security.CreateSecurityEntityAsync(entity.Id, entity.ParentId, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -110,7 +111,8 @@ namespace SenseNet.Security.Tests
             var state0 = securitySystem.SecurityActivityQueue.GetCurrentState();
             Assert.AreEqual(0, state0.Termination.LastActivityId);
             Assert.AreEqual(0, state0.InnerState.Hearthbeats);
-            _context.Security.CreateSecurityEntity(999, GetId("E1"), GetId("U1"));
+            _context.Security.CreateSecurityEntityAsync(999, GetId("E1"), GetId("U1"), CancellationToken.None)
+                .GetAwaiter().GetResult();
             Task.Delay(10).Wait();
             var state1 = securitySystem.SecurityActivityQueue.GetCurrentState();
             Assert.AreEqual(1, state1.Termination.LastActivityId);

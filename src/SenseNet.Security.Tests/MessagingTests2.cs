@@ -88,7 +88,8 @@ namespace SenseNet.Security.Tests
 
                 var user = TestUser.User1;
                 var ctx = new SecurityContext(user, sourceSystem);
-                ctx.CreateSecurityEntity(999, 1, user.Id);
+                await ctx.CreateSecurityEntityAsync(999, 1, user.Id, CancellationToken.None)
+                    .ConfigureAwait(false);
 
                 Assert.IsTrue(sourceSystem.Cache.Entities.ContainsKey(999));
                 Assert.IsFalse(targetSystem.Cache.Entities.ContainsKey(999));
