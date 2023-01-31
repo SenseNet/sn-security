@@ -85,12 +85,12 @@ namespace SenseNet.Security.Tests
         private static int _id;
         private static int _maxLevel;
         private static int _levelWidth;
-        public static Dictionary<int, StoredSecurityEntity> CreateTestEntities_Big(int maxLevel, int levelWidth)
+        public static ConcurrentDictionary<int, StoredSecurityEntity> CreateTestEntities_Big(int maxLevel, int levelWidth)
         {
             _maxLevel = maxLevel;
             _levelWidth = levelWidth;
             _id = 1;
-            var storage = new Dictionary<int, StoredSecurityEntity>();
+            var storage = new ConcurrentDictionary<int, StoredSecurityEntity>();
 
             var root = CreateEntity_Big(null, 9999999, storage);
             for (var level = 1; level < 2; level++)
@@ -98,7 +98,7 @@ namespace SenseNet.Security.Tests
 
             return storage;
         }
-        private static void CreateTestEntities_Big(int currentLevel, StoredSecurityEntity root, Dictionary<int, StoredSecurityEntity> storage)
+        private static void CreateTestEntities_Big(int currentLevel, StoredSecurityEntity root, ConcurrentDictionary<int, StoredSecurityEntity> storage)
         {
             if (currentLevel >= _maxLevel)
                 return;
@@ -108,7 +108,7 @@ namespace SenseNet.Security.Tests
                 CreateTestEntities_Big(currentLevel + 1, entity, storage);
             }
         }
-        private static StoredSecurityEntity CreateEntity_Big(StoredSecurityEntity parentEntity, int ownerId, Dictionary<int, StoredSecurityEntity> storage)
+        private static StoredSecurityEntity CreateEntity_Big(StoredSecurityEntity parentEntity, int ownerId, ConcurrentDictionary<int, StoredSecurityEntity> storage)
         {
             var entity = new StoredSecurityEntity
             {

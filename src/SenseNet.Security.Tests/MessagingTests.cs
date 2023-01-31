@@ -10,6 +10,7 @@ using SenseNet.Security.Data;
 using SenseNet.Security.Tests.TestPortal;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
+using System.Collections.Concurrent;
 
 namespace SenseNet.Security.Tests
 {
@@ -136,9 +137,9 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expected, actual);
         }
 
-        public static Dictionary<int, StoredSecurityEntity> CreateTestEntities()
+        public static ConcurrentDictionary<int, StoredSecurityEntity> CreateTestEntities()
         {
-            var storage = new Dictionary<int, StoredSecurityEntity>();
+            var storage = new ConcurrentDictionary<int, StoredSecurityEntity>();
             var u1 = TestUser.User1;
 
             CreateEntity("E1", null, u1, storage);
@@ -219,7 +220,7 @@ namespace SenseNet.Security.Tests
             return storage;
         }
         private static void CreateEntity(string name, string parentName, TestUser owner,
-            Dictionary<int, StoredSecurityEntity> storage)
+            ConcurrentDictionary<int, StoredSecurityEntity> storage)
         {
             var entityId = Id(name);
             var parentEntityId = parentName == null ? default : Id(parentName);

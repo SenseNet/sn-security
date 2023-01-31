@@ -196,7 +196,7 @@ namespace SenseNet.Security.Data
         }
         public Task DeleteSecurityEntityAsync(int entityId, CancellationToken cancel)
         {
-            Storage.Entities.Remove(entityId);
+            Storage.Entities.TryRemove(entityId, out _);
             return Task.CompletedTask;
         }
 
@@ -357,7 +357,7 @@ namespace SenseNet.Security.Data
             }
 
             // remove the entity itself
-            Storage.Entities.Remove(entityId);
+            Storage.Entities.TryRemove(entityId, out _);
         }
 
         [Obsolete("Use async version instead.")]

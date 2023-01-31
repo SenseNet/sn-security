@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace SenseNet.Security.Data
@@ -15,7 +16,7 @@ namespace SenseNet.Security.Data
     /// </summary>
     public class DatabaseStorage
     {
-        public Dictionary<int, StoredSecurityEntity> Entities;
+        public ConcurrentDictionary<int, StoredSecurityEntity> Entities;
         public List<Membership> Memberships;
         public List<StoredAce> Aces;
 
@@ -27,7 +28,7 @@ namespace SenseNet.Security.Data
             return new DatabaseStorage
             {
                 Aces = new List<StoredAce>(),
-                Entities = new Dictionary<int, StoredSecurityEntity>(),
+                Entities = new ConcurrentDictionary<int, StoredSecurityEntity>(),
                 Memberships = new List<Membership>(),
                 Messages = new List<Tuple<int,DateTime,byte[]>>()
             };
