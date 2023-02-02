@@ -244,7 +244,7 @@ namespace SenseNet.Security
             if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
             var activity = new CreateSecurityEntityActivity(entityId, parentEntityId, ownerId);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Changes the owner of the entity.
@@ -271,7 +271,7 @@ namespace SenseNet.Security
             if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
             var activity = new ModifySecurityEntityOwnerActivity(entityId, ownerId);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Deletes the entity, it's whole subtree and all related ACLs.
@@ -296,7 +296,7 @@ namespace SenseNet.Security
             if (entityId == default)
                 throw new ArgumentException("Id of the Entity cannot be " + default(int));
             var activity = new DeleteSecurityEntityActivity(entityId);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Moves the entity and it's whole subtree, including the related ACLs.
@@ -329,7 +329,7 @@ namespace SenseNet.Security
             if (targetId == default)
                 throw new ArgumentException("Id of the target Entity cannot be " + default(int));
             var activity = new MoveSecurityEntityActivity(sourceId, targetId);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Returns false if the entity inherits permissions from it's parent.

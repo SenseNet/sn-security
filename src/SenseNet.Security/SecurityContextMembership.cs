@@ -85,7 +85,7 @@ namespace SenseNet.Security
             if (AllNullOrEmpty(groupMembers, userMembers, parentGroups))
                 return;
             var activity = new AddMembersToGroupActivity(groupId, userMembers, groupMembers, parentGroups);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Removes multiple kinds of members from a group in one step.
@@ -124,7 +124,7 @@ namespace SenseNet.Security
             if (AllNullOrEmpty(groupMembers, userMembers, parentGroups))
                 return;
             var activity = new RemoveMembersFromGroupActivity(groupId, userMembers, groupMembers, parentGroups);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace SenseNet.Security
             if (AllNullOrEmpty(groupMembers))
                 return;
             var activity = new AddMembersToGroupActivity(groupId, null, groupMembers, null);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Add a group as a member of one or more parent groups. If the main group or any parent is unknown it will be created.
@@ -191,7 +191,7 @@ namespace SenseNet.Security
             if (AllNullOrEmpty(parentGroups))
                 return;
             var activity = new AddMembersToGroupActivity(groupId, null, null, parentGroups);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Removes one or more group members from a group in one step.
@@ -226,7 +226,7 @@ namespace SenseNet.Security
             if (AllNullOrEmpty(groupMembers))
                 return;
             var activity = new RemoveMembersFromGroupActivity(groupId, null, groupMembers, null);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Removes a group from one or more parent groups
@@ -261,7 +261,7 @@ namespace SenseNet.Security
             if (AllNullOrEmpty(parentGroups))
                 return;
             var activity = new RemoveMembersFromGroupActivity(groupId, null, null, parentGroups);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Adds one or more users to a group in one step.
@@ -296,7 +296,7 @@ namespace SenseNet.Security
             if (AllNullOrEmpty(userMembers))
                 return;
             var activity = new AddMembersToGroupActivity(groupId, userMembers, null, null);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Add a user to one or more groups in one step.
@@ -329,7 +329,7 @@ namespace SenseNet.Security
             if (AllNullOrEmpty(parentGroups))
                 return;
             var activity = new AddUserToSecurityGroupsActivity(userId, parentGroups);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Removes one or more users from a group in one step.
@@ -364,7 +364,7 @@ namespace SenseNet.Security
             if (AllNullOrEmpty(userMembers))
                 return;
             var activity = new RemoveMembersFromGroupActivity(groupId, userMembers, null, null);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Removes a user from one or more groups in one step.
@@ -397,7 +397,7 @@ namespace SenseNet.Security
             if (AllNullOrEmpty(parentGroups))
                 return;
             var activity = new RemoveUserFromSecurityGroupsActivity(userId, parentGroups);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -423,7 +423,7 @@ namespace SenseNet.Security
             if (groupId == default)
                 throw new ArgumentException("The groupId cannot be " + default(int));
             var activity = new DeleteGroupActivity(groupId);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Deletes the user from the system by removing all memberships and security entries related to this user.
@@ -448,7 +448,7 @@ namespace SenseNet.Security
             if (userId == default)
                 throw new ArgumentException("The userId cannot be " + default(int));
             var activity = new DeleteUserActivity(userId);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Deletes the specified group or user and its relations including related security entries.
@@ -472,7 +472,7 @@ namespace SenseNet.Security
             if (id == default)
                 throw new ArgumentException("The id cannot be " + default(int));
             var activity = new DeleteIdentitiesActivity(new[] { id });
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Deletes the specified groups or users and their relations including related security entries.
@@ -496,7 +496,7 @@ namespace SenseNet.Security
             if (ids == null)
                 throw new ArgumentException("ids");
             var activity = new DeleteIdentitiesActivity(ids);
-            await activity.ExecuteAsync(this, cancel);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
 
         private bool AllNullOrEmpty(params IEnumerable<int>[] args)
