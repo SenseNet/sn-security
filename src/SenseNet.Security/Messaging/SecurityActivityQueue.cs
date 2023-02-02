@@ -109,11 +109,6 @@ namespace SenseNet.Security.Messaging
                     await foreach (var loadedActivity in loader.LoadAsync(lastExecutedId + 1, lastDatabaseId, true, cancel).ConfigureAwait(false))
                         Arrive(loadedActivity);
             }
-
-            //if (hasUnprocessed)
-            //    SnLog.WriteInformation(string.Format(EventMessage.Information.ExecutingUnprocessedActivitiesFinished, count),
-            //        EventId.RepositoryLifecycle);
-            //SnTrace.SecurityQueue.Write($"Executing unprocessed security activities ({count}).");
         }
 
         // Activity arrival
@@ -197,8 +192,8 @@ namespace SenseNet.Security.Messaging
 
                     LineUpArrivedActivities(_arrivalQueue, _waitingList);
 
-                    // Iterate while the waiting list is not empty or should wait for arrival the next activity.
-                    // Too early-arrived activities remain in the list (activity.Id > lastStartedId + 1)
+                    // Iterate while the waiting list is not empty or should wait for arrival of the next activity.
+                    // Activities arrived too early (activity.Id > lastStartedId + 1) remain in the list.
                     // If the current activity is "unprocessed" (startup mode), it needs to process instantly and
                     //   skip not-loaded activities because the activity may process a gap.
                     while (_waitingList.Count > 0)

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace SenseNet.Security.Messaging.SecurityMessages
 {
     /// <summary>
-    /// An activity arrives at ActivityQueue when the IDs of loaded activities are not discontinuous.
+    /// An activity for cases when the IDs of loaded activities are not continuous.
     /// These activities only exist in memory, they do nothing and just fill in the gaps.
     /// </summary>
     public class PlaceholderActivity : SecurityActivity

@@ -115,8 +115,6 @@ namespace SenseNet.Security
             CommunicationMonitor = new CommunicationMonitor(DataHandler, Options.Create(MessagingOptions));
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
 
-            //SecurityActivityQueue =
-            //    new SecurityActivityQueue_Legacy(this, CommunicationMonitor, DataHandler, ActivityHistory);
             SecurityActivityQueue = new SecurityActivityQueue(DataHandler, CommunicationMonitor, ActivityHistory);
             await SecurityActivityQueue.StartAsync(uncompleted, lastActivityIdFromDb, cancel);
 
@@ -178,7 +176,6 @@ namespace SenseNet.Security
 
                 activity.FromReceiver = true;
                 activity.Context = GeneralSecurityContext;
-                //activity.Execute(GeneralSecurityContext, false);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed.
                 activity.ExecuteAsync(GeneralSecurityContext, CancellationToken.None);
 #pragma warning restore CS4014
