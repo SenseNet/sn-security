@@ -34,7 +34,7 @@ namespace SenseNet.Security.Messaging
             _serializer.DependencyManager = _dependencyManager;
             _executor.DependencyManager = _dependencyManager;
 
-            communicationMonitor.HearthBeat += (sender, args) => HealthCheck();
+            communicationMonitor.Heartbeat += (sender, args) => HealthCheck();
         }
 
         public void HealthCheck()

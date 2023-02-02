@@ -290,7 +290,7 @@ namespace SenseNet.Security.Messaging
         public int? PendingExecution { get; set; }  // _waitingList.Length
         public int? UnderExecution { get; set; }    // _executingList.Length
         public bool? IsLoaderActive { get; set; }   // _activityLoaderTask == null
-        public long? Hearthbeats { get; set; }      // _workCycle
+        public long? Heartbeats { get; set; }      // _workCycle
     }
     /// <summary>
     /// Contains momentary state information about the security activity execution for debugging purposes.

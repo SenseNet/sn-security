@@ -111,13 +111,13 @@ namespace SenseNet.Security.Tests
             //---- check some work
             var state0 = securitySystem.SecurityActivityQueue.GetCurrentState();
             Assert.AreEqual(0, state0.Termination.LastActivityId);
-            Assert.AreEqual(0, state0.InnerState.Hearthbeats);
+            Assert.AreEqual(0, state0.InnerState.Heartbeats);
             _context.Security.CreateSecurityEntityAsync(999, GetId("E1"), GetId("U1"), CancellationToken.None)
                 .GetAwaiter().GetResult();
             Task.Delay(10).Wait();
             var state1 = securitySystem.SecurityActivityQueue.GetCurrentState();
             Assert.AreEqual(1, state1.Termination.LastActivityId);
-            Assert.IsTrue(state1.InnerState.Hearthbeats > 1);
+            Assert.IsTrue(state1.InnerState.Heartbeats > 1);
         }
         private static AclInfo GetAcl(Dictionary<int, AclInfo> acls, int entityId)
         {

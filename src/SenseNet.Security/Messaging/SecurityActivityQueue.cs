@@ -29,7 +29,7 @@ namespace SenseNet.Security.Messaging
             _mainCancellationToken = _mainCancellationSource.Token;
             _completionState = new CompletionState();
 
-            communicationMonitor.HearthBeat += (sender, args) => HealthCheck();
+            communicationMonitor.Heartbeat += (sender, args) => HealthCheck();
         }
 
         public void Shutdown()
@@ -473,7 +473,7 @@ namespace SenseNet.Security.Messaging
                     PendingExecution = _waitingList.Count,
                     UnderExecution = _executingList.Count,
                     IsLoaderActive = _activityLoaderTask != null,
-                    Hearthbeats = _workCycle,
+                    Heartbeats = _workCycle,
                 }
             };
         }

@@ -49,7 +49,7 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void CommunicationMonitor_HearthBeat()
+        public void CommunicationMonitor_Heartbeat()
         {
             var services = new ServiceCollection()
                 .AddDefaultSecurityMessageTypes()
@@ -70,7 +70,6 @@ namespace SenseNet.Security.Tests
             var dataHandler = new DataHandler(testDp, messagingOptions);
             var communicationMonitor = new CommunicationMonitor(dataHandler, messagingOptions);
             var activityHistory = new SecurityActivityHistoryController();
-            //var securityActivityQueue = new SecurityActivityQueue_Legacy(securitySystem, communicationMonitor, dataHandler, activityHistory);
             var securityActivityQueue = new SecurityActivityQueue(dataHandler, communicationMonitor, activityHistory);
 
             // ACTION
