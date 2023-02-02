@@ -322,15 +322,12 @@ namespace SenseNet.Security.Messaging
         }
         private async Task LoadLastActivities(int fromId, CancellationToken cancel)
         {
-            ConfiguredCancelableAsyncEnumerable<SecurityActivity> loaded;
-            using (var op = SnTrace.SecurityQueue.StartOperation(() => $"DataHandler: LoadLastActivities(fromId: {fromId})"))
-            {
-                var loader = new SecurityActivityAsyncLoader(_dataHandler);
-                loaded = loader.LoadAsync(fromId, int.MaxValue, false, cancel).ConfigureAwait(false);
-                op.Successful = true;
-            }
+            using var op = SnTrace.SecurityQueue.StartOperation(() =>
+                $"DataHandler: LoadLastActivities(fromId: {fromId})");
 
-            int expectedId = fromId;
+            var loader = new SecurityActivityAsyncLoader(_dataHandler);
+            var loaded = loader.LoadAsync(fromId, int.MaxValue, false, cancel).ConfigureAwait(false);
+            var expectedId = fromId;
             await foreach (var activity in loaded)
             {
                 if (activity.Id != expectedId)
@@ -354,6 +351,7 @@ namespace SenseNet.Security.Messaging
             }
             // Unlock loading
             _activityLoaderTask = null;
+            op.Successful = true;
         }
         private readonly TaskStatus?[] _finishedTaskStates = { TaskStatus.RanToCompletion, TaskStatus.Canceled, TaskStatus.Faulted };
         private void SuperviseExecutions(List<SecurityActivity> executingList, List<SecurityActivity> finishedList, CancellationToken cancel)
