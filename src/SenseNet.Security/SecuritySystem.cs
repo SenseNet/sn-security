@@ -116,7 +116,7 @@ namespace SenseNet.Security
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
 
             SecurityActivityQueue = new SecurityActivityQueue(DataHandler, CommunicationMonitor, ActivityHistory);
-            await SecurityActivityQueue.StartAsync(uncompleted, lastActivityIdFromDb, cancel);
+            await SecurityActivityQueue.StartAsync(uncompleted, lastActivityIdFromDb, cancel).ConfigureAwait(false);
 
             ActivityHistory.SecurityActivityQueue = SecurityActivityQueue; // Property injection
 
