@@ -120,11 +120,23 @@ namespace SenseNet.Security.Messaging
         {
             if (!activity.FromDatabase && !activity.FromReceiver)
             {
-                using var op = SnTrace.SecurityQueue.StartOperation(() => $"DataHandler: SaveActivity #SA{activity.Key}");
-                _dataHandler.SaveActivityAsync(activity, cancel).GetAwaiter().GetResult();
-                op.Successful = true;
+                SnTrace.SecurityQueue.Write(() => $"DataHandler: SaveActivity #SA{activity.Key} START");
+
+                return _dataHandler.SaveActivityAsync(activity, cancel)
+                    .ContinueWith(_ =>
+                    {
+                        SnTrace.SecurityQueue.Write(() => $"DataHandler: SaveActivity #SA{activity.Key} END");
+
+                        return ExecuteActivityInternalAsync(activity, cancel);
+                    }, cancel)
+                    .Unwrap(); // we need to return the task inside
             }
 
+            return ExecuteActivityInternalAsync(activity, cancel);
+        }
+
+        private Task ExecuteActivityInternalAsync(SecurityActivity activity, CancellationToken cancel)
+        {
             if (activity.FromDatabase)
                 SnTrace.SecurityQueue.Write(() => $"SAQ: Arrive from database #SA{activity.Key}");
             else if (activity.FromReceiver)
