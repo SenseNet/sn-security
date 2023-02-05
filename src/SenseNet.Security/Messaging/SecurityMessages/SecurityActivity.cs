@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,14 +31,24 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         // MoveSecurityEntityActivity: SourceId, TargetId
         // SetAclActivity: _acls, _entries, _entriesToRemove, _breaks, _unbreaks
 
-        private Exception _executionException;
+        [field: NonSerialized]
+        [JsonIgnore]
+        private static int _activityId;
 
-        [NonSerialized] private SecurityContext __context;
+        [field: NonSerialized]
+        private int _instanceId;
+        [JsonIgnore] internal string Key => $"{Id}-{_instanceId}";
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        public Exception ExecutionException { get; private set; }
+
         /// <summary>
         /// Gets the current SecurityContext.
         /// </summary>
+        [field: NonSerialized]
         [JsonIgnore]
-        public SecurityContext Context { get => __context; internal set => __context = value; }
+        public SecurityContext Context { get; internal set; }
 
         /// <summary>
         /// Initializes the instance.
@@ -48,6 +56,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// </summary>
         protected SecurityActivity()
         {
+            _instanceId = Interlocked.Increment(ref _activityId);
             TypeName = GetType().Name;
         }
 
@@ -58,8 +67,17 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <param name="waitForComplete">If the value is true (default),
         /// the current thread waits for the full execution on this computer.
         /// Otherwise the method returns immediately.</param>
+        [Obsolete("SAQ: Use ExecuteAsync instead.", false)]
         public void Execute(SecurityContext context, bool waitForComplete = true)
         {
+            if (context.SecuritySystem.SecurityActivityQueue is SecurityActivityQueue)
+            {
+                var task = ExecuteAsync(context, CancellationToken.None);
+                if(waitForComplete)
+                    task.GetAwaiter().GetResult();
+                return;
+            }
+
             Context = context;
             if (Sender == null)
                 Sender = context.SecuritySystem.MessageSenderManager.CreateMessageSender();
@@ -69,13 +87,35 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             if (waitForComplete)
                 WaitForComplete();
 
-            if (_executionException != null)
-                throw _executionException;
+            if (ExecutionException != null)
+                throw ExecutionException;
+        }
+
+        /// <summary>
+        /// Executes the activity by adding it to the activity queue.
+        /// </summary>
+        /// <param name="context">Current SecurityContext</param>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
+        /// <returns>
+        /// A Task that represents the asynchronous operation and wraps the query result.
+        /// </returns>
+        public async Task ExecuteAsync(SecurityContext context, CancellationToken cancel)
+        {
+            Context = context;
+            Sender ??= context.SecuritySystem.MessageSenderManager.CreateMessageSender();
+
+            var caller = FromReceiver || FromDatabase ? "System" : "Business";
+            using var op = SnTrace.SecurityQueue.StartOperation(() => $"App: {caller} executes #SA{this.Key}");
+            await context.SecuritySystem.SecurityActivityQueue.ExecuteActivityAsync(this, cancel);
+            if (ExecutionException != null)
+                throw ExecutionException;
+            op.Successful = true;
         }
 
         /// <summary>
         /// Called by an internal component in right order.
         /// </summary>
+        [Obsolete("SAQ: Use ExecuteInternalAsync instead.", false)]
         internal void ExecuteInternal()
         {
             try
@@ -94,7 +134,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             }
             catch (Exception e)
             {
-                _executionException = e;
+                ExecutionException = e;
 
                 // we log this here, because if the activity is not waited for later than the exception would not be logged
                 SnTrace.Security.WriteError("Error during security activity execution. SA{0} {1}", Id, e);
@@ -102,6 +142,36 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             finally
             {
                 Finish();
+            }
+        }
+        internal async Task ExecuteInternalAsync(CancellationToken cancel)
+        {
+            try
+            {
+                using var op = SnTrace.SecurityQueue.StartOperation(() => $"SA: ExecuteInternal #SA{Key}");
+                using (var execLock = await Context.SecuritySystem.DataHandler
+                           .AcquireSecurityActivityExecutionLockAsync(this, CancellationToken.None).ConfigureAwait(false))
+                {
+                    if (execLock.FullExecutionEnabled)
+                    {
+                        Initialize(Context);
+                        await StoreAsync(Context, CancellationToken.None).ConfigureAwait(false);
+                        Distribute(Context);
+                    }
+                }
+                Apply(Context);
+                op.Successful = true;
+            }
+            catch (TaskCanceledException)
+            {
+                SnTrace.Security.Write(() => $"A security activity execution CANCELED. #SA{Key}");
+            }
+            catch (Exception e)
+            {
+                ExecutionException = e;
+
+                // we log this here, because if the activity is not waited for later than the exception would not be logged
+                SnTrace.Security.WriteError(() => $"Error during security activity execution. #SA{Key} {e}");
             }
         }
 
@@ -117,7 +187,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         private void Distribute(SecurityContext context)
         {
             DistributedMessage msg = this;
-            if (BodySize > __context.SecuritySystem.MessagingOptions.DistributableSecurityActivityMaxSize)
+            if (BodySize > Context.SecuritySystem.MessagingOptions.DistributableSecurityActivityMaxSize)
                 msg = new BigActivityMessage { DatabaseId = Id };
             context.SecuritySystem.MessageProvider.SendMessage(msg);
         }
@@ -134,7 +204,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         /// <param name="context">Current SecurityContext to use any security related thing.</param>
         protected abstract void Apply(SecurityContext context);
 
-        internal abstract bool MustWaitFor(SecurityActivity olderActivity);
+        internal abstract bool ShouldWaitFor(SecurityActivity olderActivity);
 
         [NonSerialized]
         private readonly AutoResetEvent _finishSignal = new AutoResetEvent(false);
@@ -160,39 +230,12 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             }
             else
             {
-                if (!_finishSignal.WaitOne(__context.SecuritySystem.MessagingOptions.SecurityActivityTimeoutInSeconds * 1000, false))
+                if (!_finishSignal.WaitOne(Context.SecuritySystem.MessagingOptions.SecurityActivityTimeoutInSeconds * 1000, false))
                 {
                     var message = $"SecurityActivity is not finishing on a timely manner (#{Id})";
                     throw new SecurityActivityTimeoutException(message);
                 }
             }
-        }
-
-        [NonSerialized]
-        private SecurityActivity _attachedActivity;
-        [JsonIgnore]
-        internal SecurityActivity AttachedActivity
-        {
-            get => _attachedActivity;
-            private set => _attachedActivity = value;
-        }
-
-        /// <summary>
-        /// When an activity gets executed and needs to be finalized, all activity objects that have
-        /// the same id need to be finalized too. The Attach methods puts all activities with the
-        /// same id to a chain to let the Finish method call the Finish method of each object in the chain.
-        /// This method was needed because it is possible that the same activity arrives from different
-        /// sources: e.g from messaging, from database or from direct execution.
-        /// </summary>
-        /// <param name="activity"></param>
-        internal void Attach(SecurityActivity activity)
-        {
-            if (ReferenceEquals(this, activity))
-                return;
-            if (AttachedActivity == null)
-                AttachedActivity = activity;
-            else
-                AttachedActivity.Attach(activity);
         }
 
         /// <summary>
@@ -201,8 +244,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         internal void Finish()
         {
             _finished = true;
+
             // finalize attached activities first
-            AttachedActivity?.Finish();
+            foreach (var attachment in _attachments)
+                attachment.Finish();
+
             if (_finishSignal != null)
             {
                 _finishSignal.Set();
@@ -256,52 +302,38 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         public string TypeName { get; private set; }
 
 
-        [NonSerialized]
-        private bool _fromReceiver;
         /// <summary>
         /// Gets or sets whether the activity comes from the message receiver.
         /// </summary>
+        [field: NonSerialized]
         [JsonIgnore]
-        public bool FromReceiver
-        {
-            get => _fromReceiver;
-            set => _fromReceiver = value;
-        }
+        public bool FromReceiver { get; set; }
 
-        [NonSerialized]
-        private bool _fromDatabase;
         /// <summary>
         /// Gets or sets whether the activity is loaded from the database.
         /// </summary>
+        [field: NonSerialized]
         [JsonIgnore]
-        public bool FromDatabase
-        {
-            get => _fromDatabase;
-            set => _fromDatabase = value;
-        }
+        public bool FromDatabase { get; set; }
 
-        [NonSerialized]
-        private bool _isUnprocessedActivity;
         /// <summary>
         /// Gets or sets whether the activity is loaded from the database at the system start.
         /// </summary>
+        [field: NonSerialized]
         [JsonIgnore]
-        public bool IsUnprocessedActivity
-        {
-            get => _isUnprocessedActivity;
-            set => _isUnprocessedActivity = value;
-        }
+        public bool IsUnprocessedActivity { get; set; }
 
         [field: NonSerialized]
         [JsonIgnore]
-        internal List<SecurityActivity> WaitingFor { get; private set; } = new List<SecurityActivity>();
+        internal List<SecurityActivity> WaitingFor { get; private set; } = new();
 
         [field: NonSerialized]
         [JsonIgnore]
-        internal List<SecurityActivity> WaitingForMe { get; private set; } = new List<SecurityActivity>();
+        internal List<SecurityActivity> WaitingForMe { get; private set; } = new();
 
         internal void WaitFor(SecurityActivity olderActivity)
         {
+            SnTrace.SecurityQueue.Write(() => $"SA: Make dependency: #SA{Key} depends from SA{olderActivity.Key}.");
             // this method must called from thread safe block.
             if (WaitingFor.All(x => x.Id != olderActivity.Id))
                 WaitingFor.Add(olderActivity);
@@ -330,5 +362,61 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             WaitingFor = new List<SecurityActivity>();
             WaitingForMe = new List<SecurityActivity>();
         }
+
+
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        internal CancellationToken CancellationToken { get; set; }
+
+        [field: NonSerialized]
+        [JsonIgnore]
+        private Task _executionTask;
+        [field: NonSerialized]
+        [JsonIgnore]
+        private Task _finalizationTask;
+
+        internal Task CreateTaskForWait()
+        {
+            _finalizationTask = new Task(() => { /* do nothing */ }, CancellationToken, TaskCreationOptions.LongRunning);
+            return _finalizationTask;
+        }
+        internal void StartExecutionTask()
+        {
+            _executionTask = ExecuteInternalAsync(CancellationToken);
+        }
+        internal void StartFinalizationTask()
+        {
+            _finalizationTask?.Start();
+        }
+
+        /// <summary>
+        /// Gets or sets a flag that is true if the StartExecutionTask() is called in async way.
+        /// This flag react faster than testing _executionTask existence.
+        /// </summary>
+        [field: NonSerialized]
+        [JsonIgnore]
+        internal bool Started { get; set; }
+
+        internal TaskStatus? GetExecutionTaskStatus() => _executionTask?.Status;
+
+        /* =============================================================================== ATTACHMENTS */
+        [field: NonSerialized]
+        [JsonIgnore]
+        private List<SecurityActivity> _attachments = new();
+        internal SecurityActivity[] GetAttachments() => _attachments.ToArray();
+        internal void Attach(SecurityActivity activity)
+        {
+            if (ReferenceEquals(this, activity))
+                return;
+            if (_attachments.Contains(activity))
+                return;
+            _attachments.Add(activity);
+        }
+        public void ClearAttachments()
+        {
+            _attachments.Clear();
+        }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,13 +31,9 @@ namespace SenseNet.Security.Tests
             var services = new ServiceCollection()
                 .AddLogging();
 
-            services.AddInMemorySecurityDataProvider(new DatabaseStorage
-            {
-                Entities = new Dictionary<int, StoredSecurityEntity>
-                {
-                    { 123, new StoredSecurityEntity { Id = 123 } }
-                }
-            });
+            var entities = new ConcurrentDictionary<int, StoredSecurityEntity>();
+            entities[123] = new StoredSecurityEntity {Id = 123};
+            services.AddInMemorySecurityDataProvider(new DatabaseStorage {Entities = entities});
 
             var provider = services.BuildServiceProvider();
             var sdp = (MemoryDataProvider)provider.GetRequiredService<ISecurityDataProvider>();

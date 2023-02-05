@@ -60,7 +60,7 @@ namespace SenseNet.Security.Messaging
 
     public class SecurityActivityHistoryController
     {
-        internal SecurityActivityQueue SecurityActivityQueue { get; set; } // Property injection
+        internal ISecurityActivityQueue SecurityActivityQueue { get; set; } // Property injection
 
         internal SecurityActivityHistory GetHistory()
         {
@@ -204,6 +204,7 @@ namespace SenseNet.Security.Messaging
     /// <summary>
     /// Contains information about the serialized activities on the arrival size.
     /// </summary>
+    [Obsolete("Do not use anymore.", true)]
     public class SecurityActivitySerializerState
     {
         /// <summary>
@@ -223,6 +224,7 @@ namespace SenseNet.Security.Messaging
     /// <summary>
     /// Contains information about the waiting activities.
     /// </summary>
+    [Obsolete("Do not use anymore.", true)]
     public class SecurityActivityDependencyState
     {
         /// <summary>
@@ -280,6 +282,17 @@ namespace SenseNet.Security.Messaging
         }
     }
     /// <summary>
+    /// Contains internal technical information about the current operation of the SecurityActivityQueue
+    /// </summary>
+    public class SecurityActivityQueueInnerState
+    {
+        public int? WaitingToArrive { get; set; }   // _arrivalQueue.Length
+        public int? PendingExecution { get; set; }  // _waitingList.Length
+        public int? UnderExecution { get; set; }    // _executingList.Length
+        public bool? IsLoaderActive { get; set; }   // _activityLoaderTask == null
+        public long? Heartbeats { get; set; }      // _workCycle
+    }
+    /// <summary>
     /// Contains momentary state information about the security activity execution for debugging purposes.
     /// </summary>
     public class SecurityActivityQueueState
@@ -287,15 +300,21 @@ namespace SenseNet.Security.Messaging
         /// <summary>
         /// Activity serializer state on the arrival side.
         /// </summary>
+        [Obsolete("Do not use anymore.", true)]
         public SecurityActivitySerializerState Serializer { get; set; }
         /// <summary>
         /// State of the waiting activities.
         /// </summary>
+        [Obsolete("Do not use anymore.", true)]
         public SecurityActivityDependencyState DependencyManager { get; set; }
         /// <summary>
         /// State of the executed activities.
         /// </summary>
         public CompletionState Termination { get; set; }
+        /// <summary>
+        /// The internal working state of the activity queue.
+        /// </summary>
+        public SecurityActivityQueueInnerState InnerState { get; set; }
     }
 
     /// <summary>

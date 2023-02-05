@@ -42,7 +42,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
             context.SecuritySystem.EntityManager.CreateEntity(EntityId, ParentEntityId, OwnerId);
         }
 
-        internal override bool MustWaitFor(SecurityActivity olderActivity)
+        internal override bool ShouldWaitFor(SecurityActivity olderActivity)
         {
             if (olderActivity is MembershipActivity)
                 return true;

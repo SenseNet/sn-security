@@ -12,7 +12,7 @@ namespace SenseNet.Security.Messaging
         private readonly DataHandler _dataHandler;
         private readonly System.Timers.Timer _timer;
 
-        public event EventHandler HearthBeat;
+        public event EventHandler Heartbeat;
 
         internal CommunicationMonitor(DataHandler dataHandler, IOptions<MessagingOptions> messagingOptions)
         {
@@ -45,7 +45,7 @@ namespace SenseNet.Security.Messaging
 
             try
             {
-                HearthBeat?.Invoke(null, EventArgs.Empty);
+                Heartbeat?.Invoke(null, EventArgs.Empty);
             }
             catch (Exception ex) //logged
             {

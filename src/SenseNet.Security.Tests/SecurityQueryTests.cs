@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Tests.TestPortal;
@@ -143,7 +144,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             ctx.CreateAclEditor()
                 .BreakInheritance(Id("E4"), new[] { EntryType.Normal })
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             const string expected = "30,12,4";
 
             var result = SecurityQuery.ParentChain(ctx).GetEntities(Id("E32"),
@@ -168,7 +169,7 @@ namespace SenseNet.Security.Tests
             var ctx = CurrentContext.Security;
             ctx.CreateAclEditor()
                 .BreakInheritance(Id("E4"), new[] { EntryType.Normal })
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             const string expected = "4,12,30,31,32,33";
 
             var result = SecurityQuery.All(ctx).GetEntities(Id("E30"),
@@ -493,19 +494,19 @@ namespace SenseNet.Security.Tests
                 // additions for checking denied permissions.
                 .Deny(Id("E1"), Id("U6"), false, PermissionType.Custom01)
                 .Deny(Id("E1"), Id("U7"), false, PermissionType.Custom02)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             ctx.CreateAclEditor()
                 .BreakInheritance(Id("E4"), new[] { EntryType.Normal })
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             ctx.CreateAclEditor()
                 .ClearPermission(Id("E4"), Id("U4"), false, PermissionType.Custom04)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             ctx.CreateAclEditor(EntryType.Sharing)
                 .Allow(Id("E12"), Id("U8"), false, PermissionType.Open)
                 .Allow(Id("E41"), Id("U8"), false, PermissionType.Open)
                 .Allow(Id("E38"), Id("U8"), false, PermissionType.Open)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             const string expected1 = "101,107,201,202,205";
 
@@ -573,11 +574,11 @@ namespace SenseNet.Security.Tests
             ctx.CreateAclEditor()
                 .Allow(Id("E1"), Id("G4"), false, PermissionType.Custom04)
                 .Allow(Id("E42"), Id("G4"), false, PermissionType.Custom04)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             ctx.CreateAclEditor(EntryType.Sharing)
                 .Allow(Id("E4"), Id("U8"), false, PermissionType.Open)
                 .Allow(Id("E41"), Id("U8"), false, PermissionType.Open)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // sample output: "U1:p0:1,p1:2|U2:|U3:p3:2"
             string ResultToString(Dictionary<string, Dictionary<int, int>> result)
@@ -720,7 +721,7 @@ namespace SenseNet.Security.Tests
                 // additions for validating local permissions.
                 .Allow(Id("E1"), Id("G6"), true, PermissionType.Custom04)
                 .Allow(Id("E38"), Id("G7"), true, PermissionType.Custom04)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         private static void AddPermissionsForCategorySelectionTests(SecurityContext ctx)
         {
@@ -731,7 +732,7 @@ namespace SenseNet.Security.Tests
                 // additions for validating local permissions.
                 .Allow(Id("E1"), Id("G6"), false, PermissionType.Custom04)
                 .Allow(Id("E38"), Id("G7"), false, PermissionType.Custom04)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // add some sharing related entries
             ctx.CreateAclEditor(EntryType.Sharing)
@@ -739,7 +740,7 @@ namespace SenseNet.Security.Tests
                 .Allow(Id("E39"), Id("U7"), false, PermissionType.Custom04)
                 .Allow(Id("E4"), Id("G8"), false, PermissionType.Custom04)
                 .Allow(Id("E39"), Id("G9"), false, PermissionType.Custom04)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         private static void AddPermissionsForIdentityByPermissionTests(SecurityContext ctx)
         {
@@ -758,7 +759,7 @@ namespace SenseNet.Security.Tests
                 .Allow(Id("E38"), Id("G4"), false, p1)
                 .Allow(Id("E38"), Id("G5"), false, p2)
                 .Allow(Id("E38"), Id("G6"), false, p1, p2)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
 
         private static int[] GetSortedIds(IEnumerable<SecurityEntity> entities)
@@ -887,13 +888,20 @@ namespace SenseNet.Security.Tests
 
             var ctx = CurrentContext.Security;
 
-            ctx.AddUsersToSecurityGroup(Id("G13"), new[] { Id("U13") });
-            ctx.AddUsersToSecurityGroup(Id("G12"), new[] { Id("U12") });
-            ctx.AddUsersToSecurityGroup(Id("G11"), new[] { Id("U11") });
-            ctx.AddUsersToSecurityGroup(Id("G10"), new[] { Id("U10") });
-            ctx.AddGroupToSecurityGroups(Id("G11"), new[] { Id("G10") });
-            ctx.AddGroupToSecurityGroups(Id("G13"), new[] { Id("G11") });
-            ctx.AddGroupToSecurityGroups(Id("G13"), new[] { Id("G12") });
+            ctx.AddUsersToSecurityGroupAsync(Id("G13"), new[] { Id("U13") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddUsersToSecurityGroupAsync(Id("G12"), new[] { Id("U12") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddUsersToSecurityGroupAsync(Id("G11"), new[] { Id("U11") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddUsersToSecurityGroupAsync(Id("G10"), new[] { Id("U10") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddGroupToSecurityGroupsAsync(Id("G11"), new[] { Id("G10") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddGroupToSecurityGroupsAsync(Id("G13"), new[] { Id("G11") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
+            ctx.AddGroupToSecurityGroupsAsync(Id("G13"), new[] { Id("G12") }, CancellationToken.None)
+                .GetAwaiter().GetResult();
 
             ctx.CreateAclEditor()
                 .Allow(Id("E2"), Id("U1"), false, PermissionType.Custom01)
@@ -923,7 +931,7 @@ namespace SenseNet.Security.Tests
 
                 .Allow(Id("E32"), Id("U1"), false, PermissionType.Custom01)
 
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             ctx.CreateAclEditor()
                 .BreakInheritance(Id("E22"), new[] { EntryType.Normal })
@@ -938,7 +946,7 @@ namespace SenseNet.Security.Tests
                 .ClearPermission(Id("E36"), Id("U1"), false, PermissionType.Custom01)
 
 
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             ctx.CreateAclEditor()
                 .BreakInheritance(Id("E37"), new[] { EntryType.Normal })
@@ -946,7 +954,7 @@ namespace SenseNet.Security.Tests
                 // E41 and her subtree (E41, E42) is disabled for everyone except the system user
                 .BreakInheritance(Id("E41"), new EntryType[0])
 
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
         }
 
@@ -960,7 +968,8 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
-            CurrentContext.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
+            CurrentContext.Security.CreateSecurityEntityAsync(entity.Id, entity.ParentId, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
         }
 
         private static int Id(string name)

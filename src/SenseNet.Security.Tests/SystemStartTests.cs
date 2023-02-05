@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
@@ -46,7 +49,7 @@ namespace SenseNet.Security.Tests
             //var memberships = Tools.CreateInMemoryMembershipTable("G1:U1,U2|G2:U3,U4|G3:U1,U3|G4:U4|G5:U5");
             var memberships = Tools.CreateInMemoryMembershipTable(groups);
             var aces = CreateTestAces();
-            var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities };
+            var storage = new DatabaseStorage { Aces = aces, Memberships = memberships, Entities = entities, Messages = new List<Tuple<int, DateTime, byte[]>>()};
 
             //---- Start the system
             var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider());
@@ -104,6 +107,17 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(id1, acl3.Parent.EntityId);
             Assert.AreEqual(id1, acl5.Parent.EntityId);
             Assert.AreEqual(id5, acl50.Parent.EntityId);
+
+            //---- check some work
+            var state0 = securitySystem.SecurityActivityQueue.GetCurrentState();
+            Assert.AreEqual(0, state0.Termination.LastActivityId);
+            Assert.AreEqual(0, state0.InnerState.Heartbeats);
+            _context.Security.CreateSecurityEntityAsync(999, GetId("E1"), GetId("U1"), CancellationToken.None)
+                .GetAwaiter().GetResult();
+            Task.Delay(10).Wait();
+            var state1 = securitySystem.SecurityActivityQueue.GetCurrentState();
+            Assert.AreEqual(1, state1.Termination.LastActivityId);
+            Assert.IsTrue(state1.InnerState.Heartbeats > 1);
         }
         private static AclInfo GetAcl(Dictionary<int, AclInfo> acls, int entityId)
         {
@@ -111,9 +125,9 @@ namespace SenseNet.Security.Tests
             return acl;
         }
 
-        public static Dictionary<int, StoredSecurityEntity> CreateTestEntities()
+        public static ConcurrentDictionary<int, StoredSecurityEntity> CreateTestEntities()
         {
-            var storage = new Dictionary<int, StoredSecurityEntity>();
+            var storage = new ConcurrentDictionary<int, StoredSecurityEntity>();
             var u1 = TestUser.User1;
 
             CreateEntity("E1", null, u1, storage);
@@ -194,7 +208,7 @@ namespace SenseNet.Security.Tests
             return storage;
         }
         private static void CreateEntity(string name, string parentName, TestUser owner,
-            Dictionary<int, StoredSecurityEntity> storage)
+            ConcurrentDictionary<int, StoredSecurityEntity> storage)
         {
             var entityId = Id(name);
             var parentEntityId = parentName == null ? default : Id(parentName);

@@ -23,8 +23,9 @@ namespace SenseNet.Security.Tests
             if (!SnTrace.SnTracers.Any(x => x is SnFileSystemTracer))
                 SnTrace.SnTracers.Add(new SnFileSystemTracer());
             SnTrace.EnableAll();
-            SnTrace.SecurityQueue.Enabled = false;
+//            SnTrace.SecurityQueue.Enabled = false;
 
+            SnTrace.Test.Write("------------------------------------------------------------------------");
             _snTraceOperation =
                 SnTrace.Test.StartOperation(
                     $"TESTMETHOD: {testContext.FullyQualifiedTestClassName}.{testContext.TestName}");
@@ -246,7 +247,8 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : repository[GetId(parentName)]
             };
             repository.Add(entity.Id, entity);
-            context.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
+            context.CreateSecurityEntityAsync(entity.Id, entity.ParentId, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
         }
         internal string EntityIdStructureToString(SecurityContext ctx)
         {

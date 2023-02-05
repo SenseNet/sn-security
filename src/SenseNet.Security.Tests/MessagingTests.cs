@@ -10,6 +10,7 @@ using SenseNet.Security.Data;
 using SenseNet.Security.Tests.TestPortal;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
+using System.Collections.Concurrent;
 
 namespace SenseNet.Security.Tests
 {
@@ -136,9 +137,9 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(expected, actual);
         }
 
-        public static Dictionary<int, StoredSecurityEntity> CreateTestEntities()
+        public static ConcurrentDictionary<int, StoredSecurityEntity> CreateTestEntities()
         {
-            var storage = new Dictionary<int, StoredSecurityEntity>();
+            var storage = new ConcurrentDictionary<int, StoredSecurityEntity>();
             var u1 = TestUser.User1;
 
             CreateEntity("E1", null, u1, storage);
@@ -219,7 +220,7 @@ namespace SenseNet.Security.Tests
             return storage;
         }
         private static void CreateEntity(string name, string parentName, TestUser owner,
-            Dictionary<int, StoredSecurityEntity> storage)
+            ConcurrentDictionary<int, StoredSecurityEntity> storage)
         {
             var entityId = Id(name);
             var parentEntityId = parentName == null ? default : Id(parentName);
@@ -266,7 +267,7 @@ namespace SenseNet.Security.Tests
                 SnLog.WriteInformation("Applied: #" + Id);
             }
 
-            internal override bool MustWaitFor(SecurityActivity olderActivity)
+            internal override bool ShouldWaitFor(SecurityActivity olderActivity)
             {
                 return false;
             }
@@ -318,7 +319,8 @@ namespace SenseNet.Security.Tests
             public void SendMessage(IDistributedMessage message)
             {
                 SnLog.WriteInformation("Send: " + message.GetType().Name);
-
+                if (message is TestActivity originalActivity)
+                    message = new TestActivity {Id = originalActivity.Id, Sender = originalActivity.Sender};
                 MessageReceived?.Invoke(this, new MessageReceivedEventArgs(message));
             }
             public void Start(DateTime startingTheSystem)
@@ -339,13 +341,9 @@ namespace SenseNet.Security.Tests
 
             public event MessageReceivedEventHandler MessageReceived;
 
-#pragma warning disable 67
             public event ReceiveExceptionEventHandler ReceiveException;
-#pragma warning restore 67
 
-#pragma warning disable 67
             public event SendExceptionEventHandler SendException;
-#pragma warning restore 67
         }
         private class MemoryDataProviderForMessagingTests : MemoryDataProvider
         {

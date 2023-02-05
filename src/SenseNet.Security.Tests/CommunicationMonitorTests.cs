@@ -35,21 +35,21 @@ namespace SenseNet.Security.Tests
             }
 
             [Obsolete("Use async version instead.")]
-            public override int GetLastSecurityActivityId(DateTime startedTime)
+            public override int GetLastSecurityActivityId()
             {
-                return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None)
+                return GetLastSecurityActivityIdAsync(CancellationToken.None)
                     .GetAwaiter().GetResult();
             }
-            public override async Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
+            public override async Task<int> GetLastSecurityActivityIdAsync(CancellationToken cancel)
             {
-                var result = await base.GetLastSecurityActivityIdAsync(startedTime, cancel).ConfigureAwait(false);
+                var result = await base.GetLastSecurityActivityIdAsync(cancel).ConfigureAwait(false);
                 IsGetLastSecurityActivityIdCalled = true;
                 return result;
             }
         }
 
         [TestMethod]
-        public void CommunicationMonitor_HearthBeat()
+        public void CommunicationMonitor_Heartbeat()
         {
             var services = new ServiceCollection()
                 .AddDefaultSecurityMessageTypes()
@@ -70,7 +70,7 @@ namespace SenseNet.Security.Tests
             var dataHandler = new DataHandler(testDp, messagingOptions);
             var communicationMonitor = new CommunicationMonitor(dataHandler, messagingOptions);
             var activityHistory = new SecurityActivityHistoryController();
-            var securityActivityQueue = new SecurityActivityQueue(securitySystem, communicationMonitor, dataHandler, activityHistory);
+            var securityActivityQueue = new SecurityActivityQueue(dataHandler, communicationMonitor, activityHistory);
 
             // ACTION
             var communicationMonitorAcc = new ObjectAccessor(communicationMonitor);

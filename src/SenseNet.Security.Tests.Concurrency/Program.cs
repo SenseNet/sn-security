@@ -107,7 +107,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 .Allow(50, TestUser.User3.Id, false, PermissionType.Custom10)
                 .Allow(51, TestUser.User3.Id, false, PermissionType.Custom10)
                 .Allow(52, TestUser.User3.Id, false, PermissionType.Custom10)
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             // ReSharper disable once RedundantAssignment
             ok = ctx.HasPermission(52, PermissionType.See);
 
@@ -163,7 +163,7 @@ namespace SenseNet.Security.Tests.Concurrency
                 new AclEditor(ctx)
                     .Allow(5, TestUser.User1.Id, false, perm1)
                     .Allow(5, TestUser.User1.Id, false, perm2)
-                    .Apply();
+                    .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
                 count++;
             }
@@ -376,7 +376,8 @@ namespace SenseNet.Security.Tests.Concurrency
                 _stopped = false;
 
                 // build the deep test entity tree
-                DeleteBuildSubtree(securitySystem.GeneralSecurityContext);
+                DeleteBuildSubtreeAsync(securitySystem.GeneralSecurityContext, CancellationToken.None)
+                    .GetAwaiter().GetResult();
 
                 var sw = Stopwatch.StartNew();
 
@@ -384,12 +385,12 @@ namespace SenseNet.Security.Tests.Concurrency
                 var tasks = new List<Task>(); 
 
                 // start a delete task for an entity in the middle
-                tasks.Add(Task.Run(() =>
+                tasks.Add(Task.Run(async () =>
                 {
                     Trace.WriteLine("SECDEL> Start DEL thread.");
                     Thread.Sleep(10);
                     var delWatch = Stopwatch.StartNew();
-                    securitySystem.GeneralSecurityContext.DeleteEntity(60);
+                    await securitySystem.GeneralSecurityContext.DeleteEntityAsync(60, CancellationToken.None).ConfigureAwait(false);
                     delWatch.Stop();
                     Trace.WriteLine($"SECDEL> End DEL thread. Elapsed time: {delWatch.ElapsedMilliseconds}");
                     _stopped = true;
@@ -414,14 +415,14 @@ namespace SenseNet.Security.Tests.Concurrency
         /// <summary>
         /// Create a deep tree
         /// </summary>
-        private static void DeleteBuildSubtree(SecurityContext ctx)
+        private static async Task DeleteBuildSubtreeAsync(SecurityContext ctx, CancellationToken cancel)
         {
             // create first entity
-            ctx.CreateSecurityEntity(Id("E60"), Id("E42"), Id("U1"));
+            await ctx.CreateSecurityEntityAsync(Id("E60"), Id("E42"), Id("U1"), cancel);
 
             for (var i = 61; i <= 99; i++)
             {
-                ctx.CreateSecurityEntity(i, i-1, Id("U1"));
+                await ctx.CreateSecurityEntityAsync(i, i-1, Id("U1"), cancel);
             }
         }
         private static void DeleteCheckPermission(int id, SecuritySystem securitySystem)
@@ -475,7 +476,7 @@ namespace SenseNet.Security.Tests.Concurrency
             Thread.Sleep(_sleepInMilliseconds);
         }
 
-        internal override bool MustWaitFor(Messaging.SecurityMessages.SecurityActivity olderActivity)
+        internal override bool ShouldWaitFor(Messaging.SecurityMessages.SecurityActivity olderActivity)
         {
             return false;
         }

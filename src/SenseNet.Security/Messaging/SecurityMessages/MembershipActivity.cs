@@ -8,7 +8,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
     [Serializable]
     public abstract class MembershipActivity : SecurityActivity
     {
-        internal override bool MustWaitFor(SecurityActivity olderActivity)
+        internal override bool ShouldWaitFor(SecurityActivity olderActivity)
         {
             return true;
         }

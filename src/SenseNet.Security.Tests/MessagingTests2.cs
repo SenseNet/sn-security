@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -73,27 +74,37 @@ namespace SenseNet.Security.Tests
         }
 
         [TestMethod]
-        public void Messaging_SendReceive()
+        public async Task Messaging_SendReceive()
         {
             var messageQueue = new Queue<byte[]>();
             var sourceSystem = CreateSecuritySystem("source", messageQueue, false);
             var targetSystem = CreateSecuritySystem("target", messageQueue, true);
             try
             {
+                // It should be the same in a production environment, but in this case the difference is useful,
+                // because it is possible to detect the operation that modifies the database.
+                Assert.AreNotSame(((MemoryDataProvider) sourceSystem.DataProvider).Storage.Entities,
+                    ((MemoryDataProvider) targetSystem.DataProvider).Storage.Entities);
+
                 var user = TestUser.User1;
                 var ctx = new SecurityContext(user, sourceSystem);
-                ctx.CreateSecurityEntity(999, 1, user.Id);
+                await ctx.CreateSecurityEntityAsync(999, 1, user.Id, CancellationToken.None)
+                    .ConfigureAwait(false);
 
-                Assert.IsTrue(((MemoryDataProvider) sourceSystem.DataProvider).Storage.Entities.ContainsKey(999));
-                Assert.IsFalse(((MemoryDataProvider) targetSystem.DataProvider).Storage.Entities.ContainsKey(999));
+                Assert.IsTrue(sourceSystem.Cache.Entities.ContainsKey(999));
+                Assert.IsFalse(targetSystem.Cache.Entities.ContainsKey(999));
                 Assert.AreEqual(1, messageQueue.Count);
 
                 ((TestMessageProvider) targetSystem.MessageProvider).ReceiveOne();
 
                 Assert.AreEqual(0, messageQueue.Count);
-                Thread.Sleep(200);
+                await Task.Delay(1000);
+                Assert.IsTrue(sourceSystem.Cache.Entities.ContainsKey(999));
+                Assert.IsTrue(targetSystem.Cache.Entities.ContainsKey(999));
+                // Source system executes the activity with a database operation
                 Assert.IsTrue(((MemoryDataProvider)sourceSystem.DataProvider).Storage.Entities.ContainsKey(999));
-                Assert.IsTrue(((MemoryDataProvider) targetSystem.DataProvider).Storage.Entities.ContainsKey(999));
+                // Target system executes the activity without a database operation
+                Assert.IsFalse(((MemoryDataProvider)targetSystem.DataProvider).Storage.Entities.ContainsKey(999));
             }
             finally
             {

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
-using SenseNet.Diagnostics;
 
 namespace SenseNet.Security
 {
@@ -216,11 +217,12 @@ namespace SenseNet.Security
         /*********************** Structure API **********************/
         /// <summary>
         /// Creates a new entity. If it already exists, creation is skipped.
-        /// Parent entity must exist. Parent resolution can compensate the entity integrity error.
+        /// Parent entity should exist. Parent resolution can compensate the entity integrity error.
         /// </summary>
         /// <param name="entityId">Id of the created entity. Cannot be 0.</param>
         /// <param name="parentEntityId">Id of the parent entity. Cannot be 0.</param>
         /// <param name="ownerId">Id of the entity's owner identity.</param>
+        [Obsolete("Use async version instead.", true)]
         public virtual void CreateSecurityEntity(int entityId, int parentEntityId, int ownerId)
         {
             if (entityId == default)
@@ -229,10 +231,27 @@ namespace SenseNet.Security
             activity.Execute(this);
         }
         /// <summary>
+        /// Creates a new entity. If it already exists, creation is skipped.
+        /// Parent entity should exist. Parent resolution can compensate the entity integrity error.
+        /// </summary>
+        /// <param name="entityId">Id of the created entity. Cannot be 0.</param>
+        /// <param name="parentEntityId">Id of the parent entity. Cannot be 0.</param>
+        /// <param name="ownerId">Id of the entity's owner identity.</param>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
+        /// <returns>A Task that represents the asynchronous operation.</returns>
+        public virtual async Task CreateSecurityEntityAsync(int entityId, int parentEntityId, int ownerId, CancellationToken cancel)
+        {
+            if (entityId == default)
+                throw new ArgumentException("Id of the Entity cannot be " + default(int));
+            var activity = new CreateSecurityEntityActivity(entityId, parentEntityId, ownerId);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
+        }
+        /// <summary>
         /// Changes the owner of the entity.
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
         /// <param name="ownerId">Id of the entity's owner identity.</param>
+        [Obsolete("Use async version instead.", true)]
         public virtual void ModifyEntityOwner(int entityId, int ownerId)
         {
             if (entityId == default)
@@ -241,9 +260,24 @@ namespace SenseNet.Security
             activity.Execute(this);
         }
         /// <summary>
+        /// Changes the owner of the entity.
+        /// </summary>
+        /// <param name="entityId">Id of the entity. Cannot be 0.</param>
+        /// <param name="ownerId">Id of the entity's owner identity.</param>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
+        /// <returns>A Task that represents the asynchronous operation.</returns>
+        public virtual async Task ModifyEntityOwnerAsync(int entityId, int ownerId, CancellationToken cancel)
+        {
+            if (entityId == default)
+                throw new ArgumentException("Id of the Entity cannot be " + default(int));
+            var activity = new ModifySecurityEntityOwnerActivity(entityId, ownerId);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
+        }
+        /// <summary>
         /// Deletes the entity, it's whole subtree and all related ACLs.
         /// </summary>
         /// <param name="entityId">Id of the entity. Cannot be 0.</param>
+        [Obsolete("Use async version instead.", true)]
         public virtual void DeleteEntity(int entityId)
         {
             if (entityId == default)
@@ -252,11 +286,25 @@ namespace SenseNet.Security
             activity.Execute(this);
         }
         /// <summary>
+        /// Deletes the entity, it's whole subtree and all related ACLs.
+        /// </summary>
+        /// <param name="entityId">Id of the entity. Cannot be 0.</param>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
+        /// <returns>A Task that represents the asynchronous operation.</returns>
+        public virtual async Task DeleteEntityAsync(int entityId, CancellationToken cancel)
+        {
+            if (entityId == default)
+                throw new ArgumentException("Id of the Entity cannot be " + default(int));
+            var activity = new DeleteSecurityEntityActivity(entityId);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
+        }
+        /// <summary>
         /// Moves the entity and it's whole subtree, including the related ACLs.
         /// Source entity will be a child of the target entity.
         /// </summary>
         /// <param name="sourceId">Id of the source entity. Cannot be 0.</param>
         /// <param name="targetId">Id of the target entity that will contain the source. Cannot be 0.</param>
+        [Obsolete("Use async version instead.", true)]
         public virtual void MoveEntity(int sourceId, int targetId)
         {
             if (sourceId == default)
@@ -265,6 +313,23 @@ namespace SenseNet.Security
                 throw new ArgumentException("Id of the target Entity cannot be " + default(int));
             var activity = new MoveSecurityEntityActivity(sourceId, targetId);
             activity.Execute(this);
+        }
+        /// <summary>
+        /// Moves the entity and it's whole subtree, including the related ACLs.
+        /// Source entity will be a child of the target entity.
+        /// </summary>
+        /// <param name="sourceId">Id of the source entity. Cannot be 0.</param>
+        /// <param name="targetId">Id of the target entity that will contain the source. Cannot be 0.</param>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
+        /// <returns>A Task that represents the asynchronous operation.</returns>
+        public virtual async Task MoveEntityAsync(int sourceId, int targetId, CancellationToken cancel)
+        {
+            if (sourceId == default)
+                throw new ArgumentException("Id of the source Entity cannot be " + default(int));
+            if (targetId == default)
+                throw new ArgumentException("Id of the target Entity cannot be " + default(int));
+            var activity = new MoveSecurityEntityActivity(sourceId, targetId);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
         }
         /// <summary>
         /// Returns false if the entity inherits permissions from it's parent.

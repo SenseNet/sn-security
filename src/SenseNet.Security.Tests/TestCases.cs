@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.Extensions.Options;
 using SenseNet.Security.Tests.TestPortal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -31,7 +32,6 @@ namespace SenseNet.Security.Tests
             dataProvider.InstallDatabase();
 
             var securitySystem = Context.StartTheSystem(dataProvider, DiTools.CreateDefaultMessageProvider());
-            securitySystem.SecurityActivityQueue._setCurrentExecutionState(new CompletionState());
             CurrentContext = new Context(TestUser.User1, securitySystem);
 
             DataHandler = securitySystem.DataHandler;
@@ -171,7 +171,8 @@ namespace SenseNet.Security.Tests
                 Parent = parentName == null ? null : _repository[Id(parentName)]
             };
             _repository.Add(entity.Id, entity);
-            CurrentContext.Security.CreateSecurityEntity(entity.Id, entity.ParentId, entity.OwnerId);
+            CurrentContext.Security.CreateSecurityEntityAsync(entity.Id, entity.ParentId, entity.OwnerId, CancellationToken.None)
+                .GetAwaiter().GetResult();
         }
 
         private TestEntity GetRepositoryEntity(int id)

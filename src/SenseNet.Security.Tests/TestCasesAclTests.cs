@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Security.Tests.TestPortal;
 // ReSharper disable JoinDeclarationAndInitializer
@@ -60,7 +62,8 @@ namespace SenseNet.Security.Tests
 
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E3"), new EntryType[0]).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E3"), new EntryType[0])
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             SetAcl("-E3|Normal|-G3:+-+-+-+-+-+-+-+");
 
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
@@ -74,7 +77,8 @@ namespace SenseNet.Security.Tests
 
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E3"), new EntryType[0]).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E3"), new EntryType[0])
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var acl = CurrentContext.Security.GetAcl(Id("E3"));
 
@@ -300,11 +304,12 @@ namespace SenseNet.Security.Tests
             //E9 is an empty subtree (leaf) and has inherited permissions
             SetMembership(CurrentContext.Security, "U1:G1");
             CurrentContext.Security.CreateAclEditor()
-                .Allow(Id("E1"), Id("G1"), false, PermissionType.See).Apply();
+                .Allow(Id("E1"), Id("G1"), false, PermissionType.See)
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.IsTrue(CurrentContext.Security.HasSubtreePermission(Id("E9"), PermissionType.See));
         }
         [TestMethod]
-        public void Eval_AssertSubtreePermission()
+        public async Task Eval_AssertSubtreePermission()
         {
             EnsureRepository();
 
@@ -316,17 +321,20 @@ namespace SenseNet.Security.Tests
 
             var origOwnerId = Id("U1");
             const int differentOwnerId = int.MaxValue;
+            var cancel = CancellationToken.None;
 
             CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See);
             CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.Preview);
-            CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+            await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), differentOwnerId, cancel)
+                .ConfigureAwait(false);
             try
             {
                 CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
             }
             finally
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), origOwnerId, cancel)
+                    .ConfigureAwait(false);
             }
 
             foreach (var perm in PermissionTypeBase.GetPermissionTypes())
@@ -344,7 +352,8 @@ namespace SenseNet.Security.Tests
                     }
                     try
                     {
-                        CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+                        await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), differentOwnerId, cancel)
+                            .ConfigureAwait(false);
                         CurrentContext.Security.AssertSubtreePermission(Id("E3"), perm);
                         Assert.Fail($"{perm.Name} subtree permission on E3 is true, expected: false.");
                     }
@@ -354,7 +363,8 @@ namespace SenseNet.Security.Tests
                     }
                     finally
                     {
-                        CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                        await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), origOwnerId, cancel)
+                            .ConfigureAwait(false);
                     }
                 }
             }
@@ -373,7 +383,8 @@ namespace SenseNet.Security.Tests
             }
             try
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+                await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), differentOwnerId, cancel)
+                    .ConfigureAwait(false);
                 CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
                 Assert.Fail("Open+Edit subtree permission on E3 is true, expected: false.");
             }
@@ -383,11 +394,12 @@ namespace SenseNet.Security.Tests
             }
             finally
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), origOwnerId, cancel)
+                    .ConfigureAwait(false);
             }
         }
         [TestMethod]
-        public void Eval_AssertSubtreePermission_Entity()
+        public async Task Eval_AssertSubtreePermission_Entity()
         {
             EnsureRepository();
 
@@ -446,7 +458,8 @@ namespace SenseNet.Security.Tests
             }
             try
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), differentOwnerId);
+                await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), differentOwnerId, CancellationToken.None)
+                    .ConfigureAwait(false);
                 CurrentContext.Security.AssertSubtreePermission(Id("E3"), PermissionType.See, PermissionType.Preview);
                 Assert.Fail("Open+Edit subtree permission on E3 is true, expected: false.");
             }
@@ -456,7 +469,8 @@ namespace SenseNet.Security.Tests
             }
             finally
             {
-                CurrentContext.Security.ModifyEntityOwner(Id("E3"), origOwnerId);
+                await CurrentContext.Security.ModifyEntityOwnerAsync(Id("E3"), origOwnerId, CancellationToken.None)
+                    .ConfigureAwait(false);
             }
         }
         [TestMethod]
@@ -521,7 +535,7 @@ namespace SenseNet.Security.Tests
             ed.Deny(Id("E5"), u2, false, GetPermissionTypes("___p__p________"));
             ed.Allow(Id("E5"), g1, false, GetPermissionTypes("_pp_pp_pp______"));
             ed.Deny(Id("E5"), g1, false, GetPermissionTypes("p__p__p________"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var entries = CurrentContext.Security.GetEffectiveEntries(Id("E5"))
                 .OrderBy(e => e.IdentityId).ToList();
@@ -666,10 +680,12 @@ namespace SenseNet.Security.Tests
         {
             EnsureRepository();
 
-            CurrentContext.Security.CreateAclEditor().Set(Id("E1"), Id("U1"), false, new PermissionBitMask { AllowBits = ~0ul, DenyBits = 0ul }).Apply();
+            CurrentContext.Security.CreateAclEditor().Set(Id("E1"), Id("U1"), false, new PermissionBitMask { AllowBits = ~0ul, DenyBits = 0ul })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("+E1|Normal|+U1:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E1")).ToString()));
 
-            CurrentContext.Security.CreateAclEditor().Set(Id("E1"), Id("U1"), false, new PermissionBitMask { AllowBits = 0ul, DenyBits = ~0ul }).Apply();
+            CurrentContext.Security.CreateAclEditor().Set(Id("E1"), Id("U1"), false, new PermissionBitMask { AllowBits = 0ul, DenyBits = ~0ul })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("+E1|Normal|+U1:----------------------------------------------------------------", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E1")).ToString()));
         }
         [TestMethod]
@@ -735,7 +751,7 @@ namespace SenseNet.Security.Tests
             ed.Allow(entityId1, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark);
             ed.Allow(entityId1, userId2, false, PermissionType.See);
             ed.Allow(entityId2, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark, PermissionType.PreviewWithoutRedaction);
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var acl = CurrentContext.Security.GetAcl(entityId2);
             Assert.AreEqual("+E2|Normal|+U1:____________________________________________________________++++,Normal|+U2:_______________________________________________________________+", ReplaceIds(acl.ToString()));
@@ -755,7 +771,7 @@ namespace SenseNet.Security.Tests
             ed.Allow(entityId1, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark);
             ed.Allow(entityId1, userId2, false, PermissionType.See);
             ed.Allow(entityId2, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark, PermissionType.PreviewWithoutRedaction);
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var acl = CurrentContext.Security.GetAcl(entityId2);
             Assert.AreEqual("+E2|Normal|+U1:____________________________________________________________++++,Normal|+U2:_______________________________________________________________+", ReplaceIds(acl.ToString()));
@@ -763,7 +779,7 @@ namespace SenseNet.Security.Tests
             //#
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(entityId2, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark, PermissionType.PreviewWithoutRedaction);
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             acl = CurrentContext.Security.GetAcl(entityId2);
             Assert.AreEqual("+E2|Normal|+U1:_____________________________________________________________+++,Normal|+U2:_______________________________________________________________+", ReplaceIds(acl.ToString()));
@@ -783,7 +799,7 @@ namespace SenseNet.Security.Tests
             ed.Allow(entityId1, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark);
             ed.Allow(entityId1, userId2, false, PermissionType.See);
             ed.Allow(entityId2, userId1, false, PermissionType.See, PermissionType.Preview, PermissionType.PreviewWithoutWatermark, PermissionType.PreviewWithoutRedaction);
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var acl = CurrentContext.Security.GetAcl(entityId2);
             Assert.AreEqual("+E2|Normal|+U1:____________________________________________________________++++,Normal|+U2:_______________________________________________________________+", ReplaceIds(acl.ToString()));
@@ -791,7 +807,7 @@ namespace SenseNet.Security.Tests
             //#
             ed = CurrentContext.Security.CreateAclEditor();
             ed.Reset(entityId2, userId1, false, PermissionType.See | PermissionType.Preview | PermissionType.PreviewWithoutWatermark | PermissionType.PreviewWithoutRedaction);
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             acl = CurrentContext.Security.GetAcl(entityId2);
             Assert.AreEqual("+E2|Normal|+U1:_____________________________________________________________+++,Normal|+U2:_______________________________________________________________+", ReplaceIds(acl.ToString()));
@@ -819,63 +835,63 @@ namespace SenseNet.Security.Tests
             ed0.Allow(Id("E14"), Id("G1"), false, GetPermissionTypes("___p___________"));
             ed0.Allow(Id("E50"), Id("G1"), false, GetPermissionTypes("__p____________"));
             ed0.Allow(Id("E51"), Id("G1"), false, GetPermissionTypes("_p_____________"));
-            ed0.Apply();
+            ed0.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# set some new and more irrelevant permissions
             var ed = CurrentContext.Security.CreateAclEditor();
             ed.Deny(Id("E52"), uid1, false, GetPermissionTypes("________ppppppp"));
             ed.Deny(Id("E52"), gid1, false, GetPermissionTypes("ppppppp________"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("_________________________________________________-------_-------", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E52"), uid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E52"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E51"), uid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E51"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("___________________________________________________+++++___+++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E50"), uid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E50"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("____________________________________________________++++____++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E1"), uid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E1"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("____________________________________________________+++_____+++_", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E2"), uid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E2"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("____________________________________________________++______++__", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E5"), uid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E5"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("____________________________________________________+_______+___", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E14"), uid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E14"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("________________________________________________________________", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
         }
         [TestMethod]
@@ -901,21 +917,21 @@ namespace SenseNet.Security.Tests
             ed0.Allow(Id("E14"), Id("G1"), false, GetPermissionTypes("___p___________"));
             ed0.Allow(Id("E50"), Id("G1"), false, GetPermissionTypes("__p____________"));
             ed0.Allow(Id("E51"), Id("G1"), false, GetPermissionTypes("_p_____________"));
-            ed0.Apply();
+            ed0.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# set some new and more irrelevant permissions
             var ed = CurrentContext.Security.CreateAclEditor();
             ed.Deny(Id("E52"), uid1, false, GetPermissionTypes("________ppppppp"));
             ed.Deny(Id("E52"), gid1, false, GetPermissionTypes("ppppppp________"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("_________________________________________________-------_-------", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E52"), uid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E52"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("__________________________________________________++++++__++++++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
 
             //# clear all permissions (inherited won't be cleared)
@@ -930,7 +946,7 @@ namespace SenseNet.Security.Tests
             ed.ClearPermission(Id("E2"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E5"), uid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E5"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("____________________________________________________+_______+___", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
             Assert.AreEqual(default, CurrentContext.Security.SecuritySystem.Cache.Entities[Id("E5")].GetFirstAclId());
 
@@ -938,7 +954,7 @@ namespace SenseNet.Security.Tests
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E14"), uid1, false, GetPermissionTypes("ppppppppppppppp"));
             ed.ClearPermission(Id("E14"), gid1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             Assert.AreEqual("________________________________________________________________", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), Id("U1"), default));
         }
         [TestMethod]
@@ -953,7 +969,7 @@ namespace SenseNet.Security.Tests
             ed0.Deny(Id("E1"), u1, false, GetPermissionTypes("_______p_p_p_p_"));
             ed0.Allow(Id("E2"), u1, false, GetPermissionTypes("p_p_p_p________"));
             ed0.Deny(Id("E2"), u1, false, GetPermissionTypes("_p_p_p_________"));
-            ed0.Apply();
+            ed0.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var db = CurrentContext.Security.SecuritySystem.DataProvider;
 
@@ -968,7 +984,7 @@ namespace SenseNet.Security.Tests
             //# clear all permissions (inherited won't be cleared)
             var ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E2"), u1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual("________________________________________________________-+-+-+-+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E52"), u1, default));
             dbEntries1 = db.LoadPermissionEntriesAsync(new[] { Id("E1") }, CancellationToken.None)
@@ -990,7 +1006,7 @@ namespace SenseNet.Security.Tests
             ed0.Deny(Id("E1"), u1, false, GetPermissionTypes("_______p_p_p_p_"));
             ed0.Allow(Id("E2"), u1, false, GetPermissionTypes("p_p_p_p________"));
             ed0.Deny(Id("E2"), u1, false, GetPermissionTypes("_p_p_p_________"));
-            ed0.Apply();
+            ed0.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var acl1 = CurrentContext.Security.GetAclInfo(Id("E1"));
             var acl2 = CurrentContext.Security.GetAclInfo(Id("E2"));
@@ -1000,7 +1016,7 @@ namespace SenseNet.Security.Tests
             //# clear all permissions (inherited won't be cleared)
             var ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E2"), u1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             acl1 = CurrentContext.Security.GetAclInfo(Id("E1"));
             acl2 = CurrentContext.Security.GetAclInfo(Id("E2"));
@@ -1019,7 +1035,7 @@ namespace SenseNet.Security.Tests
             ed0.Deny(Id("E1"), u1, false, GetPermissionTypes("_______p_p_p_p_"));
             ed0.Allow(Id("E2"), u1, false, GetPermissionTypes("p_p_p_p________"));
             ed0.Deny(Id("E2"), u1, false, GetPermissionTypes("_p_p_p_________"));
-            ed0.Apply();
+            ed0.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var acl1 = CurrentContext.Security.GetAclInfo(Id("E1"));
             var acl2 = CurrentContext.Security.GetAclInfo(Id("E2"));
@@ -1031,7 +1047,7 @@ namespace SenseNet.Security.Tests
             ed.BreakInheritance(Id("E2"), new[] { EntryType.Normal });
 
             ed.ClearPermission(Id("E2"), u1, false, GetPermissionTypes("ppppppppppppppp"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             acl1 = CurrentContext.Security.GetAclInfo(Id("E1"));
             acl2 = CurrentContext.Security.GetAclInfo(Id("E2"));
@@ -1056,7 +1072,7 @@ namespace SenseNet.Security.Tests
             ed.Deny(Id("E2"), u1, false, GetPermissionTypes("_____p_________"));
             ed.Deny(Id("E5"), u1, true, GetPermissionTypes("____p__________"));
             ed.Deny(Id("E14"), u1, false, GetPermissionTypes("___p___________"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual("_______________________________________________________-_______+", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E1"), u1, default));
             Assert.AreEqual("______________________________________________________--______++", CurrentContext.Security.Evaluator._traceEffectivePermissionValues(Id("E2"), u1, default));
@@ -1084,7 +1100,7 @@ namespace SenseNet.Security.Tests
             //--------------------------------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
             ed.Allow(Id("E2"), u1, false, GetPermissionTypes("_____________P_"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual(eid0, sec.GetSecurityEntity(eid1).GetFirstAclId());
             Assert.AreEqual(eid0, sec.GetSecurityEntity(eid3).GetFirstAclId());
@@ -1097,7 +1113,7 @@ namespace SenseNet.Security.Tests
             //--------------------------------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
             ed.Allow(Id("E1"), u1, false, GetPermissionTypes("______________p"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual(eid1, sec.GetSecurityEntity(eid1).GetFirstAclId());
             Assert.AreEqual(eid1, sec.GetSecurityEntity(eid3).GetFirstAclId());
@@ -1110,7 +1126,7 @@ namespace SenseNet.Security.Tests
             //--------------------------------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
             ed.Allow(Id("E5"), u1, false, GetPermissionTypes("____________P__"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual(eid1, sec.GetSecurityEntity(eid1).GetFirstAclId());
             Assert.AreEqual(eid1, sec.GetSecurityEntity(eid3).GetFirstAclId());
@@ -1123,7 +1139,7 @@ namespace SenseNet.Security.Tests
             //--------------------------------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E1"), u1, false, GetPermissionTypes("______________P"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual(eid0, sec.GetSecurityEntity(eid1).GetFirstAclId());
             Assert.AreEqual(eid0, sec.GetSecurityEntity(eid3).GetFirstAclId());
@@ -1136,7 +1152,7 @@ namespace SenseNet.Security.Tests
             //--------------------------------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E5"), u1, false, GetPermissionTypes("____________P__"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual(eid0, sec.GetSecurityEntity(eid1).GetFirstAclId());
             Assert.AreEqual(eid0, sec.GetSecurityEntity(eid3).GetFirstAclId());
@@ -1149,7 +1165,7 @@ namespace SenseNet.Security.Tests
             //--------------------------------------------------------------------------------
             ed = CurrentContext.Security.CreateAclEditor();
             ed.ClearPermission(Id("E2"), u1, false, GetPermissionTypes("_____________P_"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual(eid0, sec.GetSecurityEntity(eid1).GetFirstAclId());
             Assert.AreEqual(eid0, sec.GetSecurityEntity(eid3).GetFirstAclId());
@@ -1172,7 +1188,7 @@ namespace SenseNet.Security.Tests
             ed.Allow(Id("E1"), u1, false, GetPermissionTypes("____________ppp"));
             ed.Allow(Id("E2"), u1, false, GetPermissionTypes("_________ppp___"));
             ed.Allow(Id("E5"), u1, false, GetPermissionTypes("______ppp______"));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var acl = CurrentContext.Security.GetAcl(Id("E1"));
             Assert.AreEqual(64, acl.Entries.First().Permissions.Count(x => x.AllowFrom == default && x.DenyFrom == default));
@@ -1196,7 +1212,8 @@ namespace SenseNet.Security.Tests
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual("-E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1219,7 +1236,8 @@ namespace SenseNet.Security.Tests
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E2"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E2"), new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var aclInfo = CurrentContext.Security.GetAclInfo(Id("E2"));
             Assert.IsNotNull(aclInfo);
@@ -1244,7 +1262,8 @@ namespace SenseNet.Security.Tests
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new EntryType[0]).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new EntryType[0])
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var aclInfo = CurrentContext.Security.GetAclInfo(Id("E5"));
             Assert.IsNotNull(aclInfo);
@@ -1277,7 +1296,8 @@ namespace SenseNet.Security.Tests
             SetAcl("+E36|Normal|+G2:_+++++++++++___");                                 //     0x24    //           0x24
 
             var ctx = CurrentContext.Security;
-            ctx.CreateAclEditor().BreakInheritance(Id("E32"), new EntryType[0]).Apply();  // 0x20
+            ctx.CreateAclEditor().BreakInheritance(Id("E32"), new EntryType[0])
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();  // 0x20
 
             var aclE32 = CurrentContext.Security.GetAclInfo(Id("E32"));
             var aclE35 = ctx.GetAclInfo(Id("E35"));
@@ -1321,7 +1341,8 @@ namespace SenseNet.Security.Tests
             SetAcl("+E33|Normal|+G2:_+++++_________");
             SetAcl("+E34|Normal|+G2:_+++++_________");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), new EntryType[0]).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), new EntryType[0])
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var aclE12 = CurrentContext.Security.GetAclInfo(Id("E12"));
             var aclE33 = CurrentContext.Security.GetAclInfo(Id("E33"));
@@ -1367,7 +1388,8 @@ namespace SenseNet.Security.Tests
             // breaks, tests and repeat
             for (var i = 0; i < 3; i++)
             {
-                CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), new EntryType[0]).Apply();
+                CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E12"), new EntryType[0])
+                    .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
                 var aclE12 = CurrentContext.Security.GetAclInfo(Id("E12"));
                 //var aclE4 = CurrentContext.Security.GetAclInfo(Id("E4"));
@@ -1407,7 +1429,8 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+___________++_");
 
             //#
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual("-E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1415,12 +1438,13 @@ namespace SenseNet.Security.Tests
             var ed = CurrentContext.Security.CreateAclEditor();
             ed.Allow(Id("E5"), Id("G2"), false, GetPermissionTypes("+++++++++++++++"))
                 .Deny(Id("E5"), Id("G2"), false, GetPermissionTypes("_+_____________"))
-                .Apply();
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual("-E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-+++++++++++++", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
             //#
-            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E5"), new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
 
             var sec = CurrentContext.Security;
@@ -1441,9 +1465,11 @@ namespace SenseNet.Security.Tests
             SetAcl("+E1|Normal|+G1:+++++++++++++++,Normal|+G2:_-____________+");
             SetAcl("+E2|Normal|+G2:+___________++_");
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
-            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E5"), new EntryType[0]).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E5"), new EntryType[0])
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual("+E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-__________+++", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1478,7 +1504,8 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual("E2|Normal|+G2:_________________________________________________+___________++_", ReplaceIds(aces[0].ToString()));
 
 
-            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E2"), new EntryType[0]).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E2"), new EntryType[0])
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
 
             Assert.AreEqual("+E2|Normal|+G2:_________________________________________________+___________++_", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E2")).ToString()));
@@ -1504,11 +1531,13 @@ namespace SenseNet.Security.Tests
 
             Assert.AreEqual(e2Id, sec.GetSecurityEntity(e5Id).GetFirstAclId());
 
-            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().BreakInheritance(Id("E5"), new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual(e5Id, sec.GetSecurityEntity(e5Id).GetFirstAclId());
 
-            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E5"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().UnBreakInheritance(Id("E5"), new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual(e2Id, sec.GetSecurityEntity(e5Id).GetFirstAclId());
 
@@ -1544,7 +1573,8 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+___________++_");
             SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:___________++++");
 
-            CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E5"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E5"), new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual("+E5|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-_________++++", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1564,7 +1594,8 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+___________++_");
             SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:___________++++");
 
-            CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E14"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().CopyEffectivePermissions(Id("E14"), new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual("+E14|Normal|+G1:_________________________________________________+++++++++++++++,Normal|+G2:_________________________________________________+-_________++++", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E14")).ToString()));
 
@@ -1584,7 +1615,8 @@ namespace SenseNet.Security.Tests
             SetAcl("+E2|Normal|+G2:+-__________++_");
             SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:-__________++++");
 
-            CurrentContext.Security.CreateAclEditor().NormalizeExplicitPermissions(Id("E5"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().NormalizeExplicitPermissions(Id("E5"), new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.AreEqual("+E5|Normal|+G2:_________________________________________________-__________+___", ReplaceIds(CurrentContext.Security.GetAclInfo(Id("E5")).ToString()));
 
@@ -1604,7 +1636,8 @@ namespace SenseNet.Security.Tests
             SetAcl("+E5|Normal|+G1:+___+++_____++_,Normal|+G2:___________++++");
             SetAcl("+E14|Normal|+G1:+++++++++++++++,Normal|+G2:+-_________++++");
 
-            CurrentContext.Security.CreateAclEditor().NormalizeExplicitPermissions(Id("E14"), new[] { EntryType.Normal }).Apply();
+            CurrentContext.Security.CreateAclEditor().NormalizeExplicitPermissions(Id("E14"), new[] { EntryType.Normal })
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             Assert.IsNull(CurrentContext.Security.GetAclInfo(Id("E14")));
 
@@ -1633,7 +1666,7 @@ namespace SenseNet.Security.Tests
                 ed.Deny(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             for (var i = 2; i < PermissionTypeBase.PermissionCount; i += 3)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+", ReplaceIds(acl.ToString()));
 
@@ -1645,7 +1678,7 @@ namespace SenseNet.Security.Tests
                 ed.Deny(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             for (var i = 0; i < PermissionTypeBase.PermissionCount; i += 3)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_", ReplaceIds(acl.ToString()));
 
@@ -1657,7 +1690,7 @@ namespace SenseNet.Security.Tests
                 ed.Deny(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
             for (var i = 1; i < PermissionTypeBase.PermissionCount; i += 3)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-+_-", ReplaceIds(acl.ToString()));
 
@@ -1665,49 +1698,49 @@ namespace SenseNet.Security.Tests
             ed = CurrentContext.Security.CreateAclEditor();
             for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|", ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
             for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
                 ed.Allow(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
             for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
                 ed.Deny(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:----------------------------------------------------------------", ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
             for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|", ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
             for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
                 ed.Deny(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:----------------------------------------------------------------", ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
             for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
                 ed.Allow(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|Normal|+U6:++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", ReplaceIds(acl.ToString()));
 
             ed = CurrentContext.Security.CreateAclEditor();
             for (var i = 0; i < PermissionTypeBase.PermissionCount; i++)
                 ed.ClearPermission(entity4Id, user6Id, false, PermissionTypeBase.GetPermissionTypeByIndex(i));
-            ed.Apply();
+            ed.ApplyAsync(CancellationToken.None).GetAwaiter().GetResult();
             acl = CurrentContext.Security.GetAcl(entity4Id);
             Assert.AreEqual("+E4|", ReplaceIds(acl.ToString()));
         }
@@ -1720,7 +1753,8 @@ namespace SenseNet.Security.Tests
 
             var ctx = CurrentContext.Security;
 
-            ctx.CreateAclEditor().BreakInheritance(Id("E3"), new EntryType[0]).Apply(); // with entry
+            ctx.CreateAclEditor().BreakInheritance(Id("E3"), new EntryType[0])
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult(); // with entry
             var acl3 = ctx.GetAcl(Id("E3"));
             var acl9 = ctx.GetAcl(Id("E9")); // child of E3 and no entry
             var acl25 = ctx.GetAcl(Id("E25")); // deeper descendant of E3 and no entry
@@ -1728,7 +1762,8 @@ namespace SenseNet.Security.Tests
             Assert.AreEqual(true, acl9.Inherits);
             Assert.AreEqual(true, acl25.Inherits);
 
-            ctx.CreateAclEditor().BreakInheritance(Id("E4"), new EntryType[0]).Apply(); // without entry
+            ctx.CreateAclEditor().BreakInheritance(Id("E4"), new EntryType[0])
+                .ApplyAsync(CancellationToken.None).GetAwaiter().GetResult(); // without entry
             var acl4 = ctx.GetAcl(Id("E4"));
             var acl11 = ctx.GetAcl(Id("E11")); // child of E4 and no entry
             var acl34 = ctx.GetAcl(Id("E34")); // deeper descendant of E4 and no entry

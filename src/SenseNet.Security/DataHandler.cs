@@ -397,19 +397,19 @@ namespace SenseNet.Security
             activity.Id = result.ActivityId;
         }
 
-        internal Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
+        internal Task<int> GetLastSecurityActivityIdAsync(CancellationToken cancel)
         {
-            return _dataProvider.GetLastSecurityActivityIdAsync(startedTime, cancel);
+            return _dataProvider.GetLastSecurityActivityIdAsync(cancel);
         }
 
-        internal async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int from, int to, int count,
+        internal virtual async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int from, int to, int count,
             bool executingUnprocessedActivities, CancellationToken cancel)
         {
             var result = await _dataProvider.LoadSecurityActivitiesAsync(from, to, count, executingUnprocessedActivities, cancel).ConfigureAwait(false);
             return result;
         }
 
-        internal async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities,
+        internal virtual async Task<IEnumerable<SecurityActivity>> LoadSecurityActivitiesAsync(int[] gaps, bool executingUnprocessedActivities,
             CancellationToken cancel)
         {
             var result = await _dataProvider.LoadSecurityActivitiesAsync(gaps, executingUnprocessedActivities, cancel).ConfigureAwait(false);

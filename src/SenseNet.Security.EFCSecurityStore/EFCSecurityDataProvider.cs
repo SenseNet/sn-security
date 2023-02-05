@@ -540,15 +540,13 @@ ELSE CAST(0 AS BIT) END";
         //===================================================================== SecurityActivity
 
         [Obsolete("Use async version instead.")]
-        public int GetLastSecurityActivityId(DateTime startedTime)
+        public int GetLastSecurityActivityId()
         {
-            return GetLastSecurityActivityIdAsync(startedTime, CancellationToken.None).GetAwaiter().GetResult();
+            return GetLastSecurityActivityIdAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
-        public async Task<int> GetLastSecurityActivityIdAsync(DateTime startedTime, CancellationToken cancel)
+        public async Task<int> GetLastSecurityActivityIdAsync(CancellationToken cancel)
         {
-            using var op = SnTrace.SecurityDatabase.StartOperation(
-                "EFCSecurityDataProvider: GetLastSecurityActivityId(startedTime: {0})",
-                startedTime.ToString("yyyy-MM-dd HH:mm:ss.ffff"));
+            using var op = SnTrace.SecurityDatabase.StartOperation("EFCSecurityDataProvider: GetLastSecurityActivityId()");
 
             int result;
             var db = Db();

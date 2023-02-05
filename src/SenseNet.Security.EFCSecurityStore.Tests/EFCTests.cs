@@ -2,10 +2,13 @@
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SenseNet.Diagnostics;
 using SenseNet.Extensions.DependencyInjection;
 using SenseNet.Security.EFCSecurityStore.Configuration;
 using SenseNet.Security.Messaging;
@@ -49,19 +52,21 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             }
         }
 
-        private SecurityActivityQueue SecurityActivityQueue => SecuritySystem.SecurityActivityQueue;
+        private ISecurityActivityQueue SecurityActivityQueue => SecuritySystem.SecurityActivityQueue;
 
         [TestMethod]
-        public void EFC_LoadActivities_AtStart_DataHandlerLevel()
+        public async Task EFC_LoadActivities_AtStart_DataHandlerLevel()
         {
             var sCtx = CurrentContext.Security;
             var user1Id = TestUser.User1.Id;
             var rootEntityId = Id("E01");
 
             // create 30 activities
-            sCtx.CreateSecurityEntity(rootEntityId, default, user1Id);
+            await sCtx.CreateSecurityEntityAsync(rootEntityId, default, user1Id, CancellationToken.None)
+                .ConfigureAwait(false);
             for (var entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
-                sCtx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
+                await sCtx.CreateSecurityEntityAsync(entityId, rootEntityId, user1Id, CancellationToken.None)
+                    .ConfigureAwait(false);
 
             var lastId = Db().ExecuteTestScript<int>("select top 1 Id as Value from [EFMessages] order by Id desc").First();
 
@@ -111,16 +116,18 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
         }
 
         [TestMethod]
-        public void EFC_LoadActivities_AtStart_ActivityQueueLevel()
+        public async Task EFC_LoadActivities_AtStart_ActivityQueueLevel()
         {
             var sCtx = CurrentContext.Security;
             var user1Id = TestUser.User1.Id;
             var rootEntityId = Id("E01");
 
             // create 30 activities
-            sCtx.CreateSecurityEntity(rootEntityId, default, user1Id);
+            await sCtx.CreateSecurityEntityAsync(rootEntityId, default, user1Id, CancellationToken.None)
+                .ConfigureAwait(false);
             for (var entityId = rootEntityId + 1; entityId < rootEntityId + 31; entityId++)
-                sCtx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
+                await sCtx.CreateSecurityEntityAsync(entityId, rootEntityId, user1Id, CancellationToken.None)
+                    .ConfigureAwait(false);
 
             var lastId = Db().ExecuteTestScript<int>("select top 1 Id as Value from [EFMessages] order by Id desc").First();
 
@@ -129,7 +136,7 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             var expectedCs = new CompletionState { LastActivityId = lastId };
             var uncompleted = DataHandler_LoadCompletionState(out var lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
-            var cs0 = SecurityActivityQueue.GetCurrentState().Termination;
+            var cs0 = SecurityActivityQueue.GetCurrentCompletionState();
             Assert.AreEqual(expectedCs.ToString(), cs0.ToString());
 
 
@@ -146,8 +153,9 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             var expectedIsFromDb1 = string.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId });
             uncompleted = DataHandler_LoadCompletionState(out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
-            var cs1 = SecurityActivityQueue.GetCurrentState().Termination;
-            var idsFromDb1 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None).GetAwaiter().GetResult());
+            await Task.Delay(200).ConfigureAwait(false);
+            var cs1 = SecurityActivityQueue.GetCurrentCompletionState();
+            var idsFromDb1 = string.Join(", ", await Db().GetUnprocessedActivityIdsAsync(CancellationToken.None).ConfigureAwait(false));
             Assert.AreEqual(expectedCs.ToString(), cs1.ToString());
             Assert.AreEqual(expectedIsFromDb1, idsFromDb1);
 
@@ -164,91 +172,15 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             var expectedIsFromDb2 = string.Join(", ", new[] { lastId - 9, lastId - 4, lastId - 3, lastId - 1, lastId, lastId });
             uncompleted = DataHandler_LoadCompletionState(out lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
-            var cs2 = SecurityActivityQueue.GetCurrentState().Termination;
-            var idsFromDb2 = string.Join(", ", Db().GetUnprocessedActivityIdsAsync(CancellationToken.None).GetAwaiter().GetResult());
+            await Task.Delay(200).ConfigureAwait(false);
+            var cs2 = SecurityActivityQueue.GetCurrentCompletionState();
+            var idsFromDb2 = string.Join(", ", await Db().GetUnprocessedActivityIdsAsync(CancellationToken.None).ConfigureAwait(false));
             Assert.AreEqual(expectedCs.ToString(), cs2.ToString());
             Assert.AreEqual(expectedIsFromDb2, idsFromDb2);
         }
 
         [TestMethod]
-        public void EFC_LoadActivities_RightDependencies()
-        {
-            var sCtx = CurrentContext.Security;
-            var user1Id = TestUser.User1.Id;
-
-            // register some dependent activities
-            // create a tree
-            string waitingActivitiesDump;
-
-            try
-            {
-                SecurityActivityQueue.__disableExecution();
-
-                new CreateSecurityEntityActivity(Id("E01"), default, user1Id).Execute(sCtx, false);
-                {
-                    new CreateSecurityEntityActivity(Id("E02"), Id("E01"), user1Id).Execute(sCtx, false);
-                    {
-                        new CreateSecurityEntityActivity(Id("E03"), Id("E02"), user1Id).Execute(sCtx, false);
-                        {
-                            new CreateSecurityEntityActivity(Id("E04"), Id("E03"), user1Id).Execute(sCtx, false);
-                            new CreateSecurityEntityActivity(Id("E05"), Id("E03"), user1Id).Execute(sCtx, false);
-                        }
-                    }
-                }
-                // set acl
-                new SetAclActivity(null, new List<int>(), new List<int> { Id("E111"), Id("E03") }).Execute(sCtx, false);
-                new SetAclActivity(null, new List<int>(), new List<int> { Id("E112"), Id("E113") }).Execute(sCtx, false);
-                new SetAclActivity(null, new List<int>(), new List<int> { Id("E113"), Id("E114") }).Execute(sCtx, false);
-                // delete a chain
-                new DeleteSecurityEntityActivity(Id("E04")).Execute(sCtx, false);
-                new DeleteSecurityEntityActivity(Id("E03")).Execute(sCtx, false);
-                new DeleteSecurityEntityActivity(Id("E02")).Execute(sCtx, false);
-
-                // dump
-                var waitingActivities = SecurityActivityQueue.__getWaitingSet();
-                var x = waitingActivities.Select(a => "{"
-                   + $"id:{a.Id}, w:[{string.Join(",", a.WaitingFor.Select(b => b.Id))}], wm:[{string.Join(",", a.WaitingForMe.Select(c => c.Id))}]"
-                                                     + "}");
-                waitingActivitiesDump = string.Join(",", x);
-            }
-            finally
-            {
-                SecurityActivityQueue.__enableExecution();
-            }
-
-            var lastId = Db().ExecuteTestScript<int>("select top 1 Id as Value from [EFMessages] order by Id desc").First();
-            var create1 = lastId - 10;
-            var create2 = lastId - 9;
-            var create3 = lastId - 8;
-            var create4 = lastId - 7;
-            var create5 = lastId - 6;
-            var setAcl1 = lastId - 5;
-            var setAcl2 = lastId - 4;
-            var setAcl3 = lastId - 3;
-            var delete1 = lastId - 2;
-            var delete2 = lastId - 1;
-            var delete3 = lastId;
-
-            var expectedWaitingActivitiesDump =
-                  "{id:" + create1 + ", w:[], wm:[" + create2 + "]},"
-                + "{id:" + create2 + ", w:[" + create1 + "], wm:[" + create3 + "," + delete3 + "]},"
-                + "{id:" + create3 + ", w:[" + create2 + "], wm:[" + create4 + "," + create5 + "," + setAcl1 + "," + delete2 + "]},"
-                + "{id:" + create4 + ", w:[" + create3 + "], wm:[" + delete1 + "]},"
-                + "{id:" + create5 + ", w:[" + create3 + "], wm:[]},"
-
-                + "{id:" + setAcl1 + ", w:[" + create3 + "], wm:[]},"
-                + "{id:" + setAcl2 + ", w:[], wm:[" + setAcl3 + "]},"
-                + "{id:" + setAcl3 + ", w:[" + setAcl2 + "], wm:[]},"
-
-                + "{id:" + delete1 + ", w:[" + create4 + "], wm:[]},"
-                + "{id:" + delete2 + ", w:[" + create3 + "], wm:[]},"
-                + "{id:" + delete3 + ", w:[" + create2 + "], wm:[]}";
-
-            Assert.AreEqual(expectedWaitingActivitiesDump, waitingActivitiesDump);
-        }
-
-        [TestMethod]
-        public void EFC_LoadActivities_SmartGapResolution()
+        public async Task EFC_LoadActivities_SmartGapResolution()
         {
             var sb = new StringBuilder();
             SecuritySystem.CommunicationMonitor.Stop();
@@ -257,10 +189,13 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             var rootEntityId = Id("E01");
 
             // create some activities with gap
-            sCtx.CreateSecurityEntity(rootEntityId, default, user1Id);
+            var activity = new CreateSecurityEntityActivity(rootEntityId, default, user1Id);
+            await this.SecuritySystem.DataHandler.SaveActivityAsync(activity, CancellationToken.None).ConfigureAwait(false);
+            await this.SecuritySystem.DataHandler.SaveActivityAsync(activity, CancellationToken.None).ConfigureAwait(false);
             for (var entityId = rootEntityId + 1; entityId < rootEntityId + 11; entityId++)
             {
-                sCtx.CreateSecurityEntity(entityId, rootEntityId, user1Id);
+                activity = new CreateSecurityEntityActivity(entityId, rootEntityId, user1Id);
+                await this.SecuritySystem.DataHandler.SaveActivityAsync(activity, CancellationToken.None).ConfigureAwait(false);
                 Db().ExecuteTestScript(@"
                     -- 2 gap
                     INSERT INTO EFMessages ([SavedBy], [SavedAt], [ExecutionState]) VALUES ('asdf1', GETDATE(),'Wait')
@@ -274,6 +209,8 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
             sb.Clear();
             var uncompleted = DataHandler_LoadCompletionState(out var lastActivityIdFromDb);
             SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
+
+            await Task.Delay(2000).ConfigureAwait(false);
 
             var cs1 = SecurityActivityQueue.GetCurrentCompletionState();
 
@@ -295,13 +232,15 @@ namespace SenseNet.Security.EFCSecurityStore.Tests
                     DELETE EFMessages WHERE Id in (select top 2 Id from [EFMessages] order by Id desc)");
 
             // last activity
-            sCtx.CreateSecurityEntity(101, rootEntityId, user1Id);
+            await sCtx.CreateSecurityEntityAsync(101, rootEntityId, user1Id, CancellationToken.None)
+                .ConfigureAwait(false);
 
             var cs2 = SecurityActivityQueue.GetCurrentCompletionState();
             Assert.AreEqual(4, cs2.Gaps.Length);
             Assert.AreEqual(cs1.LastActivityId + 6, cs2.LastActivityId);
 
             SecurityActivityQueue.HealthCheck();
+            await Task.Delay(200).ConfigureAwait(false);
 
             var cs3 = SecurityActivityQueue.GetCurrentCompletionState();
             Assert.AreEqual(0, cs3.Gaps.Length);

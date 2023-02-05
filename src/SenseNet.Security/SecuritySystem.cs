@@ -42,7 +42,7 @@ namespace SenseNet.Security
         public IMessageSenderManager MessageSenderManager { get; set; }
         internal SecurityCache Cache { get; private set; }
         internal CommunicationMonitor CommunicationMonitor { get; private set; }
-        internal SecurityActivityQueue SecurityActivityQueue { get; private set; }
+        internal ISecurityActivityQueue SecurityActivityQueue { get; private set; }
         internal SecurityEntityManager EntityManager { get; set; }
         internal IMissingEntityHandler MissingEntityHandler { get; set; }
         internal SecurityActivityHistoryController ActivityHistory { get; set; }
@@ -115,8 +115,9 @@ namespace SenseNet.Security
             CommunicationMonitor = new CommunicationMonitor(DataHandler, Options.Create(MessagingOptions));
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
 
-            SecurityActivityQueue = new SecurityActivityQueue(this, CommunicationMonitor, DataHandler, ActivityHistory);
-            SecurityActivityQueue.Startup(uncompleted, lastActivityIdFromDb);
+            SecurityActivityQueue = new SecurityActivityQueue(DataHandler, CommunicationMonitor, ActivityHistory);
+            await SecurityActivityQueue.StartAsync(uncompleted, lastActivityIdFromDb, cancel).ConfigureAwait(false);
+
             ActivityHistory.SecurityActivityQueue = SecurityActivityQueue; // Property injection
 
             MessageProvider.MessageReceived += MessageProvider_MessageReceived;
@@ -175,7 +176,9 @@ namespace SenseNet.Security
 
                 activity.FromReceiver = true;
                 activity.Context = GeneralSecurityContext;
-                activity.Execute(GeneralSecurityContext, false);
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed.
+                activity.ExecuteAsync(GeneralSecurityContext, CancellationToken.None);
+#pragma warning restore CS4014
             }
             else
             {

@@ -11,12 +11,11 @@ namespace SenseNet.Security.Tests.TestPortal
     public class Context
     {
         // Called by tests. The messageProvider must be initialized.
-        internal static SecuritySystem StartTheSystem(
+        internal static SecuritySystem StartTheSystem (
             ISecurityDataProvider securityDataProvider,
             IMessageProvider messageProvider,
             TextWriter traceChannel = null,
-            Action<IServiceCollection> configureServices = null
-            )
+            Action<IServiceCollection> configureServices = null)
         {
             var serviceCollection = new ServiceCollection()
                 .AddDefaultSecurityMessageTypes()
