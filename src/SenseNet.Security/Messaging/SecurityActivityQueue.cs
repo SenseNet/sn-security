@@ -16,6 +16,7 @@ namespace SenseNet.Security.Messaging
         private readonly SecurityActivityHistoryController _activityHistory;
         private readonly CancellationTokenSource _mainCancellationSource;
         private readonly CancellationToken _mainCancellationToken;
+        private readonly object _lock = new object();
         private Task _mainThreadControllerTask;
 
         public SecurityActivityQueue(DataHandler dataHandler, CommunicationMonitor communicationMonitor,
@@ -61,9 +62,11 @@ namespace SenseNet.Security.Messaging
 
             // Start worker thread
             if(_mainThreadControllerTask == null)
-                _mainThreadControllerTask = Task.Factory.StartNew(
-                    () => ControlActivityQueueThread(_mainCancellationToken),
-                    _mainCancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                lock (_lock)
+                    if (_mainThreadControllerTask == null)
+                        _mainThreadControllerTask = Task.Factory.StartNew(
+                            () => ControlActivityQueueThread(_mainCancellationToken),
+                            _mainCancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             await Task.Delay(1, cancel);
 
@@ -319,6 +322,8 @@ namespace SenseNet.Security.Messaging
                 if (activity.Id == activityUnderExecution.Id)
                 {
                     // compensation: do not depend on itself.
+                    SnTrace.SecurityQueue.Write(() => $"SAQT: COMPENSATION: attach instead of chain " +
+                                                      $"#SA{activity.Key} -> SA{activityUnderExecution.Key}");
                     activityUnderExecution.Attach(activity);
                     dependsOnAny = true;
                 }
