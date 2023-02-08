@@ -16,6 +16,7 @@ namespace SenseNet.Security.Messaging
         private readonly SecurityActivityHistoryController _activityHistory;
         private readonly CancellationTokenSource _mainCancellationSource;
         private readonly CancellationToken _mainCancellationToken;
+        private readonly object _lock = new object();
         private Task _mainThreadControllerTask;
 
         public SecurityActivityQueue(DataHandler dataHandler, CommunicationMonitor communicationMonitor,
@@ -61,9 +62,11 @@ namespace SenseNet.Security.Messaging
 
             // Start worker thread
             if(_mainThreadControllerTask == null)
-                _mainThreadControllerTask = Task.Factory.StartNew(
-                    () => ControlActivityQueueThread(_mainCancellationToken),
-                    _mainCancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                lock (_lock)
+                    if (_mainThreadControllerTask == null)
+                        _mainThreadControllerTask = Task.Factory.StartNew(
+                            () => ControlActivityQueueThread(_mainCancellationToken),
+                            _mainCancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             await Task.Delay(1, cancel);
 
@@ -312,18 +315,28 @@ namespace SenseNet.Security.Messaging
         }
         private int ExecuteOrChain(SecurityActivity activity, List<SecurityActivity> executingList)
         {
+            var dependsOnAny = false;
             // Discover dependencies
             foreach (var activityUnderExecution in GetAllFromChains(executingList))
             {
-                if (activity.ShouldWaitFor(activityUnderExecution))
+                if (activity.Id == activityUnderExecution.Id)
+                {
+                    // compensation: do not depend on itself.
+                    SnTrace.SecurityQueue.Write(() => $"SAQT: COMPENSATION: attach instead of chain " +
+                                                      $"#SA{activity.Key} -> SA{activityUnderExecution.Key}");
+                    activityUnderExecution.Attach(activity);
+                    dependsOnAny = true;
+                }
+                else if (activity.ShouldWaitFor(activityUnderExecution))
                 {
                     activity.WaitFor(activityUnderExecution);
+                    dependsOnAny = true;
                     //TODO: rewrite SecurityActivityHistoryController and call this: _activityHistory.Wait(activity);
                 }
             }
 
             // Add to concurrently executable list
-            if (activity.WaitingFor.Count == 0)
+            if (!dependsOnAny)
             {
                 SnTrace.SecurityQueue.Write(() => $"SAQT: moved to executing list: #SA{activity.Key}");
                 executingList.Add(activity);
@@ -455,10 +468,11 @@ namespace SenseNet.Security.Messaging
             var index = 0;
             while (index < flattened.Count)
             {
-                yield return flattened[index];
                 flattened.AddRange(flattened[index].WaitingForMe);
                 index++;
             }
+            foreach (var item in flattened)
+                yield return item;
         }
 
         /* ======================================================================================== */

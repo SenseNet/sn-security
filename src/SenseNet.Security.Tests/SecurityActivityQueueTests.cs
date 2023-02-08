@@ -119,6 +119,117 @@ public class SecurityActivityQueueTests : TestBase
         Assert.AreEqual(null, msg);
     }
     [TestMethod]
+    public async Task SAQ_CreateEntity_Duplications_Forced_SameObject()
+    {
+        //---- Ensure test data
+        var entities = SystemStartTests.CreateTestEntities();
+        var groups = SystemStartTests.CreateTestGroups();
+        //var memberships = Tools.CreateInMemoryMembershipTable("G1:U1,U2|G2:U3,U4|G3:U1,U3|G4:U4|G5:U5");
+        var memberships = Tools.CreateInMemoryMembershipTable(groups);
+        var aces = SystemStartTests.CreateTestAces();
+        var storage = new DatabaseStorage
+        {
+            Aces = aces,
+            Memberships = memberships,
+            Entities = entities,
+            Messages = new List<Tuple<int, DateTime, byte[]>>()
+        };
+
+        var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider());
+
+        var idU1 = GetId("U1");
+        var idG1 = GetId("G1");
+        _context = new Context(TestUser.User1, securitySystem);
+        var cancel = CancellationToken.None;
+
+        // Create an activity that depends from itself (FromReceiver = true avoids duplicated saves).
+        var activity1 = new AddUserToSecurityGroupsActivity(idU1, new[] {idG1})
+        {
+            Id = 1,
+            Context = _context.Security,
+            FromReceiver = true,
+        };
+
+        // ACTION
+        // force add to currently executed list
+        var saq = securitySystem.SecurityActivityQueue;
+        var saqAcc = new ObjectAccessor(saq);
+        var executionList = (List<SecurityActivity>)saqAcc.GetField("_executingList");
+        executionList.Add(activity1);
+        // try to make infinite loop: "Make dependency: #SA1-1 depends from SA1-1."
+        saq.ExecuteActivityAsync(activity1, cancel);
+
+        //ASSERT
+        await Task.Delay(1000);
+        //_context.Security.SecuritySystem.Shutdown();
+
+        var trace = _testTracer.Lines;
+        Assert.IsTrue(trace.Count <= 70, $"Trace has {trace.Count} lines that greater than the expected 70.");
+        var msg = CheckTrace(trace, 1);
+        Assert.AreEqual(null, msg);
+    }
+    [TestMethod]
+    public async Task SAQ_CreateEntity_Duplications_Forced_SameId()
+    {
+        //---- Ensure test data
+        var entities = SystemStartTests.CreateTestEntities();
+        var groups = SystemStartTests.CreateTestGroups();
+        //var memberships = Tools.CreateInMemoryMembershipTable("G1:U1,U2|G2:U3,U4|G3:U1,U3|G4:U4|G5:U5");
+        var memberships = Tools.CreateInMemoryMembershipTable(groups);
+        var aces = SystemStartTests.CreateTestAces();
+        var storage = new DatabaseStorage
+        {
+            Aces = aces,
+            Memberships = memberships,
+            Entities = entities,
+            Messages = new List<Tuple<int, DateTime, byte[]>>()
+        };
+
+        var securitySystem = Context.StartTheSystem(new MemoryDataProvider(storage), DiTools.CreateDefaultMessageProvider());
+
+        var idU1 = GetId("U1");
+        var idG1 = GetId("G1");
+        _context = new Context(TestUser.User1, securitySystem);
+        var cancel = CancellationToken.None;
+
+        // Create an activity that depends from itself (FromReceiver = true avoids duplicated saves).
+        var activity1 = new AddUserToSecurityGroupsActivity(idU1, new[] { idG1 })
+        {
+            Id = 1,
+            Context = _context.Security,
+            FromReceiver = true,
+        };
+        var activity2 = new AddUserToSecurityGroupsActivity(idU1, new[] { idG1 })
+        {
+            Id = 1,
+            Context = _context.Security,
+            FromReceiver = true,
+        };
+
+        // ACTION
+        // force add to currently executed list
+        var saq = securitySystem.SecurityActivityQueue;
+        var saqAcc = new ObjectAccessor(saq);
+        var executionList = (List<SecurityActivity>)saqAcc.GetField("_executingList");
+        executionList.Add(activity1);
+        // try to make infinite loop: "Make dependency: #SA1-1 depends from SA1-1."
+        saq.ExecuteActivityAsync(activity2, cancel);
+
+        //ASSERT
+        await Task.Delay(1000);
+        _context.Security.SecuritySystem.Shutdown();
+
+        var trace = _testTracer.Lines;
+        Assert.IsTrue(trace.Count <= 70, $"Trace has {trace.Count} lines that greater than the expected 70.");
+        // The "CheckTrace(trace, 1)" is skipped: #SA1-1 is "not in the right order"
+        // because the trace is incomplete due to hacked start.
+        // Rather check the trace for the following lines.
+        var allEntries = trace.Select(Entry.Parse).ToArray();
+        Assert.IsTrue(allEntries.Any(e => e.Message == $"SA: ExecuteInternal #SA{activity1.Key}"));
+        Assert.IsTrue(allEntries.Any(e => e.Message == $"SAQT: State after finishing SA1: 1()"));
+        Assert.IsTrue(allEntries.Any(e => e.Message == $"SAQT: execution ignored (attachment): #SA{activity2.Key}"));
+    }
+    [TestMethod]
     public async Task SAQ_CreateEntity_ArrivalInWrongDependencyOrder()
     {
         //---- Ensure test data
