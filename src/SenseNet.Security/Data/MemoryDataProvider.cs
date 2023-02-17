@@ -538,8 +538,7 @@ namespace SenseNet.Security.Data
         public Task<SecurityActivityExecutionLock> AcquireSecurityActivityExecutionLockAsync(SecurityActivity securityActivity, int timeoutInSeconds,
             CancellationToken cancel)
         {
-            var result = new Messaging.SecurityActivityExecutionLock(securityActivity, this,
-                !securityActivity.FromReceiver && !securityActivity.FromDatabase);
+            var result = new Messaging.SecurityActivityExecutionLock(securityActivity, this, true);
             return Task.FromResult(result);
         }
 
