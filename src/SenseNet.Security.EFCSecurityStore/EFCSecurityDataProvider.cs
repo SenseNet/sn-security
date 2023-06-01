@@ -154,7 +154,7 @@ ELSE CAST(0 AS BIT) END";
             var db = Db();
             await using (db.ConfigureAwait(false))
             {
-                result = await db.EFEntities.Select(x => new StoredSecurityEntity
+                result = await db.EFEntities.AsNoTracking().Select(x => new StoredSecurityEntity
                 {
                     Id = x.Id,
                     nullableOwnerId = x.OwnerId,
@@ -192,7 +192,7 @@ ELSE CAST(0 AS BIT) END";
         public IEnumerable<StoredAce> LoadAllAces()
         {
             using var db = Db();
-            foreach (var dbItem in db.EFEntries)
+            foreach (var dbItem in db.EFEntries.AsNoTracking())
             {
                 var item = dbItem.ToStoredAce();
                 yield return item;
@@ -923,7 +923,7 @@ ELSE CAST(0 AS BIT) END";
             var db = Db();
             await using (db.ConfigureAwait(false))
             {
-                await db.EFMemberships.ForEachAsync(membership =>
+                await db.EFMemberships.AsNoTracking().ForEachAsync(membership =>
                 {
                     var group = EnsureGroup(membership.GroupId, groups);
                     if (membership.IsUser)
