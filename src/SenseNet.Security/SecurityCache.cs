@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using SenseNet.Diagnostics;
 
 namespace SenseNet.Security
 {
@@ -32,14 +33,19 @@ namespace SenseNet.Security
         {
             var entities = _dataHandler.LoadSecurityEntitiesAsync(CancellationToken.None)
                 .GetAwaiter().GetResult();
+            SnTrace.Security.Write(() => $"Entities loaded. Count: {entities.Count}");
             var aclTable = _dataHandler.LoadAclsAsync(CancellationToken.None)
                 .GetAwaiter().GetResult();
+            SnTrace.Security.Write(() => $"ACLs loaded. Count: {aclTable.Count}");
             BuildAcls(entities, aclTable);
+            SnTrace.Security.Write(() => $"ACLs built. Count: {aclTable.Count}");
 
             Entities = entities;
             Groups = _dataHandler.LoadAllGroupsAsync(CancellationToken.None)
                 .GetAwaiter().GetResult();
+            SnTrace.Security.Write(() => $"Groups loaded. Count: {Groups.Count}");
             Membership = FlattenUserMembership(Groups);
+            SnTrace.Security.Write(() => $"User flattening finished. Count: {Groups.Count}");
         }
 
         private void BuildAcls(IDictionary<int, SecurityEntity> entities, Dictionary<int, AclInfo> aclTable)
@@ -57,38 +63,43 @@ namespace SenseNet.Security
 
         internal Dictionary<int, List<int>> FlattenUserMembership(IDictionary<int, SecurityGroup> groups)
         {
-            var allUsers = new Dictionary<int, List<int>>();
+            var allUsers = new Dictionary<int, HashSet<int>>();
             foreach (var group in groups.Values)
             {
-                var flattenedGroups = new List<SecurityGroup>();
+                var flattenedGroups = new HashSet<int>();
                 FlattenGroupMembership(group, flattenedGroups);
                 foreach (var userId in group.UserMemberIds)
                 {
                     var user = EnsureUser(userId, allUsers);
-                    foreach (var flattenedGroup in flattenedGroups)
-                        if (!user.Contains(flattenedGroup.Id))
-                            user.Add(flattenedGroup.Id);
+                    user.UnionWith(flattenedGroups);
                 }
             }
-            return allUsers;
+
+            SnTrace.Security.Write("Convert flattened structure");
+            var result = allUsers.ToDictionary(x => x.Key, x => x.Value.ToList());
+
+            return result;
         }
-        private void FlattenGroupMembership(SecurityGroup group, List<SecurityGroup> flattenedGroups)
+        private void FlattenGroupMembership(SecurityGroup group, HashSet<int> flattenedGroups)
         {
-            // avoid infinite loop because of circular references
-            if (flattenedGroups.Contains(group))
-                return;
-
-            flattenedGroups.Add(group);
-
-            // recursion
-            foreach (var parentGroup in group.ParentGroups)
-                FlattenGroupMembership(parentGroup, flattenedGroups);
+            var stack = new Stack<SecurityGroup>();
+            stack.Push(group);
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                // avoid infinite loop because of circular references
+                if (flattenedGroups.Contains(current.Id))
+                    continue;
+                flattenedGroups.Add(current.Id);
+                foreach (var parentGroup in current.ParentGroups)
+                    stack.Push(parentGroup);
+            }
         }
-        private List<int> EnsureUser(int userId, Dictionary<int, List<int>> users)
+        private HashSet<int> EnsureUser(int userId, Dictionary<int, HashSet<int>> users)
         {
             if (!users.TryGetValue(userId, out var user))
             {
-                user = new List<int>();
+                user = new HashSet<int>();
                 users.Add(userId, user);
             }
             return user;
