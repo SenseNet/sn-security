@@ -57,6 +57,7 @@ namespace SenseNet.Security.Tests.Concurrency
         internal static SecuritySystem StartTheSystem(ISecurityDataProvider securityDataProvider)
         {
             var services = new ServiceCollection()
+                .AddLogging()
                 .AddDefaultSecurityMessageTypes()
                 .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
                 .BuildServiceProvider();
