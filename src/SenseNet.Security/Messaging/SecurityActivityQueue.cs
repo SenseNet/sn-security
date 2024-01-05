@@ -84,16 +84,12 @@ namespace SenseNet.Security.Messaging
 
             var hasUnprocessed = gaps.Count > 0 || lastDatabaseId != lastExecutedId;
 
-            SnLog.WriteInformation(EventMessage.Information.StartTheSystem, EventId.RepositoryLifecycle,
-                // ReSharper disable once ArgumentsStyleOther
-                properties: new Dictionary<string, object>{
-                    {"LastDatabaseId", lastDatabaseId},
-                    {"LastExecutedId", lastExecutedId},
-                    {"CountOfGaps", gaps.Count},
-                    {"Gaps", gaps.Count > 50
-                        ? "[" + string.Join(", ", gaps.Take(50)) + ", ...]"
-                        : "[" + string.Join(", ", gaps) + "]"}
-                });
+            var gapString = gaps.Count > 50
+                ? "[" + string.Join(", ", gaps.Take(50).Select(x => x.ToString())) + ", ...]"
+                : "[" + string.Join(", ", gaps.Select(x => x.ToString())) + "]";
+            _logger.LogInformation(EventMessage.Information.StartTheSystem +
+                                   $" LastDatabaseId: {lastDatabaseId}, LastExecutedId: {lastExecutedId}, " +
+                                   $"CountOfGaps: {gaps.Count}, Gaps: {gapString}");
 
             var count = 0;
             void Arrive(SecurityActivity activity)
