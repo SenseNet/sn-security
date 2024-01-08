@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using SenseNet.Security.Configuration;
 using SenseNet.Security.Data;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace SenseNet.Security.Tests.Concurrency
 {
@@ -56,6 +57,7 @@ namespace SenseNet.Security.Tests.Concurrency
         internal static SecuritySystem StartTheSystem(ISecurityDataProvider securityDataProvider)
         {
             var services = new ServiceCollection()
+                .AddLogging()
                 .AddDefaultSecurityMessageTypes()
                 .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
                 .BuildServiceProvider();
@@ -66,7 +68,8 @@ namespace SenseNet.Security.Tests.Concurrency
             var securitySystem = new SecuritySystem(securityDataProvider,
                 DiTools.CreateDefaultMessageProvider("asdf", "instance1"),
                 services.GetRequiredService<ISecurityMessageFormatter>(),
-                new MissingEntityHandler(), securityConfiguration, messagingOptions);
+                new MissingEntityHandler(), securityConfiguration, messagingOptions,
+                services.GetRequiredService<ILogger<SecuritySystem>>());
             securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             // legacy logic

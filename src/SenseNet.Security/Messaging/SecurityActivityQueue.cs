@@ -3,15 +3,17 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using SenseNet.Security.Messaging.SecurityMessages;
+using EventId = SenseNet.Diagnostics.EventId;
 
 namespace SenseNet.Security.Messaging
 {
     internal class SecurityActivityQueue : ISecurityActivityQueue, IDisposable
     {
+        private readonly ILogger<SecuritySystem> _logger;
         private readonly DataHandler _dataHandler;
         private readonly SecurityActivityHistoryController _activityHistory;
         private readonly CancellationTokenSource _mainCancellationSource;
@@ -20,10 +22,11 @@ namespace SenseNet.Security.Messaging
         private Task _mainThreadControllerTask;
 
         public SecurityActivityQueue(DataHandler dataHandler, CommunicationMonitor communicationMonitor,
-            SecurityActivityHistoryController activityHistory)
+            SecurityActivityHistoryController activityHistory, ILogger<SecuritySystem> logger)
         {
             _dataHandler = dataHandler;
             _activityHistory = activityHistory;
+            _logger = logger;
 
             // initialize non-nullable fields
             _mainCancellationSource = new CancellationTokenSource();
@@ -81,16 +84,12 @@ namespace SenseNet.Security.Messaging
 
             var hasUnprocessed = gaps.Count > 0 || lastDatabaseId != lastExecutedId;
 
-            SnLog.WriteInformation(EventMessage.Information.StartTheSystem, EventId.RepositoryLifecycle,
-                // ReSharper disable once ArgumentsStyleOther
-                properties: new Dictionary<string, object>{
-                    {"LastDatabaseId", lastDatabaseId},
-                    {"LastExecutedId", lastExecutedId},
-                    {"CountOfGaps", gaps.Count},
-                    {"Gaps", gaps.Count > 50
-                        ? "[" + string.Join(", ", gaps.Take(50)) + ", ...]"
-                        : "[" + string.Join(", ", gaps) + "]"}
-                });
+            var gapString = gaps.Count > 50
+                ? "[" + string.Join(", ", gaps.Take(50).Select(x => x.ToString())) + ", ...]"
+                : "[" + string.Join(", ", gaps.Select(x => x.ToString())) + "]";
+            _logger.LogInformation(EventMessage.Information.StartTheSystem +
+                                   $" LastDatabaseId: {lastDatabaseId}, LastExecutedId: {lastExecutedId}, " +
+                                   $"CountOfGaps: {gaps.Count}, Gaps: {gapString}");
 
             var count = 0;
             void Arrive(SecurityActivity activity)

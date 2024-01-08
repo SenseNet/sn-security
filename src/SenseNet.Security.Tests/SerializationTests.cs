@@ -335,6 +335,7 @@ namespace SenseNet.Security.Tests
         private void SerializationTest<T>(T message, Action<T, string> checkReceived) where T : IDistributedMessage
         {
             var services = new ServiceCollection()
+                .AddLogging()
                 .AddSenseNetSecurity(configureMessageSender: options =>
                 {
                     options.ComputerId = "Machine1";

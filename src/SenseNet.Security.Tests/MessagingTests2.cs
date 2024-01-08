@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -116,6 +117,7 @@ namespace SenseNet.Security.Tests
         private SecuritySystem CreateSecuritySystem(string instanceName, Queue<byte[]> messageQueue, bool isReceiver)
         {
             var services = new ServiceCollection()
+                .AddLogging()
                 .AddDefaultSecurityMessageTypes()
                 .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>()
                 .BuildServiceProvider();
@@ -132,11 +134,13 @@ namespace SenseNet.Security.Tests
                     DiTools.CreateMessageSenderManager(null, instanceName),
                     services.GetRequiredService<ISecurityMessageFormatter>(),
                     messageQueue,
-                    isReceiver),
+                    isReceiver
+                    ),
                 services.GetRequiredService<ISecurityMessageFormatter>(),
                 new MissingEntityHandler(),
                 Options.Create(new SecurityConfiguration()),
-                Options.Create(new MessagingOptions()));
+                Options.Create(new MessagingOptions()),
+                services.GetRequiredService<ILogger<SecuritySystem>>());
 
             securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 

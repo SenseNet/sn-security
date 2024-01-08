@@ -5,6 +5,8 @@ using System.Threading;
 using Microsoft.Extensions.Options;
 using SenseNet.Security.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace SenseNet.Security.Tests.TestPortal
 {
@@ -18,6 +20,7 @@ namespace SenseNet.Security.Tests.TestPortal
             Action<IServiceCollection> configureServices = null)
         {
             var serviceCollection = new ServiceCollection()
+                .AddLogging()
                 .AddDefaultSecurityMessageTypes()
                 .AddSingleton<ISecurityMessageFormatter, SnSecurityMessageFormatter>();
             configureServices?.Invoke(serviceCollection);
@@ -27,7 +30,8 @@ namespace SenseNet.Security.Tests.TestPortal
                 services.GetRequiredService<ISecurityMessageFormatter>(),
                 new MissingEntityHandler(),
                 Options.Create(new SecurityConfiguration()),
-                Options.Create(new MessagingOptions {CommunicationMonitorRunningPeriodInSeconds = 31}));
+                Options.Create(new MessagingOptions {CommunicationMonitorRunningPeriodInSeconds = 31}),
+                services.GetRequiredService<ILogger<SecuritySystem>>());
             securitySystem.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             return securitySystem;

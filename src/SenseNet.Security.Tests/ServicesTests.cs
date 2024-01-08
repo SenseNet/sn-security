@@ -15,6 +15,7 @@ namespace SenseNet.Security.Tests
         public void RegisterServices_Default()
         {
             var services = new ServiceCollection()
+                .AddLogging()
                 .AddSenseNetSecurity()
                 .BuildServiceProvider();
 
