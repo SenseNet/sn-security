@@ -176,8 +176,7 @@ namespace SenseNet.Security.Messaging
                 {
                     if (_allowMessageProcessing)
                     {
-                        List<IDistributedMessage> messagesToProcess;
-                        while ((messagesToProcess = GetProcessableMessages()) != null)
+                        while (GetProcessableMessages() is { } messagesToProcess)
                         {
                             var count = messagesToProcess.Count;
 
@@ -195,7 +194,7 @@ namespace SenseNet.Security.Messaging
                 }
                 catch (Exception ex)
                 {
-                    SnLog.WriteException(ex, EventMessage.Error.MessageProcessing, EventId.Messaging);
+                    _logger.LogError(ex, EventMessage.Error.MessageProcessing);
                 }
 
                 // no messages to process, wait some time and continue checking incoming messages
