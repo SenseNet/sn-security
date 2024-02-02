@@ -1,19 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CmdLine" Version="1.0.7.509" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="CmdLine" Version="1.0.7.509" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SenseNet.Security.EFCSecurityStore\SenseNet.Security.EFCSecurityStore.csproj" />
-    <ProjectReference Include="..\SenseNet.Security.Tests\SenseNet.Security.Tests.csproj" />
-    <ProjectReference Include="..\SenseNet.Security\SenseNet.Security.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\SenseNet.Security.EFCSecurityStore\SenseNet.Security.EFCSecurityStore.csproj" />
+		<ProjectReference Include="..\SenseNet.Security.Tests\SenseNet.Security.Tests.csproj" />
+		<ProjectReference Include="..\SenseNet.Security\SenseNet.Security.csproj" />
+	</ItemGroup>
 
 </Project>

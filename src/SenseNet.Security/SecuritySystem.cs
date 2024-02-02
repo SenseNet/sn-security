@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Configuration;
@@ -34,6 +35,8 @@ namespace SenseNet.Security
     /// </summary>
     public class SecuritySystem
     {
+        private readonly ILogger<SecuritySystem> _logger;
+
         internal SecurityConfiguration Configuration { get; }
         internal MessagingOptions MessagingOptions { get; }
         public ISecurityDataProvider DataProvider { get; }
@@ -66,7 +69,8 @@ namespace SenseNet.Security
             ISecurityMessageFormatter messageFormatter,
             IMissingEntityHandler missingEntityHandler,
             IOptions<SecurityConfiguration> configuration,
-            IOptions<MessagingOptions> messagingOptions)
+            IOptions<MessagingOptions> messagingOptions,
+            ILogger<SecuritySystem> logger)
         {
             Configuration = configuration?.Value ?? new SecurityConfiguration();
             MessagingOptions = messagingOptions?.Value ?? new MessagingOptions();
@@ -79,6 +83,7 @@ namespace SenseNet.Security
             MessageSenderManager = messageProvider.MessageSenderManager;
             MissingEntityHandler = missingEntityHandler;
             SystemUser = new SecuritySystemUser(Configuration.SystemUserId);
+            _logger = logger;
         }
 
         [Obsolete("Use async version instead.")]
@@ -115,7 +120,7 @@ namespace SenseNet.Security
             CommunicationMonitor = new CommunicationMonitor(DataHandler, Options.Create(MessagingOptions));
             GeneralSecurityContext = new SecurityContext(SystemUser, this);
 
-            SecurityActivityQueue = new SecurityActivityQueue(DataHandler, CommunicationMonitor, ActivityHistory);
+            SecurityActivityQueue = new SecurityActivityQueue(DataHandler, CommunicationMonitor, ActivityHistory, _logger);
             await SecurityActivityQueue.StartAsync(uncompleted, lastActivityIdFromDb, cancel).ConfigureAwait(false);
 
             ActivityHistory.SecurityActivityQueue = SecurityActivityQueue; // Property injection
