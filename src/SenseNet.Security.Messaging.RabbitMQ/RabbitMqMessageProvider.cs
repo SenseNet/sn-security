@@ -121,7 +121,7 @@ namespace SenseNet.Security.Messaging.RabbitMQ
             }
             catch (Exception ex)
             {
-                SnLog.WriteException(ex, $"RabbitMQ Security message provider connection error. Service url: {ServiceUrl}");
+                _logger.LogError(ex, "RabbitMQ Security message provider connection error. Service url: {ServiceUrl}", ServiceUrl);
                 throw;
             }
 
@@ -142,12 +142,9 @@ namespace SenseNet.Security.Messaging.RabbitMQ
 
             ReceiverChannel.BasicConsume(queueName, true, consumer);
 
-            SnLog.WriteInformation($"RabbitMQ Security message provider connected to {ServiceUrl}",
-                properties: new Dictionary<string, object>
-                {
-                    { "Exchange", MessageExchange },
-                    { "QueueName", queueName }
-                });
+            _logger.LogInformation("RabbitMQ Security message provider connected to {ServiceUrl} " +
+                                   "through exchange {Exchange} and queue {QueueName}", 
+                ServiceUrl, MessageExchange, queueName);
 
             _initialized = true;
         }
@@ -191,7 +188,9 @@ namespace SenseNet.Security.Messaging.RabbitMQ
             }
             catch (Exception ex)
             {
-                SnLog.WriteException(ex, "Error during security message serialization.");
+                _logger.LogError(ex, "Error during security message serialization. Message type: {MessageType}", 
+                    message.GetType().Name);
+
                 return;
             }
 
@@ -211,7 +210,7 @@ namespace SenseNet.Security.Messaging.RabbitMQ
                 }
                 catch (Exception ex)
                 {
-                    SnLog.WriteException(ex, "Security message SEND ERROR", EventId.Messaging);
+                    _logger.LogError(ex, "Security message SEND ERROR");
                     SnTrace.Messaging.WriteError($"Security message SEND ERROR {ex.Message}");
 
                     OnSendException(message, ex);
