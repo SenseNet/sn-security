@@ -12,9 +12,6 @@ public class ReloadCacheActivity : SecurityActivity
 {
     public ReloadCacheActivity() { }
 
-    public int Something { get; set; }
-
-
     protected override Task StoreAsync(SecurityContext context, CancellationToken cancel)
     {
         // do nothing
