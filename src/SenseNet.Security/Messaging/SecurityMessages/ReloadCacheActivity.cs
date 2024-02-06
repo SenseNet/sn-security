@@ -10,6 +10,11 @@ namespace SenseNet.Security.Messaging.SecurityMessages;
 [Serializable]
 public class ReloadCacheActivity : SecurityActivity
 {
+    public ReloadCacheActivity() { }
+
+    public int Something { get; set; }
+
+
     protected override Task StoreAsync(SecurityContext context, CancellationToken cancel)
     {
         // do nothing
