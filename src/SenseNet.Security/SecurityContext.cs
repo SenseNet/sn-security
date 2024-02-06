@@ -356,9 +356,9 @@ namespace SenseNet.Security
         }
 
         /// <summary>
-        /// Reloads the security local or remote cache. Reloading the local cache can be skipped.
+        /// Reloads the local or remote security cache. Reloading the local cache can be skipped.
         /// </summary>
-        /// <param name="remoteOnly">If true, the sender's cache will not reloaded.</param>
+        /// <param name="remoteOnly">If true, the sender's cache will not be reloaded.</param>
         /// <param name="cancel">The token to monitor for cancellation requests.</param>
         /// <returns>A Task that represents the asynchronous operation.</returns>
         public virtual async Task ReloadCacheAsync(bool remoteOnly, CancellationToken cancel)
