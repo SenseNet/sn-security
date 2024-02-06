@@ -58,7 +58,7 @@ namespace SenseNet.Security.Messaging
                 throw new InvalidDataException("TypeName not found.");
 
             if (!_knownMessageTypes.TryGetValue(typeName, out var type))
-                throw new InvalidDataException("Type not found: " + typeName);
+                throw new InvalidDataException("Message type should be registered: " + typeName + ". See SenseNet.Security.Messaging.MessagingExtensions.AddSecurityMessageType<T> method.");
 
             var msg = envelope["Msg"];
             if (msg == null)

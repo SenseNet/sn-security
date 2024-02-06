@@ -37,6 +37,8 @@ namespace SenseNet.Security.Messaging
                     .AddSecurityMessageType<DeleteUserActivity>()
                     .AddSecurityMessageType<DeleteIdentitiesActivity>()
                     .AddSecurityMessageType<DeleteGroupActivity>()
+                    //
+                    .AddSecurityMessageType<ReloadCacheActivity>()
                 ;
         }
     }
