@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace SenseNet.Security.Messaging.SecurityMessages;
 
 /// <summary>
-/// Represents an activity that reloads the security cache after any other active security activity is finished activity.
+/// Represents an activity that reloads the security cache as soon as all other active activities are finished.
 /// </summary>
 [Serializable]
 public class ReloadCacheActivity : SecurityActivity
