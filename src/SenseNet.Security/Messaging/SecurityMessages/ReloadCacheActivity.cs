@@ -10,7 +10,14 @@ namespace SenseNet.Security.Messaging.SecurityMessages;
 [Serializable]
 public class ReloadCacheActivity : SecurityActivity
 {
+    public bool RemoteOnly { get; set; }
+
     public ReloadCacheActivity() { }
+
+    public ReloadCacheActivity(bool remoteOnly)
+    {
+        RemoteOnly = remoteOnly;
+    }
 
     protected override Task StoreAsync(SecurityContext context, CancellationToken cancel)
     {
@@ -20,6 +27,8 @@ public class ReloadCacheActivity : SecurityActivity
 
     protected override void Apply(SecurityContext context)
     {
+        if (RemoteOnly && context.SecuritySystem.MessageSenderManager.IsMe(this.Sender))
+            return;
         context.SecuritySystem.Cache.Reset();
     }
 

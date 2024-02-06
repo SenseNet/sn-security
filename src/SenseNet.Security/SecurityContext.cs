@@ -355,6 +355,18 @@ namespace SenseNet.Security
             return GetSecurityEntity(entityId) != null;
         }
 
+        /// <summary>
+        /// Reloads the security local or remote cache. Reloading the local cache can be skipped.
+        /// </summary>
+        /// <param name="remoteOnly">If true, the sender's cache will not reloaded.</param>
+        /// <param name="cancel">The token to monitor for cancellation requests.</param>
+        /// <returns>A Task that represents the asynchronous operation.</returns>
+        public virtual async Task ReloadCacheAsync(bool remoteOnly, CancellationToken cancel)
+        {
+            var activity = new ReloadCacheActivity(remoteOnly);
+            await activity.ExecuteAsync(this, cancel).ConfigureAwait(false);
+        }
+
         /*********************** Internal in memory entity structure **********************/
         internal SecurityEntity GetSecurityEntity(int entityId, bool throwError = false)
         {
