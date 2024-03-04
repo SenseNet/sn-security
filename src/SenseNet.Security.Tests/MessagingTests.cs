@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Data;
@@ -11,6 +10,7 @@ using SenseNet.Security.Tests.TestPortal;
 using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 using System.Collections.Concurrent;
+using SenseNet.Extensions.DependencyInjection;
 
 namespace SenseNet.Security.Tests
 {

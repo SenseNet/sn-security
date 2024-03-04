@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using SenseNet.Security.Messaging;
 using SenseNet.Security.Messaging.SecurityMessages;
 
-namespace SenseNet.Security.Messaging
+// ReSharper disable once CheckNamespace
+namespace SenseNet.Extensions.DependencyInjection
 {
     public static class MessagingExtensions
     {

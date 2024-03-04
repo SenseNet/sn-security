@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SenseNet.Extensions.DependencyInjection;
 using SenseNet.Security.Configuration;
 using SenseNet.Security.Data;
 using SenseNet.Security.Messaging;
