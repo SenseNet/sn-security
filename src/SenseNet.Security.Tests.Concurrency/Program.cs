@@ -13,6 +13,7 @@ using SenseNet.Security.Configuration;
 using SenseNet.Security.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SenseNet.Extensions.DependencyInjection;
 
 namespace SenseNet.Security.Tests.Concurrency
 {

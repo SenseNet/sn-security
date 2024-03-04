@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using SenseNet.Security.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+using SenseNet.Extensions.DependencyInjection;
 
 namespace SenseNet.Security.Tests.TestPortal
 {
