@@ -216,30 +216,6 @@ namespace SenseNet.Security
         /// Restores the permission inheritance on the requested entity.
         /// </summary>
         /// <param name="entityId">The requested entity.</param>
-        /// <param name="normalize">If true (default is false), the unnecessary explicit entries will be removed.
-        /// WARNING: Only the Normal category will be copied.</param>
-        /// <returns>A reference to this instance for calling more operations.</returns>
-        [Obsolete("Use the UnBreakInheritance(int entityId, EntryType[] categoriesToNormalize) method instead", true)]
-        public AclEditor UnbreakInheritance(int entityId, bool normalize = false)
-        {
-            _breaks.Remove(entityId);
-            if (!_unBreaks.Contains(entityId))
-                _unBreaks.Add(entityId);
-
-            if (normalize)
-                NormalizeExplicitPermissions(entityId, new[] { EntryType.Normal });
-
-            return this;
-        }
-        [Obsolete("Use the overload with correct name.", true)]
-        public AclEditor UnbreakInheritance(int entityId, EntryType[] categoriesToNormalize)
-        {
-            return UnBreakInheritance(entityId, categoriesToNormalize);
-        }
-        /// <summary>
-        /// Restores the permission inheritance on the requested entity.
-        /// </summary>
-        /// <param name="entityId">The requested entity.</param>
         /// <param name="categoriesToNormalize">Unnecessary explicit entries
         /// that match these categories will be removed.</param>
         /// <returns>A reference to this instance for calling more operations.</returns>
@@ -253,15 +229,6 @@ namespace SenseNet.Security
             return this;
         }
 
-        /// <summary>
-        /// Executes all modifications. If you do not call this method, no changes will be made.
-        /// </summary>
-        [Obsolete("Use async version instead.", true)]
-        public virtual void Apply()
-        {
-            var activity = new SetAclActivity(_acls.Values.ToArray(), _breaks, _unBreaks);
-            activity.Execute(this.Context);
-        }
         /// <summary>
         /// Executes all modifications. If you do not call this method, no changes will be made.
         /// </summary>

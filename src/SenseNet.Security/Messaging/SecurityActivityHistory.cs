@@ -202,42 +202,6 @@ namespace SenseNet.Security.Messaging
     }
 
     /// <summary>
-    /// Contains information about the serialized activities on the arrival size.
-    /// </summary>
-    [Obsolete("Do not use anymore.", true)]
-    public class SecurityActivitySerializerState
-    {
-        /// <summary>
-        /// Id of the last arrived activity.
-        /// </summary>
-        public int LastQueued { get; set; }
-        /// <summary>
-        /// Length of the Queue
-        /// </summary>
-        public int QueueLength => Queue?.Length ?? 0;
-
-        /// <summary>
-        /// Ids of th Arrived but not parallel activities.
-        /// </summary>
-        public int[] Queue { get; set; }
-    }
-    /// <summary>
-    /// Contains information about the waiting activities.
-    /// </summary>
-    [Obsolete("Do not use anymore.", true)]
-    public class SecurityActivityDependencyState
-    {
-        /// <summary>
-        /// Length of the WaitingSet.
-        /// </summary>
-        public int WaitingSetLength => WaitingSet?.Length ?? 0;
-
-        /// <summary>
-        /// Ids of the all waiting activities.
-        /// </summary>
-        public int[] WaitingSet { get; set; }
-    }
-    /// <summary>
     /// Contains information about the executed activities.
     /// </summary>
     public class CompletionState
@@ -297,16 +261,6 @@ namespace SenseNet.Security.Messaging
     /// </summary>
     public class SecurityActivityQueueState
     {
-        /// <summary>
-        /// Activity serializer state on the arrival side.
-        /// </summary>
-        [Obsolete("Do not use anymore.", true)]
-        public SecurityActivitySerializerState Serializer { get; set; }
-        /// <summary>
-        /// State of the waiting activities.
-        /// </summary>
-        [Obsolete("Do not use anymore.", true)]
-        public SecurityActivityDependencyState DependencyManager { get; set; }
         /// <summary>
         /// State of the executed activities.
         /// </summary>

@@ -53,20 +53,6 @@ namespace SenseNet.Security.Messaging.RabbitMQ
             MessageExchange = rabbitmqOptions.Value.MessageExchange;
         }
 
-        [Obsolete("Use dependency injection or the constructor with the RabbitMqOptions instance.", true)]
-        public RabbitMQMessageProvider(IMessageSenderManager messageSenderManager, ISecurityMessageFormatter messageFormatter,
-            IOptions<MessagingOptions> messagingOptions, string serviceUrl, string exchange = null)
-            : base(messageSenderManager, messageFormatter, messagingOptions, NullLogger<MessageProviderBase>.Instance)
-        {
-            if (string.IsNullOrEmpty(serviceUrl))
-                throw new ArgumentNullException(nameof(serviceUrl));
-
-            ServiceUrl = serviceUrl;
-
-            if (!string.IsNullOrEmpty(exchange))
-                MessageExchange = exchange;
-        }
-
         //=================================================================================== Shared resources
 
         private IConnection Connection { get; set; }

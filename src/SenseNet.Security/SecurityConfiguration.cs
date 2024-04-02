@@ -19,11 +19,5 @@ namespace SenseNet.Security
 
         /// <summary>Default: 9</summary>
         public int OwnerGroupId { get; set; } = 9;
-
-        [Obsolete("Use MessagingOptions instead.", true)]
-        public int? SecurityActivityLifetimeInMinutes { get; set; }
-
-        [Obsolete("Use MessagingOptions instead.", true)]
-        public int? SecurityActivityTimeoutInSeconds { get; set; }
     }
 }
