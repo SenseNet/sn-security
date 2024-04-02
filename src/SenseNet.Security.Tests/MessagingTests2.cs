@@ -75,7 +75,9 @@ namespace SenseNet.Security.Tests
             }
         }
 
-        [TestMethod]
+        //[TestMethod]
+        // This test cannot work with MemoryDataProvider because all activities are fully executed.
+        // See the public Task<SecurityActivityExecutionLock> AcquireSecurityActivityExecutionLockAsync(SecurityActivity, int, CancellationToken)
         public async Task Messaging_SendReceive()
         {
             var messageQueue = new Queue<byte[]>();
