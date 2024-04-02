@@ -352,31 +352,31 @@ public class SecurityActivityQueueTests : TestBase
             // SAQT: execution ignored (attachment): A1-1
 
             if (ParseLine(allEvents, entry, "App: Business executes ", "Start", out var item))
-                item.BusinessStart = entry.Time - t0;
+                item.BusinessStart = entry.LineId;
             else if (ParseLine(allEvents, entry, "App: Business executes ", "End", out item))
-                item.BusinessEnd = entry.Time - t0;
+                item.BusinessEnd = entry.LineId;
             else if (ParseLine(allEvents, entry, "DataHandler: SaveActivity ", "Start", out item))
-                item.SaveStart = entry.Time - t0;
+                item.SaveStart = entry.LineId;
             else if (ParseLine(allEvents, entry, "DataHandler: SaveActivity ", "End", out item))
-                item.SaveEnd = entry.Time - t0;
+                item.SaveEnd = entry.LineId;
             else if (ParseLine(allEvents, entry, "SAQ: Arrive from receiver ", null, out item))
-            { item.Arrival = entry.Time - t0; item.FromDbOrReceiver = true; }
+            { item.Arrival = entry.LineId; item.FromDbOrReceiver = true; }
             else if (ParseLine(allEvents, entry, "SAQ: Arrive from database ", null, out item))
-            { item.Arrival = entry.Time - t0; item.FromDbOrReceiver = true; }
+            { item.Arrival = entry.LineId; item.FromDbOrReceiver = true; }
             else if (ParseLine(allEvents, entry, "SAQ: Arrive ", null, out item))
-                item.Arrival = entry.Time - t0;
+                item.Arrival = entry.LineId;
             else if (ParseLine(allEvents, entry, "SAQT: start execution: ", null, out item))
-                item.Execution = entry.Time - t0;
+                item.Execution = entry.LineId;
             else if (ParseLine(allEvents, entry, "SA: ExecuteInternal ", "Start", out item))
-                item.InternalExecutionStart = entry.Time - t0;
+                item.InternalExecutionStart = entry.LineId;
             else if (ParseLine(allEvents, entry, "SA: ExecuteInternal ", "End", out item))
-                item.InternalExecutionEnd = entry.Time - t0;
+                item.InternalExecutionEnd = entry.LineId;
             else if (ParseLine(allEvents, entry, "SAQT: execution finished: ", null, out item))
-                item.Released = entry.Time - t0;
+                item.Released = entry.LineId;
             else if (ParseLine(allEvents, entry, "SAQT: execution ignored immediately: ", null, out item))
-            { item.ExecutionIgnored = true; item.Released = entry.Time - t0; }
+            { item.ExecutionIgnored = true; item.Released = entry.LineId; }
             else if (ParseLine(allEvents, entry, "SAQT: execution ignored (attachment): ", null, out item))
-            { item.ExecutionIgnored = true; item.Released = entry.Time - t0; }
+            { item.ExecutionIgnored = true; item.Released = entry.LineId; }
         }
 
         // fix activity id by objectid when the id is null (not saved yet).
@@ -525,53 +525,53 @@ public class SecurityActivityQueueTests : TestBase
         public int ObjectId;
         public string Key;
         public bool FromDbOrReceiver;                     // 
-        public TimeSpan BusinessStart;                    // Start  App: Business executes #SA1
-        public TimeSpan SaveStart;                        // Start  DataHandler: SaveActivity #SA1
-        public TimeSpan SaveEnd;                          // End    DataHandler: SaveActivity #SA1
-        public TimeSpan Arrival;                          //        SAQ: Arrive #SA1
-        public TimeSpan Execution;                        //        SAQT: start execution: #SA1
-        public TimeSpan InternalExecutionStart;           // Start  SA: ExecuteInternal #SA1
-        public TimeSpan InternalExecutionEnd;             // End    SA: ExecuteInternal #SA1
-        public TimeSpan Released;                         //        SAQT: execution ignored immediately: #SA1-1
+        public int BusinessStart;                    // Start  App: Business executes #SA1
+        public int SaveStart;                        // Start  DataHandler: SaveActivity #SA1
+        public int SaveEnd;                          // End    DataHandler: SaveActivity #SA1
+        public int Arrival;                          //        SAQ: Arrive #SA1
+        public int Execution;                        //        SAQT: start execution: #SA1
+        public int InternalExecutionStart;           // Start  SA: ExecuteInternal #SA1
+        public int InternalExecutionEnd;             // End    SA: ExecuteInternal #SA1
+        public int Released;                         //        SAQT: execution ignored immediately: #SA1-1
                                                           //        SAQT: execution finished: #SA1-1
                                                           //        SAQT: execution ignored (attachment): #SA1-1
-        public TimeSpan BusinessEnd;                      // End    App: Business executes #SA1
+        public int BusinessEnd;                      // End    App: Business executes #SA1
         public bool ExecutionIgnored;                     //        SAQT: execution ignored #SA3-1
         public List<ActivityEvents> DependsFrom = new();  //        SA: Make dependency: #SA4-5 depends from SA3-6.
 
-        public bool Saved => SaveStart != TimeSpan.Zero;
+        public bool Saved => SaveStart != 0;
 
         public bool IsRightOrder()
         {
             if (FromDbOrReceiver && ExecutionIgnored)
-                return SaveStart == TimeSpan.Zero &&
-                       SaveEnd == TimeSpan.Zero &&
-                       BusinessStart == TimeSpan.Zero &&
-                       Arrival > TimeSpan.Zero &&
-                       Execution == TimeSpan.Zero &&
-                       InternalExecutionStart == TimeSpan.Zero &&
-                       InternalExecutionEnd == TimeSpan.Zero &&
+                return SaveStart == 0 &&
+                       SaveEnd == 0 &&
+                       BusinessStart == 0 &&
+                       Arrival > 0 &&
+                       Execution == 0 &&
+                       InternalExecutionStart == 0 &&
+                       InternalExecutionEnd == 0 &&
                        Released >= Arrival &&
-                       BusinessEnd == TimeSpan.Zero;
+                       BusinessEnd == 0;
 
             if (FromDbOrReceiver && !ExecutionIgnored)
-                return SaveStart == TimeSpan.Zero &&
-                       SaveEnd == TimeSpan.Zero &&
-                       BusinessStart == TimeSpan.Zero &&
-                       Arrival > TimeSpan.Zero &&
+                return SaveStart == 0 &&
+                       SaveEnd == 0 &&
+                       BusinessStart == 0 &&
+                       Arrival > 0 &&
                        Execution >= Arrival &&
                        InternalExecutionStart >= Execution &&
                        InternalExecutionEnd >= InternalExecutionStart &&
                        Released >= InternalExecutionEnd &&
-                       BusinessEnd == TimeSpan.Zero;
+                       BusinessEnd == 0;
 
             if (ExecutionIgnored && !Saved)
-                return SaveStart == TimeSpan.Zero &&
-                       SaveEnd == TimeSpan.Zero &&
+                return SaveStart == 0 &&
+                       SaveEnd == 0 &&
                        Arrival >= BusinessStart &&
-                       Execution == TimeSpan.Zero &&
-                       InternalExecutionStart == TimeSpan.Zero &&
-                       InternalExecutionEnd == TimeSpan.Zero &&
+                       Execution == 0 &&
+                       InternalExecutionStart == 0 &&
+                       InternalExecutionEnd == 0 &&
                        Released >= Arrival &&
                        BusinessEnd >= Arrival;
 
@@ -579,14 +579,14 @@ public class SecurityActivityQueueTests : TestBase
                 return SaveStart >= BusinessStart &&
                        SaveEnd >= SaveStart &&
                        Arrival >= SaveEnd &&
-                       Execution == TimeSpan.Zero &&
-                       InternalExecutionStart == TimeSpan.Zero &&
-                       InternalExecutionEnd == TimeSpan.Zero &&
+                       Execution == 0 &&
+                       InternalExecutionStart == 0 &&
+                       InternalExecutionEnd == 0 &&
                        BusinessEnd >= Arrival;
 
             if (!Saved)
-                return SaveStart == TimeSpan.Zero &&
-                       SaveEnd == TimeSpan.Zero &&
+                return SaveStart == 0 &&
+                       SaveEnd == 0 &&
                        Arrival >= BusinessStart &&
                        Execution >= Arrival &&
                        InternalExecutionStart >= Execution &&
@@ -604,7 +604,7 @@ public class SecurityActivityQueueTests : TestBase
 
         public string TraceTimes()
         {
-            var s = $"FromDbOrReceiver: {FromDbOrReceiver}, ExecutionIgnored: {ExecutionIgnored}, Saved: {SaveStart != TimeSpan.Zero}.";
+            var s = $"FromDbOrReceiver: {FromDbOrReceiver}, ExecutionIgnored: {ExecutionIgnored}, Saved: {SaveStart != 0}.";
             return $"{s} " +
                    $"BusinessStart:          {BusinessStart} " +
                    $"SaveStart:              {SaveStart} " +

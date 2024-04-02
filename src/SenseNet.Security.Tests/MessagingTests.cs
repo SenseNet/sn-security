@@ -127,8 +127,7 @@ namespace SenseNet.Security.Tests
             var largeActivityId = largeActivity.Id;
 
             // check the logger
-            var expected = string.Format("Executing unprocessed security activities., " +
-                                         "Send: TestActivity, Applied: #{0}, " +
+            var expected = string.Format("Send: TestActivity, Applied: #{0}, " +
                                          "Send: BigActivityMessage, LoadMessage: TestActivity#{1}, Applied: #{1}",
                 smallActivityId, largeActivityId);
 
