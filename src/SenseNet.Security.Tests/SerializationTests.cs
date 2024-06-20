@@ -225,6 +225,19 @@ namespace SenseNet.Security.Tests
             SerializationTest(message, (deserialized, text) =>
             {
                 Assert.AreEqual(1, deserialized.Acls.Count());
+
+                var aclEntries = deserialized.Acls.Single().Entries.ToArray();
+                Assert.AreEqual(456, aclEntries[0].IdentityId);
+                Assert.AreEqual(ulong.MaxValue - ulong.MaxValue / 2, aclEntries[0].AllowBits);
+                Assert.AreEqual(ulong.MaxValue / 2, aclEntries[0].DenyBits);
+                Assert.AreEqual(EntryType.Normal, aclEntries[0].EntryType);
+                Assert.AreEqual(false, aclEntries[0].LocalOnly);
+                Assert.AreEqual(457, aclEntries[1].IdentityId);
+                Assert.AreEqual(ulong.MaxValue - ulong.MaxValue / 2, aclEntries[1].AllowBits);
+                Assert.AreEqual(ulong.MaxValue / 2, aclEntries[1].DenyBits);
+                Assert.AreEqual(EntryType.Normal, aclEntries[1].EntryType);
+                Assert.AreEqual(true, aclEntries[1].LocalOnly);
+
                 Assert.AreEqual(2, deserialized.Entries.Count);
                 Assert.AreEqual(2, deserialized.EntriesToRemove.Count);
                 Assert.AreEqual("12, 23", string.Join(", ",

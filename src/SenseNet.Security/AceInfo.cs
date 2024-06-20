@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Diagnostics;
 
 namespace SenseNet.Security
@@ -13,22 +14,27 @@ namespace SenseNet.Security
         /// <summary>
         /// Category of the entry.
         /// </summary>
+        [JsonProperty]
         public EntryType EntryType { get; set; }
         /// <summary>
         /// Id of the identity.
         /// </summary>
+        [JsonProperty]
         public int IdentityId { get; internal set; }
         /// <summary>
         /// Gets the inheritance state.
         /// </summary>
+        [JsonProperty]
         public bool LocalOnly { get; internal set; }
         /// <summary>
         /// Allowed permissions as bitmask.
         /// </summary>
+        [JsonProperty]
         public ulong AllowBits { get; internal set; }
         /// <summary>
         /// Denied permissions as bitmask.
         /// </summary>
+        [JsonProperty]
         public ulong DenyBits { get; internal set; }
 
         internal AceInfo Copy()
