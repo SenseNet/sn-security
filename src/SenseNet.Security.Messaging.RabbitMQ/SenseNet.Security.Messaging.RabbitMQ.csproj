@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+		<TargetFramework>net8.0</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Version>1.2.6</Version>
 		<Authors>kavics,tusmester</Authors>
@@ -27,8 +27,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
-		<PackageReference Include="SenseNet.Tools" Version="3.2.13" />
+		<PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+		<PackageReference Include="SenseNet.Tools" Version="3.2.13.1" />
 	</ItemGroup>
 
 	<ItemGroup>
