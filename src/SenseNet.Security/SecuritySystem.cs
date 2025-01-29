@@ -126,7 +126,7 @@ namespace SenseNet.Security
             ActivityHistory.SecurityActivityQueue = SecurityActivityQueue; // Property injection
 
             MessageProvider.MessageReceived += MessageProvider_MessageReceived;
-            MessageProvider.Initialize();
+            await MessageProvider.InitializeAsync(cancel);
             MessageProvider.Start(StartedAt);
 
             _killed = false;

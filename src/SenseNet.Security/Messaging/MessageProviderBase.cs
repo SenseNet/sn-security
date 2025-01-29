@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SenseNet.Diagnostics;
@@ -55,7 +56,7 @@ namespace SenseNet.Security.Messaging
         }
 
         /// <inheritdoc />
-        public virtual void Initialize()
+        public virtual Task InitializeAsync(CancellationToken cancel)
         {
             _incomingMessages = new List<IDistributedMessage>();
 
@@ -66,6 +67,8 @@ namespace SenseNet.Security.Messaging
                 var thread = new Thread(thStart) { Name = i.ToString() };
                 thread.Start();
             }
+
+            return Task.CompletedTask;
         }
         /// <inheritdoc />
         public abstract void SendMessage(IDistributedMessage message);

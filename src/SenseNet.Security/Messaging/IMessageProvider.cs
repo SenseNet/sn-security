@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SenseNet.Security.Messaging
 {
@@ -22,7 +24,7 @@ namespace SenseNet.Security.Messaging
         /// <summary>
         /// Initializes the provider instance.
         /// </summary>
-        void Initialize();
+        Task InitializeAsync(CancellationToken cancel);
         /// <summary>
         /// Sends the passed message to all other AppDomains.
         /// </summary>
