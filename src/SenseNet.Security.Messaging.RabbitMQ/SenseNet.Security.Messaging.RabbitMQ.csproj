@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+		<TargetFramework>net8.0</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>1.2.6</Version>
+		<Version>1.3.0</Version>
 		<Authors>kavics,tusmester</Authors>
 		<Company>Sense/Net Inc.</Company>
 		<Description>RabbitMQ message provider implementation for the SenseNet.Security project.</Description>
@@ -27,8 +27,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
-		<PackageReference Include="SenseNet.Tools" Version="3.2.13" />
+		<PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
+		<PackageReference Include="SenseNet.Tools" Version="3.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>

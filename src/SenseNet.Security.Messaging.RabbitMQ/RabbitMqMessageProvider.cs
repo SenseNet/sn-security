@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using SenseNet.Diagnostics;
 using SenseNet.Security.Configuration;
-using EventId = SenseNet.Diagnostics.EventId;
 
 namespace SenseNet.Security.Messaging.RabbitMQ
 {
@@ -41,6 +39,7 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         /// <param name="messageFormatter"></param>
         /// <param name="messagingOptions"></param>
         /// <param name="rabbitmqOptions"></param>
+        /// <param name="logger"></param>
         public RabbitMQMessageProvider(IMessageSenderManager messageSenderManager,
             ISecurityMessageFormatter messageFormatter,
             IOptions<MessagingOptions> messagingOptions,
@@ -56,7 +55,7 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         //=================================================================================== Shared resources
 
         private IConnection Connection { get; set; }
-        private IModel ReceiverChannel { get; set; }
+        private IChannel ReceiverChannel { get; set; }
 
         //=================================================================================== Overrides
 
@@ -70,16 +69,16 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         /// Declares the exchange and binds a consumer queue.
         /// Opens a receiver channel and creates a consumer for receiving messages.
         /// </summary>
-        public override void Initialize()
+        public override async Task InitializeAsync(CancellationToken cancel)
         {
             if (_initialized)
                 return;
 
-            base.Initialize();
+            await base.InitializeAsync(cancel);
 
             try
             {
-                Connection = OpenConnection(ServiceUrl);
+                Connection = await OpenConnectionAsync(ServiceUrl, cancel);
             }
             catch (Exception ex)
             {
@@ -92,15 +91,15 @@ namespace SenseNet.Security.Messaging.RabbitMQ
             try
             {
                 // declare an exchange and bind a queue unique for this application
-                using (var initChannel = OpenChannel(Connection))
+                using (var initChannel = await OpenChannelAsync(Connection, cancel))
                 {
-                    initChannel.ExchangeDeclare(MessageExchange, "fanout");
+                    await initChannel.ExchangeDeclareAsync(MessageExchange, "fanout", cancellationToken: cancel);
 
                     // let the server generate a unique queue name
-                    queueName = initChannel.QueueDeclare().QueueName;
+                    queueName = (await initChannel.QueueDeclareAsync(cancellationToken: cancel)).QueueName;
                     SnTrace.Messaging.Write($"RMQ: RabbitMQ Security queue declared: {queueName}");
 
-                    initChannel.QueueBind(queueName, MessageExchange, string.Empty);
+                    await initChannel.QueueBindAsync(queueName, MessageExchange, string.Empty, cancellationToken: cancel);
 
                     SnTrace.Messaging.Write($"RMQ: RabbitMQ Security queue {queueName} is bound to exchange {MessageExchange}.");
                 }
@@ -112,21 +111,28 @@ namespace SenseNet.Security.Messaging.RabbitMQ
             }
 
             // use a single channel for receiving messages
-            ReceiverChannel = OpenChannel(Connection);
+            ReceiverChannel = await OpenChannelAsync(Connection, cancel);
 
-            var consumer = new EventingBasicConsumer(ReceiverChannel);
-            consumer.Shutdown += (sender, args) => { SnTrace.Messaging.Write("RMQ: RabbitMQ Security consumer shutdown."); };
-            consumer.ConsumerCancelled += (sender, args) => { SnTrace.Messaging.Write("RMQ: RabbitMQ Security consumer cancelled."); };
-            consumer.Received += (model, args) =>
+            var consumer = new AsyncEventingBasicConsumer(ReceiverChannel);
+            consumer.ShutdownAsync += (_, args) =>
             {
+                SnTrace.Messaging.Write("RMQ: RabbitMQ Security consumer shutdown.");
+                return Task.CompletedTask;
+            };
+            consumer.ReceivedAsync += async (_, args) =>
+            {
+                var messageLength = args?.Body.Length ?? 0;
+                SnTrace.Messaging.Write($"RMQ: Message received. Length: {messageLength}");
+                if (messageLength == 0)
+                    return;
+
                 // this is the main entry point for receiving messages
-                using (var ms = new MemoryStream(args.Body.ToArray()))
-                {
-                    OnMessageReceived(ms);
-                }
+                var body = args.Body.ToArray();
+                using var ms = new MemoryStream(body);
+                OnMessageReceived(ms);
             };
 
-            ReceiverChannel.BasicConsume(queueName, true, consumer);
+            await ReceiverChannel.BasicConsumeAsync(queueName, true, consumer, cancellationToken: cancel);
 
             _logger.LogInformation("RabbitMQ Security message provider connected to {ServiceUrl} " +
                                    "through exchange {Exchange} and queue {QueueName}", 
@@ -188,10 +194,11 @@ namespace SenseNet.Security.Messaging.RabbitMQ
                 {
                     _logger.LogTrace($"Sending security message {message.GetType().Name}");
 
-                    using (var channel = OpenChannel(Connection))
+                    using (var channel = OpenChannelAsync(Connection, CancellationToken.None).GetAwaiter().GetResult())
                     {
-                        channel.BasicPublish(MessageExchange, string.Empty, null, body);
-                        channel.Close();
+                        channel.BasicPublishAsync(MessageExchange, string.Empty, body, CancellationToken.None)
+                            .GetAwaiter().GetResult();
+                        channel.CloseAsync(CancellationToken.None).GetAwaiter().GetResult();
                     }
                 }
                 catch (Exception ex)
@@ -209,8 +216,8 @@ namespace SenseNet.Security.Messaging.RabbitMQ
         /// </summary>
         public override void ShutDown()
         {
-            ReceiverChannel?.Close();
-            Connection?.Close();
+            ReceiverChannel?.CloseAsync().GetAwaiter().GetResult();
+            Connection?.CloseAsync().GetAwaiter().GetResult();
 
             base.ShutDown();
 
@@ -219,29 +226,32 @@ namespace SenseNet.Security.Messaging.RabbitMQ
 
         //=================================================================================== Helper methods
 
-        private static IModel OpenChannel(IConnection connection)
+        private async Task<IChannel> OpenChannelAsync(IConnection connection, CancellationToken cancel)
         {
-            var channel = connection.CreateModel();
-            channel.CallbackException += (sender, args) =>
+            var channel = await connection.CreateChannelAsync(cancellationToken: cancel);
+            channel.CallbackExceptionAsync += (sender, args) =>
             {
                 SnLog.WriteException(args.Exception);
                 SnTrace.Messaging.WriteError($"RMQ: RabbitMQ Security channel callback exception: {args.Exception?.Message}");
+                return Task.CompletedTask;
             };
 
             return channel;
         }
-        private static IConnection OpenConnection(string serviceUrl)
+        private static async Task<IConnection> OpenConnectionAsync(string serviceUrl, CancellationToken cancel)
         {
-            var factory = new ConnectionFactory { Uri = new Uri(serviceUrl) };
-            var connection = factory.CreateConnection();
-            connection.CallbackException += (sender, ea) =>
+            var factory = new ConnectionFactory { Uri = new Uri(serviceUrl), ConsumerDispatchConcurrency = 5 };
+            var connection = await factory.CreateConnectionAsync(cancel);
+            connection.CallbackExceptionAsync += (_, ea) =>
             {
                 SnLog.WriteException(ea.Exception);
                 SnTrace.Messaging.WriteError($"RMQ: RabbitMQ Security connection callback exception: {ea.Exception?.Message}");
+                return Task.CompletedTask;
             };
-            connection.ConnectionShutdown += (sender, ea) =>
+            connection.ConnectionShutdownAsync += (_, ea) =>
             {
                 SnTrace.Messaging.Write("RMQ: RabbitMQ Security connection shutdown.");
+                return Task.CompletedTask;
             };
 
             return connection;

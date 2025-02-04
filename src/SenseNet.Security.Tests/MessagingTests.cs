@@ -62,7 +62,7 @@ namespace SenseNet.Security.Tests
             //---- Start the system
             var msgProvider = new TestMessageProvider(DiTools.CreateMessageSenderManager());
             msgProvider.MessageReceived += MsgProvider_MessageReceived;
-            msgProvider.Initialize();
+            msgProvider.InitializeAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var securitySystem = Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider);
 
@@ -107,7 +107,7 @@ namespace SenseNet.Security.Tests
 
             //---- Start the system
             var msgProvider = new TestMessageProvider(DiTools.CreateMessageSenderManager());
-            msgProvider.Initialize();
+            msgProvider.InitializeAsync(CancellationToken.None).GetAwaiter().GetResult();
             var securitySystem = Context.StartTheSystem(new MemoryDataProviderForMessagingTests(storage), msgProvider,
                 configureServices: services =>
                 {
@@ -313,7 +313,7 @@ namespace SenseNet.Security.Tests
                 MessageSenderManager = messageSenderManager;
             }
 
-            public void Initialize() {}
+            public Task InitializeAsync(CancellationToken cancel) => Task.CompletedTask;
 
             public void SendMessage(IDistributedMessage message)
             {
