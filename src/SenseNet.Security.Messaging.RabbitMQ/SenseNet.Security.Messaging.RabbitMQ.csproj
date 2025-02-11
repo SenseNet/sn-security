@@ -22,10 +22,6 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DocumentationFile>bin\Release\netstandard2.0\SenseNet.Security.Messaging.RabbitMQ.xml</DocumentationFile>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="RabbitMQ.Client" Version="7.0.0" />
 		<PackageReference Include="SenseNet.Tools" Version="3.3.0" />
