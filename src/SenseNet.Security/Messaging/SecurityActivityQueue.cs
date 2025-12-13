@@ -470,6 +470,8 @@ namespace SenseNet.Security.Messaging
                 flattened.AddRange(flattened[index].WaitingForMe);
                 index++;
             }
+flattened = flattened.Distinct().ToList();
+SnTrace.SecurityQueue.Write(() => $"SAQT: GetAllFromChains: found {flattened.Count} activities.");
             foreach (var item in flattened)
                 yield return item;
         }
