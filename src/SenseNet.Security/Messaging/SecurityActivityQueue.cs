@@ -201,6 +201,9 @@ namespace SenseNet.Security.Messaging
                     SnTrace.SecurityQueue.Write(() => $"SAQT: works (cycle: {_workCycle}, " +
                                                       $"_arrivalQueue.Count: {_arrivalQueue.Count}), " +
                                                       $"_executingList.Count: {_executingList.Count}");
+SnTrace.SecurityQueue.Write(() => $"_arrivalQueue:  {string.Join(", ", _arrivalQueue.Select(a => a.Key))}");
+SnTrace.SecurityQueue.Write(() => $"_executingList: {string.Join(", ", _executingList.Select(a => a.Key))}");
+SnTrace.SecurityQueue.Write(() => $"_waitingList:   {string.Join(", ", _waitingList.Select(a => a.Key))}");
 
                     RemoveGapsIfRequested();
 
