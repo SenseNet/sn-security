@@ -339,10 +339,6 @@ namespace SenseNet.Security.Messaging.SecurityMessages
                 WaitingFor.Add(olderActivity);
             if (olderActivity.WaitingForMe.All(x => x.Id != Id))
                 olderActivity.WaitingForMe.Add(this);
-
-var wf = string.Join(",", WaitingFor.Take(10).Select(x => x.Key));
-var wfm = string.Join(",", WaitingForMe.Take(10).Select(x => x.Key));
-SnTrace.SecurityQueue.Write(() => $"SA: ALL DEPENDENCIES #SA{Key} WaitingFor: {wf} ({WaitingFor.Count}). WaitingForMe {wfm} ({WaitingForMe.Count}).");
         }
 
         internal void FinishWaiting(SecurityActivity olderActivity)

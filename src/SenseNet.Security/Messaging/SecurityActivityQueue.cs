@@ -198,12 +198,10 @@ namespace SenseNet.Security.Messaging
 
                     // Continue working
                     _workCycle++;
-                    SnTrace.SecurityQueue.Write(() => $"SAQT: works (cycle: {_workCycle}, " +
-                                                      $"_arrivalQueue.Count: {_arrivalQueue.Count}), " +
-                                                      $"_executingList.Count: {_executingList.Count}");
-SnTrace.SecurityQueue.Write(() => $"_arrivalQueue:  {string.Join(", ", _arrivalQueue.Select(a => a.Key))}");
-SnTrace.SecurityQueue.Write(() => $"_executingList: {string.Join(", ", _executingList.Select(a => a.Key))}");
-SnTrace.SecurityQueue.Write(() => $"_waitingList:   {string.Join(", ", _waitingList.Select(a => a.Key))}");
+                    SnTrace.SecurityQueue.Write(() => $"SAQT: works (cycle: {_workCycle}, Queues: " +
+                                                      $"arrival: {_arrivalQueue.Count}), " +
+                                                      $"executing: {_executingList.Count}, " +
+                                                      $"waiting: {_waitingList.Count}");
 
                     RemoveGapsIfRequested();
 
@@ -473,8 +471,8 @@ SnTrace.SecurityQueue.Write(() => $"_waitingList:   {string.Join(", ", _waitingL
                 flattened.AddRange(flattened[index].WaitingForMe);
                 index++;
             }
-flattened = flattened.Distinct().ToList();
-SnTrace.SecurityQueue.Write(() => $"SAQT: GetAllFromChains: found {flattened.Count} activities.");
+            flattened = flattened.Distinct().ToList();
+            SnTrace.SecurityQueue.Write(() => $"SAQT: GetAllFromChains: found {flattened.Count} activities.");
             foreach (var item in flattened)
                 yield return item;
         }
