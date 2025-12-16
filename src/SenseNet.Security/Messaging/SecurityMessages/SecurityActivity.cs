@@ -374,12 +374,12 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         private Task _executionTask;
         [field: NonSerialized]
         [JsonIgnore]
-        private Task _finalizationTask;
+        private TaskCompletionSource<bool> _finalizationTcs;
 
         internal Task CreateTaskForWait()
         {
-            _finalizationTask = new Task(() => { /* do nothing */ }, CancellationToken, TaskCreationOptions.LongRunning);
-            return _finalizationTask;
+            _finalizationTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            return _finalizationTcs.Task;
         }
         internal void StartExecutionTask()
         {
@@ -387,7 +387,7 @@ namespace SenseNet.Security.Messaging.SecurityMessages
         }
         internal void StartFinalizationTask()
         {
-            _finalizationTask?.Start();
+            _finalizationTcs?.TrySetResult(true);
         }
 
         /// <summary>
